@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
+import { Search } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { SearchFilter } from '@/components/shared/SearchFilter';
+import { Input } from '@/components/ui/input';
 import { ConsultationRow } from '@/components/consultations/ConsultationRow';
 import { mockSOAPNotes, mockPatients, mockConsultations } from '@/data/mockData';
 
@@ -49,14 +50,20 @@ export default function ConsultationsList() {
 
   return (
     <DashboardLayout campName="Bapatla">
-      {/* Search Filter Header */}
-      <SearchFilter
-        title="Doctor Consultations"
-        count={currentCount}
-        placeholder="Search Patient by MR Number / First Name"
-        value={searchQuery}
-        onChange={setSearchQuery}
-      />
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <h1 className="text-xl font-semibold text-foreground whitespace-nowrap">
+          Doctor Consultations <span className="text-muted-foreground font-normal">({currentCount})</span>
+        </h1>
+        <div className="relative w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search Patient by MR Number / First Name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 h-10 bg-background border-border"
+          />
+        </div>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">

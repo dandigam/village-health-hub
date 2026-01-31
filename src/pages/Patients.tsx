@@ -20,19 +20,19 @@ export default function Patients() {
 
   return (
     <DashboardLayout campName="Bapatla">
-      <div className="flex items-center justify-between mb-6">
-        <SearchFilter
-          title="Patients List"
-          count={filteredPatients.length}
-          placeholder="Search Patient by MR Number / First Name"
-          value={searchTerm}
-          onChange={setSearchTerm}
-        />
-        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/patients/new')}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Add New Patient
-        </Button>
-      </div>
+      <SearchFilter
+        title="Patients List"
+        count={filteredPatients.length}
+        placeholder="Search Patient by MR Number / First Name"
+        value={searchTerm}
+        onChange={setSearchTerm}
+        action={
+          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/patients/new')}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add New Patient
+          </Button>
+        }
+      />
 
       {/* Patient Table */}
       <div className="data-table">

@@ -58,19 +58,19 @@ export default function SOAPNotesList() {
 
   return (
     <DashboardLayout campName="Bapatla">
-      <div className="flex items-center justify-between mb-6">
-        <SearchFilter
-          title="SOAP Notes"
-          count={filteredNotes.length}
-          placeholder="Search Patient by MR Number / First Name"
-          value={searchTerm}
-          onChange={setSearchTerm}
-        />
-        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/soap/new')}>
-          <Plus className="mr-2 h-4 w-4" />
-          New SOAP Note
-        </Button>
-      </div>
+      <SearchFilter
+        title="SOAP Notes"
+        count={filteredNotes.length}
+        placeholder="Search Patient by MR Number / First Name"
+        value={searchTerm}
+        onChange={setSearchTerm}
+        action={
+          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/soap/new')}>
+            <Plus className="mr-2 h-4 w-4" />
+            New SOAP Note
+          </Button>
+        }
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">

@@ -22,19 +22,19 @@ export default function Doctors() {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
-        <SearchFilter
-          title="Doctor Management"
-          count={filteredDoctors.length}
-          placeholder="Search by Name / Specialization / Phone"
-          value={searchTerm}
-          onChange={setSearchTerm}
-        />
-        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/doctors/new')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Doctor
-        </Button>
-      </div>
+      <SearchFilter
+        title="Doctor Management"
+        count={filteredDoctors.length}
+        placeholder="Search by Name / Specialization / Phone"
+        value={searchTerm}
+        onChange={setSearchTerm}
+        action={
+          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/doctors/new')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Doctor
+          </Button>
+        }
+      />
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredDoctors.map((doctor) => {
