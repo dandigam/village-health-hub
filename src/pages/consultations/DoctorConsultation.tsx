@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, Send, Printer, Download, Clock } from 'lucide-react';
+import { ArrowLeft, Save, Send, Printer, Download, Clock, PanelRight } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
 import { mockSOAPNotes, mockPatients, mockDoctors, mockMedicines, mockStockItems } from '@/data/mockData';
 import { useCamp } from '@/context/CampContext';
@@ -35,6 +36,7 @@ export default function DoctorConsultation() {
   const [activeTab, setActiveTab] = useState('subject');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Subjective Tab State
   const [selectedConditions, setSelectedConditions] = useState<string[]>(['diabetes', 'htn']);
@@ -163,7 +165,7 @@ export default function DoctorConsultation() {
   return (
     <TooltipProvider>
       <DashboardLayout>
-        <div className="flex gap-6 min-h-[calc(100vh-120px)]">
+        <div className="min-h-[calc(100vh-120px)]">
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col">
             {/* Patient Header Bar - Redesigned */}
@@ -378,7 +380,7 @@ export default function DoctorConsultation() {
               </div>
 
               {/* Action Buttons Footer */}
-              <div className="bg-white border rounded-lg mt-4 p-4 flex items-center justify-between">
+              <div className="bg-card border rounded-lg mt-4 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {lastSaved && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -404,11 +406,23 @@ export default function DoctorConsultation() {
                     </TooltipTrigger>
                     <TooltipContent>Download PDF</TooltipContent>
                   </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => setIsSidebarOpen(true)}
+                      >
+                        <PanelRight className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Patient Details</TooltipContent>
+                  </Tooltip>
                   <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
                     <Save className="mr-1.5 h-4 w-4" />
                     Save Draft
                   </Button>
-                  <Button onClick={handleSendToPharmacy} className="bg-primary hover:bg-primary/90">
+                  <Button onClick={handleSendToPharmacy}>
                     <Send className="mr-1.5 h-4 w-4" />
                     Complete & Send to Pharmacy
                   </Button>
@@ -417,16 +431,21 @@ export default function DoctorConsultation() {
             </Tabs>
           </div>
 
-          {/* Right Sidebar */}
-          <PatientSidebar
-            patient={patient}
-            doctor={doctor}
-            campName={selectedCamp}
-            date={new Date().toLocaleDateString('en-GB')}
-            vitals={vitals}
-            diagnosis={diagnosisList}
-            allergies={allergies}
-          />
+          {/* Right Sidebar as Sheet */}
+          <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+            <SheetContent side="right" className="w-[380px] p-0">
+              <PatientSidebar
+                patient={patient}
+                doctor={doctor}
+                campName={selectedCamp}
+                date={new Date().toLocaleDateString('en-GB')}
+                vitals={vitals}
+                diagnosis={diagnosisList}
+                allergies={allergies}
+                onClose={() => setIsSidebarOpen(false)}
+              />
+            </SheetContent>
+          </Sheet>
         </div>
       </DashboardLayout>
     </TooltipProvider>
