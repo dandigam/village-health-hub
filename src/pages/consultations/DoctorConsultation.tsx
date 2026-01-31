@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Save, Send, Printer, Download, Clock, PanelRight } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -167,107 +168,126 @@ export default function DoctorConsultation() {
       <DashboardLayout>
         <div className="min-h-[calc(100vh-120px)]">
           {/* Main Content Area */}
-          <div className="flex-1 flex flex-col">
-            {/* Patient Header Bar - Redesigned */}
-            <div className="bg-primary text-primary-foreground rounded-t-lg overflow-hidden">
-              {/* Row 1: Patient Info */}
-              <div className="px-4 py-3 flex items-center gap-4 border-b border-primary-foreground/10">
+          <div className="flex-1 flex flex-col gap-0">
+            {/* Patient Header Card */}
+            <div className="bg-primary text-primary-foreground rounded-t-xl">
+              {/* Row 1: Patient Identity */}
+              <div className="px-5 py-4 flex items-center gap-4">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 shrink-0"
+                  className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 shrink-0 rounded-full"
                   onClick={() => navigate('/consultations')}
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <Avatar className="h-12 w-12 border-2 border-primary-foreground/20 shrink-0">
+                <Avatar className="h-14 w-14 border-2 border-primary-foreground/30 shrink-0 ring-2 ring-primary-foreground/10">
                   <AvatarImage src={patient.photoUrl} />
-                  <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">
+                  <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-lg font-semibold">
                     {getInitials(patient.name, patient.surname)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="min-w-0">
-                  <h2 className="font-semibold text-lg truncate">
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-bold text-xl tracking-tight">
                     {patient.name} {patient.surname}
                   </h2>
-                  <p className="text-sm text-primary-foreground/70">
+                  <p className="text-sm text-primary-foreground/80 font-medium">
                     {patient.patientId} • {patient.gender} • {patient.age} yrs • {patient.village}, {patient.district}
                   </p>
                 </div>
               </div>
+            </div>
 
-              {/* Row 2: Vitals, Diagnosis, Allergies */}
-              <div className="px-4 py-2 flex items-center gap-6 flex-wrap">
-                {/* Vitals with Icons */}
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5" title="Weight">
-                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {/* Clinical Info Bar */}
+            <div className="bg-muted/50 border-x border-b rounded-b-none px-5 py-3">
+              <div className="flex items-center gap-6 flex-wrap">
+                {/* Vitals Cards */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
                       </svg>
                     </div>
-                    <span className="text-sm font-medium">{vitals.weight || '--'}</span>
+                    <span className="text-sm font-semibold text-foreground">{vitals.weight || '--'}</span>
+                    <span className="text-xs text-muted-foreground">kg</span>
                   </div>
-                  <div className="flex items-center gap-1.5" title="Blood Pressure">
-                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  
+                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
+                    <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-destructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                       </svg>
                     </div>
-                    <span className="text-sm font-medium">{vitals.bp || '--'}</span>
+                    <span className="text-sm font-semibold text-foreground">{vitals.bp || '--'}</span>
                   </div>
-                  <div className="flex items-center gap-1.5" title="Pulse">
-                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  
+                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
+                    <div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                       </svg>
                     </div>
-                    <span className="text-sm font-medium">{vitals.pulse || '--'}</span>
+                    <span className="text-sm font-semibold text-foreground">{vitals.pulse || '--'}</span>
+                    <span className="text-xs text-muted-foreground">bpm</span>
                   </div>
-                  <div className="flex items-center gap-1.5" title="Temperature">
-                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  
+                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
+                    <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
                       </svg>
                     </div>
-                    <span className="text-sm font-medium">{vitals.temp ? `${vitals.temp}°F` : '--'}</span>
+                    <span className="text-sm font-semibold text-foreground">{vitals.temp ? `${vitals.temp}°F` : '--'}</span>
                   </div>
-                  <div className="flex items-center gap-1.5" title="SpO2">
-                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  
+                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
+                    <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="12" r="10"/>
                         <path d="M12 6v6l4 2"/>
                       </svg>
                     </div>
-                    <span className="text-sm font-medium">{vitals.spo2 ? `${vitals.spo2}%` : '--'}</span>
+                    <span className="text-sm font-semibold text-foreground">{vitals.spo2 ? `${vitals.spo2}%` : '--'}</span>
                   </div>
                 </div>
 
-                <div className="w-px h-6 bg-primary-foreground/20" />
+                <Separator orientation="vertical" className="h-8" />
 
-                {/* Diagnosis Badges */}
+                {/* Diagnosis */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-primary-foreground/60 uppercase">Dx:</span>
-                  {diagnosisList.map((d, i) => (
-                    <Badge key={i} variant="outline" className="bg-accent/20 border-accent text-accent text-xs">
-                      {d}
-                    </Badge>
-                  ))}
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">DX:</span>
+                  <div className="flex items-center gap-1.5">
+                    {diagnosisList.map((d, i) => (
+                      <Badge key={i} className="bg-primary text-primary-foreground border-0 px-2.5 py-0.5 text-xs font-medium">
+                        {d}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="w-px h-6 bg-primary-foreground/20" />
+                <Separator orientation="vertical" className="h-8" />
 
                 {/* Allergies */}
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-primary-foreground/60 uppercase">Allergies:</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={allergies.drug ? "destructive" : "secondary"} className="text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">ALLERGIES:</span>
+                  <div className="flex items-center gap-1.5">
+                    <Badge 
+                      variant={allergies.drug ? "destructive" : "outline"} 
+                      className={`text-xs font-medium px-2.5 py-0.5 ${!allergies.drug ? 'bg-background text-muted-foreground' : ''}`}
+                    >
                       Drug {allergies.drug ? '✓' : '✗'}
                     </Badge>
-                    <Badge variant={allergies.food ? "destructive" : "secondary"} className="text-xs">
+                    <Badge 
+                      variant={allergies.food ? "destructive" : "outline"} 
+                      className={`text-xs font-medium px-2.5 py-0.5 ${!allergies.food ? 'bg-background text-muted-foreground' : ''}`}
+                    >
                       Food {allergies.food ? '✓' : '✗'}
                     </Badge>
-                    <Badge variant={allergies.environment ? "destructive" : "secondary"} className="text-xs">
+                    <Badge 
+                      variant={allergies.environment ? "destructive" : "outline"} 
+                      className={`text-xs font-medium px-2.5 py-0.5 ${!allergies.environment ? 'bg-background text-muted-foreground' : ''}`}
+                    >
                       Env {allergies.environment ? '✓' : '✗'}
                     </Badge>
                   </div>
@@ -275,52 +295,52 @@ export default function DoctorConsultation() {
               </div>
             </div>
 
-            {/* Tabs Navigation */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-              <TabsList className="w-full justify-start rounded-none bg-slate-700 p-0 h-auto">
+            {/* Tabs Navigation - Modern Design */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col mt-4">
+              <TabsList className="w-full justify-start rounded-lg bg-muted/30 border p-1 h-auto gap-1">
                 <TabsTrigger 
                   value="subject" 
-                  className="rounded-none px-6 py-3 text-white data-[state=active]:bg-white data-[state=active]:text-slate-800 data-[state=inactive]:text-slate-300 data-[state=inactive]:hover:text-white"
+                  className="rounded-md px-5 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/50 transition-all"
                 >
                   <div className="text-left">
-                    <p className="font-medium">Subject</p>
-                    <p className="text-[10px] opacity-80">Chief Complaints</p>
+                    <p className="font-semibold text-sm">Subject</p>
+                    <p className="text-[10px] opacity-70 font-normal">Chief Complaints</p>
                   </div>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="objective"
-                  className="rounded-none px-6 py-3 text-white data-[state=active]:bg-white data-[state=active]:text-slate-800 data-[state=inactive]:text-slate-300 data-[state=inactive]:hover:text-white"
+                  className="rounded-md px-5 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/50 transition-all"
                 >
                   <div className="text-left">
-                    <p className="font-medium">Objective</p>
-                    <p className="text-[10px] opacity-80">Vitals / Labs</p>
+                    <p className="font-semibold text-sm">Objective</p>
+                    <p className="text-[10px] opacity-70 font-normal">Vitals / Labs</p>
                   </div>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="assessment"
-                  className="rounded-none px-6 py-3 text-white data-[state=active]:bg-white data-[state=active]:text-slate-800 data-[state=inactive]:text-slate-300 data-[state=inactive]:hover:text-white"
+                  className="rounded-md px-5 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/50 transition-all"
                 >
                   <div className="text-left">
-                    <p className="font-medium">Assessment</p>
-                    <p className="text-[10px] opacity-80">Diagnosis</p>
+                    <p className="font-semibold text-sm">Assessment</p>
+                    <p className="text-[10px] opacity-70 font-normal">Diagnosis</p>
                   </div>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="plan"
-                  className="rounded-none px-6 py-3 text-white data-[state=active]:bg-white data-[state=active]:text-slate-800 data-[state=inactive]:text-slate-300 data-[state=inactive]:hover:text-white"
+                  className="rounded-md px-5 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/50 transition-all"
                 >
                   <div className="text-left">
-                    <p className="font-medium">Plan / Recommendation</p>
-                    <p className="text-[10px] opacity-80">Inside RX / Outside RX</p>
+                    <p className="font-semibold text-sm">Plan / Recommendation</p>
+                    <p className="text-[10px] opacity-70 font-normal">Inside RX / Outside RX</p>
                   </div>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="summary"
-                  className="rounded-none px-6 py-3 text-white data-[state=active]:bg-white data-[state=active]:text-slate-800 data-[state=inactive]:text-slate-300 data-[state=inactive]:hover:text-white"
+                  className="rounded-md px-5 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted/50 transition-all"
                 >
                   <div className="text-left">
-                    <p className="font-medium">Summary</p>
-                    <p className="text-[10px] opacity-80">Description</p>
+                    <p className="font-semibold text-sm">Summary</p>
+                    <p className="text-[10px] opacity-70 font-normal">Description</p>
                   </div>
                 </TabsTrigger>
               </TabsList>
