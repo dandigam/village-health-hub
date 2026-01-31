@@ -191,38 +191,6 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* User Profile Section - pushed to bottom */}
-        <div className={cn(
-          "p-3 border-t border-white/10 bg-white/5 mt-auto",
-          isCollapsed ? "flex justify-center" : ""
-        )}>
-          {isCollapsed ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:scale-105 transition-transform shadow-lg">
-                  V
-                </div>
-              </TooltipTrigger>
-              <TooltipContent 
-                side="right" 
-                className="bg-gray-900 text-white border-0 px-3 py-2"
-              >
-                <p className="font-medium text-xs">Venkatesh Dandigam</p>
-                <p className="text-[10px] text-gray-400">Camp Admin</p>
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-lg">
-                V
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-white truncate">Venkatesh Dandigam</p>
-                <p className="text-[10px] text-white/60">Camp Admin</p>
-              </div>
-            </div>
-          )}
-        </div>
       </aside>
     </TooltipProvider>
   );
