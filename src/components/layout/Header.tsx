@@ -1,4 +1,4 @@
-import { Bell, Search, User, LogOut, Settings } from 'lucide-react';
+import { Bell, Search, User, LogOut, Settings, MapPin, ChevronDown, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,12 +11,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { mockUser } from '@/data/mockData';
+import { mockUser, mockCamps } from '@/data/mockData';
 import { useCamp } from '@/context/CampContext';
 
 export function Header() {
   const navigate = useNavigate();
-  const { selectedCamp } = useCamp();
+  const { selectedCamp, setSelectedCamp } = useCamp();
 
   const handleLogout = () => {
     navigate('/login');
@@ -24,7 +24,7 @@ export function Header() {
 
   return (
     <header className="h-16 bg-primary flex items-center justify-between px-4 lg:px-6 print:hidden">
-      {/* Left: Logo & Camp Info */}
+      {/* Left: Logo & Camp Selector */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
@@ -35,12 +35,44 @@ export function Header() {
             <span className="text-xs text-primary-foreground/70 block -mt-1">FOUNDATION</span>
           </div>
         </div>
-        {selectedCamp && (
-          <div className="hidden md:block border-l border-primary-foreground/20 pl-4 ml-2">
-            <p className="text-primary-foreground font-medium">{selectedCamp}</p>
-            <p className="text-xs text-primary-foreground/70">Camp</p>
-          </div>
-        )}
+        
+        {/* Camp Dropdown Selector */}
+        <div className="hidden md:block border-l border-primary-foreground/20 pl-4 ml-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="h-auto p-2 text-primary-foreground hover:bg-primary-foreground/10 flex items-center gap-2"
+              >
+                <MapPin className="h-4 w-4 text-primary-foreground/70" />
+                <div className="text-left">
+                  <p className="text-sm font-medium">{selectedCamp || 'Select Camp'}</p>
+                  <p className="text-[10px] text-primary-foreground/70">Current Camp</p>
+                </div>
+                <ChevronDown className="h-4 w-4 text-primary-foreground/70" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 z-50 bg-card">
+              <DropdownMenuLabel>Select Camp Location</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {mockCamps.map((camp) => (
+                <DropdownMenuItem 
+                  key={camp.id}
+                  onClick={() => setSelectedCamp(camp.name)}
+                  className="flex items-center justify-between cursor-pointer"
+                >
+                  <div>
+                    <p className="font-medium">{camp.name}</p>
+                    <p className="text-xs text-muted-foreground">{camp.location}</p>
+                  </div>
+                  {selectedCamp === camp.name && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Center: Search */}
