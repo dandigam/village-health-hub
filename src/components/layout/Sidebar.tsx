@@ -41,24 +41,6 @@ export function Sidebar() {
           isCollapsed ? "w-16" : "w-64"
         )}
       >
-        {/* Medical Icon Display */}
-        <div className={cn("p-4 flex flex-col items-center", isCollapsed ? "py-4" : "p-6")}>
-          <div className={cn(
-            "rounded-full bg-card flex items-center justify-center shadow-lg transition-all",
-            isCollapsed ? "w-10 h-10" : "w-24 h-24"
-          )}>
-            <div className={cn(
-              "rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center transition-all",
-              isCollapsed ? "w-8 h-8" : "w-20 h-20"
-            )}>
-              <Stethoscope className={cn("text-white transition-all", isCollapsed ? "w-4 h-4" : "w-10 h-10")} />
-            </div>
-          </div>
-          {!isCollapsed && (
-            <p className="mt-3 text-sm font-medium text-sidebar-foreground">Medical Camp</p>
-          )}
-        </div>
-
         {/* Collapse Toggle */}
         <div className={cn("px-2 mb-2", isCollapsed ? "flex justify-center" : "flex justify-end pr-3")}>
           <Button
