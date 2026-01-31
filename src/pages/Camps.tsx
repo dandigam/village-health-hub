@@ -35,19 +35,19 @@ export default function Camps() {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
-        <SearchFilter
-          title="Camp Management"
-          count={filteredCamps.length}
-          placeholder="Search by Camp Name / Village / District"
-          value={searchTerm}
-          onChange={setSearchTerm}
-        />
-        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/camps/new')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create New Camp
-        </Button>
-      </div>
+      <SearchFilter
+        title="Camp Management"
+        count={filteredCamps.length}
+        placeholder="Search by Camp Name / Village / District"
+        value={searchTerm}
+        onChange={setSearchTerm}
+        action={
+          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/camps/new')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create New Camp
+          </Button>
+        }
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList>
