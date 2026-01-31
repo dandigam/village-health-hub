@@ -11,9 +11,9 @@ import { mockCamps, mockDoctors } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 const statusColors = {
-  draft: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  active: 'bg-green-100 text-green-800 border-green-200',
-  closed: 'bg-gray-100 text-gray-800 border-gray-200',
+  draft: 'bg-stat-orange text-stat-orange-text border-stat-orange-text/20',
+  active: 'bg-stat-green text-stat-green-text border-stat-green-text/20',
+  closed: 'bg-muted text-muted-foreground border-muted-foreground/20',
 };
 
 export default function Camps() {

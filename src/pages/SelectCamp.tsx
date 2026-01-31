@@ -39,7 +39,7 @@ export default function SelectCamp() {
     <div className="min-h-screen relative">
       {/* Background */}
       <div
-        className="absolute inset-0 bg-gradient-to-br from-blue-100 via-teal-50 to-blue-100"
+        className="absolute inset-0 bg-gradient-to-br from-primary/10 via-muted to-primary/10"
         style={{
           backgroundImage: `url('/placeholder.svg')`,
           backgroundSize: 'cover',
@@ -70,8 +70,8 @@ export default function SelectCamp() {
         <Card className="w-full max-w-2xl bg-card/95 backdrop-blur-sm shadow-xl">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-2">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                <MapPin className="w-6 h-6 text-red-500" />
+              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+                <MapPin className="w-6 h-6 text-accent" />
               </div>
             </div>
             <p className="text-muted-foreground">Select your</p>

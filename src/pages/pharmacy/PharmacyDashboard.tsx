@@ -22,11 +22,11 @@ export default function PharmacyDashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">Pending</Badge>;
+        return <Badge className="bg-stat-orange text-stat-orange-text border-stat-orange-text/20">Pending</Badge>;
       case 'partial':
-        return <Badge className="bg-orange-100 text-orange-700 border-orange-200">Partial</Badge>;
+        return <Badge className="bg-stat-pink text-stat-pink-text border-stat-pink-text/20">Partial</Badge>;
       case 'dispensed':
-        return <Badge className="bg-green-100 text-green-700 border-green-200">Dispensed</Badge>;
+        return <Badge className="bg-stat-green text-stat-green-text border-stat-green-text/20">Dispensed</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -43,8 +43,8 @@ export default function PharmacyDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-yellow-100">
-                <Clock className="h-6 w-6 text-yellow-600" />
+              <div className="p-3 rounded-full bg-stat-orange">
+                <Clock className="h-6 w-6 text-stat-orange-text" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{pendingPrescriptions.length}</p>
@@ -56,8 +56,8 @@ export default function PharmacyDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-orange-100">
-                <AlertCircle className="h-6 w-6 text-orange-600" />
+              <div className="p-3 rounded-full bg-stat-pink">
+                <AlertCircle className="h-6 w-6 text-stat-pink-text" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{partialPrescriptions.length}</p>
@@ -69,8 +69,8 @@ export default function PharmacyDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-green-100">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="p-3 rounded-full bg-stat-green">
+                <CheckCircle className="h-6 w-6 text-stat-green-text" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{dispensedPrescriptions.length}</p>
@@ -82,8 +82,8 @@ export default function PharmacyDashboard() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-blue-100">
-                <DollarSign className="h-6 w-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-stat-blue">
+                <DollarSign className="h-6 w-6 text-stat-blue-text" />
               </div>
               <div>
                 <p className="text-2xl font-bold">₹12,450</p>
@@ -161,8 +161,8 @@ export default function PharmacyDashboard() {
                   <CardContent className="py-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-                          <AlertCircle className="h-6 w-6 text-orange-600" />
+                        <div className="w-12 h-12 rounded-full bg-stat-pink flex items-center justify-center">
+                          <AlertCircle className="h-6 w-6 text-stat-pink-text" />
                         </div>
                         <div>
                           <h3 className="font-semibold">{patient?.name} {patient?.surname}</h3>
@@ -198,8 +198,8 @@ export default function PharmacyDashboard() {
                   <CardContent className="py-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                          <CheckCircle className="h-6 w-6 text-green-600" />
+                        <div className="w-12 h-12 rounded-full bg-stat-green flex items-center justify-center">
+                          <CheckCircle className="h-6 w-6 text-stat-green-text" />
                         </div>
                         <div>
                           <h3 className="font-semibold">{patient?.name} {patient?.surname}</h3>
