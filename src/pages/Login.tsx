@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Stethoscope } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,56 +13,29 @@ export default function Login() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // For demo, just navigate to camp selection
     navigate('/select-camp');
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-end pr-8 md:pr-16 lg:pr-24">
-      {/* Background */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-teal-700"
-        style={{
-          backgroundImage: `linear-gradient(to bottom right, rgba(30, 58, 95, 0.9), rgba(30, 58, 95, 0.7)), url('/placeholder.svg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
-
-      {/* Left Logo */}
-      <div className="absolute top-6 left-6 z-10">
-        <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center">
-          <div className="text-center text-white">
-            <p className="text-xs">ఉత్తమ పౌర సమాజమే</p>
-            <p className="text-2xl font-bold">🤝</p>
-            <p className="text-xs">జన విజ్ఞాన విద్యా లక్ష్యం</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Login Card */}
-      <Card className="relative z-10 w-full max-w-md bg-card/95 backdrop-blur-sm border-0 shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-accent/20 p-4">
+      <Card className="w-full max-w-md bg-card border-0 shadow-2xl">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-1">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 via-red-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white text-xl">🔥</span>
-              </div>
-              <div>
-                <span className="text-2xl font-bold">
-                  <span className="text-yellow-500">G</span>
-                  <span className="text-teal-500">B</span>
-                  <span className="text-purple-500">R</span>
-                </span>
-                <p className="text-xs text-muted-foreground -mt-1">FOUNDATION</p>
-              </div>
+            <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center">
+              <Stethoscope className="w-10 h-10 text-white" />
             </div>
           </div>
+          <CardTitle className="text-2xl font-bold text-foreground">
+            Medical Camp System
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Sign in to manage camps and patients
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="mobile">Mobile</Label>
+              <Label htmlFor="mobile">Mobile Number</Label>
               <Input
                 id="mobile"
                 type="tel"
@@ -84,9 +58,9 @@ export default function Login() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-accent to-purple-500 hover:from-accent/90 hover:to-purple-500/90"
+              className="w-full bg-accent hover:bg-accent/90"
             >
-              Sign in
+              Sign In
             </Button>
           </form>
         </CardContent>

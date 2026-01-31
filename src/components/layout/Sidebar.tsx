@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Tent,
@@ -9,10 +9,7 @@ import {
   Package,
   FileText,
   Settings,
-  Heart,
-  Droplets,
-  Activity,
-  Wind,
+  FileEdit,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -20,44 +17,25 @@ const mainNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
   { icon: Tent, label: 'Camps', href: '/camps' },
   { icon: Users, label: 'Patients', href: '/patients' },
-  { icon: Stethoscope, label: 'Doctors', href: '/doctors' },
+  { icon: FileEdit, label: 'SOAP Notes', href: '/soap' },
+  { icon: Stethoscope, label: 'Consultations', href: '/consultations' },
   { icon: Pill, label: 'Pharmacy', href: '/pharmacy' },
-  { icon: ClipboardList, label: 'Consultations', href: '/consultations' },
   { icon: Package, label: 'Stock', href: '/stock' },
+  { icon: ClipboardList, label: 'Doctors', href: '/doctors' },
   { icon: FileText, label: 'Reports', href: '/reports' },
 ];
 
-const medicalIcons = [
-  { icon: Heart, color: 'text-red-400' },
-  { icon: Droplets, color: 'text-red-500' },
-  { icon: Activity, color: 'text-red-400' },
-  { icon: Wind, color: 'text-red-400' },
-];
-
 export function Sidebar() {
-  const location = useLocation();
-
   return (
     <aside className="w-64 bg-sidebar min-h-screen flex flex-col">
       {/* Medical Icon Display */}
-      <div className="p-4 flex flex-col items-center">
-        <div className="w-32 h-32 rounded-full bg-card flex items-center justify-center mb-4 shadow-lg">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center">
-            <Stethoscope className="w-12 h-12 text-white" />
+      <div className="p-6 flex flex-col items-center">
+        <div className="w-24 h-24 rounded-full bg-card flex items-center justify-center shadow-lg">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-teal-500 flex items-center justify-center">
+            <Stethoscope className="w-10 h-10 text-white" />
           </div>
         </div>
-        
-        {/* Decorative Medical Icons */}
-        <div className="flex flex-col gap-3 mt-2">
-          {medicalIcons.map((item, index) => (
-            <div
-              key={index}
-              className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center"
-            >
-              <item.icon className={cn('w-5 h-5', item.color)} />
-            </div>
-          ))}
-        </div>
+        <p className="mt-3 text-sm font-medium text-sidebar-foreground">Medical Camp</p>
       </div>
 
       {/* Navigation */}

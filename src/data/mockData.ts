@@ -1,4 +1,4 @@
-import { Camp, Doctor, Patient, CampStats, User } from '@/types';
+import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment } from '@/types';
 
 export const mockUser: User = {
   id: '1',
@@ -157,6 +157,172 @@ export const mockPatients: Patient[] = [
     district: 'Guntur',
     state: 'Andhra Pradesh',
     createdAt: '2025-01-15T12:00:00Z',
+  },
+];
+
+export const mockSOAPNotes: SOAPNote[] = [
+  {
+    id: '1',
+    patientId: '1',
+    campId: '1',
+    createdBy: '1',
+    subjective: 'Patient complains of chest pain and breathlessness for the past 2 days. Pain increases during physical activity.',
+    objective: {
+      weight: 72,
+      bp: '140/90',
+      pulse: 88,
+      temp: 98.6,
+      spo2: 96,
+      notes: 'Mild wheezing observed',
+    },
+    assessment: 'Possible hypertension with respiratory issues',
+    plan: 'Refer to doctor for detailed examination and ECG',
+    status: 'pending',
+    createdAt: '2025-01-15T10:30:00Z',
+  },
+  {
+    id: '2',
+    patientId: '2',
+    campId: '1',
+    createdBy: '1',
+    subjective: 'Frequent headaches and dizziness for 1 week. Unable to concentrate.',
+    objective: {
+      weight: 68,
+      bp: '130/85',
+      pulse: 76,
+      temp: 98.4,
+      spo2: 98,
+      notes: 'Normal reflexes',
+    },
+    assessment: 'Tension headache, rule out migraine',
+    plan: 'Neurological consultation recommended',
+    status: 'with_doctor',
+    createdAt: '2025-01-15T11:00:00Z',
+  },
+  {
+    id: '3',
+    patientId: '3',
+    campId: '1',
+    createdBy: '1',
+    subjective: 'Joint pain in knees and back for 3 months. Difficulty walking.',
+    objective: {
+      weight: 65,
+      bp: '120/80',
+      pulse: 72,
+      temp: 98.2,
+      spo2: 99,
+      notes: 'Swelling observed in right knee',
+    },
+    assessment: 'Osteoarthritis suspected',
+    plan: 'X-ray and orthopedic consultation',
+    status: 'completed',
+    createdAt: '2025-01-15T09:00:00Z',
+  },
+];
+
+export const mockMedicines: Medicine[] = [
+  { id: '1', name: 'T.RABI 20 MG', code: '258410', category: 'Gastric', unitPrice: 5 },
+  { id: '2', name: 'A.BENZ 10 MG', code: '258411', category: 'Analgesic', unitPrice: 8 },
+  { id: '3', name: 'C.CALCIUM 500 MG', code: '258412', category: 'Supplement', unitPrice: 3 },
+  { id: '4', name: 'D.DOSTINEX 0.5 MG', code: '258413', category: 'Hormonal', unitPrice: 25 },
+  { id: '5', name: 'E.ERGO 250 MG', code: '258414', category: 'Neurological', unitPrice: 12 },
+  { id: '6', name: 'F.FERROUS 100 MG', code: '258415', category: 'Supplement', unitPrice: 4 },
+  { id: '7', name: 'PARACETAMOL 500 MG', code: '258416', category: 'Analgesic', unitPrice: 2 },
+  { id: '8', name: 'AMOXICILLIN 250 MG', code: '258417', category: 'Antibiotic', unitPrice: 6 },
+  { id: '9', name: 'METFORMIN 500 MG', code: '258418', category: 'Diabetes', unitPrice: 7 },
+  { id: '10', name: 'OMEPRAZOLE 20 MG', code: '258419', category: 'Gastric', unitPrice: 5 },
+];
+
+export const mockConsultations: Consultation[] = [
+  {
+    id: '1',
+    patientId: '3',
+    doctorId: '1',
+    campId: '1',
+    soapNoteId: '3',
+    chiefComplaint: 'Severe joint pain in both knees and lower back',
+    medicalHistory: 'No diabetes, hypertension controlled with medication',
+    diagnosis: ['Osteoarthritis - Bilateral Knee', 'Lumbar Spondylosis'],
+    labTests: ['X-Ray Knee AP/Lateral', 'CBC'],
+    suggestedOperations: [],
+    notes: 'Patient advised to reduce weight and start physiotherapy',
+    prescriptionId: '1',
+    status: 'completed',
+    createdAt: '2025-01-15T09:30:00Z',
+  },
+];
+
+export const mockPrescriptions: Prescription[] = [
+  {
+    id: '1',
+    consultationId: '1',
+    patientId: '3',
+    doctorId: '1',
+    campId: '1',
+    items: [
+      { medicineId: '2', medicineName: 'A.BENZ 10 MG', quantity: 20, morning: 1, afternoon: 0, night: 1, days: 10 },
+      { medicineId: '3', medicineName: 'C.CALCIUM 500 MG', quantity: 30, morning: 1, afternoon: 1, night: 1, days: 10 },
+      { medicineId: '7', medicineName: 'PARACETAMOL 500 MG', quantity: 15, morning: 1, afternoon: 1, night: 1, days: 5 },
+    ],
+    status: 'dispensed',
+    createdAt: '2025-01-15T09:45:00Z',
+  },
+  {
+    id: '2',
+    consultationId: '2',
+    patientId: '1',
+    doctorId: '2',
+    campId: '1',
+    items: [
+      { medicineId: '1', medicineName: 'T.RABI 20 MG', quantity: 10, morning: 1, afternoon: 0, night: 0, days: 10 },
+      { medicineId: '10', medicineName: 'OMEPRAZOLE 20 MG', quantity: 10, morning: 1, afternoon: 0, night: 0, days: 10 },
+    ],
+    status: 'pending',
+    createdAt: '2025-01-15T11:00:00Z',
+  },
+];
+
+export const mockSuppliers: Supplier[] = [
+  { id: '1', name: 'MedPharma Distributors', contact: '9876543200', address: 'Industrial Area, Guntur' },
+  { id: '2', name: 'HealthCare Supplies', contact: '9876543201', address: 'Main Road, Vijayawada' },
+  { id: '3', name: 'Apollo Medical Supplies', contact: '9876543202', address: 'Gandhi Nagar, Bapatla' },
+];
+
+export const mockStockItems: StockItem[] = [
+  { id: '1', medicineId: '1', campId: '1', quantity: 500, batchNumber: 'BT001', expiryDate: '2026-06-30', purchaseDate: '2025-01-10', supplierId: '1' },
+  { id: '2', medicineId: '2', campId: '1', quantity: 45, batchNumber: 'BT002', expiryDate: '2026-03-15', purchaseDate: '2025-01-10', supplierId: '1' },
+  { id: '3', medicineId: '3', campId: '1', quantity: 200, batchNumber: 'BT003', expiryDate: '2027-01-20', purchaseDate: '2025-01-10', supplierId: '2' },
+  { id: '4', medicineId: '4', campId: '1', quantity: 20, batchNumber: 'BT004', expiryDate: '2025-12-31', purchaseDate: '2025-01-10', supplierId: '2' },
+  { id: '5', medicineId: '5', campId: '1', quantity: 150, batchNumber: 'BT005', expiryDate: '2026-08-15', purchaseDate: '2025-01-10', supplierId: '3' },
+  { id: '6', medicineId: '6', campId: '1', quantity: 300, batchNumber: 'BT006', expiryDate: '2026-09-30', purchaseDate: '2025-01-10', supplierId: '3' },
+  { id: '7', medicineId: '7', campId: '1', quantity: 1000, batchNumber: 'BT007', expiryDate: '2026-12-31', purchaseDate: '2025-01-10', supplierId: '1' },
+  { id: '8', medicineId: '8', campId: '1', quantity: 250, batchNumber: 'BT008', expiryDate: '2026-05-15', purchaseDate: '2025-01-10', supplierId: '2' },
+  { id: '9', medicineId: '9', campId: '1', quantity: 400, batchNumber: 'BT009', expiryDate: '2026-07-20', purchaseDate: '2025-01-10', supplierId: '3' },
+  { id: '10', medicineId: '10', campId: '1', quantity: 350, batchNumber: 'BT010', expiryDate: '2026-04-30', purchaseDate: '2025-01-10', supplierId: '1' },
+];
+
+export const mockPayments: Payment[] = [
+  {
+    id: '1',
+    prescriptionId: '1',
+    patientId: '3',
+    campId: '1',
+    totalAmount: 250,
+    paidAmount: 250,
+    pendingAmount: 0,
+    status: 'full',
+    createdAt: '2025-01-15T10:00:00Z',
+  },
+  {
+    id: '2',
+    prescriptionId: '2',
+    patientId: '1',
+    campId: '1',
+    totalAmount: 150,
+    paidAmount: 100,
+    pendingAmount: 50,
+    status: 'partial',
+    createdAt: '2025-01-15T11:30:00Z',
   },
 ];
 
