@@ -43,6 +43,11 @@ import MedicineReports from "./pages/reports/MedicineReports";
 import DiscountReports from "./pages/reports/DiscountReports";
 import DoctorReports from "./pages/reports/DoctorReports";
 
+// Settings & Profile
+import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
+import IDCardPrintouts from "./pages/settings/IDCardPrintouts";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -97,6 +102,11 @@ const App = () => (
           <Route path="/reports/medicines" element={<MedicineReports />} />
           <Route path="/reports/discounts" element={<DiscountReports />} />
           <Route path="/reports/doctors" element={<DoctorReports />} />
+          
+          {/* Settings & Profile */}
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings/id-cards" element={<IDCardPrintouts />} />
+          <Route path="/profile" element={<Profile />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
