@@ -28,7 +28,7 @@ export default function Camps() {
     <DashboardLayout>
       <div className="page-header">
         <h1 className="page-title">Camp Management</h1>
-        <Button className="bg-accent hover:bg-accent/90">
+        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/camps/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Create New Camp
         </Button>
