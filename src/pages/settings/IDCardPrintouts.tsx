@@ -8,19 +8,18 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { 
   IdCard,
   ArrowLeft,
   Printer,
-  Download,
   QrCode,
   Phone,
   Stethoscope,
   Users,
   UserCheck,
-  FileDown
+  FileDown,
+  User
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { mockCamps, mockDoctors } from '@/data/mockData';
@@ -122,39 +121,53 @@ export default function IDCardPrintouts() {
     }
   };
 
-  const getAccentColor = (role: string) => {
+  // Refined color schemes
+  const getRoleColors = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'doctor': return 'bg-blue-500';
-      case 'volunteer': return 'bg-emerald-500';
-      case 'staff': return 'bg-purple-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const getHeaderGradient = (role: string) => {
-    switch (role.toLowerCase()) {
-      case 'doctor': return 'from-blue-600 to-blue-700';
-      case 'volunteer': return 'from-emerald-600 to-emerald-700';
-      case 'staff': return 'from-purple-600 to-purple-700';
-      default: return 'from-gray-600 to-gray-700';
-    }
-  };
-
-  const getBadgeStyle = (role: string) => {
-    switch (role.toLowerCase()) {
-      case 'doctor': return 'bg-blue-100 text-blue-700';
-      case 'volunteer': return 'bg-emerald-100 text-emerald-700';
-      case 'staff': return 'bg-purple-100 text-purple-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getAccentBorder = (role: string) => {
-    switch (role.toLowerCase()) {
-      case 'doctor': return 'ring-blue-500/30';
-      case 'volunteer': return 'ring-emerald-500/30';
-      case 'staff': return 'ring-purple-500/30';
-      default: return 'ring-gray-500/30';
+      case 'doctor':
+        return {
+          headerBg: 'bg-gradient-to-br from-sky-500 to-blue-600',
+          avatarBg: 'bg-sky-100',
+          avatarText: 'text-sky-700',
+          avatarBorder: 'border-sky-200',
+          avatarRing: 'ring-sky-100',
+          badgeBg: 'bg-sky-50',
+          badgeText: 'text-sky-700',
+          badgeBorder: 'border-sky-200',
+        };
+      case 'volunteer':
+        return {
+          headerBg: 'bg-gradient-to-br from-teal-500 to-emerald-600',
+          avatarBg: 'bg-teal-100',
+          avatarText: 'text-teal-700',
+          avatarBorder: 'border-teal-200',
+          avatarRing: 'ring-teal-100',
+          badgeBg: 'bg-teal-50',
+          badgeText: 'text-teal-700',
+          badgeBorder: 'border-teal-200',
+        };
+      case 'staff':
+        return {
+          headerBg: 'bg-gradient-to-br from-violet-500 to-purple-600',
+          avatarBg: 'bg-violet-100',
+          avatarText: 'text-violet-700',
+          avatarBorder: 'border-violet-200',
+          avatarRing: 'ring-violet-100',
+          badgeBg: 'bg-violet-50',
+          badgeText: 'text-violet-700',
+          badgeBorder: 'border-violet-200',
+        };
+      default:
+        return {
+          headerBg: 'bg-gradient-to-br from-slate-500 to-slate-600',
+          avatarBg: 'bg-slate-100',
+          avatarText: 'text-slate-700',
+          avatarBorder: 'border-slate-200',
+          avatarRing: 'ring-slate-100',
+          badgeBg: 'bg-slate-50',
+          badgeText: 'text-slate-700',
+          badgeBorder: 'border-slate-200',
+        };
     }
   };
 
@@ -167,7 +180,6 @@ export default function IDCardPrintouts() {
     try {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = 210;
-      const pageHeight = 297;
       const cardWidth = 85;
       const cardHeight = 130;
       const marginX = (pageWidth - (cardWidth * 2 + 10)) / 2;
@@ -176,7 +188,6 @@ export default function IDCardPrintouts() {
       for (let i = 0; i < selectedData.length; i += 2) {
         if (i > 0) pdf.addPage();
 
-        // Render first card
         const card1 = document.getElementById(`id-card-${selectedData[i].id}`);
         if (card1) {
           const canvas1 = await html2canvas(card1, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
@@ -184,7 +195,6 @@ export default function IDCardPrintouts() {
           pdf.addImage(imgData1, 'PNG', marginX, marginY, cardWidth, cardHeight);
         }
 
-        // Render second card if exists
         if (selectedData[i + 1]) {
           const card2 = document.getElementById(`id-card-${selectedData[i + 1].id}`);
           if (card2) {
@@ -210,34 +220,62 @@ export default function IDCardPrintouts() {
     const printWindow = window.open('', '', 'width=800,height=600');
     if (!printWindow) return;
 
-    const cardsHTML = selectedData.map(person => `
+    const getHeaderColor = (role: string) => {
+      switch (role.toLowerCase()) {
+        case 'doctor': return 'linear-gradient(135deg, #0ea5e9, #2563eb)';
+        case 'volunteer': return 'linear-gradient(135deg, #14b8a6, #059669)';
+        case 'staff': return 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+        default: return 'linear-gradient(135deg, #64748b, #475569)';
+      }
+    };
+
+    const getAvatarColors = (role: string) => {
+      switch (role.toLowerCase()) {
+        case 'doctor': return { bg: '#e0f2fe', text: '#0369a1' };
+        case 'volunteer': return { bg: '#ccfbf1', text: '#0f766e' };
+        case 'staff': return { bg: '#ede9fe', text: '#6d28d9' };
+        default: return { bg: '#f1f5f9', text: '#475569' };
+      }
+    };
+
+    const getBadgeColors = (role: string) => {
+      switch (role.toLowerCase()) {
+        case 'doctor': return { bg: '#f0f9ff', text: '#0369a1', border: '#bae6fd' };
+        case 'volunteer': return { bg: '#f0fdfa', text: '#0f766e', border: '#99f6e4' };
+        case 'staff': return { bg: '#f5f3ff', text: '#6d28d9', border: '#ddd6fe' };
+        default: return { bg: '#f8fafc', text: '#475569', border: '#e2e8f0' };
+      }
+    };
+
+    const cardsHTML = selectedData.map(person => {
+      const avatarColors = getAvatarColors(person.role);
+      const badgeColors = getBadgeColors(person.role);
+      return `
       <div class="id-card">
-        <div class="card-header ${person.role.toLowerCase()}">
+        <div class="card-header" style="background: ${getHeaderColor(person.role)}">
           <div class="logo">SF</div>
           <p class="org-name">Srini Foundation</p>
           <p class="camp-name">${currentCamp?.name || 'Medical Camp'}</p>
         </div>
-        <div class="avatar-container">
-          <div class="avatar ${person.role.toLowerCase()}-bg">
-            ${person.name.split(' ').map(n => n[0]).join('')}
-          </div>
-        </div>
         <div class="card-body">
+          <div class="avatar" style="background: ${avatarColors.bg}; color: ${avatarColors.text}">
+            ${person.photoUrl ? `<img src="${person.photoUrl}" alt="${person.name}" />` : `<span class="initials">${person.name.split(' ').map(n => n[0]).join('')}</span>`}
+          </div>
           <h3 class="name">${person.name}</h3>
-          <span class="role-badge ${person.role.toLowerCase()}">${person.role}</span>
+          <span class="role-badge" style="background: ${badgeColors.bg}; color: ${badgeColors.text}; border-color: ${badgeColors.border}">${person.role}</span>
           <p class="department">${person.department}</p>
           <div class="id-box">
             <p class="id-number">${person.idNumber}</p>
           </div>
           ${showContact ? `<p class="contact">📞 ${person.phone}</p>` : ''}
-          ${showQRCode ? `<div class="qr-placeholder">QR</div>` : ''}
+          ${showQRCode ? `<div class="qr-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>` : ''}
           <div class="validity">
-            <p class="validity-label">Valid</p>
+            <p class="validity-label">VALID</p>
             <p class="validity-dates">${getCampDates()}</p>
           </div>
         </div>
       </div>
-    `).join('');
+    `}).join('');
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -247,39 +285,31 @@ export default function IDCardPrintouts() {
           <style>
             @page { size: A4; margin: 15mm; }
             * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f5f5; }
-            .cards-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; padding: 20px; }
-            .id-card { width: 280px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); page-break-inside: avoid; }
+            body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; }
+            .cards-container { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; padding: 24px; }
+            .id-card { width: 260px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); page-break-inside: avoid; border: 1px solid #e2e8f0; }
             .card-header { padding: 20px 16px; text-align: center; color: white; position: relative; }
-            .card-header.doctor { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-            .card-header.volunteer { background: linear-gradient(135deg, #059669, #047857); }
-            .card-header.staff { background: linear-gradient(135deg, #9333ea, #7c3aed); }
-            .logo { position: absolute; top: 8px; left: 8px; width: 28px; height: 28px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
-            .org-name { font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
-            .camp-name { font-size: 18px; font-weight: 700; margin-top: 4px; }
-            .avatar-container { display: flex; justify-content: center; margin-top: -40px; position: relative; z-index: 1; }
-            .avatar { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-            .doctor-bg { background: #3b82f6; }
-            .volunteer-bg { background: #10b981; }
-            .staff-bg { background: #a855f7; }
-            .card-body { padding: 12px 20px 20px; text-align: center; }
-            .name { font-size: 20px; font-weight: 700; color: #111827; margin-top: 8px; }
-            .role-badge { display: inline-block; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 8px; }
-            .role-badge.doctor { background: #dbeafe; color: #1d4ed8; }
-            .role-badge.volunteer { background: #d1fae5; color: #047857; }
-            .role-badge.staff { background: #f3e8ff; color: #7c3aed; }
-            .department { font-size: 14px; color: #4b5563; margin-top: 10px; font-weight: 500; }
-            .id-box { background: #f3f4f6; border-radius: 8px; padding: 8px 16px; display: inline-block; margin-top: 12px; }
-            .id-number { font-family: 'Courier New', monospace; font-size: 16px; font-weight: 700; color: #1f2937; letter-spacing: 1px; }
-            .contact { font-size: 13px; color: #6b7280; margin-top: 10px; }
-            .qr-placeholder { width: 60px; height: 60px; background: #f3f4f6; border-radius: 8px; margin: 12px auto; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 12px; border: 1px solid #e5e7eb; }
-            .validity { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f3f4f6; }
-            .validity-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; }
-            .validity-dates { font-size: 13px; font-weight: 600; color: #374151; margin-top: 2px; }
+            .logo { position: absolute; top: 10px; left: 10px; width: 28px; height: 28px; background: rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+            .org-name { font-size: 13px; font-weight: 600; opacity: 0.95; letter-spacing: 0.3px; }
+            .camp-name { font-size: 17px; font-weight: 700; margin-top: 4px; }
+            .card-body { padding: 20px; text-align: center; background: white; }
+            .avatar { width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
+            .avatar img { width: 100%; height: 100%; object-fit: cover; }
+            .avatar .initials { font-size: 28px; font-weight: 700; }
+            .name { font-size: 18px; font-weight: 700; color: #1e293b; }
+            .role-badge { display: inline-block; padding: 5px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 10px; border: 1px solid; }
+            .department { font-size: 13px; color: #64748b; margin-top: 10px; font-weight: 500; }
+            .id-box { background: #f8fafc; border-radius: 10px; padding: 8px 20px; display: inline-block; margin-top: 14px; border: 1px solid #e2e8f0; }
+            .id-number { font-family: 'SF Mono', 'Courier New', monospace; font-size: 15px; font-weight: 700; color: #334155; letter-spacing: 1px; }
+            .contact { font-size: 13px; color: #64748b; margin-top: 12px; }
+            .qr-placeholder { width: 56px; height: 56px; background: #f8fafc; border-radius: 10px; margin: 14px auto 0; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
+            .validity { margin-top: 16px; padding-top: 14px; border-top: 1px solid #f1f5f9; }
+            .validity-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+            .validity-dates { font-size: 13px; font-weight: 600; color: #475569; margin-top: 3px; }
             @media print {
               body { background: white; }
-              .cards-container { gap: 15px; padding: 0; }
-              .id-card { box-shadow: none; border: 1px solid #e5e7eb; }
+              .cards-container { gap: 20px; padding: 0; }
+              .id-card { box-shadow: none; }
             }
           </style>
         </head>
@@ -305,8 +335,8 @@ export default function IDCardPrintouts() {
                 <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <IdCard className="h-5 w-5 text-blue-600" />
+                <div className="h-10 w-10 rounded-lg bg-sky-100 flex items-center justify-center">
+                  <IdCard className="h-5 w-5 text-sky-600" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">ID Card & Tag Printouts</h1>
@@ -375,7 +405,7 @@ export default function IDCardPrintouts() {
                       className="gap-2"
                     >
                       <FileDown className="h-4 w-4" />
-                      {isGeneratingPDF ? 'Generating...' : `Download PDF (2/page)`}
+                      {isGeneratingPDF ? 'Generating...' : `Download PDF`}
                     </Button>
                   </div>
                 </div>
@@ -414,92 +444,100 @@ export default function IDCardPrintouts() {
 
                 {/* ID Cards Grid */}
                 <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {data.map((person) => (
-                    <div key={person.id} className="relative">
-                      {/* Selection Checkbox */}
-                      <div className="absolute -top-2 -left-2 z-10">
-                        <Checkbox 
-                          checked={selectedItems.includes(person.id)}
-                          onCheckedChange={() => toggleSelectItem(person.id)}
-                          className="bg-white shadow-sm h-5 w-5"
-                        />
-                      </div>
+                  {data.map((person) => {
+                    const colors = getRoleColors(person.role);
+                    return (
+                      <div key={person.id} className="relative">
+                        {/* Selection Checkbox */}
+                        <div className="absolute -top-2 -left-2 z-10">
+                          <Checkbox 
+                            checked={selectedItems.includes(person.id)}
+                            onCheckedChange={() => toggleSelectItem(person.id)}
+                            className="bg-white shadow-sm h-5 w-5"
+                          />
+                        </div>
 
-                      {/* Modern ID Card */}
-                      <div 
-                        id={`id-card-${person.id}`}
-                        className={`id-card bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 transition-all hover:shadow-2xl ${
-                          selectedItems.includes(person.id) ? 'ring-2 ring-primary ring-offset-2' : ''
-                        }`}
-                      >
-                        {/* Card Header with Gradient */}
-                        <div className={`bg-gradient-to-br ${getHeaderGradient(person.role)} px-4 py-5 text-center text-white relative`}>
-                          <div className="absolute top-2 left-2 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                            <span className="text-[10px] font-bold">SF</span>
+                        {/* Modern ID Card */}
+                        <div 
+                          id={`id-card-${person.id}`}
+                          className={`bg-white rounded-2xl shadow-lg overflow-hidden border transition-all hover:shadow-xl ${
+                            selectedItems.includes(person.id) ? 'ring-2 ring-primary ring-offset-2' : 'border-slate-200'
+                          }`}
+                        >
+                          {/* Card Header */}
+                          <div className={`${colors.headerBg} px-4 py-5 text-center text-white relative`}>
+                            <div className="absolute top-2.5 left-2.5 w-7 h-7 bg-white/25 rounded-full flex items-center justify-center">
+                              <span className="text-[10px] font-bold">SF</span>
+                            </div>
+                            <p className="text-sm font-semibold opacity-95 tracking-wide">Srini Foundation</p>
+                            <p className="text-base font-bold mt-1">{currentCamp?.name || 'Medical Camp'}</p>
                           </div>
-                          <p className="text-sm font-semibold tracking-wide">Srini Foundation</p>
-                          <p className="text-lg font-bold mt-1">{currentCamp?.name || 'Medical Camp'}</p>
-                        </div>
 
-                        {/* Avatar Section - Overlapping */}
-                        <div className="relative -mt-10 flex justify-center">
-                          <Avatar className={`h-24 w-24 border-4 border-white shadow-lg ring-4 ${getAccentBorder(person.role)}`}>
-                            <AvatarImage src={person.photoUrl} className="object-cover" />
-                            <AvatarFallback className={`text-2xl font-bold text-white ${getAccentColor(person.role)}`}>
-                              {person.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
+                          {/* Card Body */}
+                          <div className="px-5 py-5 text-center">
+                            {/* Avatar - Centered properly */}
+                            <div className={`w-[88px] h-[88px] mx-auto rounded-full ${colors.avatarBg} ${colors.avatarBorder} border-[3px] flex items-center justify-center shadow-md overflow-hidden`}>
+                              {person.photoUrl ? (
+                                <img 
+                                  src={person.photoUrl} 
+                                  alt={person.name} 
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className={`text-2xl font-bold ${colors.avatarText}`}>
+                                  {person.name.split(' ').map(n => n[0]).join('')}
+                                </span>
+                              )}
+                            </div>
 
-                        {/* Card Body */}
-                        <div className="px-5 pt-3 pb-5 text-center">
-                          {/* Name */}
-                          <h3 className="font-bold text-xl text-foreground mt-2">{person.name}</h3>
+                            {/* Name */}
+                            <h3 className="font-bold text-lg text-slate-800 mt-4">{person.name}</h3>
 
-                          {/* Role Badge */}
-                          <Badge 
-                            variant="secondary" 
-                            className={`mt-2 px-4 py-1 text-sm font-semibold ${getBadgeStyle(person.role)}`}
-                          >
-                            {person.role}
-                          </Badge>
+                            {/* Role Badge */}
+                            <Badge 
+                              variant="outline"
+                              className={`mt-2 px-4 py-1 text-xs font-semibold ${colors.badgeBg} ${colors.badgeText} ${colors.badgeBorder} border`}
+                            >
+                              {person.role}
+                            </Badge>
 
-                          {/* Department */}
-                          <p className="text-sm text-muted-foreground mt-3 font-medium">
-                            {person.department}
-                          </p>
-
-                          {/* ID Number */}
-                          <div className="mt-4 bg-muted/50 rounded-lg py-2 px-4 inline-block">
-                            <p className="font-mono text-base font-bold text-foreground tracking-wider">
-                              {person.idNumber}
+                            {/* Department */}
+                            <p className="text-sm text-slate-500 mt-3 font-medium">
+                              {person.department}
                             </p>
-                          </div>
 
-                          {/* Contact */}
-                          {showContact && (
-                            <div className="flex items-center justify-center gap-2 mt-3 text-sm text-muted-foreground">
-                              <Phone className="h-4 w-4" />
-                              <span>{person.phone}</span>
+                            {/* ID Number */}
+                            <div className="mt-4 bg-slate-50 border border-slate-200 rounded-xl py-2 px-5 inline-block">
+                              <p className="font-mono text-sm font-bold text-slate-700 tracking-wider">
+                                {person.idNumber}
+                              </p>
                             </div>
-                          )}
 
-                          {/* QR Code */}
-                          {showQRCode && (
-                            <div className="mt-4 mx-auto w-16 h-16 bg-muted rounded-lg flex items-center justify-center border">
-                              <QrCode className="h-12 w-12 text-muted-foreground/50" />
+                            {/* Contact */}
+                            {showContact && (
+                              <div className="flex items-center justify-center gap-2 mt-3 text-sm text-slate-500">
+                                <Phone className="h-3.5 w-3.5" />
+                                <span>{person.phone}</span>
+                              </div>
+                            )}
+
+                            {/* QR Code */}
+                            {showQRCode && (
+                              <div className="mt-4 mx-auto w-14 h-14 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-200">
+                                <QrCode className="h-9 w-9 text-slate-400" />
+                              </div>
+                            )}
+
+                            {/* Validity */}
+                            <div className="mt-4 pt-4 border-t border-slate-100">
+                              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Valid</p>
+                              <p className="text-sm font-semibold text-slate-600 mt-1">{getCampDates()}</p>
                             </div>
-                          )}
-
-                          {/* Validity */}
-                          <div className="mt-4 pt-3 border-t">
-                            <p className="text-xs text-muted-foreground uppercase tracking-wide">Valid</p>
-                            <p className="text-sm font-semibold text-foreground mt-0.5">{getCampDates()}</p>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </Tabs>
