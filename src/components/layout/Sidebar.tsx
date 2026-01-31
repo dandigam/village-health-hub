@@ -42,12 +42,12 @@ export function Sidebar() {
         )}
       >
         {/* Collapse Toggle */}
-        <div className={cn("px-2 mb-2", isCollapsed ? "flex justify-center" : "flex justify-end pr-3")}>
+        <div className={cn("px-2 mb-2 pt-2", isCollapsed ? "flex justify-center" : "flex justify-end pr-3")}>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="h-8 w-8 text-sidebar-foreground hover:bg-sidebar-accent"
+            className="h-8 w-8 text-white/90 hover:bg-sidebar-accent hover:text-white"
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
@@ -67,8 +67,8 @@ export function Sidebar() {
                           cn(
                             'flex items-center justify-center p-2.5 rounded-lg text-sm font-medium transition-colors',
                             isActive
-                              ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                              : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                              ? 'bg-sidebar-primary text-white'
+                              : 'text-white/90 hover:bg-sidebar-accent hover:text-white'
                           )
                         }
                       >
@@ -86,8 +86,8 @@ export function Sidebar() {
                       cn(
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                         isActive
-                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                          ? 'bg-sidebar-primary text-white'
+                          : 'text-white/90 hover:bg-sidebar-accent hover:text-white'
                       )
                     }
                   >
@@ -111,8 +111,8 @@ export function Sidebar() {
                     cn(
                       'flex items-center justify-center p-2.5 rounded-lg text-sm font-medium transition-colors',
                       isActive
-                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                        ? 'bg-sidebar-primary text-white'
+                        : 'text-white/90 hover:bg-sidebar-accent hover:text-white'
                     )
                   }
                 >
@@ -130,8 +130,8 @@ export function Sidebar() {
                 cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                    ? 'bg-sidebar-primary text-white'
+                    : 'text-white/90 hover:bg-sidebar-accent hover:text-white'
                 )
               }
             >
