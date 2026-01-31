@@ -92,6 +92,7 @@ export const mockPatients: Patient[] = [
     village: 'Bapatla',
     district: 'Guntur',
     state: 'Andhra Pradesh',
+    photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
     createdAt: '2025-01-15T10:00:00Z',
   },
   {
@@ -108,6 +109,7 @@ export const mockPatients: Patient[] = [
     village: 'Bapatla',
     district: 'Guntur',
     state: 'Andhra Pradesh',
+    photoUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
     createdAt: '2025-01-15T10:30:00Z',
   },
   {
@@ -124,6 +126,7 @@ export const mockPatients: Patient[] = [
     village: 'Bapatla',
     district: 'Guntur',
     state: 'Andhra Pradesh',
+    photoUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
     createdAt: '2025-01-15T11:00:00Z',
   },
   {
@@ -140,6 +143,7 @@ export const mockPatients: Patient[] = [
     village: 'Boinavaripalem',
     district: 'Guntur',
     state: 'Andhra Pradesh',
+    photoUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
     createdAt: '2025-01-15T11:30:00Z',
   },
   {
@@ -156,6 +160,7 @@ export const mockPatients: Patient[] = [
     village: 'Kolapudi',
     district: 'Guntur',
     state: 'Andhra Pradesh',
+    photoUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&h=150&fit=crop&crop=face',
     createdAt: '2025-01-15T12:00:00Z',
   },
   {
@@ -172,6 +177,7 @@ export const mockPatients: Patient[] = [
     village: 'Vijayawada',
     district: 'Krishna',
     state: 'Andhra Pradesh',
+    photoUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
     createdAt: '2025-01-01T10:00:00Z',
   },
 ];
