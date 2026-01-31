@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,11 +19,13 @@ import {
   Phone,
   Stethoscope,
   Users,
-  UserCheck
+  UserCheck,
+  FileDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { mockCamps, mockDoctors } from '@/data/mockData';
-import { IDCardPreview } from '@/components/settings/IDCardPreview';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // Mock volunteers and staff data
 const mockVolunteers = [
@@ -38,6 +40,16 @@ const mockStaff = [
   { id: 's3', name: 'Meena Rani', phone: '+91 98765 43216', photoUrl: '', department: 'Finance' },
 ];
 
+interface PersonData {
+  id: string;
+  name: string;
+  role: string;
+  department: string;
+  phone: string;
+  photoUrl: string;
+  idNumber: string;
+}
+
 export default function IDCardPrintouts() {
   const navigate = useNavigate();
   const [selectedCamp, setSelectedCamp] = useState(mockCamps[0]?.id || '');
@@ -45,10 +57,19 @@ export default function IDCardPrintouts() {
   const [showQRCode, setShowQRCode] = useState(true);
   const [showContact, setShowContact] = useState(true);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   const currentCamp = mockCamps.find(c => c.id === selectedCamp);
 
-  const getDataForTab = () => {
+  const getCampDates = () => {
+    if (!currentCamp) return 'Camp Duration';
+    const start = new Date(currentCamp.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    const end = new Date(currentCamp.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `${start} - ${end}`;
+  };
+
+  const getDataForTab = (): PersonData[] => {
     switch (selectedTab) {
       case 'doctors':
         return mockDoctors.map(d => ({
@@ -101,71 +122,174 @@ export default function IDCardPrintouts() {
     }
   };
 
-  const handlePrintSelected = () => {
-    const printContent = document.getElementById('print-area');
-    if (printContent) {
-      const printWindow = window.open('', '', 'width=800,height=600');
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>ID Cards - ${currentCamp?.name || 'Camp'}</title>
-              <style>
-                @page { size: A4; margin: 10mm; }
-                body { font-family: system-ui, -apple-system, sans-serif; }
-                .id-card-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-                .id-card { width: 240px; border: 2px solid #e5e7eb; border-radius: 12px; overflow: hidden; page-break-inside: avoid; }
-                .id-card-header { padding: 12px; text-align: center; color: white; }
-                .id-card-header.doctor { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-                .id-card-header.volunteer { background: linear-gradient(135deg, #22c55e, #16a34a); }
-                .id-card-header.staff { background: linear-gradient(135deg, #a855f7, #7c3aed); }
-                .id-card-body { padding: 16px; text-align: center; background: white; }
-                .avatar { width: 80px; height: 80px; border-radius: 50%; background: #e5e7eb; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #6b7280; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-                .name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-                .role { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
-                .department { font-size: 11px; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
-                .id-number { font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; }
-                .phone { font-size: 11px; color: #6b7280; }
-                .validity { font-size: 10px; color: #9ca3af; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; }
-                .qr-placeholder { width: 60px; height: 60px; background: #f3f4f6; margin: 8px auto; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #9ca3af; }
-              </style>
-            </head>
-            <body>
-              ${printContent.innerHTML}
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
-      }
-    }
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role.toLowerCase()) {
-      case 'doctor': return 'doctor';
-      case 'volunteer': return 'volunteer';
-      case 'staff': return 'staff';
-      default: return 'staff';
-    }
-  };
-
   const getAccentColor = (role: string) => {
     switch (role.toLowerCase()) {
       case 'doctor': return 'bg-blue-500';
-      case 'volunteer': return 'bg-green-500';
+      case 'volunteer': return 'bg-emerald-500';
       case 'staff': return 'bg-purple-500';
       default: return 'bg-gray-500';
     }
   };
 
+  const getHeaderGradient = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'doctor': return 'from-blue-600 to-blue-700';
+      case 'volunteer': return 'from-emerald-600 to-emerald-700';
+      case 'staff': return 'from-purple-600 to-purple-700';
+      default: return 'from-gray-600 to-gray-700';
+    }
+  };
+
+  const getBadgeStyle = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'doctor': return 'bg-blue-100 text-blue-700';
+      case 'volunteer': return 'bg-emerald-100 text-emerald-700';
+      case 'staff': return 'bg-purple-100 text-purple-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
   const getAccentBorder = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'doctor': return 'border-blue-200';
-      case 'volunteer': return 'border-green-200';
-      case 'staff': return 'border-purple-200';
-      default: return 'border-gray-200';
+      case 'doctor': return 'ring-blue-500/30';
+      case 'volunteer': return 'ring-emerald-500/30';
+      case 'staff': return 'ring-purple-500/30';
+      default: return 'ring-gray-500/30';
     }
+  };
+
+  const handleDownloadPDF = async () => {
+    const selectedData = data.filter(d => selectedItems.includes(d.id));
+    if (selectedData.length === 0) return;
+
+    setIsGeneratingPDF(true);
+
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const cardWidth = 85;
+      const cardHeight = 130;
+      const marginX = (pageWidth - (cardWidth * 2 + 10)) / 2;
+      const marginY = 20;
+
+      for (let i = 0; i < selectedData.length; i += 2) {
+        if (i > 0) pdf.addPage();
+
+        // Render first card
+        const card1 = document.getElementById(`id-card-${selectedData[i].id}`);
+        if (card1) {
+          const canvas1 = await html2canvas(card1, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+          const imgData1 = canvas1.toDataURL('image/png');
+          pdf.addImage(imgData1, 'PNG', marginX, marginY, cardWidth, cardHeight);
+        }
+
+        // Render second card if exists
+        if (selectedData[i + 1]) {
+          const card2 = document.getElementById(`id-card-${selectedData[i + 1].id}`);
+          if (card2) {
+            const canvas2 = await html2canvas(card2, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+            const imgData2 = canvas2.toDataURL('image/png');
+            pdf.addImage(imgData2, 'PNG', marginX + cardWidth + 10, marginY, cardWidth, cardHeight);
+          }
+        }
+      }
+
+      pdf.save(`ID-Cards-${currentCamp?.name || 'Camp'}-${selectedTab}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  const handlePrintSelected = () => {
+    const selectedData = data.filter(d => selectedItems.includes(d.id));
+    if (selectedData.length === 0) return;
+
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (!printWindow) return;
+
+    const cardsHTML = selectedData.map(person => `
+      <div class="id-card">
+        <div class="card-header ${person.role.toLowerCase()}">
+          <div class="logo">SF</div>
+          <p class="org-name">Srini Foundation</p>
+          <p class="camp-name">${currentCamp?.name || 'Medical Camp'}</p>
+        </div>
+        <div class="avatar-container">
+          <div class="avatar ${person.role.toLowerCase()}-bg">
+            ${person.name.split(' ').map(n => n[0]).join('')}
+          </div>
+        </div>
+        <div class="card-body">
+          <h3 class="name">${person.name}</h3>
+          <span class="role-badge ${person.role.toLowerCase()}">${person.role}</span>
+          <p class="department">${person.department}</p>
+          <div class="id-box">
+            <p class="id-number">${person.idNumber}</p>
+          </div>
+          ${showContact ? `<p class="contact">📞 ${person.phone}</p>` : ''}
+          ${showQRCode ? `<div class="qr-placeholder">QR</div>` : ''}
+          <div class="validity">
+            <p class="validity-label">Valid</p>
+            <p class="validity-dates">${getCampDates()}</p>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>ID Cards - ${currentCamp?.name || 'Camp'}</title>
+          <style>
+            @page { size: A4; margin: 15mm; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f5f5; }
+            .cards-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; padding: 20px; }
+            .id-card { width: 280px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); page-break-inside: avoid; }
+            .card-header { padding: 20px 16px; text-align: center; color: white; position: relative; }
+            .card-header.doctor { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+            .card-header.volunteer { background: linear-gradient(135deg, #059669, #047857); }
+            .card-header.staff { background: linear-gradient(135deg, #9333ea, #7c3aed); }
+            .logo { position: absolute; top: 8px; left: 8px; width: 28px; height: 28px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+            .org-name { font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
+            .camp-name { font-size: 18px; font-weight: 700; margin-top: 4px; }
+            .avatar-container { display: flex; justify-content: center; margin-top: -40px; position: relative; z-index: 1; }
+            .avatar { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+            .doctor-bg { background: #3b82f6; }
+            .volunteer-bg { background: #10b981; }
+            .staff-bg { background: #a855f7; }
+            .card-body { padding: 12px 20px 20px; text-align: center; }
+            .name { font-size: 20px; font-weight: 700; color: #111827; margin-top: 8px; }
+            .role-badge { display: inline-block; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+            .role-badge.doctor { background: #dbeafe; color: #1d4ed8; }
+            .role-badge.volunteer { background: #d1fae5; color: #047857; }
+            .role-badge.staff { background: #f3e8ff; color: #7c3aed; }
+            .department { font-size: 14px; color: #4b5563; margin-top: 10px; font-weight: 500; }
+            .id-box { background: #f3f4f6; border-radius: 8px; padding: 8px 16px; display: inline-block; margin-top: 12px; }
+            .id-number { font-family: 'Courier New', monospace; font-size: 16px; font-weight: 700; color: #1f2937; letter-spacing: 1px; }
+            .contact { font-size: 13px; color: #6b7280; margin-top: 10px; }
+            .qr-placeholder { width: 60px; height: 60px; background: #f3f4f6; border-radius: 8px; margin: 12px auto; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 12px; border: 1px solid #e5e7eb; }
+            .validity { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f3f4f6; }
+            .validity-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; }
+            .validity-dates { font-size: 13px; font-weight: 600; color: #374151; margin-top: 2px; }
+            @media print {
+              body { background: white; }
+              .cards-container { gap: 15px; padding: 0; }
+              .id-card { box-shadow: none; border: 1px solid #e5e7eb; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="cards-container">${cardsHTML}</div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
   };
 
   return (
@@ -243,22 +367,15 @@ export default function IDCardPrintouts() {
                       className="gap-2"
                     >
                       <Printer className="h-4 w-4" />
-                      Print Selected ({selectedItems.length})
+                      Print ({selectedItems.length})
                     </Button>
                     <Button 
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedItems(data.map(d => d.id));
-                        setTimeout(handlePrintSelected, 100);
-                      }}
+                      onClick={handleDownloadPDF}
+                      disabled={selectedItems.length === 0 || isGeneratingPDF}
                       className="gap-2"
                     >
-                      <Printer className="h-4 w-4" />
-                      Print All
-                    </Button>
-                    <Button className="gap-2">
-                      <Download className="h-4 w-4" />
-                      Download PDF
+                      <FileDown className="h-4 w-4" />
+                      {isGeneratingPDF ? 'Generating...' : `Download PDF (2/page)`}
                     </Button>
                   </div>
                 </div>
@@ -296,96 +413,93 @@ export default function IDCardPrintouts() {
                 </div>
 
                 {/* ID Cards Grid */}
-                <div id="print-area" className="id-card-grid">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {data.map((person) => (
-                      <div key={person.id} className="relative">
-                        {/* Selection Checkbox */}
-                        <div className="absolute -top-2 -left-2 z-10">
-                          <Checkbox 
-                            checked={selectedItems.includes(person.id)}
-                            onCheckedChange={() => toggleSelectItem(person.id)}
-                            className="bg-white shadow-sm"
-                          />
+                <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {data.map((person) => (
+                    <div key={person.id} className="relative">
+                      {/* Selection Checkbox */}
+                      <div className="absolute -top-2 -left-2 z-10">
+                        <Checkbox 
+                          checked={selectedItems.includes(person.id)}
+                          onCheckedChange={() => toggleSelectItem(person.id)}
+                          className="bg-white shadow-sm h-5 w-5"
+                        />
+                      </div>
+
+                      {/* Modern ID Card */}
+                      <div 
+                        id={`id-card-${person.id}`}
+                        className={`id-card bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 transition-all hover:shadow-2xl ${
+                          selectedItems.includes(person.id) ? 'ring-2 ring-primary ring-offset-2' : ''
+                        }`}
+                      >
+                        {/* Card Header with Gradient */}
+                        <div className={`bg-gradient-to-br ${getHeaderGradient(person.role)} px-4 py-5 text-center text-white relative`}>
+                          <div className="absolute top-2 left-2 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                            <span className="text-[10px] font-bold">SF</span>
+                          </div>
+                          <p className="text-sm font-semibold tracking-wide">Srini Foundation</p>
+                          <p className="text-lg font-bold mt-1">{currentCamp?.name || 'Medical Camp'}</p>
                         </div>
 
-                        {/* ID Card */}
-                        <div className={`id-card bg-white rounded-xl border-2 ${getAccentBorder(person.role)} shadow-lg overflow-hidden hover:shadow-xl transition-shadow`}>
-                          {/* Card Header */}
-                          <div className={`id-card-header ${getRoleColor(person.role)} p-4 text-center text-white`}
-                            style={{
-                              background: person.role === 'Doctor' 
-                                ? 'linear-gradient(135deg, hsl(217, 91%, 60%), hsl(221, 83%, 53%))' 
-                                : person.role === 'Volunteer'
-                                ? 'linear-gradient(135deg, hsl(142, 76%, 36%), hsl(142, 71%, 45%))'
-                                : 'linear-gradient(135deg, hsl(270, 95%, 60%), hsl(271, 91%, 65%))'
-                            }}
+                        {/* Avatar Section - Overlapping */}
+                        <div className="relative -mt-10 flex justify-center">
+                          <Avatar className={`h-24 w-24 border-4 border-white shadow-lg ring-4 ${getAccentBorder(person.role)}`}>
+                            <AvatarImage src={person.photoUrl} className="object-cover" />
+                            <AvatarFallback className={`text-2xl font-bold text-white ${getAccentColor(person.role)}`}>
+                              {person.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+
+                        {/* Card Body */}
+                        <div className="px-5 pt-3 pb-5 text-center">
+                          {/* Name */}
+                          <h3 className="font-bold text-xl text-foreground mt-2">{person.name}</h3>
+
+                          {/* Role Badge */}
+                          <Badge 
+                            variant="secondary" 
+                            className={`mt-2 px-4 py-1 text-sm font-semibold ${getBadgeStyle(person.role)}`}
                           >
-                            <p className="text-xs font-medium opacity-90">Srini Foundation</p>
-                            <p className="font-bold text-sm mt-1">{currentCamp?.name || 'Medical Camp'}</p>
-                          </div>
+                            {person.role}
+                          </Badge>
 
-                          {/* Card Body */}
-                          <div className="p-4 text-center">
-                            {/* Avatar */}
-                            <Avatar className="h-20 w-20 mx-auto mb-3 border-4 border-white shadow-lg">
-                              <AvatarImage src={person.photoUrl} />
-                              <AvatarFallback className={`text-xl font-bold text-white ${getAccentColor(person.role)}`}>
-                                {person.name.split(' ').map(n => n[0]).join('')}
-                              </AvatarFallback>
-                            </Avatar>
+                          {/* Department */}
+                          <p className="text-sm text-muted-foreground mt-3 font-medium">
+                            {person.department}
+                          </p>
 
-                            {/* Name */}
-                            <h3 className="font-bold text-lg text-foreground">{person.name}</h3>
-
-                            {/* Role Badge */}
-                            <Badge 
-                              variant="secondary" 
-                              className={`mt-1 ${
-                                person.role === 'Doctor' 
-                                  ? 'bg-blue-100 text-blue-700' 
-                                  : person.role === 'Volunteer'
-                                  ? 'bg-green-100 text-green-700'
-                                  : 'bg-purple-100 text-purple-700'
-                              }`}
-                            >
-                              {person.role}
-                            </Badge>
-
-                            {/* Department */}
-                            <p className="text-xs text-muted-foreground mt-2 bg-muted/50 py-1 px-2 rounded inline-block">
-                              {person.department}
-                            </p>
-
-                            {/* ID Number */}
-                            <p className="font-mono text-sm font-semibold mt-3 text-foreground">
+                          {/* ID Number */}
+                          <div className="mt-4 bg-muted/50 rounded-lg py-2 px-4 inline-block">
+                            <p className="font-mono text-base font-bold text-foreground tracking-wider">
                               {person.idNumber}
                             </p>
+                          </div>
 
-                            {/* Contact */}
-                            {showContact && (
-                              <div className="flex items-center justify-center gap-1 mt-2 text-xs text-muted-foreground">
-                                <Phone className="h-3 w-3" />
-                                <span>{person.phone}</span>
-                              </div>
-                            )}
-
-                            {/* QR Code Placeholder */}
-                            {showQRCode && (
-                              <div className="mt-3 mx-auto w-16 h-16 bg-muted rounded flex items-center justify-center">
-                                <QrCode className="h-10 w-10 text-muted-foreground/50" />
-                              </div>
-                            )}
-
-                            {/* Validity */}
-                            <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
-                              Valid: {currentCamp ? `${new Date(currentCamp.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${new Date(currentCamp.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Camp Duration'}
+                          {/* Contact */}
+                          {showContact && (
+                            <div className="flex items-center justify-center gap-2 mt-3 text-sm text-muted-foreground">
+                              <Phone className="h-4 w-4" />
+                              <span>{person.phone}</span>
                             </div>
+                          )}
+
+                          {/* QR Code */}
+                          {showQRCode && (
+                            <div className="mt-4 mx-auto w-16 h-16 bg-muted rounded-lg flex items-center justify-center border">
+                              <QrCode className="h-12 w-12 text-muted-foreground/50" />
+                            </div>
+                          )}
+
+                          {/* Validity */}
+                          <div className="mt-4 pt-3 border-t">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wide">Valid</p>
+                            <p className="text-sm font-semibold text-foreground mt-0.5">{getCampDates()}</p>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </Tabs>
