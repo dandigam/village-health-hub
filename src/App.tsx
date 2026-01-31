@@ -35,6 +35,11 @@ import PatientHistory from "./pages/patients/PatientHistory";
 
 // Reports
 import ReportsHub from "./pages/reports/ReportsHub";
+import CampReports from "./pages/reports/CampReports";
+import PatientReports from "./pages/reports/PatientReports";
+import MedicineReports from "./pages/reports/MedicineReports";
+import DiscountReports from "./pages/reports/DiscountReports";
+import DoctorReports from "./pages/reports/DoctorReports";
 
 const queryClient = new QueryClient();
 
@@ -83,11 +88,11 @@ const App = () => (
           
           {/* Reports */}
           <Route path="/reports" element={<ReportsHub />} />
-          <Route path="/reports/camps" element={<ReportsHub />} />
-          <Route path="/reports/patients" element={<ReportsHub />} />
-          <Route path="/reports/consultations" element={<ReportsHub />} />
-          <Route path="/reports/medicines" element={<ReportsHub />} />
-          <Route path="/reports/payments" element={<ReportsHub />} />
+          <Route path="/reports/camps" element={<CampReports />} />
+          <Route path="/reports/patients" element={<PatientReports />} />
+          <Route path="/reports/medicines" element={<MedicineReports />} />
+          <Route path="/reports/discounts" element={<DiscountReports />} />
+          <Route path="/reports/doctors" element={<DoctorReports />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

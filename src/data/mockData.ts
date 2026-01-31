@@ -1,4 +1,4 @@
-import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment } from '@/types';
+import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment, Discount } from '@/types';
 
 export const mockUser: User = {
   id: '1',
@@ -158,6 +158,22 @@ export const mockPatients: Patient[] = [
     state: 'Andhra Pradesh',
     createdAt: '2025-01-15T12:00:00Z',
   },
+  {
+    id: '6',
+    patientId: 'VJW-JAN0125-0001',
+    campId: '3',
+    name: 'Suresh',
+    surname: 'Kumar',
+    fatherName: 'Raju',
+    age: 42,
+    gender: 'Male',
+    phone: '9123456794',
+    address: 'Gandhi Road',
+    village: 'Vijayawada',
+    district: 'Krishna',
+    state: 'Andhra Pradesh',
+    createdAt: '2025-01-01T10:00:00Z',
+  },
 ];
 
 export const mockSOAPNotes: SOAPNote[] = [
@@ -250,6 +266,38 @@ export const mockConsultations: Consultation[] = [
     status: 'completed',
     createdAt: '2025-01-15T09:30:00Z',
   },
+  {
+    id: '2',
+    patientId: '1',
+    doctorId: '2',
+    campId: '1',
+    soapNoteId: '1',
+    chiefComplaint: 'Chest pain and breathlessness',
+    medicalHistory: 'Hypertension for 5 years',
+    diagnosis: ['Hypertensive Heart Disease', 'Mild COPD'],
+    labTests: ['ECG', 'Chest X-Ray', 'Lipid Profile'],
+    suggestedOperations: [],
+    notes: 'Follow-up in 2 weeks',
+    prescriptionId: '2',
+    status: 'completed',
+    createdAt: '2025-01-15T11:00:00Z',
+  },
+  {
+    id: '3',
+    patientId: '6',
+    doctorId: '2',
+    campId: '3',
+    soapNoteId: '4',
+    chiefComplaint: 'Fever and body ache',
+    medicalHistory: 'No significant history',
+    diagnosis: ['Viral Fever'],
+    labTests: ['CBC'],
+    suggestedOperations: [],
+    notes: 'Rest and hydration advised',
+    prescriptionId: '3',
+    status: 'completed',
+    createdAt: '2025-01-01T10:30:00Z',
+  },
 ];
 
 export const mockPrescriptions: Prescription[] = [
@@ -280,6 +328,18 @@ export const mockPrescriptions: Prescription[] = [
     status: 'pending',
     createdAt: '2025-01-15T11:00:00Z',
   },
+  {
+    id: '3',
+    consultationId: '3',
+    patientId: '6',
+    doctorId: '2',
+    campId: '3',
+    items: [
+      { medicineId: '7', medicineName: 'PARACETAMOL 500 MG', quantity: 9, morning: 1, afternoon: 1, night: 1, days: 3 },
+    ],
+    status: 'dispensed',
+    createdAt: '2025-01-01T10:45:00Z',
+  },
 ];
 
 export const mockSuppliers: Supplier[] = [
@@ -301,6 +361,48 @@ export const mockStockItems: StockItem[] = [
   { id: '10', medicineId: '10', campId: '1', quantity: 350, batchNumber: 'BT010', expiryDate: '2026-04-30', purchaseDate: '2025-01-10', supplierId: '1' },
 ];
 
+export const mockDiscounts: Discount[] = [
+  {
+    id: '1',
+    name: 'Senior Citizen Discount',
+    type: 'percentage',
+    value: 20,
+    campId: '1',
+    patientId: '1',
+    prescriptionId: '2',
+    medicineIds: ['1', '10'],
+    appliedBy: '2',
+    reason: 'Patient above 55 years',
+    createdAt: '2025-01-15T11:15:00Z',
+  },
+  {
+    id: '2',
+    name: 'BPL Card Holder',
+    type: 'percentage',
+    value: 50,
+    campId: '1',
+    patientId: '3',
+    prescriptionId: '1',
+    medicineIds: ['2', '3', '7'],
+    appliedBy: '1',
+    reason: 'Below Poverty Line family',
+    createdAt: '2025-01-15T10:00:00Z',
+  },
+  {
+    id: '3',
+    name: 'Camp Special Offer',
+    type: 'fixed',
+    value: 50,
+    campId: '3',
+    patientId: '6',
+    prescriptionId: '3',
+    medicineIds: ['7'],
+    appliedBy: '2',
+    reason: 'Inaugural camp discount',
+    createdAt: '2025-01-01T11:00:00Z',
+  },
+];
+
 export const mockPayments: Payment[] = [
   {
     id: '1',
@@ -308,8 +410,10 @@ export const mockPayments: Payment[] = [
     patientId: '3',
     campId: '1',
     totalAmount: 250,
-    paidAmount: 250,
+    paidAmount: 125,
     pendingAmount: 0,
+    discountId: '2',
+    discountAmount: 125,
     status: 'full',
     createdAt: '2025-01-15T10:00:00Z',
   },
@@ -320,9 +424,24 @@ export const mockPayments: Payment[] = [
     campId: '1',
     totalAmount: 150,
     paidAmount: 100,
-    pendingAmount: 50,
+    pendingAmount: 20,
+    discountId: '1',
+    discountAmount: 30,
     status: 'partial',
     createdAt: '2025-01-15T11:30:00Z',
+  },
+  {
+    id: '3',
+    prescriptionId: '3',
+    patientId: '6',
+    campId: '3',
+    totalAmount: 68,
+    paidAmount: 18,
+    pendingAmount: 0,
+    discountId: '3',
+    discountAmount: 50,
+    status: 'full',
+    createdAt: '2025-01-01T11:30:00Z',
   },
 ];
 

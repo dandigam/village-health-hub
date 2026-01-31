@@ -125,6 +125,23 @@ export interface Prescription {
   createdAt: string;
 }
 
+// Discount Types
+export type DiscountType = 'percentage' | 'fixed';
+
+export interface Discount {
+  id: string;
+  name: string;
+  type: DiscountType;
+  value: number; // percentage (0-100) or fixed amount
+  campId: string;
+  patientId: string;
+  prescriptionId?: string;
+  medicineIds?: string[];
+  appliedBy: string; // Doctor ID
+  reason?: string;
+  createdAt: string;
+}
+
 // Payment Types
 export interface Payment {
   id: string;
@@ -134,6 +151,8 @@ export interface Payment {
   totalAmount: number;
   paidAmount: number;
   pendingAmount: number;
+  discountId?: string;
+  discountAmount?: number;
   status: 'full' | 'partial' | 'pending';
   createdAt: string;
 }
