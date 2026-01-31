@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Plus, Phone, Mail, Stethoscope } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -7,11 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { mockDoctors, mockCamps } from '@/data/mockData';
 
 export default function Doctors() {
+  const navigate = useNavigate();
+
   return (
     <DashboardLayout>
       <div className="page-header">
         <h1 className="page-title">Doctor Management</h1>
-        <Button className="bg-accent hover:bg-accent/90">
+        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/doctors/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Add Doctor
         </Button>
