@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CampProvider } from "@/context/CampContext";
 import Login from "./pages/Login";
-import SelectCamp from "./pages/SelectCamp";
 import Dashboard from "./pages/Dashboard";
 import Camps from "./pages/Camps";
 import Patients from "./pages/Patients";
@@ -62,7 +61,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/select-camp" element={<SelectCamp />} />
+            
             <Route path="/dashboard" element={<Dashboard />} />
             
             {/* Camps */}

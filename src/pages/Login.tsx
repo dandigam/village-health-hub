@@ -14,7 +14,7 @@ export default function Login() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/select-camp');
+    navigate('/dashboard');
   };
 
   return (
