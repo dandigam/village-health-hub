@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, X } from 'lucide-react';
+import { Camera, User, MapPin, Save, X } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +34,6 @@ export default function NewPatient() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Validation
     if (!formData.name || !formData.fatherName || !formData.gender || !formData.age) {
       toast.error('Please fill in all required fields');
       return;
@@ -49,52 +48,76 @@ export default function NewPatient() {
 
   return (
     <DashboardLayout campName="Bapatla">
-      <div className="max-w-4xl">
-        <div className="page-header">
-          <h1 className="page-title">Add New Patient</h1>
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">Add New Patient</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/patients')}>
+              <X className="h-4 w-4 mr-1" />
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleSubmit} className="bg-accent hover:bg-accent/90">
+              <Save className="h-4 w-4 mr-1" />
+              Submit
+            </Button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="flex gap-6">
-            {/* Form Fields */}
-            <Card className="flex-1">
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">
+          <div className="flex gap-4">
+            {/* Main Form */}
+            <Card className="flex-1 shadow-sm">
+              <CardHeader className="py-3 px-4 border-b bg-muted/30">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <User className="h-4 w-4 text-accent" />
+                  Patient Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 space-y-4">
+                {/* Personal Details Row 1 */}
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="name" className="text-xs font-medium">
                       Name <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => updateField('name', e.target.value)}
+                      className="h-9 text-sm"
+                      placeholder="First name"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="surname">Surname</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="surname" className="text-xs font-medium">Surname</Label>
                     <Input
                       id="surname"
                       value={formData.surname}
                       onChange={(e) => updateField('surname', e.target.value)}
+                      className="h-9 text-sm"
+                      placeholder="Last name"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="fatherName">
+                  <div className="space-y-1">
+                    <Label htmlFor="fatherName" className="text-xs font-medium">
                       Father Name <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="fatherName"
                       value={formData.fatherName}
                       onChange={(e) => updateField('fatherName', e.target.value)}
+                      className="h-9 text-sm"
+                      placeholder="Father's name"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gender">
+                  <div className="space-y-1">
+                    <Label htmlFor="gender" className="text-xs font-medium">
                       Gender <span className="text-destructive">*</span>
                     </Label>
                     <Select value={formData.gender} onValueChange={(v) => updateField('gender', v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Gender" />
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Male">Male</SelectItem>
@@ -105,15 +128,16 @@ export default function NewPatient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="maritalStatus">Marital Status</Label>
+                {/* Personal Details Row 2 */}
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="maritalStatus" className="text-xs font-medium">Marital Status</Label>
                     <Select
                       value={formData.maritalStatus}
                       onValueChange={(v) => updateField('maritalStatus', v)}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Marital Status" />
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Single">Single</SelectItem>
@@ -123,8 +147,8 @@ export default function NewPatient() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="age">
+                  <div className="space-y-1">
+                    <Label htmlFor="age" className="text-xs font-medium">
                       Age <span className="text-destructive">*</span>
                     </Label>
                     <Input
@@ -132,102 +156,113 @@ export default function NewPatient() {
                       type="number"
                       value={formData.age}
                       onChange={(e) => updateField('age', e.target.value)}
+                      className="h-9 text-sm"
+                      placeholder="Years"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                  <div className="space-y-1 col-span-2">
+                    <Label htmlFor="phone" className="text-xs font-medium">Phone</Label>
                     <Input
                       id="phone"
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => updateField('phone', e.target.value)}
+                      className="h-9 text-sm"
+                      placeholder="Mobile number"
                     />
                   </div>
                 </div>
 
                 {/* Address Section */}
-                <h3 className="font-semibold mb-4">Address</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State</Label>
-                    <Select value={formData.state} onValueChange={(v) => updateField('state', v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select State" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="AP">Andhra Pradesh</SelectItem>
-                        <SelectItem value="TS">Telangana</SelectItem>
-                        <SelectItem value="KA">Karnataka</SelectItem>
-                        <SelectItem value="TN">Tamil Nadu</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <div className="pt-2 border-t">
+                  <div className="flex items-center gap-2 mb-3">
+                    <MapPin className="h-4 w-4 text-accent" />
+                    <span className="text-sm font-medium">Address</span>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="district">District</Label>
-                    <Select
-                      value={formData.district}
-                      onValueChange={(v) => updateField('district', v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select District" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Guntur">Guntur</SelectItem>
-                        <SelectItem value="Krishna">Krishna</SelectItem>
-                        <SelectItem value="Prakasam">Prakasam</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  
+                  <div className="grid grid-cols-4 gap-3 mb-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="state" className="text-xs font-medium">State</Label>
+                      <Select value={formData.state} onValueChange={(v) => updateField('state', v)}>
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AP">Andhra Pradesh</SelectItem>
+                          <SelectItem value="TS">Telangana</SelectItem>
+                          <SelectItem value="KA">Karnataka</SelectItem>
+                          <SelectItem value="TN">Tamil Nadu</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="district" className="text-xs font-medium">District</Label>
+                      <Select
+                        value={formData.district}
+                        onValueChange={(v) => updateField('district', v)}
+                      >
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Guntur">Guntur</SelectItem>
+                          <SelectItem value="Krishna">Krishna</SelectItem>
+                          <SelectItem value="Prakasam">Prakasam</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="mandal" className="text-xs font-medium">Mandal</Label>
+                      <Select value={formData.mandal} onValueChange={(v) => updateField('mandal', v)}>
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Bapatla">Bapatla</SelectItem>
+                          <SelectItem value="Mangalagiri">Mangalagiri</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="village" className="text-xs font-medium">City / Village</Label>
+                      <Input
+                        id="village"
+                        value={formData.village}
+                        onChange={(e) => updateField('village', e.target.value)}
+                        className="h-9 text-sm"
+                        placeholder="Enter city/village"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="mandal">Mandal</Label>
-                    <Select value={formData.mandal} onValueChange={(v) => updateField('mandal', v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Mandal" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Bapatla">Bapatla</SelectItem>
-                        <SelectItem value="Mangalagiri">Mangalagiri</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="village">City / Village</Label>
+
+                  <div className="space-y-1">
+                    <Label htmlFor="street" className="text-xs font-medium">Street</Label>
                     <Input
-                      id="village"
-                      value={formData.village}
-                      onChange={(e) => updateField('village', e.target.value)}
+                      id="street"
+                      value={formData.street}
+                      onChange={(e) => updateField('street', e.target.value)}
+                      className="h-9 text-sm"
+                      placeholder="Street address"
                     />
                   </div>
-                </div>
-
-                <div className="space-y-2 mb-6">
-                  <Label htmlFor="street">Street</Label>
-                  <Input
-                    id="street"
-                    value={formData.street}
-                    onChange={(e) => updateField('street', e.target.value)}
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-4">
-                  <Button type="button" variant="outline" onClick={() => navigate('/patients')}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="bg-accent hover:bg-accent/90">
-                    Submit
-                  </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Photo Upload */}
-            <Card className="w-64 shrink-0">
-              <CardContent className="pt-6">
-                <div className="aspect-square bg-muted rounded-lg flex items-center justify-center mb-4">
-                  <Camera className="h-16 w-16 text-muted-foreground" />
+            {/* Photo Upload Card */}
+            <Card className="w-48 shrink-0 shadow-sm">
+              <CardHeader className="py-3 px-4 border-b bg-muted/30">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Camera className="h-4 w-4 text-accent" />
+                  Photo
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="aspect-square bg-muted/50 rounded-lg flex items-center justify-center mb-3 border-2 border-dashed border-muted-foreground/30">
+                  <Camera className="h-12 w-12 text-muted-foreground/50" />
                 </div>
-                <Button variant="secondary" className="w-full">
+                <Button variant="outline" size="sm" className="w-full text-xs">
+                  <Camera className="h-3 w-3 mr-1" />
                   Take Picture
                 </Button>
               </CardContent>
