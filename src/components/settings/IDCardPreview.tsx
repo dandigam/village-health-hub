@@ -28,7 +28,7 @@ export function IDCardPreview({
   const getAccentColor = (role: string) => {
     switch (role.toLowerCase()) {
       case 'doctor': return 'bg-blue-500';
-      case 'volunteer': return 'bg-green-500';
+      case 'volunteer': return 'bg-emerald-500';
       case 'staff': return 'bg-purple-500';
       default: return 'bg-gray-500';
     }
@@ -36,79 +36,93 @@ export function IDCardPreview({
 
   const getHeaderGradient = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'doctor': return 'linear-gradient(135deg, hsl(217, 91%, 60%), hsl(221, 83%, 53%))';
-      case 'volunteer': return 'linear-gradient(135deg, hsl(142, 76%, 36%), hsl(142, 71%, 45%))';
-      case 'staff': return 'linear-gradient(135deg, hsl(270, 95%, 60%), hsl(271, 91%, 65%))';
-      default: return 'linear-gradient(135deg, hsl(0, 0%, 50%), hsl(0, 0%, 40%))';
+      case 'doctor': return 'from-blue-600 to-blue-700';
+      case 'volunteer': return 'from-emerald-600 to-emerald-700';
+      case 'staff': return 'from-purple-600 to-purple-700';
+      default: return 'from-gray-600 to-gray-700';
     }
   };
 
   const getBadgeStyle = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'doctor': return 'bg-blue-100 text-blue-700';
-      case 'volunteer': return 'bg-green-100 text-green-700';
-      case 'staff': return 'bg-purple-100 text-purple-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'doctor': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'volunteer': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'staff': return 'bg-purple-100 text-purple-700 border-purple-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getAccentBorderColor = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'doctor': return 'border-blue-500';
+      case 'volunteer': return 'border-emerald-500';
+      case 'staff': return 'border-purple-500';
+      default: return 'border-gray-500';
     }
   };
 
   return (
-    <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg overflow-hidden w-60">
-      {/* Card Header */}
-      <div 
-        className="p-4 text-center text-white"
-        style={{ background: getHeaderGradient(person.role) }}
-      >
-        <p className="text-xs font-medium opacity-90">Srini Foundation</p>
-        <p className="font-bold text-sm mt-1">{campName}</p>
+    <div className="id-card-preview bg-white rounded-2xl shadow-xl overflow-hidden w-[280px] border border-gray-200">
+      {/* Card Header with Gradient */}
+      <div className={`bg-gradient-to-br ${getHeaderGradient(person.role)} px-4 py-5 text-center text-white relative`}>
+        <div className="absolute top-2 left-2 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+          <span className="text-[10px] font-bold">SF</span>
+        </div>
+        <p className="text-sm font-semibold tracking-wide">Srini Foundation</p>
+        <p className="text-lg font-bold mt-1">{campName}</p>
       </div>
 
-      {/* Card Body */}
-      <div className="p-4 text-center">
-        {/* Avatar */}
-        <Avatar className="h-20 w-20 mx-auto mb-3 border-4 border-white shadow-lg">
-          <AvatarImage src={person.photoUrl} />
-          <AvatarFallback className={`text-xl font-bold text-white ${getAccentColor(person.role)}`}>
+      {/* Avatar Section - Overlapping */}
+      <div className="relative -mt-10 flex justify-center">
+        <Avatar className={`h-24 w-24 border-4 border-white shadow-lg ring-4 ${getAccentBorderColor(person.role)} ring-opacity-30`}>
+          <AvatarImage src={person.photoUrl} className="object-cover" />
+          <AvatarFallback className={`text-2xl font-bold text-white ${getAccentColor(person.role)}`}>
             {person.name.split(' ').map(n => n[0]).join('')}
           </AvatarFallback>
         </Avatar>
+      </div>
 
+      {/* Card Body */}
+      <div className="px-5 pt-3 pb-5 text-center">
         {/* Name */}
-        <h3 className="font-bold text-lg text-gray-900">{person.name}</h3>
+        <h3 className="font-bold text-xl text-gray-900 mt-2">{person.name}</h3>
 
         {/* Role Badge */}
-        <Badge variant="secondary" className={`mt-1 ${getBadgeStyle(person.role)}`}>
+        <Badge variant="outline" className={`mt-2 px-4 py-1 text-sm font-semibold ${getBadgeStyle(person.role)}`}>
           {person.role}
         </Badge>
 
         {/* Department */}
-        <p className="text-xs text-gray-500 mt-2 bg-gray-100 py-1 px-2 rounded inline-block">
+        <p className="text-sm text-gray-600 mt-3 font-medium">
           {person.department}
         </p>
 
         {/* ID Number */}
-        <p className="font-mono text-sm font-semibold mt-3 text-gray-900">
-          {person.idNumber}
-        </p>
+        <div className="mt-4 bg-gray-50 rounded-lg py-2 px-4 inline-block">
+          <p className="font-mono text-base font-bold text-gray-800 tracking-wider">
+            {person.idNumber}
+          </p>
+        </div>
 
         {/* Contact */}
         {showContact && (
-          <div className="flex items-center justify-center gap-1 mt-2 text-xs text-gray-500">
-            <Phone className="h-3 w-3" />
+          <div className="flex items-center justify-center gap-2 mt-3 text-sm text-gray-600">
+            <Phone className="h-4 w-4 text-gray-400" />
             <span>{person.phone}</span>
           </div>
         )}
 
-        {/* QR Code Placeholder */}
+        {/* QR Code */}
         {showQRCode && (
-          <div className="mt-3 mx-auto w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-            <QrCode className="h-10 w-10 text-gray-300" />
+          <div className="mt-4 mx-auto w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+            <QrCode className="h-12 w-12 text-gray-400" />
           </div>
         )}
 
         {/* Validity */}
-        <div className="mt-3 pt-3 border-t text-xs text-gray-400">
-          Valid: {campDates}
+        <div className="mt-4 pt-3 border-t border-gray-100">
+          <p className="text-xs text-gray-400 uppercase tracking-wide">Valid</p>
+          <p className="text-sm font-semibold text-gray-700 mt-0.5">{campDates}</p>
         </div>
       </div>
     </div>
