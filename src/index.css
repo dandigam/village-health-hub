@@ -173,3 +173,82 @@
     @apply bg-muted/30;
   }
 }
+
+/* Print Styles for SOAP Notes */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  .print\\:block {
+    display: block !important;
+  }
+  
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+  
+  .print\\:border-0 {
+    border: none !important;
+  }
+  
+  .print\\:p-0 {
+    padding: 0 !important;
+  }
+  
+  .print\\:m-0 {
+    margin: 0 !important;
+  }
+  
+  .print\\:bg-white {
+    background-color: white !important;
+  }
+  
+  /* SOAP Note specific print styles */
+  .soap-print-container {
+    @apply max-w-none w-full;
+  }
+  
+  .soap-print-header {
+    @apply border-b-2 border-black pb-4 mb-4;
+  }
+  
+  .soap-print-section {
+    @apply break-inside-avoid mb-4;
+  }
+  
+  .soap-print-grid {
+    @apply grid grid-cols-2 gap-4;
+  }
+  
+  /* Hide non-essential elements when printing */
+  aside,
+  nav,
+  .no-print,
+  button:not(.print-btn) {
+    display: none !important;
+  }
+  
+  /* Ensure content fits on page */
+  main {
+    @apply p-0 m-0 max-w-none;
+  }
+  
+  /* Page break controls */
+  .page-break-before {
+    page-break-before: always;
+  }
+  
+  .page-break-after {
+    page-break-after: always;
+  }
+  
+  .avoid-break {
+    page-break-inside: avoid;
+  }
+}

@@ -2,8 +2,8 @@ import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicin
 
 export const mockUser: User = {
   id: '1',
-  name: 'Gopi Krishna Pocham',
-  email: 'gopi@gbrfoundation.org',
+  name: 'Venkatesh Dandigam',
+  email: 'venkatesh@srinifoundation.org',
   phone: '9234644748',
   role: 'camp_admin',
 };
