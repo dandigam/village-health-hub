@@ -1,4 +1,3 @@
-import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Phone, Mail, Stethoscope } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -6,48 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { SearchFilter } from '@/components/shared/SearchFilter';
 import { mockDoctors, mockCamps } from '@/data/mockData';
 
 export default function Doctors() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredDoctors = useMemo(() => {
-    return mockDoctors.filter((doctor) => {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        !searchQuery ||
-        doctor.name.toLowerCase().includes(searchLower) ||
-        doctor.specialization.toLowerCase().includes(searchLower) ||
-        doctor.phone.includes(searchQuery)
-      );
-    });
-  }, [searchQuery]);
 
   return (
     <DashboardLayout>
       <div className="page-header">
-        <div>
-          <h1 className="page-title">
-            Doctor Management <span className="text-muted-foreground">({filteredDoctors.length})</span>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage doctors and assignments</p>
-        </div>
+        <h1 className="page-title">Doctor Management</h1>
         <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/doctors/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Add Doctor
         </Button>
       </div>
 
-      <SearchFilter
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Search by doctor name, specialization, or phone..."
-      />
-
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredDoctors.map((doctor) => {
+        {mockDoctors.map((doctor) => {
           const assignedCamps = mockCamps.filter((c) => c.doctorIds.includes(doctor.id));
 
           return (
@@ -102,20 +76,6 @@ export default function Doctors() {
           );
         })}
       </div>
-
-      {filteredDoctors.length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Stethoscope className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">No doctors found matching your search.</p>
-            {searchQuery && (
-              <Button variant="link" onClick={() => setSearchQuery('')} className="mt-2">
-                Clear search
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </DashboardLayout>
   );
 }

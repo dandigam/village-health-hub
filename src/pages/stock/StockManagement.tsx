@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Plus, AlertTriangle, Package, Truck, FileText } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SearchFilter } from '@/components/shared/SearchFilter';
 import { mockMedicines, mockStockItems, mockSuppliers } from '@/data/mockData';
 
 const MIN_STOCK_LEVEL = 50;
@@ -19,7 +18,6 @@ export default function StockManagement() {
   const [showAddStock, setShowAddStock] = useState(false);
   const [showAddSupplier, setShowAddSupplier] = useState(false);
   const [showPurchaseOrder, setShowPurchaseOrder] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const getStockWithDetails = () => {
     return mockStockItems.map(stock => {
@@ -36,41 +34,13 @@ export default function StockManagement() {
     });
   };
 
-  const stockItems = useMemo(() => {
-    const items = getStockWithDetails();
-    if (!searchQuery) return items;
-    
-    const searchLower = searchQuery.toLowerCase();
-    return items.filter(item => 
-      item.medicineName.toLowerCase().includes(searchLower) ||
-      item.medicineCode.toLowerCase().includes(searchLower) ||
-      item.category.toLowerCase().includes(searchLower) ||
-      item.supplierName.toLowerCase().includes(searchLower) ||
-      item.batchNumber.toLowerCase().includes(searchLower)
-    );
-  }, [searchQuery]);
-
-  const filteredSuppliers = useMemo(() => {
-    if (!searchQuery) return mockSuppliers;
-    const searchLower = searchQuery.toLowerCase();
-    return mockSuppliers.filter(supplier =>
-      supplier.name.toLowerCase().includes(searchLower) ||
-      supplier.contact.includes(searchQuery) ||
-      supplier.address.toLowerCase().includes(searchLower)
-    );
-  }, [searchQuery]);
-
+  const stockItems = getStockWithDetails();
   const lowStockItems = stockItems.filter(item => item.isLowStock);
 
   return (
     <DashboardLayout campName="Bapatla">
       <div className="page-header">
-        <div>
-          <h1 className="page-title">
-            Stock Management <span className="text-muted-foreground">({stockItems.length})</span>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage inventory and suppliers</p>
-        </div>
+        <h1 className="page-title">Stock Management</h1>
         <div className="flex gap-2">
           <Dialog open={showAddSupplier} onOpenChange={setShowAddSupplier}>
             <DialogTrigger asChild>
@@ -237,17 +207,11 @@ export default function StockManagement() {
         </Card>
       )}
 
-      <SearchFilter
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Search by medicine name, code, category, or supplier..."
-      />
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
-          <TabsTrigger value="inventory">Current Inventory ({stockItems.length})</TabsTrigger>
+          <TabsTrigger value="inventory">Current Inventory</TabsTrigger>
           <TabsTrigger value="purchases">Purchase Orders</TabsTrigger>
-          <TabsTrigger value="suppliers">Suppliers ({filteredSuppliers.length})</TabsTrigger>
+          <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
           <TabsTrigger value="reports">Stock Reports</TabsTrigger>
         </TabsList>
 
@@ -294,13 +258,6 @@ export default function StockManagement() {
                         </td>
                       </tr>
                     ))}
-                    {stockItems.length === 0 && (
-                      <tr>
-                        <td colSpan={8} className="text-center py-8 text-muted-foreground">
-                          No stock items found matching your search.
-                        </td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
@@ -332,7 +289,7 @@ export default function StockManagement() {
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredSuppliers.map(supplier => (
+                {mockSuppliers.map(supplier => (
                   <Card key={supplier.id}>
                     <CardContent className="pt-6">
                       <div className="flex items-start gap-3">
@@ -348,11 +305,6 @@ export default function StockManagement() {
                     </CardContent>
                   </Card>
                 ))}
-                {filteredSuppliers.length === 0 && (
-                  <div className="col-span-full text-center py-8 text-muted-foreground">
-                    No suppliers found matching your search.
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
