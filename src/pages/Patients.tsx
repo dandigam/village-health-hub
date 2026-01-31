@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Eye, UserPlus } from 'lucide-react';
+import { Eye, UserPlus } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { SearchFilter } from '@/components/shared/SearchFilter';
 import { mockPatients } from '@/data/mockData';
 
 export default function Patients() {
@@ -20,25 +20,18 @@ export default function Patients() {
 
   return (
     <DashboardLayout campName="Bapatla">
-      <div className="page-header">
-        <h1 className="page-title">
-          Patients List <span className="text-muted-foreground">({filteredPatients.length})</span>
-        </h1>
-        <div className="flex items-center gap-4">
-          <div className="relative w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search Patient by MR Number / First Name / Surname"
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/patients/new')}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add New Patient
-          </Button>
-        </div>
+      <div className="flex items-center justify-between mb-6">
+        <SearchFilter
+          title="Patients List"
+          count={filteredPatients.length}
+          placeholder="Search Patient by MR Number / First Name"
+          value={searchTerm}
+          onChange={setSearchTerm}
+        />
+        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/patients/new')}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Add New Patient
+        </Button>
       </div>
 
       {/* Patient Table */}
@@ -61,7 +54,8 @@ export default function Patients() {
               <tr key={patient.id}>
                 <td>
                   <Avatar>
-                    <AvatarFallback className="bg-muted">
+                    <AvatarImage src={patient.photoUrl} alt={patient.name} />
+                    <AvatarFallback className="bg-accent/10 text-accent">
                       {patient.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
