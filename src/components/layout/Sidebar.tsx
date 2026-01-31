@@ -135,8 +135,8 @@ export function Sidebar() {
           </ul>
         </nav>
 
-        {/* Settings at bottom - no extra spacing */}
-        <div className="p-2 mt-auto border-t border-white/10">
+        {/* Settings - directly after nav items */}
+        <div className="p-2 border-t border-white/10">
           {isCollapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -191,9 +191,9 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* User Profile Section */}
+        {/* User Profile Section - pushed to bottom */}
         <div className={cn(
-          "p-3 border-t border-white/10 bg-white/5",
+          "p-3 border-t border-white/10 bg-white/5 mt-auto",
           isCollapsed ? "flex justify-center" : ""
         )}>
           {isCollapsed ? (
