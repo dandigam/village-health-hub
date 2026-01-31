@@ -218,7 +218,7 @@ export default function DispenseMedicine() {
                   <div className="flex items-center space-x-2 p-3 border rounded-lg">
                     <RadioGroupItem value="full" id="full" />
                     <Label htmlFor="full" className="flex-1 cursor-pointer">Full Payment</Label>
-                    <Badge className="bg-green-100 text-green-700">₹{totalAmount}</Badge>
+                    <Badge className="bg-stat-green text-stat-green-text">₹{totalAmount}</Badge>
                   </div>
                   <div className="flex items-center space-x-2 p-3 border rounded-lg mt-2">
                     <RadioGroupItem value="partial" id="partial" />
@@ -227,7 +227,7 @@ export default function DispenseMedicine() {
                   <div className="flex items-center space-x-2 p-3 border rounded-lg mt-2">
                     <RadioGroupItem value="pending" id="pending" />
                     <Label htmlFor="pending" className="flex-1 cursor-pointer">Payment Pending</Label>
-                    <Badge className="bg-red-100 text-red-700">₹{totalAmount}</Badge>
+                    <Badge className="bg-destructive/10 text-destructive">₹{totalAmount}</Badge>
                   </div>
                 </RadioGroup>
               </div>
@@ -255,13 +255,13 @@ export default function DispenseMedicine() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Paid</span>
-                  <span className="font-medium text-green-600">
+                  <span className="font-medium text-stat-green-text">
                     ₹{paymentType === 'full' ? totalAmount : paymentType === 'pending' ? 0 : parseInt(paidAmount) || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Pending</span>
-                  <span className="font-medium text-red-600">₹{pendingAmount}</span>
+                  <span className="font-medium text-destructive">₹{pendingAmount}</span>
                 </div>
               </div>
             </CardContent>
@@ -276,9 +276,9 @@ export default function DispenseMedicine() {
             <DialogTitle>Bill Generated</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-2" />
-              <p className="font-semibold text-green-800">Medicines Dispensed Successfully!</p>
+            <div className="text-center p-4 bg-stat-green rounded-lg">
+              <CheckCircle className="h-12 w-12 text-stat-green-text mx-auto mb-2" />
+              <p className="font-semibold text-stat-green-text">Medicines Dispensed Successfully!</p>
             </div>
             <Separator />
             <div className="space-y-2 text-sm">

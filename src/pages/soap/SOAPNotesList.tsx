@@ -13,11 +13,11 @@ import { mockSOAPNotes, mockPatients } from '@/data/mockData';
 const getStatusBadge = (status: string) => {
   switch (status) {
     case 'pending':
-      return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">Draft</Badge>;
+      return <Badge className="bg-stat-orange text-stat-orange-text border-stat-orange-text/20">Draft</Badge>;
     case 'with_doctor':
-      return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Sent to Doctor</Badge>;
+      return <Badge className="bg-stat-blue text-stat-blue-text border-stat-blue-text/20">Sent to Doctor</Badge>;
     case 'completed':
-      return <Badge className="bg-green-100 text-green-700 border-green-200">Reviewed</Badge>;
+      return <Badge className="bg-stat-green text-stat-green-text border-stat-green-text/20">Reviewed</Badge>;
     default:
       return <Badge variant="secondary">{status}</Badge>;
   }

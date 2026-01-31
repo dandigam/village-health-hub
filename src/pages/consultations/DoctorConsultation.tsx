@@ -227,8 +227,8 @@ export default function DoctorConsultation() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm cursor-help">
-                        <div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center">
-                          <svg className="w-3.5 h-3.5 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <div className="w-6 h-6 rounded-full bg-stat-orange/30 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-stat-orange-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                           </svg>
                         </div>
@@ -242,8 +242,8 @@ export default function DoctorConsultation() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm cursor-help">
-                        <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center">
-                          <svg className="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <div className="w-6 h-6 rounded-full bg-stat-orange/30 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-stat-orange-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
                           </svg>
                         </div>
@@ -256,8 +256,8 @@ export default function DoctorConsultation() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm cursor-help">
-                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                          <svg className="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <div className="w-6 h-6 rounded-full bg-stat-teal/30 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-stat-teal-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <circle cx="12" cy="12" r="10"/>
                             <path d="M12 6v6l4 2"/>
                           </svg>

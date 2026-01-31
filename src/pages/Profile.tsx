@@ -145,8 +145,8 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-blue-600" />
+                <div className="h-10 w-10 rounded-lg bg-stat-blue flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-stat-blue-text" />
                 </div>
                 <div>
                   <p className="font-medium">{profile.role}</p>
@@ -284,20 +284,20 @@ export default function Profile() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <p className="text-2xl font-bold text-blue-600">12</p>
+              <div className="text-center p-4 bg-stat-blue rounded-lg">
+                <p className="text-2xl font-bold text-stat-blue-text">12</p>
                 <p className="text-sm text-muted-foreground">Camps Managed</p>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <p className="text-2xl font-bold text-green-600">248</p>
+              <div className="text-center p-4 bg-stat-green rounded-lg">
+                <p className="text-2xl font-bold text-stat-green-text">248</p>
                 <p className="text-sm text-muted-foreground">Patients Registered</p>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <p className="text-2xl font-bold text-purple-600">45</p>
+              <div className="text-center p-4 bg-stat-purple rounded-lg">
+                <p className="text-2xl font-bold text-stat-purple-text">45</p>
                 <p className="text-sm text-muted-foreground">Staff Assigned</p>
               </div>
-              <div className="text-center p-4 bg-amber-50 rounded-lg">
-                <p className="text-2xl font-bold text-amber-600">156</p>
+              <div className="text-center p-4 bg-stat-orange rounded-lg">
+                <p className="text-2xl font-bold text-stat-orange-text">156</p>
                 <p className="text-sm text-muted-foreground">Reports Generated</p>
               </div>
             </div>

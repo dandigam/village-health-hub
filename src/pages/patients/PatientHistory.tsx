@@ -87,11 +87,11 @@ export default function PatientHistory() {
 
   const getTimelineColor = (type: string) => {
     switch (type) {
-      case 'soap': return 'bg-blue-100 text-blue-600';
-      case 'consultation': return 'bg-green-100 text-green-600';
-      case 'prescription': return 'bg-purple-100 text-purple-600';
-      case 'payment': return 'bg-yellow-100 text-yellow-600';
-      default: return 'bg-gray-100 text-gray-600';
+      case 'soap': return 'bg-stat-blue text-stat-blue-text';
+      case 'consultation': return 'bg-stat-green text-stat-green-text';
+      case 'prescription': return 'bg-stat-purple text-stat-purple-text';
+      case 'payment': return 'bg-stat-orange text-stat-orange-text';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -258,7 +258,7 @@ export default function PatientHistory() {
                             {new Date(c.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge className="bg-green-100 text-green-700">{c.status}</Badge>
+                        <Badge className="bg-stat-green text-stat-green-text">{c.status}</Badge>
                       </div>
                       <Separator className="my-3" />
                       <div className="space-y-2 text-sm">
@@ -293,7 +293,7 @@ export default function PatientHistory() {
                             {new Date(p.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge className={p.status === 'dispensed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                        <Badge className={p.status === 'dispensed' ? 'bg-stat-green text-stat-green-text' : 'bg-stat-orange text-stat-orange-text'}>
                           {p.status}
                         </Badge>
                       </div>
@@ -354,13 +354,13 @@ export default function PatientHistory() {
               <Separator />
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Total Paid</span>
-                <span className="font-semibold text-green-600">
+                <span className="font-semibold text-stat-green-text">
                   ₹{patientPayments.reduce((sum, p) => sum + p.paidAmount, 0)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Pending</span>
-                <span className="font-semibold text-red-600">
+                <span className="font-semibold text-destructive">
                   ₹{patientPayments.reduce((sum, p) => sum + p.pendingAmount, 0)}
                 </span>
               </div>

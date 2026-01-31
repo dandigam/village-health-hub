@@ -174,12 +174,12 @@ export default function Dashboard() {
                   variant={step.completed ? "secondary" : "outline"}
                   className={cn(
                     "flex items-center gap-2 h-auto py-3 px-4",
-                    step.completed && "bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                    step.completed && "bg-stat-green border-stat-green-text/20 text-stat-green-text hover:bg-stat-green/80"
                   )}
                   onClick={() => navigate(step.href)}
                 >
                   {step.completed ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    <CheckCircle2 className="w-5 h-5 text-stat-green-text" />
                   ) : (
                     <Circle className="w-5 h-5 text-muted-foreground" />
                   )}
@@ -285,11 +285,11 @@ export default function Dashboard() {
                           'outline'
                         }
                         className={cn(
-                          patient.status === 'Completed' && 'bg-green-100 text-green-800 hover:bg-green-100',
-                          patient.status === 'At Doctor' && 'bg-orange-100 text-orange-800',
-                          patient.status === 'At Pharmacy' && 'bg-teal-100 text-teal-800',
-                          patient.status === 'At Cashier' && 'bg-blue-100 text-blue-800',
-                          patient.status === 'Waiting' && 'bg-gray-100 text-gray-800'
+                          patient.status === 'Completed' && 'bg-stat-green text-stat-green-text hover:bg-stat-green',
+                          patient.status === 'At Doctor' && 'bg-stat-orange text-stat-orange-text',
+                          patient.status === 'At Pharmacy' && 'bg-stat-teal text-stat-teal-text',
+                          patient.status === 'At Cashier' && 'bg-stat-blue text-stat-blue-text',
+                          patient.status === 'Waiting' && 'bg-muted text-muted-foreground'
                         )}
                       >
                         {patient.status}
