@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, MapPin, Calendar, Users, ChevronRight } from 'lucide-react';
+import { Plus, MapPin, Calendar, Users, ChevronRight, Tent } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SearchFilter } from '@/components/shared/SearchFilter';
 import { mockCamps, mockDoctors } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
@@ -18,28 +19,59 @@ const statusColors = {
 export default function Camps() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState<Date | undefined>();
 
-  const filteredCamps =
-    activeTab === 'all'
+  const filteredCamps = useMemo(() => {
+    let camps = activeTab === 'all'
       ? mockCamps
       : mockCamps.filter((c) => c.status === activeTab);
+
+    return camps.filter((camp) => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = !searchQuery ||
+        camp.name.toLowerCase().includes(searchLower) ||
+        camp.village.toLowerCase().includes(searchLower) ||
+        camp.district.toLowerCase().includes(searchLower);
+
+      const campDate = new Date(camp.startDate);
+      const matchesDate = !dateFilter ||
+        campDate.toDateString() === dateFilter.toDateString();
+
+      return matchesSearch && matchesDate;
+    });
+  }, [activeTab, searchQuery, dateFilter]);
 
   return (
     <DashboardLayout>
       <div className="page-header">
-        <h1 className="page-title">Camp Management</h1>
+        <div>
+          <h1 className="page-title">
+            Camp Management <span className="text-muted-foreground">({filteredCamps.length})</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage medical camps and locations</p>
+        </div>
         <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/camps/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Create New Camp
         </Button>
       </div>
 
+      <SearchFilter
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by camp name, village, or district..."
+        showDateFilter
+        dateFilter={dateFilter}
+        onDateChange={setDateFilter}
+      />
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList>
-          <TabsTrigger value="all">All Camps</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="draft">Draft</TabsTrigger>
-          <TabsTrigger value="closed">Closed</TabsTrigger>
+          <TabsTrigger value="all">All Camps ({mockCamps.length})</TabsTrigger>
+          <TabsTrigger value="active">Active ({mockCamps.filter(c => c.status === 'active').length})</TabsTrigger>
+          <TabsTrigger value="draft">Draft ({mockCamps.filter(c => c.status === 'draft').length})</TabsTrigger>
+          <TabsTrigger value="closed">Closed ({mockCamps.filter(c => c.status === 'closed').length})</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -103,6 +135,24 @@ export default function Camps() {
           );
         })}
       </div>
+
+      {filteredCamps.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Tent className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <p className="text-muted-foreground">No camps found matching your search.</p>
+            {(searchQuery || dateFilter) && (
+              <Button 
+                variant="link" 
+                onClick={() => { setSearchQuery(''); setDateFilter(undefined); }} 
+                className="mt-2"
+              >
+                Clear filters
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </DashboardLayout>
   );
 }

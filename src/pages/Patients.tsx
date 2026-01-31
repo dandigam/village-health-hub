@@ -1,45 +1,59 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Eye, UserPlus } from 'lucide-react';
+import { Eye, UserPlus, Users } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent } from '@/components/ui/card';
+import { SearchFilter } from '@/components/shared/SearchFilter';
 import { mockPatients } from '@/data/mockData';
 
 export default function Patients() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState<Date | undefined>();
 
-  const filteredPatients = mockPatients.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.surname?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPatients = useMemo(() => {
+    return mockPatients.filter((patient) => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = !searchQuery ||
+        patient.name.toLowerCase().includes(searchLower) ||
+        patient.patientId.toLowerCase().includes(searchLower) ||
+        patient.surname?.toLowerCase().includes(searchLower) ||
+        patient.fatherName?.toLowerCase().includes(searchLower) ||
+        patient.village?.toLowerCase().includes(searchLower);
+
+      const patientDate = new Date(patient.createdAt);
+      const matchesDate = !dateFilter ||
+        patientDate.toDateString() === dateFilter.toDateString();
+
+      return matchesSearch && matchesDate;
+    });
+  }, [searchQuery, dateFilter]);
 
   return (
     <DashboardLayout campName="Bapatla">
       <div className="page-header">
-        <h1 className="page-title">
-          Patients List <span className="text-muted-foreground">({filteredPatients.length})</span>
-        </h1>
-        <div className="flex items-center gap-4">
-          <div className="relative w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search Patient by MR Number / First Name / Surname"
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/patients/new')}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add New Patient
-          </Button>
+        <div>
+          <h1 className="page-title">
+            Patients List <span className="text-muted-foreground">({filteredPatients.length})</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage registered patients</p>
         </div>
+        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/patients/new')}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Add New Patient
+        </Button>
       </div>
+
+      <SearchFilter
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by MR Number, patient name, father name, or village..."
+        showDateFilter
+        dateFilter={dateFilter}
+        onDateChange={setDateFilter}
+      />
 
       {/* Patient Table */}
       <div className="data-table">
@@ -61,6 +75,7 @@ export default function Patients() {
               <tr key={patient.id}>
                 <td>
                   <Avatar>
+                    <AvatarImage src={patient.photoUrl} alt={patient.name} />
                     <AvatarFallback className="bg-muted">
                       {patient.name.charAt(0)}
                     </AvatarFallback>
@@ -86,6 +101,23 @@ export default function Patients() {
                 </td>
               </tr>
             ))}
+            {filteredPatients.length === 0 && (
+              <tr>
+                <td colSpan={8} className="text-center py-12">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <p className="text-muted-foreground">No patients found matching your search.</p>
+                  {(searchQuery || dateFilter) && (
+                    <Button 
+                      variant="link" 
+                      onClick={() => { setSearchQuery(''); setDateFilter(undefined); }} 
+                      className="mt-2"
+                    >
+                      Clear filters
+                    </Button>
+                  )}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
