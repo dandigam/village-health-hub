@@ -166,71 +166,108 @@ export default function DoctorConsultation() {
         <div className="flex gap-6 min-h-[calc(100vh-120px)]">
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col">
-            {/* Patient Header Bar */}
-            <div className="bg-slate-800 text-white rounded-t-lg px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-4">
+            {/* Patient Header Bar - Redesigned */}
+            <div className="bg-primary text-primary-foreground rounded-t-lg overflow-hidden">
+              {/* Row 1: Patient Info */}
+              <div className="px-4 py-3 flex items-center gap-4 border-b border-primary-foreground/10">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-white hover:bg-slate-700 h-8 w-8"
+                  className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 shrink-0"
                   onClick={() => navigate('/consultations')}
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <Avatar className="h-10 w-10 border-2 border-white/20">
+                <Avatar className="h-12 w-12 border-2 border-primary-foreground/20 shrink-0">
                   <AvatarImage src={patient.photoUrl} />
-                  <AvatarFallback className="bg-slate-600 text-white">
+                  <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">
                     {getInitials(patient.name, patient.surname)}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <span className="font-semibold">
-                    {patient.patientId} | {patient.name} {patient.surname} | {patient.gender} | {patient.age}
-                  </span>
-                  <p className="text-xs text-slate-300">{patient.village} | {patient.district}</p>
+                <div className="min-w-0">
+                  <h2 className="font-semibold text-lg truncate">
+                    {patient.name} {patient.surname}
+                  </h2>
+                  <p className="text-sm text-primary-foreground/70">
+                    {patient.patientId} • {patient.gender} • {patient.age} yrs • {patient.village}, {patient.district}
+                  </p>
                 </div>
               </div>
 
-              {/* Inline Vitals Badges */}
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <p className="text-[10px] text-slate-400 uppercase">Vitals</p>
-                  <div className="flex gap-2 mt-1">
-                    <Badge variant="outline" className="bg-slate-700 border-slate-600 text-white text-xs">
-                      Weight {vitals.weight || '--'}
-                    </Badge>
-                    <Badge variant="outline" className="bg-slate-700 border-slate-600 text-white text-xs">
-                      BP {vitals.bp || '--'}
-                    </Badge>
-                    <Badge variant="outline" className="bg-slate-700 border-slate-600 text-white text-xs">
-                      Pulse {vitals.pulse || '--'}
-                    </Badge>
-                    <Badge variant="outline" className="bg-slate-700 border-slate-600 text-white text-xs">
-                      Temp {vitals.temp ? `${vitals.temp}°F` : '--'}
-                    </Badge>
-                    <Badge variant="outline" className="bg-slate-700 border-slate-600 text-white text-xs">
-                      SpO2 {vitals.spo2 ? `${vitals.spo2}%` : '--'}
-                    </Badge>
+              {/* Row 2: Vitals, Diagnosis, Allergies */}
+              <div className="px-4 py-2 flex items-center gap-6 flex-wrap">
+                {/* Vitals with Icons */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5" title="Weight">
+                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">{vitals.weight || '--'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5" title="Blood Pressure">
+                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">{vitals.bp || '--'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5" title="Pulse">
+                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">{vitals.pulse || '--'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5" title="Temperature">
+                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">{vitals.temp ? `${vitals.temp}°F` : '--'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5" title="SpO2">
+                    <div className="w-7 h-7 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium">{vitals.spo2 ? `${vitals.spo2}%` : '--'}</span>
                   </div>
                 </div>
 
-                <div className="text-center">
-                  <p className="text-[10px] text-slate-400 uppercase">Diagnosis</p>
-                  <div className="flex gap-1 mt-1">
-                    {diagnosisList.map((d, i) => (
-                      <Badge key={i} variant="outline" className="bg-transparent border-amber-400 text-amber-400 text-xs">
-                        {d}
-                      </Badge>
-                    ))}
-                  </div>
+                <div className="w-px h-6 bg-primary-foreground/20" />
+
+                {/* Diagnosis Badges */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-primary-foreground/60 uppercase">Dx:</span>
+                  {diagnosisList.map((d, i) => (
+                    <Badge key={i} variant="outline" className="bg-accent/20 border-accent text-accent text-xs">
+                      {d}
+                    </Badge>
+                  ))}
                 </div>
 
-                <div className="text-center">
-                  <p className="text-[10px] text-slate-400 uppercase">Allergies</p>
-                  <div className="flex gap-2 mt-1 text-xs">
-                    <span>Drug <Badge variant={allergies.drug ? "destructive" : "secondary"} className="ml-1 text-[10px]">{allergies.drug ? 'Yes' : 'No'}</Badge></span>
-                    <span>Food <Badge variant={allergies.food ? "destructive" : "secondary"} className="ml-1 text-[10px]">{allergies.food ? 'Yes' : 'No'}</Badge></span>
-                    <span>Environment <Badge variant={allergies.environment ? "destructive" : "secondary"} className="ml-1 text-[10px]">{allergies.environment ? 'Yes' : 'No'}</Badge></span>
+                <div className="w-px h-6 bg-primary-foreground/20" />
+
+                {/* Allergies */}
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-primary-foreground/60 uppercase">Allergies:</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={allergies.drug ? "destructive" : "secondary"} className="text-xs">
+                      Drug {allergies.drug ? '✓' : '✗'}
+                    </Badge>
+                    <Badge variant={allergies.food ? "destructive" : "secondary"} className="text-xs">
+                      Food {allergies.food ? '✓' : '✗'}
+                    </Badge>
+                    <Badge variant={allergies.environment ? "destructive" : "secondary"} className="text-xs">
+                      Env {allergies.environment ? '✓' : '✗'}
+                    </Badge>
                   </div>
                 </div>
               </div>
