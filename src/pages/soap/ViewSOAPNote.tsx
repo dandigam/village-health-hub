@@ -2,10 +2,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Edit, Printer } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { mockSOAPNotes, mockPatients } from '@/data/mockData';
+import { cn } from '@/lib/utils';
+
+const getInitials = (name?: string, surname?: string) => {
+  const first = name?.charAt(0) || '';
+  const last = surname?.charAt(0) || '';
+  return (first + last).toUpperCase() || 'P';
+};
 
 export default function ViewSOAPNote() {
   const { id } = useParams();
@@ -30,11 +36,11 @@ export default function ViewSOAPNote() {
   const getStatusBadge = () => {
     switch (note.status) {
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">Draft</Badge>;
+        return <Badge className="bg-amber-50 text-amber-700 border-amber-200 font-medium">Draft</Badge>;
       case 'with_doctor':
-        return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Sent to Doctor</Badge>;
+        return <Badge className="bg-blue-50 text-blue-700 border-blue-200 font-medium">Sent to Doctor</Badge>;
       case 'completed':
-        return <Badge className="bg-green-100 text-green-700 border-green-200">Reviewed</Badge>;
+        return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-medium">Reviewed</Badge>;
       default:
         return <Badge variant="secondary">{note.status}</Badge>;
     }
@@ -42,28 +48,45 @@ export default function ViewSOAPNote() {
 
   return (
     <DashboardLayout campName="Bapatla">
-      <div className="page-header">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/soap')}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/soap')}
+            className="hover:bg-muted"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="page-title">SOAP Note Details</h1>
-            <p className="text-muted-foreground">Created on {new Date(note.createdAt).toLocaleDateString()}</p>
+            <h1 className="text-xl font-bold text-foreground">SOAP Note Details</h1>
+            <p className="text-sm text-muted-foreground">
+              Created on {new Date(note.createdAt).toLocaleDateString('en-US', { 
+                month: 'numeric', 
+                day: 'numeric', 
+                year: 'numeric' 
+              })}
+            </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" size="sm" className="h-9">
             <Printer className="mr-2 h-4 w-4" />
             Print
           </Button>
           {note.status === 'pending' && (
             <>
-              <Button variant="outline" onClick={() => navigate(`/soap/${note.id}/edit`)}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-9"
+                onClick={() => navigate(`/soap/${note.id}/edit`)}
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Button>
-              <Button className="bg-accent hover:bg-accent/90">
+              <Button size="sm" className="h-9 bg-accent hover:bg-accent/90">
                 <Send className="mr-2 h-4 w-4" />
                 Send to Doctor
               </Button>
@@ -72,101 +95,116 @@ export default function ViewSOAPNote() {
         </div>
       </div>
 
-      {/* Patient Info */}
-      <Card className="mb-6">
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">
-                <span className="text-xl font-semibold text-accent">{patient.name.charAt(0)}</span>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">{patient.name} {patient.surname}</h2>
-                <p className="text-muted-foreground">{patient.patientId}</p>
-                <p className="text-sm">{patient.age} yrs • {patient.gender} • {patient.village}</p>
-              </div>
+      {/* Patient Info Card */}
+      <div className="bg-white rounded-xl p-4 mb-6 shadow-sm border border-border relative">
+        {/* Left accent border */}
+        <div className="absolute left-0 top-4 bottom-4 w-1 bg-accent rounded-full" />
+        
+        <div className="flex items-center justify-between pl-4">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={patient.photoUrl} alt={patient.name} />
+              <AvatarFallback className="bg-accent/10 text-accent font-semibold">
+                {getInitials(patient.name, patient.surname)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="font-semibold text-foreground">
+                {patient.name} {patient.surname}
+              </h2>
+              <p className="text-sm text-muted-foreground font-mono">{patient.patientId}</p>
+              <p className="text-sm text-muted-foreground">
+                {patient.age} yrs • {patient.gender} • {patient.village}
+              </p>
             </div>
-            {getStatusBadge()}
           </div>
-        </CardContent>
-      </Card>
+          {getStatusBadge()}
+        </div>
+      </div>
 
-      {/* SOAP Details */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-accent">S - Subjective</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{note.subjective}</p>
-          </CardContent>
-        </Card>
+      {/* SOAP Sections - 2x2 Grid */}
+      <div className="grid md:grid-cols-2 gap-4">
+        {/* S - Subjective */}
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-border">
+          <h3 className="text-lg font-semibold text-accent mb-4">S - Subjective</h3>
+          <p className="text-foreground leading-relaxed">{note.subjective}</p>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-accent">O - Objective</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              {note.objective.weight && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Weight</p>
-                  <p className="font-medium">{note.objective.weight} kg</p>
-                </div>
-              )}
-              {note.objective.bp && (
-                <div>
-                  <p className="text-sm text-muted-foreground">BP</p>
-                  <p className="font-medium">{note.objective.bp}</p>
-                </div>
-              )}
-              {note.objective.pulse && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Pulse</p>
-                  <p className="font-medium">{note.objective.pulse} bpm</p>
-                </div>
-              )}
-              {note.objective.temp && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Temp</p>
-                  <p className="font-medium">{note.objective.temp}°F</p>
-                </div>
-              )}
-              {note.objective.spo2 && (
-                <div>
-                  <p className="text-sm text-muted-foreground">SpO2</p>
-                  <p className="font-medium">{note.objective.spo2}%</p>
-                </div>
-              )}
-            </div>
-            {note.objective.notes && (
-              <>
-                <Separator className="my-4" />
-                <p className="text-sm text-muted-foreground mb-1">Notes</p>
-                <p>{note.objective.notes}</p>
-              </>
+        {/* O - Objective */}
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-border">
+          <h3 className="text-lg font-semibold text-accent mb-4">O - Objective</h3>
+          
+          {/* Vitals Grid */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            {note.objective.weight && (
+              <div>
+                <p className="text-sm text-accent/80 mb-1">Weight</p>
+                <p className="font-medium text-foreground">{note.objective.weight} kg</p>
+              </div>
             )}
-          </CardContent>
-        </Card>
+            {note.objective.bp && (
+              <div>
+                <p className="text-sm text-accent/80 mb-1">BP</p>
+                <p className={cn(
+                  "font-medium",
+                  isBPHigh(note.objective.bp) ? "text-destructive" : "text-foreground"
+                )}>
+                  {note.objective.bp}
+                </p>
+              </div>
+            )}
+            {note.objective.pulse && (
+              <div>
+                <p className="text-sm text-accent/80 mb-1">Pulse</p>
+                <p className="font-medium text-foreground">{note.objective.pulse} bpm</p>
+              </div>
+            )}
+            {note.objective.temp && (
+              <div>
+                <p className="text-sm text-accent/80 mb-1">Temp</p>
+                <p className="font-medium text-foreground">{note.objective.temp}°F</p>
+              </div>
+            )}
+            {note.objective.spo2 && (
+              <div>
+                <p className="text-sm text-accent/80 mb-1">SpO2</p>
+                <p className="font-medium text-foreground">{note.objective.spo2}%</p>
+              </div>
+            )}
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-accent">A - Assessment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{note.assessment}</p>
-          </CardContent>
-        </Card>
+          {/* Notes */}
+          {note.objective.notes && (
+            <div className="pt-4 border-t border-border">
+              <p className="text-sm text-accent/80 mb-1">Notes</p>
+              <p className="text-foreground">{note.objective.notes}</p>
+            </div>
+          )}
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-accent">P - Plan</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{note.plan}</p>
-          </CardContent>
-        </Card>
+        {/* A - Assessment */}
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-border">
+          <h3 className="text-lg font-semibold text-accent mb-4">A - Assessment</h3>
+          <p className="text-foreground leading-relaxed">{note.assessment}</p>
+        </div>
+
+        {/* P - Plan */}
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-border">
+          <h3 className="text-lg font-semibold text-accent mb-4">P - Plan</h3>
+          <p className="text-foreground leading-relaxed">{note.plan}</p>
+        </div>
       </div>
     </DashboardLayout>
   );
+}
+
+// Helper function to check if BP is high
+function isBPHigh(bp: string): boolean {
+  const parts = bp?.split('/');
+  if (parts?.length === 2) {
+    const systolic = parseInt(parts[0]);
+    const diastolic = parseInt(parts[1]);
+    return systolic >= 140 || diastolic >= 90;
+  }
+  return false;
 }
