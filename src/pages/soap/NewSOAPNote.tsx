@@ -45,6 +45,7 @@ export default function NewSOAPNote() {
 
   return (
     <DashboardLayout>
+      {/* Header with back button and actions */}
       <div className="page-header">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/soap')}>
@@ -64,30 +65,30 @@ export default function NewSOAPNote() {
         </div>
       </div>
 
-      {/* Patient Selection */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Select Patient</CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* Patient Search - Same approach as Patients page */}
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          <h2 className="text-lg font-semibold text-foreground whitespace-nowrap">
+            {selectedPatient ? 'Selected Patient' : 'Select Patient'}
+          </h2>
           {selectedPatient ? (
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+            <div className="flex items-center gap-4 px-4 py-2 bg-muted rounded-lg border">
               <div>
-                <p className="font-semibold">{selectedPatient.name} {selectedPatient.surname}</p>
+                <p className="font-medium">{selectedPatient.name} {selectedPatient.surname}</p>
                 <p className="text-sm text-muted-foreground">
                   {selectedPatient.patientId} • {selectedPatient.age} yrs • {selectedPatient.gender}
                 </p>
               </div>
-              <Button variant="outline" onClick={() => setSelectedPatient(null)}>
-                Change Patient
+              <Button variant="outline" size="sm" onClick={() => setSelectedPatient(null)}>
+                Change
               </Button>
             </div>
           ) : (
-            <div className="relative">
+            <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by patient name or MR number..."
-                className="pl-10"
+                placeholder="Search by MR Number / Name..."
+                className="pl-10 h-10 bg-background border-border"
                 value={patientSearch}
                 onChange={(e) => {
                   setPatientSearch(e.target.value);
@@ -120,8 +121,8 @@ export default function NewSOAPNote() {
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* SOAP Form */}
       <Card>
