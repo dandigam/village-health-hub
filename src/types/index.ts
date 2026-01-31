@@ -36,6 +36,7 @@ export interface Doctor {
   phone: string;
   email?: string;
   avatar?: string;
+  photoUrl?: string;
 }
 
 // Patient Types
