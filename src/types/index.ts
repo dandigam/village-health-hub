@@ -53,6 +53,7 @@ export interface Patient {
   village: string;
   district?: string;
   state?: string;
+  photoUrl?: string; // Patient photo URL
   createdAt: string;
 }
 

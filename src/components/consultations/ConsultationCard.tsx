@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
 interface ConsultationCardProps {
@@ -12,11 +12,11 @@ interface ConsultationCardProps {
 const getStatusStyles = (status: 'awaiting' | 'in_progress' | 'completed') => {
   switch (status) {
     case 'awaiting':
-      return 'bg-[#FEF9C3] text-[#A16207] border-[#FDE047]';
+      return 'bg-amber-50 text-amber-700 border-amber-200';
     case 'in_progress':
-      return 'bg-[#DBEAFE] text-[#1D4ED8] border-[#93C5FD]';
+      return 'bg-blue-50 text-blue-700 border-blue-200';
     case 'completed':
-      return 'bg-[#D1FAE5] text-[#047857] border-[#6EE7B7]';
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
     default:
       return 'bg-gray-100 text-gray-700 border-gray-200';
   }
@@ -53,13 +53,16 @@ export const ConsultationCard = ({
 
   return (
     <div className={cn(
-      "bg-white rounded-xl shadow-md p-4 border border-gray-100",
-      "hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+      "bg-white rounded-2xl p-5 border border-gray-100",
+      "shadow-[0_2px_12px_rgba(0,0,0,0.06)]",
+      "hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] hover:-translate-y-1",
+      "transition-all duration-300 ease-out"
     )}>
       {/* Header: Avatar + Name + Status Badge */}
-      <div className="flex items-start gap-3 mb-3">
-        <Avatar className="h-10 w-10 flex-shrink-0 bg-gray-100">
-          <AvatarFallback className="bg-gray-100 text-gray-600 font-medium text-sm">
+      <div className="flex items-start gap-4 mb-4">
+        <Avatar className="h-12 w-12 flex-shrink-0 ring-2 ring-gray-100">
+          <AvatarImage src={patient?.photoUrl} alt={patient?.name} />
+          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-sm">
             {getInitials(patient?.name, patient?.surname)}
           </AvatarFallback>
         </Avatar>
@@ -67,13 +70,16 @@ export const ConsultationCard = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <h3 className="font-semibold text-sm text-[#111] truncate">
-                {patient?.name} {patient?.surname} • {patient?.age} yrs • {patient?.gender}
+              <h3 className="font-semibold text-[15px] text-gray-900 leading-tight">
+                {patient?.name} {patient?.surname}
               </h3>
-              <p className="text-xs text-gray-500">{patient?.patientId}</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {patient?.age} yrs • {patient?.gender}
+              </p>
+              <p className="text-xs text-gray-400 font-mono mt-0.5">{patient?.patientId}</p>
             </div>
             <span className={cn(
-              "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border flex-shrink-0",
+              "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border flex-shrink-0",
               getStatusStyles(statusColor)
             )}>
               {status}
@@ -84,9 +90,11 @@ export const ConsultationCard = ({
 
       {/* Chief Complaint */}
       {note && (
-        <div className="mb-3">
-          <p className="text-xs font-semibold text-[#111] mb-1">Chief Complaint:</p>
-          <p className="text-sm text-[#555] line-clamp-2 leading-relaxed">
+        <div className="mb-4">
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+            Chief Complaint
+          </p>
+          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
             {note.subjective}
           </p>
         </div>
@@ -94,33 +102,33 @@ export const ConsultationCard = ({
 
       {/* Colored Vital Signs */}
       {note && (
-        <div className="flex items-center gap-4 mb-4 py-2 px-3 bg-gray-50 rounded-lg">
-          <div className="text-center">
-            <p className="text-xs text-gray-500 mb-0.5">BP:</p>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="bg-gray-50 rounded-xl p-3 text-center">
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">BP</p>
             <p className={cn(
               "text-sm font-bold",
-              bpIsHigh ? "text-[#EF4444]" : "text-[#6B7280]"
+              bpIsHigh ? "text-red-500" : "text-gray-700"
             )}>
               {bp}
             </p>
           </div>
-          <div className="text-center">
-            <p className="text-xs text-gray-500 mb-0.5">Pulse:</p>
-            <p className="text-sm font-bold text-[#3B82F6]">
-              {pulse} <span className="font-normal text-xs">bpm</span>
+          <div className="bg-blue-50 rounded-xl p-3 text-center">
+            <p className="text-[10px] text-blue-400 uppercase tracking-wider mb-1">Pulse</p>
+            <p className="text-sm font-bold text-blue-600">
+              {pulse} <span className="font-normal text-[10px]">bpm</span>
             </p>
           </div>
-          <div className="text-center">
-            <p className="text-xs text-gray-500 mb-0.5">SpO2:</p>
-            <p className="text-sm font-bold text-[#10B981]">
-              {spo2}<span className="font-normal text-xs">%</span>
+          <div className="bg-emerald-50 rounded-xl p-3 text-center">
+            <p className="text-[10px] text-emerald-400 uppercase tracking-wider mb-1">SpO2</p>
+            <p className="text-sm font-bold text-emerald-600">
+              {spo2}<span className="font-normal text-[10px]">%</span>
             </p>
           </div>
         </div>
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 pt-2 border-t border-gray-100">
         {actions}
       </div>
     </div>
