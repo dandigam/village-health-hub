@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Eye, FileText, Stethoscope, User } from 'lucide-react';
+import { Play, Eye } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockSOAPNotes, mockPatients, mockConsultations } from '@/data/mockData';
+import { ConsultationCard } from '@/components/consultations/ConsultationCard';
 
 export default function ConsultationsList() {
   const navigate = useNavigate();
@@ -23,109 +22,56 @@ export default function ConsultationsList() {
   // Completed consultations
   const completedConsultations = mockConsultations.filter(c => c.status === 'completed');
 
-  const PatientCard = ({ 
-    patient, 
-    note, 
-    status, 
-    statusColor, 
-    actions 
-  }: { 
-    patient: any; 
-    note?: any; 
-    status: string; 
-    statusColor: string;
-    actions: React.ReactNode;
-  }) => (
-    <Card className="hover:shadow-lg transition-shadow border border-border/50">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3 mb-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <User className="h-5 w-5 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm truncate">
-              {patient?.name} {patient?.surname} • {patient?.age} yrs • {patient?.gender}
-            </h3>
-            <p className="text-xs text-muted-foreground">{patient?.patientId}</p>
-          </div>
-          <Badge className={`${statusColor} text-xs flex-shrink-0`}>
-            {status}
-          </Badge>
-        </div>
-        
-        {note && (
-          <>
-            <div className="mb-3">
-              <p className="text-xs text-muted-foreground mb-1">
-                <span className="font-medium text-foreground">Chief Complaint:</span>
-              </p>
-              <p className="text-xs text-muted-foreground line-clamp-2">
-                {note.subjective}
-              </p>
-            </div>
-            
-            <div className="flex gap-3 text-xs text-muted-foreground mb-4 bg-muted/50 rounded-md p-2">
-              <span><span className="font-medium">BP:</span> {note.objective.bp}</span>
-              <span><span className="font-medium">Pulse:</span> {note.objective.pulse} bpm</span>
-              <span><span className="font-medium">SpO2:</span> {note.objective.spo2}%</span>
-            </div>
-          </>
-        )}
-        
-        <div className="flex gap-2 flex-wrap">
-          {actions}
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <DashboardLayout campName="Bapatla">
-      <div className="page-header">
-        <h1 className="page-title">Doctor Consultations</h1>
+      {/* Section Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-[#2563EB]">Doctor Consultations</h1>
+        <p className="text-sm text-muted-foreground mt-1">Recent patient consultations</p>
+        <div className="h-px bg-border mt-4" />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="pending">
+        <TabsList className="mb-6 bg-muted/50">
+          <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Awaiting Consultation ({pendingSOAPs.length})
           </TabsTrigger>
-          <TabsTrigger value="in_progress">
+          <TabsTrigger value="in_progress" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
             In Progress ({inProgressConsultations.length})
           </TabsTrigger>
-          <TabsTrigger value="completed">
+          <TabsTrigger value="completed" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Completed ({completedConsultations.length})
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {pendingSOAPs.map((note) => {
               const patient = getPatientInfo(note.patientId);
               return (
-                <PatientCard
+                <ConsultationCard
                   key={note.id}
                   patient={patient}
                   note={note}
                   status="Awaiting"
-                  statusColor="bg-yellow-100 text-yellow-700 border-yellow-200"
+                  statusColor="awaiting"
                   actions={
                     <>
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="flex-1 text-xs h-8"
+                        className="text-xs h-8 border-gray-300 text-gray-600 hover:bg-gray-50"
                         onClick={() => navigate(`/soap/${note.id}`)}
                       >
-                        <Eye className="h-3 w-3 mr-1" />
+                        <Eye className="h-3.5 w-3.5 mr-1.5" />
                         View SOAP
                       </Button>
                       <Button 
                         size="sm" 
-                        className="flex-1 bg-accent hover:bg-accent/90 text-xs h-8"
+                        className="text-xs h-8 bg-[#F43F5E] hover:bg-[#E11D48] text-white"
                         onClick={() => navigate(`/consultations/new?soapId=${note.id}&patientId=${note.patientId}`)}
                       >
-                        <Play className="h-3 w-3 mr-1" />
+                        <Play className="h-3.5 w-3.5 mr-1.5" />
                         Start
                       </Button>
                     </>
@@ -135,32 +81,30 @@ export default function ConsultationsList() {
             })}
           </div>
           {pendingSOAPs.length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                No patients awaiting consultation.
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-xl p-8 text-center text-muted-foreground shadow-sm">
+              No patients awaiting consultation.
+            </div>
           )}
         </TabsContent>
 
         <TabsContent value="in_progress">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {inProgressConsultations.map((consultation) => {
               const patient = getPatientInfo(consultation.patientId);
               const soapNote = mockSOAPNotes.find(n => n.patientId === consultation.patientId);
               return (
-                <PatientCard
+                <ConsultationCard
                   key={consultation.id}
                   patient={patient}
                   note={soapNote}
                   status="In Progress"
-                  statusColor="bg-orange-100 text-orange-700 border-orange-200"
+                  statusColor="in_progress"
                   actions={
                     <Button 
                       size="sm" 
-                      className="w-full bg-accent hover:bg-accent/90 text-xs h-8"
+                      className="w-full text-xs h-8 bg-[#3B82F6] hover:bg-[#2563EB] text-white"
                     >
-                      <Stethoscope className="h-3 w-3 mr-1" />
+                      <Play className="h-3.5 w-3.5 mr-1.5" />
                       Continue Consultation
                     </Button>
                   }
@@ -169,34 +113,32 @@ export default function ConsultationsList() {
             })}
           </div>
           {inProgressConsultations.length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                No consultations in progress.
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-xl p-8 text-center text-muted-foreground shadow-sm">
+              No consultations in progress.
+            </div>
           )}
         </TabsContent>
 
         <TabsContent value="completed">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {completedConsultations.map((consultation) => {
               const patient = getPatientInfo(consultation.patientId);
               const soapNote = mockSOAPNotes.find(n => n.patientId === consultation.patientId);
               return (
-                <PatientCard
+                <ConsultationCard
                   key={consultation.id}
                   patient={patient}
                   note={soapNote}
                   status="Completed"
-                  statusColor="bg-green-100 text-green-700 border-green-200"
+                  statusColor="completed"
                   actions={
                     <Button 
                       size="sm" 
                       variant="outline"
-                      className="w-full text-xs h-8"
+                      className="w-full text-xs h-8 border-gray-300 text-gray-600 hover:bg-gray-50"
                       onClick={() => navigate(`/consultations/${consultation.id}`)}
                     >
-                      <Eye className="h-3 w-3 mr-1" />
+                      <Eye className="h-3.5 w-3.5 mr-1.5" />
                       View Details
                     </Button>
                   }
@@ -205,11 +147,9 @@ export default function ConsultationsList() {
             })}
           </div>
           {completedConsultations.length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                No completed consultations.
-              </CardContent>
-            </Card>
+            <div className="bg-white rounded-xl p-8 text-center text-muted-foreground shadow-sm">
+              No completed consultations.
+            </div>
           )}
         </TabsContent>
       </Tabs>
