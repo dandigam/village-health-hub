@@ -50,9 +50,11 @@ export function ConsultationRow({ patient, note, consultation, status }: Consult
 
   const handlePrimaryAction = () => {
     if (status === 'awaiting' && note) {
-      navigate(`/consultations/new?soapId=${note.id}&patientId=${note.patientId}`);
+      navigate(`/consultations/doctor?soapId=${note.id}&patientId=${note.patientId}`);
+    } else if (status === 'in_progress' && consultation) {
+      navigate(`/consultations/doctor?soapId=${consultation.soapNoteId}&patientId=${consultation.patientId}`);
     } else if (status === 'completed' && consultation) {
-      navigate(`/consultations/${consultation.id}`);
+      navigate(`/consultations/doctor?soapId=${consultation.soapNoteId}&patientId=${consultation.patientId}`);
     }
   };
 
