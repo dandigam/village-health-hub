@@ -72,26 +72,18 @@ export default function DoctorConsultation() {
   const [assessmentNotes, setAssessmentNotes] = useState('');
   const [conditionHistories] = useState({});
 
-  // Plan Tab State - Initialize with mock medicines
-  const [prescriptionItems, setPrescriptionItems] = useState(() => {
-    return mockMedicines.slice(0, 9).map((medicine, index) => {
-      const stockItem = mockStockItems.find(s => s.medicineId === medicine.id);
-      return {
-        id: `rx-${index}`,
-        selected: false,
-        medicineName: medicine.name,
-        qtyAvailable: stockItem?.quantity || 0,
-        morning: index % 3 === 0 ? 1 : 0,
-        afternoon: index % 2 === 0 ? 1 : 0,
-        night: index % 3 === 1 ? 1 : 0,
-        days: 56,
-        quantityOrdered: 0,
-      };
-    }).map(item => ({
-      ...item,
-      quantityOrdered: (item.morning + item.afternoon + item.night) * item.days
-    }));
-  });
+  // Plan Tab State - Start with empty prescriptions
+  const [prescriptionItems, setPrescriptionItems] = useState<Array<{
+    id: string;
+    selected: boolean;
+    medicineName: string;
+    qtyAvailable: number;
+    morning: number;
+    afternoon: number;
+    night: number;
+    days: number;
+    quantityOrdered: number;
+  }>>([]);
 
   // Summary Tab State
   const [summaryDescription, setSummaryDescription] = useState('');
@@ -201,55 +193,80 @@ export default function DoctorConsultation() {
             {/* Clinical Info Bar */}
             <div className="bg-muted/50 border-x border-b rounded-b-none px-5 py-3">
               <div className="flex items-center gap-6 flex-wrap">
-                {/* Vitals Cards */}
+                {/* Vitals Cards with Tooltips */}
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
-                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                      </svg>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground">{vitals.weight || '--'}</span>
-                    <span className="text-xs text-muted-foreground">kg</span>
-                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm cursor-help">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">{vitals.weight || '--'}</span>
+                        <span className="text-xs text-muted-foreground">kg</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Weight (kg)</TooltipContent>
+                  </Tooltip>
                   
-                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
-                    <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 text-destructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                      </svg>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground">{vitals.bp || '--'}</span>
-                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm cursor-help">
+                        <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-destructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">{vitals.bp || '--'}</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Blood Pressure (mmHg)</TooltipContent>
+                  </Tooltip>
                   
-                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
-                    <div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                      </svg>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground">{vitals.pulse || '--'}</span>
-                    <span className="text-xs text-muted-foreground">bpm</span>
-                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm cursor-help">
+                        <div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">{vitals.pulse || '--'}</span>
+                        <span className="text-xs text-muted-foreground">bpm</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Heart Rate (bpm)</TooltipContent>
+                  </Tooltip>
                   
-                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
-                    <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
-                      </svg>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground">{vitals.temp ? `${vitals.temp}°F` : '--'}</span>
-                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm cursor-help">
+                        <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">{vitals.temp ? `${vitals.temp}°F` : '--'}</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Body Temperature (°F)</TooltipContent>
+                  </Tooltip>
                   
-                  <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm">
-                    <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 6v6l4 2"/>
-                      </svg>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground">{vitals.spo2 ? `${vitals.spo2}%` : '--'}</span>
-                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 shadow-sm cursor-help">
+                        <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">{vitals.spo2 ? `${vitals.spo2}%` : '--'}</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Oxygen Saturation (SpO2)</TooltipContent>
+                  </Tooltip>
                 </div>
 
                 <Separator orientation="vertical" className="h-8" />
@@ -426,18 +443,6 @@ export default function DoctorConsultation() {
                     </TooltipTrigger>
                     <TooltipContent>Download PDF</TooltipContent>
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        onClick={() => setIsSidebarOpen(true)}
-                      >
-                        <PanelRight className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Patient Details</TooltipContent>
-                  </Tooltip>
                   <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
                     <Save className="mr-1.5 h-4 w-4" />
                     Save Draft
@@ -450,6 +455,21 @@ export default function DoctorConsultation() {
               </div>
             </Tabs>
           </div>
+
+          {/* Fixed Right Edge Sidebar Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="default"
+                size="icon"
+                className="fixed right-0 top-1/2 -translate-y-1/2 z-50 rounded-l-lg rounded-r-none h-12 w-8 shadow-lg"
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <PanelRight className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">Patient Details</TooltipContent>
+          </Tooltip>
 
           {/* Right Sidebar as Sheet */}
           <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
