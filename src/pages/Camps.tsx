@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SearchFilter } from '@/components/shared/SearchFilter';
 import { mockCamps, mockDoctors } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
@@ -18,16 +19,30 @@ const statusColors = {
 export default function Camps() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredCamps =
+  const tabFilteredCamps =
     activeTab === 'all'
       ? mockCamps
       : mockCamps.filter((c) => c.status === activeTab);
 
+  const filteredCamps = tabFilteredCamps.filter(
+    (c) =>
+      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.village.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.district.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <DashboardLayout>
-      <div className="page-header">
-        <h1 className="page-title">Camp Management</h1>
+      <div className="flex items-center justify-between mb-6">
+        <SearchFilter
+          title="Camp Management"
+          count={filteredCamps.length}
+          placeholder="Search by Camp Name / Village / District"
+          value={searchTerm}
+          onChange={setSearchTerm}
+        />
         <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/camps/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Create New Camp

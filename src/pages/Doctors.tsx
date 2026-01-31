@@ -1,19 +1,35 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Phone, Mail, Stethoscope } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { SearchFilter } from '@/components/shared/SearchFilter';
 import { mockDoctors, mockCamps } from '@/data/mockData';
 
 export default function Doctors() {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredDoctors = mockDoctors.filter(
+    (d) =>
+      d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.phone.includes(searchTerm)
+  );
 
   return (
     <DashboardLayout>
-      <div className="page-header">
-        <h1 className="page-title">Doctor Management</h1>
+      <div className="flex items-center justify-between mb-6">
+        <SearchFilter
+          title="Doctor Management"
+          count={filteredDoctors.length}
+          placeholder="Search by Name / Specialization / Phone"
+          value={searchTerm}
+          onChange={setSearchTerm}
+        />
         <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/doctors/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Add Doctor
@@ -21,7 +37,7 @@ export default function Doctors() {
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockDoctors.map((doctor) => {
+        {filteredDoctors.map((doctor) => {
           const assignedCamps = mockCamps.filter((c) => c.doctorIds.includes(doctor.id));
 
           return (
@@ -29,6 +45,7 @@ export default function Doctors() {
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="h-16 w-16">
+                    <AvatarImage src={doctor.photoUrl} alt={doctor.name} />
                     <AvatarFallback className="bg-accent text-accent-foreground text-lg">
                       {doctor.name
                         .split(' ')
