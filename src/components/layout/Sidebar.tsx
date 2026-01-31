@@ -74,7 +74,7 @@ export function Sidebar() {
         </button>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-2 overflow-y-auto">
+        <nav className="py-4 px-2 overflow-y-auto">
           <ul className="space-y-1">
             {mainNavItems.map((item) => (
               <li key={item.href}>
@@ -135,8 +135,8 @@ export function Sidebar() {
           </ul>
         </nav>
 
-        {/* Settings at bottom */}
-        <div className="p-2 border-t border-white/10">
+        {/* Settings at bottom - no extra spacing */}
+        <div className="p-2 mt-auto border-t border-white/10">
           {isCollapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
