@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { CampProvider } from "@/context/CampContext";
 import Login from "./pages/Login";
 import SelectCamp from "./pages/SelectCamp";
 import Dashboard from "./pages/Dashboard";
@@ -53,65 +54,67 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/select-camp" element={<SelectCamp />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          
-          {/* Camps */}
-          <Route path="/camps" element={<Camps />} />
-          <Route path="/camps/new" element={<NewCamp />} />
-          <Route path="/camps/:id" element={<EditCamp />} />
-          
-          {/* Patients */}
-          <Route path="/patients" element={<Patients />} />
-          <Route path="/patients/new" element={<NewPatient />} />
-          <Route path="/patients/:id" element={<PatientHistory />} />
-          
-          {/* SOAP Notes */}
-          <Route path="/soap" element={<SOAPNotesList />} />
-          <Route path="/soap/new" element={<NewSOAPNote />} />
-          <Route path="/soap/:id" element={<ViewSOAPNote />} />
-          <Route path="/soap/:id/edit" element={<NewSOAPNote />} />
-          
-          {/* Consultations */}
-          <Route path="/consultations" element={<ConsultationsList />} />
-          <Route path="/consultations/new" element={<NewConsultation />} />
-          
-          {/* Pharmacy */}
-          <Route path="/pharmacy" element={<PharmacyDashboard />} />
-          <Route path="/pharmacy/prescription/:id" element={<DispenseMedicine />} />
-          <Route path="/pharmacy/dispense/:id" element={<DispenseMedicine />} />
-          
-          {/* Stock */}
-          <Route path="/stock" element={<StockManagement />} />
-          
-          {/* Doctors */}
-          <Route path="/doctors" element={<Doctors />} />
-          <Route path="/doctors/new" element={<NewDoctor />} />
-          <Route path="/doctors/:id/edit" element={<EditDoctor />} />
-          
-          {/* Reports */}
-          <Route path="/reports" element={<ReportsHub />} />
-          <Route path="/reports/camps" element={<CampReports />} />
-          <Route path="/reports/patients" element={<PatientReports />} />
-          <Route path="/reports/medicines" element={<MedicineReports />} />
-          <Route path="/reports/discounts" element={<DiscountReports />} />
-          <Route path="/reports/doctors" element={<DoctorReports />} />
-          
-          {/* Settings & Profile */}
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/settings/id-cards" element={<IDCardPrintouts />} />
-          <Route path="/profile" element={<Profile />} />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <CampProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/select-camp" element={<SelectCamp />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Camps */}
+            <Route path="/camps" element={<Camps />} />
+            <Route path="/camps/new" element={<NewCamp />} />
+            <Route path="/camps/:id" element={<EditCamp />} />
+            
+            {/* Patients */}
+            <Route path="/patients" element={<Patients />} />
+            <Route path="/patients/new" element={<NewPatient />} />
+            <Route path="/patients/:id" element={<PatientHistory />} />
+            
+            {/* SOAP Notes */}
+            <Route path="/soap" element={<SOAPNotesList />} />
+            <Route path="/soap/new" element={<NewSOAPNote />} />
+            <Route path="/soap/:id" element={<ViewSOAPNote />} />
+            <Route path="/soap/:id/edit" element={<NewSOAPNote />} />
+            
+            {/* Consultations */}
+            <Route path="/consultations" element={<ConsultationsList />} />
+            <Route path="/consultations/new" element={<NewConsultation />} />
+            
+            {/* Pharmacy */}
+            <Route path="/pharmacy" element={<PharmacyDashboard />} />
+            <Route path="/pharmacy/prescription/:id" element={<DispenseMedicine />} />
+            <Route path="/pharmacy/dispense/:id" element={<DispenseMedicine />} />
+            
+            {/* Stock */}
+            <Route path="/stock" element={<StockManagement />} />
+            
+            {/* Doctors */}
+            <Route path="/doctors" element={<Doctors />} />
+            <Route path="/doctors/new" element={<NewDoctor />} />
+            <Route path="/doctors/:id/edit" element={<EditDoctor />} />
+            
+            {/* Reports */}
+            <Route path="/reports" element={<ReportsHub />} />
+            <Route path="/reports/camps" element={<CampReports />} />
+            <Route path="/reports/patients" element={<PatientReports />} />
+            <Route path="/reports/medicines" element={<MedicineReports />} />
+            <Route path="/reports/discounts" element={<DiscountReports />} />
+            <Route path="/reports/doctors" element={<DoctorReports />} />
+            
+            {/* Settings & Profile */}
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/id-cards" element={<IDCardPrintouts />} />
+            <Route path="/profile" element={<Profile />} />
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </CampProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

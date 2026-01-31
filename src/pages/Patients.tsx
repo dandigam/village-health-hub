@@ -19,7 +19,7 @@ export default function Patients() {
   );
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       <SearchFilter
         title="Patients List"
         count={filteredPatients.length}

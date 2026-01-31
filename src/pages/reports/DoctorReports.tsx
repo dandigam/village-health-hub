@@ -53,7 +53,7 @@ export default function DoctorReports() {
   const doctorStats = selectedDoctor ? getDoctorStats(selectedDoctor) : null;
 
   return (
-    <DashboardLayout campName="Reports">
+    <DashboardLayout>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">

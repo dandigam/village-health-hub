@@ -81,7 +81,7 @@ export default function ReportsHub() {
   ];
 
   return (
-    <DashboardLayout campName="Reports">
+    <DashboardLayout>
       <div className="space-y-4">
         {/* Header */}
         <div>

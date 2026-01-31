@@ -4,13 +4,12 @@ import { Sidebar } from './Sidebar';
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  campName?: string;
 }
 
-export function DashboardLayout({ children, campName }: DashboardLayoutProps) {
+export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
-      <Header campName={campName} />
+      <Header />
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-6 overflow-auto">

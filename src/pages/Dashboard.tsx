@@ -130,7 +130,7 @@ export default function Dashboard() {
   };
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       {/* 1️⃣ Status Overview Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         {statusCards.map((card) => (

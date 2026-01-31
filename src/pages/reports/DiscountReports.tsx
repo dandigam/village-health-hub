@@ -51,7 +51,7 @@ export default function DiscountReports() {
   const discountDetails = selectedDiscount ? getDiscountDetails(selectedDiscount) : null;
 
   return (
-    <DashboardLayout campName="Reports">
+    <DashboardLayout>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">

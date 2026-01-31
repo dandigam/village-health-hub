@@ -49,7 +49,7 @@ export default function ConsultationsList() {
     : completedConsultations.length;
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="text-xl font-semibold text-foreground whitespace-nowrap">
           Doctor Consultations <span className="text-muted-foreground font-normal">({currentCount})</span>

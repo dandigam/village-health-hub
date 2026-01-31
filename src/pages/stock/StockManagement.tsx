@@ -38,7 +38,7 @@ export default function StockManagement() {
   const lowStockItems = stockItems.filter(item => item.isLowStock);
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       <div className="page-header">
         <h1 className="page-title">Stock Management</h1>
         <div className="flex gap-2">
