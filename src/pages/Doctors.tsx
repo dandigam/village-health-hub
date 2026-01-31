@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Phone, Mail, Stethoscope } from 'lucide-react';
+import { Plus, Phone, Mail, Stethoscope, Edit } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,7 +41,7 @@ export default function Doctors() {
           const assignedCamps = mockCamps.filter((c) => c.doctorIds.includes(doctor.id));
 
           return (
-            <Card key={doctor.id} className="hover:shadow-lg transition-shadow">
+            <Card key={doctor.id} className="hover:shadow-lg transition-shadow group">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="h-16 w-16">
@@ -54,10 +54,22 @@ export default function Doctors() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{doctor.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                      <Stethoscope className="h-4 w-4" />
-                      {doctor.specialization}
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg">{doctor.name}</h3>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                          <Stethoscope className="h-4 w-4" />
+                          {doctor.specialization}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => navigate(`/doctors/${doctor.id}/edit`)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>

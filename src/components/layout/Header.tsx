@@ -16,17 +16,17 @@ interface HeaderProps {
   campName?: string;
 }
 
-export function Header({ campName = 'GBR Foundation' }: HeaderProps) {
+export function Header({ campName = 'Srini Foundation' }: HeaderProps) {
   return (
-    <header className="h-16 bg-primary flex items-center justify-between px-4 lg:px-6">
+    <header className="h-16 bg-primary flex items-center justify-between px-4 lg:px-6 print:hidden">
       {/* Left: Logo & Camp Info */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-            <span className="text-xl font-bold text-primary-foreground">G</span>
+            <span className="text-xl font-bold text-primary-foreground">S</span>
           </div>
           <div className="hidden sm:block">
-            <span className="text-lg font-bold text-primary-foreground">GBR</span>
+            <span className="text-lg font-bold text-primary-foreground">Srini</span>
             <span className="text-xs text-primary-foreground/70 block -mt-1">FOUNDATION</span>
           </div>
         </div>

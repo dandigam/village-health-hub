@@ -11,7 +11,9 @@ import Patients from "./pages/Patients";
 import NewPatient from "./pages/NewPatient";
 import Doctors from "./pages/Doctors";
 import NewDoctor from "./pages/doctors/NewDoctor";
+import EditDoctor from "./pages/doctors/EditDoctor";
 import NewCamp from "./pages/camps/NewCamp";
+import EditCamp from "./pages/camps/EditCamp";
 import NotFound from "./pages/NotFound";
 
 // SOAP Notes
@@ -58,6 +60,7 @@ const App = () => (
           {/* Camps */}
           <Route path="/camps" element={<Camps />} />
           <Route path="/camps/new" element={<NewCamp />} />
+          <Route path="/camps/:id" element={<EditCamp />} />
           
           {/* Patients */}
           <Route path="/patients" element={<Patients />} />
@@ -85,6 +88,7 @@ const App = () => (
           {/* Doctors */}
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/doctors/new" element={<NewDoctor />} />
+          <Route path="/doctors/:id/edit" element={<EditDoctor />} />
           
           {/* Reports */}
           <Route path="/reports" element={<ReportsHub />} />
