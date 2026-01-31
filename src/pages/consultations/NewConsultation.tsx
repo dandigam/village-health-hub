@@ -221,7 +221,7 @@ export default function NewConsultation() {
 
   if (!patient || !soapNote) {
     return (
-      <DashboardLayout campName="Bapatla">
+      <DashboardLayout>
         <div className="flex flex-col items-center justify-center py-16">
           <p className="text-muted-foreground mb-4">Patient or SOAP Note not found</p>
           <Button onClick={() => navigate('/consultations')}>Back to Consultations</Button>
@@ -232,7 +232,7 @@ export default function NewConsultation() {
 
   return (
     <TooltipProvider>
-      <DashboardLayout campName="Bapatla">
+      <DashboardLayout>
         {/* Sticky Header */}
         <div className="sticky top-0 z-20 bg-card border-b shadow-sm -mx-6 px-6 py-3">
           <div className="flex items-center justify-between">

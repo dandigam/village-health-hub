@@ -28,7 +28,7 @@ export default function PatientHistory() {
 
   if (!patient) {
     return (
-      <DashboardLayout campName="Bapatla">
+      <DashboardLayout>
         <div className="text-center py-12">
           <p className="text-muted-foreground">Patient not found</p>
           <Button className="mt-4" onClick={() => navigate('/patients')}>
@@ -96,7 +96,7 @@ export default function PatientHistory() {
   };
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       <div className="page-header no-print">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/patients')}>

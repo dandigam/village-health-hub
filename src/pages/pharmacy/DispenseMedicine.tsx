@@ -27,7 +27,7 @@ export default function DispenseMedicine() {
 
   if (!prescription || !patient) {
     return (
-      <DashboardLayout campName="Bapatla">
+      <DashboardLayout>
         <div className="text-center py-12">
           <p className="text-muted-foreground">Prescription not found</p>
           <Button className="mt-4" onClick={() => navigate('/pharmacy')}>
@@ -75,7 +75,7 @@ export default function DispenseMedicine() {
   };
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       <div className="page-header no-print">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/pharmacy')}>

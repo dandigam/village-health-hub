@@ -30,7 +30,7 @@ export default function ViewSOAPNote() {
 
   if (!note || !patient) {
     return (
-      <DashboardLayout campName="Bapatla">
+      <DashboardLayout>
         <div className="text-center py-12">
           <p className="text-muted-foreground">SOAP Note not found</p>
           <Button className="mt-4" onClick={() => navigate('/soap')}>
@@ -59,7 +59,7 @@ export default function ViewSOAPNote() {
   };
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       {/* Header */}
       <div className="flex items-center justify-between mb-6 print:hidden">
         <div className="flex items-center gap-4">

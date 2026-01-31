@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { mockCamps } from '@/data/mockData';
+import { useCamp } from '@/context/CampContext';
 
 const campRules = [
   'Volunteers must report on time and follow the assigned duty schedule.',
@@ -20,11 +21,16 @@ const campRules = [
 
 export default function SelectCamp() {
   const navigate = useNavigate();
-  const [selectedCamp, setSelectedCamp] = useState<string>('');
+  const { setSelectedCamp } = useCamp();
+  const [selectedCampId, setSelectedCampId] = useState<string>('');
   const activeCamps = mockCamps.filter((c) => c.status === 'active' || c.status === 'draft');
 
   const handleContinue = () => {
-    if (selectedCamp) {
+    if (selectedCampId) {
+      const camp = activeCamps.find(c => c.id === selectedCampId);
+      if (camp) {
+        setSelectedCamp(camp.location);
+      }
       navigate('/dashboard');
     }
   };
@@ -46,16 +52,15 @@ export default function SelectCamp() {
       <header className="relative z-10 h-16 bg-primary flex items-center justify-between px-6">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 via-red-500 to-purple-600 flex items-center justify-center">
-              <span className="text-white">🔥</span>
+            <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+              <span className="text-xl font-bold text-primary-foreground">S</span>
             </div>
-            <span className="text-lg font-bold text-primary-foreground">GBR</span>
+            <span className="text-lg font-bold text-primary-foreground">Srini Foundation</span>
           </div>
         </div>
-        <div className="text-xl font-bold text-primary-foreground">GBR</div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" className="text-primary-foreground">
-            Log in or create account
+          <Button variant="ghost" className="text-primary-foreground" onClick={() => navigate('/login')}>
+            Log in
           </Button>
         </div>
       </header>
@@ -74,8 +79,8 @@ export default function SelectCamp() {
           </CardHeader>
           <CardContent className="space-y-6">
             <RadioGroup
-              value={selectedCamp}
-              onValueChange={setSelectedCamp}
+              value={selectedCampId}
+              onValueChange={setSelectedCampId}
               className="flex flex-wrap gap-4 justify-center"
             >
               {activeCamps.map((camp) => (
@@ -90,7 +95,7 @@ export default function SelectCamp() {
                 size="icon"
                 className="rounded-full bg-accent hover:bg-accent/90"
                 onClick={handleContinue}
-                disabled={!selectedCamp}
+                disabled={!selectedCampId}
               >
                 <ArrowRight className="h-4 w-4" />
               </Button>

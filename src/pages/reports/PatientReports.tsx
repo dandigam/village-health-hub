@@ -61,7 +61,7 @@ export default function PatientReports() {
   const patient = selectedPatient ? getPatientDetails(selectedPatient) : null;
 
   return (
-    <DashboardLayout campName="Reports">
+    <DashboardLayout>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">

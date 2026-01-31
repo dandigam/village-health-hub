@@ -57,7 +57,7 @@ export default function SOAPNotesList() {
   }, [searchTerm, tabFilteredNotes]);
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       <SearchFilter
         title="SOAP Notes"
         count={filteredNotes.length}

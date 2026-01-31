@@ -1,4 +1,5 @@
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search, User, LogOut, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,14 +10,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { mockUser } from '@/data/mockData';
+import { useCamp } from '@/context/CampContext';
 
-interface HeaderProps {
-  campName?: string;
-}
+export function Header() {
+  const navigate = useNavigate();
+  const { selectedCamp } = useCamp();
 
-export function Header({ campName = 'Srini Foundation' }: HeaderProps) {
+  const handleLogout = () => {
+    navigate('/login');
+  };
+
   return (
     <header className="h-16 bg-primary flex items-center justify-between px-4 lg:px-6 print:hidden">
       {/* Left: Logo & Camp Info */}
@@ -30,9 +35,9 @@ export function Header({ campName = 'Srini Foundation' }: HeaderProps) {
             <span className="text-xs text-primary-foreground/70 block -mt-1">FOUNDATION</span>
           </div>
         </div>
-        {campName && (
+        {selectedCamp && (
           <div className="hidden md:block border-l border-primary-foreground/20 pl-4 ml-2">
-            <p className="text-primary-foreground font-medium">{campName}</p>
+            <p className="text-primary-foreground font-medium">{selectedCamp}</p>
             <p className="text-xs text-primary-foreground/70">Camp</p>
           </div>
         )}
@@ -63,6 +68,7 @@ export function Header({ campName = 'Srini Foundation' }: HeaderProps) {
                 <p className="text-xs opacity-70">Front Desk | {mockUser.phone}</p>
               </div>
               <Avatar className="h-8 w-8">
+                <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
                 <AvatarFallback className="bg-accent text-accent-foreground">
                   {mockUser.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
@@ -72,13 +78,17 @@ export function Header({ campName = 'Srini Foundation' }: HeaderProps) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/profile')}>
               <User className="mr-2 h-4 w-4" />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

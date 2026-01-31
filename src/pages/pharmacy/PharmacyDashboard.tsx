@@ -33,7 +33,7 @@ export default function PharmacyDashboard() {
   };
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       <div className="page-header">
         <h1 className="page-title">Pharmacy Dashboard</h1>
       </div>

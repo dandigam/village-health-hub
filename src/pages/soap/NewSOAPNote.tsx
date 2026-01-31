@@ -44,7 +44,7 @@ export default function NewSOAPNote() {
   };
 
   return (
-    <DashboardLayout campName="Bapatla">
+    <DashboardLayout>
       <div className="page-header">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/soap')}>
