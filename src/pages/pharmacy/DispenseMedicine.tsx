@@ -64,15 +64,19 @@ export default function DispenseMedicine() {
     setShowBillDialog(true);
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const handlePrintBill = () => {
-    console.log('Printing bill...');
+    window.print();
     setShowBillDialog(false);
     navigate('/pharmacy');
   };
 
   return (
     <DashboardLayout campName="Bapatla">
-      <div className="page-header">
+      <div className="page-header no-print">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/pharmacy')}>
             <ArrowLeft className="h-5 w-5" />
@@ -84,17 +88,42 @@ export default function DispenseMedicine() {
             </p>
           </div>
         </div>
-        <Button className="bg-accent hover:bg-accent/90" onClick={handleDispense}>
-          <CheckCircle className="mr-2 h-4 w-4" />
-          Dispense & Generate Bill
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handlePrint}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print
+          </Button>
+          <Button className="bg-accent hover:bg-accent/90" onClick={handleDispense}>
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Dispense & Generate Bill
+          </Button>
+        </div>
+      </div>
+
+      {/* Print Header - Only visible when printing */}
+      <div className="hidden print:block mb-6 soap-print-header">
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold">Srini FOUNDATION</h1>
+          <p className="text-sm text-muted-foreground">Medical Camp - Prescription Bill</p>
+        </div>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p><strong>Patient:</strong> {patient.name} {patient.surname}</p>
+            <p><strong>Patient ID:</strong> {patient.patientId}</p>
+            <p><strong>Age/Gender:</strong> {patient.age} yrs / {patient.gender}</p>
+          </div>
+          <div className="text-right">
+            <p><strong>Date:</strong> {new Date().toLocaleDateString()}</p>
+            <p><strong>Doctor:</strong> {doctor?.name}</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Left - Prescription Items */}
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader>
+            <CardHeader className="no-print">
               <CardTitle>Prescription Items</CardTitle>
               <p className="text-sm text-muted-foreground">
                 Prescribed by {doctor?.name} on {new Date(prescription.createdAt).toLocaleDateString()}
@@ -108,8 +137,8 @@ export default function DispenseMedicine() {
                       <th className="p-3 text-left">Medicine</th>
                       <th className="p-3 text-center">Dosage</th>
                       <th className="p-3 text-center">Prescribed Qty</th>
-                      <th className="p-3 text-center">Stock</th>
-                      <th className="p-3 text-center">Dispense Qty</th>
+                      <th className="p-3 text-center no-print">Stock</th>
+                      <th className="p-3 text-center no-print">Dispense Qty</th>
                       <th className="p-3 text-right">Price</th>
                       <th className="p-3 text-right">Amount</th>
                     </tr>
@@ -130,12 +159,12 @@ export default function DispenseMedicine() {
                             {item.morning}-{item.afternoon}-{item.night} × {item.days} days
                           </td>
                           <td className="p-3 text-center">{item.quantity}</td>
-                          <td className="p-3 text-center">
+                          <td className="p-3 text-center no-print">
                             <Badge variant={isLowStock ? "destructive" : "secondary"}>
                               {stock}
                             </Badge>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 no-print">
                             <Input
                               type="number"
                               min="0"
@@ -167,7 +196,7 @@ export default function DispenseMedicine() {
         </div>
 
         {/* Right - Payment */}
-        <div className="space-y-6">
+        <div className="space-y-6 no-print">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

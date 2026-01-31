@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { X, Save, User, Camera } from 'lucide-react';
+import { X, Save, User, Stethoscope, Building } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -16,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { toast } from '@/hooks/use-toast';
 import { mockCamps, mockDoctors } from '@/data/mockData';
 
@@ -44,6 +44,7 @@ export default function EditDoctor() {
   const { id } = useParams();
   const doctor = mockDoctors.find((d) => d.id === id);
 
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     specialization: '',
@@ -65,9 +66,10 @@ export default function EditDoctor() {
         specialization: doctor.specialization,
         phone: doctor.phone,
         email: doctor.email || '',
-        isActive: true, // Default to active for mock data
+        isActive: true,
         selectedCamps: assignedCamps,
       });
+      setPhotoUrl(doctor.photoUrl || null);
     }
   }, [doctor]);
 
@@ -148,212 +150,192 @@ export default function EditDoctor() {
     navigate('/doctors');
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader className="relative pb-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4"
-              onClick={handleCancel}
-            >
-              <X className="h-5 w-5" />
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">Edit Doctor</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
+              <X className="h-4 w-4 mr-1" />
+              Cancel
             </Button>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <User className="h-5 w-5 text-accent" />
-              Edit Doctor
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Avatar Section */}
-            <div className="flex justify-center">
-              <div className="relative">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={doctor.photoUrl} alt={doctor.name} />
-                  <AvatarFallback className="bg-accent text-accent-foreground text-2xl">
-                    {formData.name ? getInitials(formData.name) : <User className="h-10 w-10" />}
-                  </AvatarFallback>
-                </Avatar>
-                <button className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:bg-primary/90 transition-colors">
-                  <Camera className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+            <Button size="sm" onClick={handleSubmit} className="bg-accent hover:bg-accent/90">
+              <Save className="h-4 w-4 mr-1" />
+              Update Doctor
+            </Button>
+          </div>
+        </div>
 
-            {/* Active/Inactive Toggle */}
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-              <div>
-                <Label htmlFor="active-toggle" className="font-medium">Doctor Status</Label>
-                <p className="text-sm text-muted-foreground">
-                  {formData.isActive ? 'Doctor is currently active' : 'Doctor is currently inactive'}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge className={formData.isActive ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-700 border-gray-200'}>
-                  {formData.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-                <Switch
-                  id="active-toggle"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => updateFormData('isActive', checked)}
-                />
-              </div>
-            </div>
-
-            {/* Form Fields */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">
-                  Doctor Name <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="Enter full name"
-                  value={formData.name}
-                  onChange={(e) => updateFormData('name', e.target.value)}
-                  className={errors.name ? 'border-destructive' : ''}
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="specialization">
-                  Specialization <span className="text-destructive">*</span>
-                </Label>
-                <Select
-                  value={formData.specialization}
-                  onValueChange={(v) => updateFormData('specialization', v)}
-                >
-                  <SelectTrigger className={errors.specialization ? 'border-destructive' : ''}>
-                    <SelectValue placeholder="Select specialization" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {specializations.map((spec) => (
-                      <SelectItem key={spec} value={spec}>
-                        {spec}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.specialization && (
-                  <p className="text-sm text-destructive">{errors.specialization}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">
-                  Phone Number <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="Enter phone number"
-                  value={formData.phone}
-                  onChange={(e) => updateFormData('phone', e.target.value)}
-                  className={errors.phone ? 'border-destructive' : ''}
-                />
-                {errors.phone && (
-                  <p className="text-sm text-destructive">{errors.phone}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter email address"
-                  value={formData.email}
-                  onChange={(e) => updateFormData('email', e.target.value)}
-                  className={errors.email ? 'border-destructive' : ''}
-                />
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Assign Camps</Label>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Select camps to assign this doctor
-                </p>
-                <div className="border rounded-lg p-3 max-h-48 overflow-y-auto">
-                  <div className="space-y-2">
-                    {mockCamps.map((camp) => (
-                      <div
-                        key={camp.id}
-                        className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
-                          formData.selectedCamps.includes(camp.id)
-                            ? 'bg-accent/20 border border-accent'
-                            : 'hover:bg-muted'
-                        }`}
-                        onClick={() => toggleCamp(camp.id)}
-                      >
-                        <div>
-                          <p className="font-medium text-sm">{camp.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {camp.village}, {camp.district}
-                          </p>
-                        </div>
-                        {formData.selectedCamps.includes(camp.id) && (
-                          <Badge className="bg-accent text-accent-foreground">Selected</Badge>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+        <div className="flex gap-4">
+          {/* Main Form */}
+          <Card className="flex-1 shadow-sm">
+            <CardHeader className="py-3 px-4 border-b bg-muted/30">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <User className="h-4 w-4 text-accent" />
+                Doctor Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              {/* Active/Inactive Toggle */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div>
+                  <Label htmlFor="active-toggle" className="text-sm font-medium">Doctor Status</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.isActive ? 'Currently active' : 'Currently inactive'}
+                  </p>
                 </div>
-                {formData.selectedCamps.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.selectedCamps.map((campId) => {
-                      const camp = mockCamps.find((c) => c.id === campId);
-                      return camp ? (
-                        <Badge
-                          key={campId}
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {camp.name}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleCamp(campId);
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                )}
+                <div className="flex items-center gap-3">
+                  <Badge className={formData.isActive ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-700 border-gray-200'}>
+                    {formData.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                  <Switch
+                    id="active-toggle"
+                    checked={formData.isActive}
+                    onCheckedChange={(checked) => updateFormData('isActive', checked)}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button className="flex-1 bg-accent hover:bg-accent/90" onClick={handleSubmit}>
-                <Save className="mr-2 h-4 w-4" />
-                Update Doctor
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              {/* Personal Details Row 1 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="name" className="text-xs font-medium">
+                    Doctor Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="Enter full name"
+                    value={formData.name}
+                    onChange={(e) => updateFormData('name', e.target.value)}
+                    className={`h-9 text-sm ${errors.name ? 'border-destructive' : ''}`}
+                  />
+                  {errors.name && (
+                    <p className="text-xs text-destructive">{errors.name}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="specialization" className="text-xs font-medium">
+                    Specialization <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={formData.specialization}
+                    onValueChange={(v) => updateFormData('specialization', v)}
+                  >
+                    <SelectTrigger className={`h-9 text-sm ${errors.specialization ? 'border-destructive' : ''}`}>
+                      <SelectValue placeholder="Select specialization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specializations.map((spec) => (
+                        <SelectItem key={spec} value={spec}>
+                          {spec}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.specialization && (
+                    <p className="text-xs text-destructive">{errors.specialization}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Contact Details Row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="phone" className="text-xs font-medium">
+                    Phone Number <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="Enter phone number"
+                    value={formData.phone}
+                    onChange={(e) => updateFormData('phone', e.target.value)}
+                    className={`h-9 text-sm ${errors.phone ? 'border-destructive' : ''}`}
+                  />
+                  {errors.phone && (
+                    <p className="text-xs text-destructive">{errors.phone}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-xs font-medium">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={formData.email}
+                    onChange={(e) => updateFormData('email', e.target.value)}
+                    className={`h-9 text-sm ${errors.email ? 'border-destructive' : ''}`}
+                  />
+                  {errors.email && (
+                    <p className="text-xs text-destructive">{errors.email}</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Photo Card */}
+          <Card className="w-52 shrink-0 shadow-sm">
+            <CardHeader className="py-3 px-4 border-b bg-muted/30">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Stethoscope className="h-4 w-4 text-accent" />
+                Photo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 flex flex-col items-center justify-center">
+              <PhotoUpload
+                currentPhoto={photoUrl || undefined}
+                onPhotoChange={setPhotoUrl}
+                name={formData.name}
+                size="lg"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Camp Assignment Card */}
+          <Card className="w-64 shrink-0 shadow-sm">
+            <CardHeader className="py-3 px-4 border-b bg-muted/30">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Building className="h-4 w-4 text-accent" />
+                Assign Camps
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {mockCamps.map((camp) => (
+                  <div
+                    key={camp.id}
+                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                      formData.selectedCamps.includes(camp.id)
+                        ? 'bg-accent/20 border border-accent'
+                        : 'hover:bg-muted border border-transparent'
+                    }`}
+                    onClick={() => toggleCamp(camp.id)}
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{camp.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {camp.village}
+                      </p>
+                    </div>
+                    {formData.selectedCamps.includes(camp.id) && (
+                      <Badge className="bg-accent text-accent-foreground text-xs">✓</Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {formData.selectedCamps.length > 0 && (
+                <div className="mt-3 pt-3 border-t">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {formData.selectedCamps.length} camp(s) selected
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );

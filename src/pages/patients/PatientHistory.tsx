@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, FileText, Stethoscope, Pill, DollarSign, Calendar } from 'lucide-react';
+import { ArrowLeft, User, FileText, Stethoscope, Pill, DollarSign, Calendar, Printer } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,10 @@ export default function PatientHistory() {
 
   const getDoctorName = (doctorId: string) => {
     return mockDoctors.find(d => d.id === doctorId)?.name || 'Unknown';
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   if (!patient) {
@@ -93,7 +97,7 @@ export default function PatientHistory() {
 
   return (
     <DashboardLayout campName="Bapatla">
-      <div className="page-header">
+      <div className="page-header no-print">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/patients')}>
             <ArrowLeft className="h-5 w-5" />
@@ -103,10 +107,27 @@ export default function PatientHistory() {
             <p className="text-muted-foreground">{patient.patientId}</p>
           </div>
         </div>
-        <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/soap/new')}>
-          <FileText className="mr-2 h-4 w-4" />
-          New SOAP Note
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handlePrint}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print
+          </Button>
+          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/soap/new')}>
+            <FileText className="mr-2 h-4 w-4" />
+            New SOAP Note
+          </Button>
+        </div>
+      </div>
+
+      {/* Print Header - Only visible when printing */}
+      <div className="hidden print:block mb-6 soap-print-header">
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold">Srini FOUNDATION</h1>
+          <p className="text-sm text-muted-foreground">Medical Camp - Patient History Report</p>
+        </div>
+        <div className="text-sm">
+          <p><strong>Generated on:</strong> {new Date().toLocaleDateString()}</p>
+        </div>
       </div>
 
       {/* Patient Info Card */}
@@ -142,7 +163,7 @@ export default function PatientHistory() {
         {/* Left - Timeline */}
         <div className="lg:col-span-2">
           <Tabs defaultValue="timeline">
-            <TabsList className="mb-6">
+            <TabsList className="mb-6 no-print">
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
               <TabsTrigger value="soap">SOAP Notes ({patientSOAPs.length})</TabsTrigger>
               <TabsTrigger value="consultations">Consultations ({patientConsultations.length})</TabsTrigger>
@@ -158,7 +179,7 @@ export default function PatientHistory() {
                   {timeline.length > 0 ? (
                     <div className="space-y-4">
                       {timeline.map((item, index) => (
-                        <div key={index} className="flex gap-4">
+                        <div key={index} className="flex gap-4 avoid-break">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTimelineColor(item.type)}`}>
                             {getTimelineIcon(item.type)}
                           </div>
@@ -191,7 +212,7 @@ export default function PatientHistory() {
             <TabsContent value="soap">
               <div className="space-y-4">
                 {patientSOAPs.map(soap => (
-                  <Card key={soap.id}>
+                  <Card key={soap.id} className="avoid-break">
                     <CardContent className="py-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -228,7 +249,7 @@ export default function PatientHistory() {
             <TabsContent value="consultations">
               <div className="space-y-4">
                 {patientConsultations.map(c => (
-                  <Card key={c.id}>
+                  <Card key={c.id} className="avoid-break">
                     <CardContent className="py-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -263,7 +284,7 @@ export default function PatientHistory() {
             <TabsContent value="prescriptions">
               <div className="space-y-4">
                 {patientPrescriptions.map(p => (
-                  <Card key={p.id}>
+                  <Card key={p.id} className="avoid-break">
                     <CardContent className="py-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>

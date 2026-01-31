@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { X, Save, MapPin, Calendar } from 'lucide-react';
+import { X, Save, MapPin, Calendar, Users } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,14 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { mockCamps, mockDoctors } from '@/data/mockData';
 
@@ -148,53 +140,37 @@ export default function EditCamp() {
     navigate('/camps');
   };
 
-  const getStatusColor = (status: string) => {
-    return statusOptions.find((s) => s.value === status)?.color || '';
-  };
-
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader className="relative pb-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4"
-              onClick={handleCancel}
-            >
-              <X className="h-5 w-5" />
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">Edit Camp</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
+              <X className="h-4 w-4 mr-1" />
+              Cancel
             </Button>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-accent" />
-              Edit Camp
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Status Toggle */}
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <Label className="font-medium mb-3 block">Camp Status</Label>
-              <div className="flex gap-2">
-                {statusOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => updateFormData('status', option.value)}
-                    className={`px-4 py-2 rounded-lg border transition-all ${
-                      formData.status === option.value
-                        ? `${option.color} ring-2 ring-offset-2 ring-accent`
-                        : 'bg-white border-border hover:bg-muted'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <Button size="sm" onClick={handleSubmit} className="bg-accent hover:bg-accent/90">
+              <Save className="h-4 w-4 mr-1" />
+              Update Camp
+            </Button>
+          </div>
+        </div>
 
-            {/* Form Fields */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">
+        <div className="flex gap-4">
+          {/* Main Form */}
+          <Card className="flex-1 shadow-sm">
+            <CardHeader className="py-3 px-4 border-b bg-muted/30">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-accent" />
+                Camp Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              {/* Camp Name */}
+              <div className="space-y-1">
+                <Label htmlFor="name" className="text-xs font-medium">
                   Camp Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -202,16 +178,17 @@ export default function EditCamp() {
                   placeholder="Enter camp name"
                   value={formData.name}
                   onChange={(e) => updateFormData('name', e.target.value)}
-                  className={errors.name ? 'border-destructive' : ''}
+                  className={`h-9 text-sm ${errors.name ? 'border-destructive' : ''}`}
                 />
                 {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name}</p>
+                  <p className="text-xs text-destructive">{errors.name}</p>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="village">
+              {/* Location Row */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="village" className="text-xs font-medium">
                     Village <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -219,15 +196,14 @@ export default function EditCamp() {
                     placeholder="Enter village"
                     value={formData.village}
                     onChange={(e) => updateFormData('village', e.target.value)}
-                    className={errors.village ? 'border-destructive' : ''}
+                    className={`h-9 text-sm ${errors.village ? 'border-destructive' : ''}`}
                   />
                   {errors.village && (
-                    <p className="text-sm text-destructive">{errors.village}</p>
+                    <p className="text-xs text-destructive">{errors.village}</p>
                   )}
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="district">
+                <div className="space-y-1">
+                  <Label htmlFor="district" className="text-xs font-medium">
                     District <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -235,27 +211,28 @@ export default function EditCamp() {
                     placeholder="Enter district"
                     value={formData.district}
                     onChange={(e) => updateFormData('district', e.target.value)}
-                    className={errors.district ? 'border-destructive' : ''}
+                    className={`h-9 text-sm ${errors.district ? 'border-destructive' : ''}`}
                   />
                   {errors.district && (
-                    <p className="text-sm text-destructive">{errors.district}</p>
+                    <p className="text-xs text-destructive">{errors.district}</p>
                   )}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="location" className="text-xs font-medium">Address</Label>
+                  <Input
+                    id="location"
+                    placeholder="Enter full address"
+                    value={formData.location}
+                    onChange={(e) => updateFormData('location', e.target.value)}
+                    className="h-9 text-sm"
+                  />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="location">Location / Address</Label>
-                <Input
-                  id="location"
-                  placeholder="Enter full address"
-                  value={formData.location}
-                  onChange={(e) => updateFormData('location', e.target.value)}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate">
+              {/* Date Row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="startDate" className="text-xs font-medium">
                     Start Date <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -263,15 +240,14 @@ export default function EditCamp() {
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => updateFormData('startDate', e.target.value)}
-                    className={errors.startDate ? 'border-destructive' : ''}
+                    className={`h-9 text-sm ${errors.startDate ? 'border-destructive' : ''}`}
                   />
                   {errors.startDate && (
-                    <p className="text-sm text-destructive">{errors.startDate}</p>
+                    <p className="text-xs text-destructive">{errors.startDate}</p>
                   )}
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="endDate">
+                <div className="space-y-1">
+                  <Label htmlFor="endDate" className="text-xs font-medium">
                     End Date <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -279,94 +255,98 @@ export default function EditCamp() {
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => updateFormData('endDate', e.target.value)}
-                    className={errors.endDate ? 'border-destructive' : ''}
+                    className={`h-9 text-sm ${errors.endDate ? 'border-destructive' : ''}`}
                   />
                   {errors.endDate && (
-                    <p className="text-sm text-destructive">{errors.endDate}</p>
+                    <p className="text-xs text-destructive">{errors.endDate}</p>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+              {/* Description */}
+              <div className="space-y-1">
+                <Label htmlFor="description" className="text-xs font-medium">Description</Label>
                 <Textarea
                   id="description"
                   placeholder="Enter camp description"
                   value={formData.description}
                   onChange={(e) => updateFormData('description', e.target.value)}
-                  rows={3}
+                  rows={2}
+                  className="text-sm"
                 />
               </div>
+            </CardContent>
+          </Card>
 
+          {/* Status Card */}
+          <Card className="w-48 shrink-0 shadow-sm">
+            <CardHeader className="py-3 px-4 border-b bg-muted/30">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-accent" />
+                Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
               <div className="space-y-2">
-                <Label>Assign Doctors</Label>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Select doctors to assign to this camp
-                </p>
-                <div className="border rounded-lg p-3 max-h-48 overflow-y-auto">
-                  <div className="space-y-2">
-                    {mockDoctors.map((doctor) => (
-                      <div
-                        key={doctor.id}
-                        className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
-                          formData.selectedDoctors.includes(doctor.id)
-                            ? 'bg-accent/20 border border-accent'
-                            : 'hover:bg-muted'
-                        }`}
-                        onClick={() => toggleDoctor(doctor.id)}
-                      >
-                        <div>
-                          <p className="font-medium text-sm">{doctor.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {doctor.specialization}
-                          </p>
-                        </div>
-                        {formData.selectedDoctors.includes(doctor.id) && (
-                          <Badge className="bg-accent text-accent-foreground">Selected</Badge>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {formData.selectedDoctors.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.selectedDoctors.map((doctorId) => {
-                      const doctor = mockDoctors.find((d) => d.id === doctorId);
-                      return doctor ? (
-                        <Badge
-                          key={doctorId}
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {doctor.name}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleDoctor(doctorId);
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                )}
+                {statusOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateFormData('status', option.value)}
+                    className={`w-full px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                      formData.status === option.value
+                        ? `${option.color} ring-2 ring-offset-1 ring-accent`
+                        : 'bg-white border-border hover:bg-muted'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button className="flex-1 bg-accent hover:bg-accent/90" onClick={handleSubmit}>
-                <Save className="mr-2 h-4 w-4" />
-                Update Camp
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Doctor Assignment Card */}
+          <Card className="w-64 shrink-0 shadow-sm">
+            <CardHeader className="py-3 px-4 border-b bg-muted/30">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Users className="h-4 w-4 text-accent" />
+                Assign Doctors
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {mockDoctors.map((doctor) => (
+                  <div
+                    key={doctor.id}
+                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                      formData.selectedDoctors.includes(doctor.id)
+                        ? 'bg-accent/20 border border-accent'
+                        : 'hover:bg-muted border border-transparent'
+                    }`}
+                    onClick={() => toggleDoctor(doctor.id)}
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{doctor.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {doctor.specialization}
+                      </p>
+                    </div>
+                    {formData.selectedDoctors.includes(doctor.id) && (
+                      <Badge className="bg-accent text-accent-foreground text-xs">✓</Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {formData.selectedDoctors.length > 0 && (
+                <div className="mt-3 pt-3 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    {formData.selectedDoctors.length} doctor(s) assigned
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );

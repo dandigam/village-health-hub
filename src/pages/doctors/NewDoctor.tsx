@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Save, User, Camera } from 'lucide-react';
+import { X, Save, User, Stethoscope, Building } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -15,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { toast } from '@/hooks/use-toast';
 import { mockCamps } from '@/data/mockData';
 
@@ -40,6 +40,7 @@ interface FormErrors {
 
 export default function NewDoctor() {
   const navigate = useNavigate();
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     specialization: '',
@@ -51,7 +52,6 @@ export default function NewDoctor() {
 
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -114,127 +114,116 @@ export default function NewDoctor() {
     navigate('/doctors');
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader className="relative pb-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4"
-              onClick={handleCancel}
-            >
-              <X className="h-5 w-5" />
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">Add New Doctor</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleCancel}>
+              <X className="h-4 w-4 mr-1" />
+              Cancel
             </Button>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <User className="h-5 w-5 text-accent" />
-              Add Doctor
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Avatar Section */}
-            <div className="flex justify-center">
-              <div className="relative">
-                <Avatar className="h-24 w-24">
-                  <AvatarFallback className="bg-accent text-accent-foreground text-2xl">
-                    {formData.name ? getInitials(formData.name) : <User className="h-10 w-10" />}
-                  </AvatarFallback>
-                </Avatar>
-                <button className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:bg-primary/90 transition-colors">
-                  <Camera className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+            <Button size="sm" onClick={handleSubmit} className="bg-accent hover:bg-accent/90">
+              <Save className="h-4 w-4 mr-1" />
+              Save Doctor
+            </Button>
+          </div>
+        </div>
 
-            {/* Form Fields */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">
-                  Doctor Name <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="Enter full name"
-                  value={formData.name}
-                  onChange={(e) => updateFormData('name', e.target.value)}
-                  className={errors.name ? 'border-destructive' : ''}
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="specialization">
-                  Specialization <span className="text-destructive">*</span>
-                </Label>
-                <Select
-                  value={formData.specialization}
-                  onValueChange={(v) => updateFormData('specialization', v)}
-                >
-                  <SelectTrigger className={errors.specialization ? 'border-destructive' : ''}>
-                    <SelectValue placeholder="Select specialization" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {specializations.map((spec) => (
-                      <SelectItem key={spec} value={spec}>
-                        {spec}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.specialization && (
-                  <p className="text-sm text-destructive">{errors.specialization}</p>
-                )}
+        <div className="flex gap-4">
+          {/* Main Form */}
+          <Card className="flex-1 shadow-sm">
+            <CardHeader className="py-3 px-4 border-b bg-muted/30">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <User className="h-4 w-4 text-accent" />
+                Doctor Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              {/* Personal Details Row 1 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="name" className="text-xs font-medium">
+                    Doctor Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="Enter full name"
+                    value={formData.name}
+                    onChange={(e) => updateFormData('name', e.target.value)}
+                    className={`h-9 text-sm ${errors.name ? 'border-destructive' : ''}`}
+                  />
+                  {errors.name && (
+                    <p className="text-xs text-destructive">{errors.name}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="specialization" className="text-xs font-medium">
+                    Specialization <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={formData.specialization}
+                    onValueChange={(v) => updateFormData('specialization', v)}
+                  >
+                    <SelectTrigger className={`h-9 text-sm ${errors.specialization ? 'border-destructive' : ''}`}>
+                      <SelectValue placeholder="Select specialization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specializations.map((spec) => (
+                        <SelectItem key={spec} value={spec}>
+                          {spec}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.specialization && (
+                    <p className="text-xs text-destructive">{errors.specialization}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">
-                  Phone Number <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="Enter phone number"
-                  value={formData.phone}
-                  onChange={(e) => updateFormData('phone', e.target.value)}
-                  className={errors.phone ? 'border-destructive' : ''}
-                />
-                {errors.phone && (
-                  <p className="text-sm text-destructive">{errors.phone}</p>
-                )}
+              {/* Contact Details Row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="phone" className="text-xs font-medium">
+                    Phone Number <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="Enter phone number"
+                    value={formData.phone}
+                    onChange={(e) => updateFormData('phone', e.target.value)}
+                    className={`h-9 text-sm ${errors.phone ? 'border-destructive' : ''}`}
+                  />
+                  {errors.phone && (
+                    <p className="text-xs text-destructive">{errors.phone}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-xs font-medium">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={formData.email}
+                    onChange={(e) => updateFormData('email', e.target.value)}
+                    className={`h-9 text-sm ${errors.email ? 'border-destructive' : ''}`}
+                  />
+                  {errors.email && (
+                    <p className="text-xs text-destructive">{errors.email}</p>
+                  )}
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter email address"
-                  value={formData.email}
-                  onChange={(e) => updateFormData('email', e.target.value)}
-                  className={errors.email ? 'border-destructive' : ''}
-                />
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Assign Camps</Label>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Select camps to assign this doctor
-                </p>
+              {/* Camp Assignment Section */}
+              <div className="pt-2 border-t">
+                <div className="flex items-center gap-2 mb-3">
+                  <Building className="h-4 w-4 text-accent" />
+                  <span className="text-sm font-medium">Assign Camps</span>
+                </div>
                 <div className="border rounded-lg p-3 max-h-48 overflow-y-auto">
                   <div className="space-y-2">
                     {mockCamps.map((camp) => (
@@ -285,20 +274,27 @@ export default function NewDoctor() {
                   </div>
                 )}
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button className="flex-1 bg-accent hover:bg-accent/90" onClick={handleSubmit}>
-                <Save className="mr-2 h-4 w-4" />
-                Save Doctor
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Photo Upload Card */}
+          <Card className="w-52 shrink-0 shadow-sm">
+            <CardHeader className="py-3 px-4 border-b bg-muted/30">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Stethoscope className="h-4 w-4 text-accent" />
+                Photo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 flex flex-col items-center justify-center">
+              <PhotoUpload
+                currentPhoto={photoUrl || undefined}
+                onPhotoChange={setPhotoUrl}
+                name={formData.name}
+                size="lg"
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
