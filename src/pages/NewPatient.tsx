@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, User, MapPin, Save, X } from 'lucide-react';
+import { User, MapPin, Save, X } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,10 +13,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { toast } from 'sonner';
 
 export default function NewPatient() {
   const navigate = useNavigate();
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
@@ -250,21 +252,19 @@ export default function NewPatient() {
             </Card>
 
             {/* Photo Upload Card */}
-            <Card className="w-48 shrink-0 shadow-sm">
+            <Card className="w-52 shrink-0 shadow-sm">
               <CardHeader className="py-3 px-4 border-b bg-muted/30">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Camera className="h-4 w-4 text-accent" />
                   Photo
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
-                <div className="aspect-square bg-muted/50 rounded-lg flex items-center justify-center mb-3 border-2 border-dashed border-muted-foreground/30">
-                  <Camera className="h-12 w-12 text-muted-foreground/50" />
-                </div>
-                <Button variant="outline" size="sm" className="w-full text-xs">
-                  <Camera className="h-3 w-3 mr-1" />
-                  Take Picture
-                </Button>
+              <CardContent className="p-4 flex flex-col items-center justify-center">
+                <PhotoUpload
+                  currentPhoto={photoUrl || undefined}
+                  onPhotoChange={setPhotoUrl}
+                  name={formData.name}
+                  size="lg"
+                />
               </CardContent>
             </Card>
           </div>
