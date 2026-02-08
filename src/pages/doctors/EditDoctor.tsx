@@ -17,20 +17,9 @@ import {
 } from '@/components/ui/select';
 import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { toast } from '@/hooks/use-toast';
-import { mockCamps, mockDoctors } from '@/data/mockData';
+import { mockCamps } from '@/data/mockData';
 
-const specializations = [
-  'General Physician',
-  'Cardiologist',
-  'Neurologist',
-  'Orthopedist',
-  'Pediatrician',
-  'Dermatologist',
-  'Ophthalmologist',
-  'ENT Specialist',
-  'Psychiatrist',
-  'Gynecologist',
-];
+import { API_BASE_URL, specializations } from '@/lib/api';
 
 interface FormErrors {
   name?: string;
@@ -42,7 +31,16 @@ interface FormErrors {
 export default function EditDoctor() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const doctor = mockDoctors.find((d) => d.id === id);
+  const [doctor, setDoctor] = useState(null);
+
+  useEffect(() => {
+    if (id) {
+      fetch(`${API_BASE_URL}/doctors/${id}`)
+        .then((res) => res.json())
+        .then((data) => setDoctor(data))
+        .catch(() => setDoctor(null));
+    }
+  }, [id]);
 
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -62,18 +60,19 @@ export default function EditDoctor() {
         .map((c) => c.id);
 
       setFormData({
-        name: doctor.name,
-        specialization: doctor.specialization,
-        phone: doctor.phone,
+        name: doctor.name || '',
+        specialization: doctor.specialization || '',
+        phone: doctor.phone || '',
         email: doctor.email || '',
-        isActive: true,
+        isActive: doctor.active !== undefined ? doctor.active : true,
         selectedCamps: assignedCamps,
       });
       setPhotoUrl(doctor.photoUrl || null);
     }
   }, [doctor]);
 
-  if (!doctor) {
+  // Show loading or not found UI at the top level
+  if (doctor === null) {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
@@ -129,7 +128,7 @@ export default function EditDoctor() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       toast({
         title: 'Validation Error',
@@ -139,11 +138,34 @@ export default function EditDoctor() {
       return;
     }
 
-    toast({
-      title: 'Doctor Updated Successfully!',
-      description: `${formData.name}'s details have been updated.`,
-    });
-    navigate('/doctors');
+    try {
+      await fetch(`${API_BASE_URL}/doctors/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          specialization: formData.specialization,
+          phone: formData.phone,
+          email: formData.email,
+          campIds: formData.selectedCamps,
+          photoUrl,
+          active: formData.isActive,
+        }),
+      });
+      toast({
+        title: 'Doctor Updated Successfully!',
+        description: `${formData.name}'s details have been updated.`,
+      });
+      navigate('/doctors');
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update doctor. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCancel = () => {

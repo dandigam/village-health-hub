@@ -23,7 +23,7 @@ export interface Camp {
   endDate: string;
   status: CampStatus;
   description?: string;
-  doctorIds: string[];
+  doctorIds: number[];
   pharmacyIds: string[];
   staffIds: string[];
 }

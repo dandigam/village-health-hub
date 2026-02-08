@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { 
@@ -43,6 +43,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { mockDoctors } from '@/data/mockData';
+import { API_BASE_URL } from '@/lib/api';
 
 // Mock data for dropdowns
 const mockStates = ['Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu'];
@@ -65,6 +66,19 @@ const steps = [
   { id: 5, title: 'Summary', icon: ClipboardCheck },
 ];
 
+
+interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  phone: string;
+  email?: string;
+  avatar?: string;
+  photoUrl?: string;
+  
+}
+
+
 interface FormData {
   campName: string;
   organizerName: string;
@@ -77,11 +91,21 @@ interface FormData {
   city: string;
   address: string;
   pinCode: string;
-  selectedDoctors: typeof mockDoctors;
+  selectedDoctors: Doctor[];
   selectedVolunteers: typeof mockVolunteers;
 }
 
 export default function NewCamp() {
+
+    const [doctors, setDoctors] = useState([]);
+  
+    useEffect(() => {
+      fetch(`${API_BASE_URL}/doctors`)
+        .then((res) => res.json())
+        .then((data) => setDoctors(data))
+        .catch(() => setDoctors([]));
+    }, []);
+
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [doctorSearch, setDoctorSearch] = useState('');
@@ -101,7 +125,7 @@ export default function NewCamp() {
     selectedDoctors: [],
     selectedVolunteers: [],
   });
-
+  
   const updateFormData = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -114,22 +138,83 @@ export default function NewCamp() {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleSaveDraft = () => {
-    toast({
-      title: 'Draft Saved',
-      description: 'Your camp draft has been saved successfully.',
-    });
+  const handleSaveDraft = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/camps`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.campName,
+          organizerName: formData.organizerName,
+          organizerPhone: formData.organizerPhone,
+          organizerEmail: formData.organizerEmail,
+          planDate: formData.planDate ? format(formData.planDate, 'yyyy-MM-dd') : undefined,
+          campStatus: 'draft',
+          state: formData.state,
+          district: formData.district,
+          mandal: formData.mandal,
+          village: formData.city,
+          address: formData.address,
+          pinCode: formData.pinCode,
+          doctorIds: formData.selectedDoctors.map((d) => d.id),
+          staffIds: formData.selectedVolunteers.map((v) => v.id),
+          
+        }),
+      });
+      toast({
+        title: 'Draft Saved',
+        description: 'Your camp draft has been saved successfully.',
+      });
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save draft. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const handleSubmit = () => {
-    toast({
-      title: 'Camp Created Successfully!',
-      description: `${formData.campName} has been created and is ready for activation.`,
-    });
-    navigate('/camps');
+  const handleSubmit = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/camps`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.campName,
+          organizerName: formData.organizerName,
+          organizerPhone: formData.organizerPhone,
+          organizerEmail: formData.organizerEmail,
+          planDate: formData.planDate ? format(formData.planDate, 'yyyy-MM-dd') : undefined,
+          campStatus: 'draft',
+          state: formData.state,
+          district: formData.district,
+          mandal: formData.mandal,
+          village: formData.city,
+          address: formData.address,
+          pinCode: formData.pinCode,
+          doctorIds: formData.selectedDoctors.map((d) => d.id),
+          staffIds: formData.selectedVolunteers.map((v) => v.id),
+        }),
+      });
+      toast({
+        title: 'Camp Created Successfully!',
+        description: `${formData.campName} has been created and is ready for activation.`,
+      });
+      navigate('/camps');
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create camp. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const addDoctor = (doctor: (typeof mockDoctors)[0]) => {
+  const addDoctor = (doctor: Doctor) => {
     if (!formData.selectedDoctors.find((d) => d.id === doctor.id)) {
       updateFormData('selectedDoctors', [...formData.selectedDoctors, doctor]);
     }
@@ -157,8 +242,8 @@ export default function NewCamp() {
     );
   };
 
-  const filteredDoctors = mockDoctors.filter(
-    (d) =>
+  const filteredDoctors = doctors.filter(
+    (d: Doctor) =>
       d.name.toLowerCase().includes(doctorSearch.toLowerCase()) &&
       !formData.selectedDoctors.find((sd) => sd.id === d.id)
   );

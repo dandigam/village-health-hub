@@ -7,13 +7,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SearchFilter } from '@/components/shared/SearchFilter';
-import { mockDoctors, mockCamps } from '@/data/mockData';
+import { mockCamps } from '@/data/mockData';
+import { useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/api';
+
 
 export default function Doctors() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [doctors, setDoctors] = useState([]);
 
-  const filteredDoctors = mockDoctors.filter(
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/doctors`)
+      .then((res) => res.json())
+      .then((data) => setDoctors(data))
+      .catch(() => setDoctors([]));
+  }, []);
+
+  const filteredDoctors = doctors.filter(
     (d) =>
       d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||

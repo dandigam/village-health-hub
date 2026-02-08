@@ -3,63 +3,86 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { X, Save, MapPin, Calendar, Users } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { mockCamps, mockDoctors } from '@/data/mockData';
+import { API_BASE_URL } from '@/lib/api';
 
 interface FormErrors {
   name?: string;
   village?: string;
   district?: string;
-  startDate?: string;
-  endDate?: string;
+  planDate?: string;
 }
 
 const statusOptions = [
   { value: 'draft', label: 'Draft', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-  { value: 'active', label: 'Active', color: 'bg-green-100 text-green-800 border-green-200' },
+  { value: 'start', label: 'Active', color: 'bg-green-100 text-green-800 border-green-200' },
   { value: 'closed', label: 'Closed', color: 'bg-gray-100 text-gray-800 border-gray-200' },
 ];
-
-export default function EditCamp() {
+function EditCamp() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const camp = mockCamps.find((c) => c.id === id);
-
   const [formData, setFormData] = useState({
     name: '',
     village: '',
     district: '',
-    location: '',
-    startDate: '',
-    endDate: '',
+    address: '',
+    planDate: '',
     description: '',
-    status: 'draft' as 'draft' | 'active' | 'closed',
-    selectedDoctors: [] as string[],
+    campStatus: 'draft' as 'draft' | 'start' | 'closed',
+    selectedDoctors: [] as (string | number)[],
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(true);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (camp) {
-      setFormData({
-        name: camp.name,
-        village: camp.village,
-        district: camp.district,
-        location: camp.location,
-        startDate: camp.startDate,
-        endDate: camp.endDate,
-        description: camp.description || '',
-        status: camp.status,
-        selectedDoctors: camp.doctorIds,
-      });
+    async function fetchData() {
+      try {
+        const campRes = await fetch(`${API_BASE_URL}/camps/${id}`);
+        if (!campRes.ok) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+        const camp = await campRes.json();
+        setFormData({
+          name: camp.name || '',
+          village: camp.village || '',
+          district: camp.district || '',
+          address: camp.address || '',
+          planDate: camp.planDate || '',
+          description: camp.description || '',
+          campStatus: camp.campStatus || 'draft',
+          selectedDoctors: camp.doctorIds || [],
+        });
+        const doctorsRes = await fetch(`${API_BASE_URL}/doctors`);
+        const doctorsData = doctorsRes.ok ? await doctorsRes.json() : [];
+        setDoctors(doctorsData);
+      } catch (err) {
+        setNotFound(true);
+      }
+      setLoading(false);
     }
-  }, [camp]);
+    fetchData();
+  }, [id]);
 
-  if (!camp) {
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (notFound) {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
@@ -79,7 +102,7 @@ export default function EditCamp() {
     }
   };
 
-  const toggleDoctor = (doctorId: string) => {
+  const toggleDoctor = (doctorId: string | number) => {
     if (formData.selectedDoctors.includes(doctorId)) {
       updateFormData(
         'selectedDoctors',
@@ -105,21 +128,15 @@ export default function EditCamp() {
       newErrors.district = 'District is required';
     }
 
-    if (!formData.startDate) {
-      newErrors.startDate = 'Start date is required';
-    }
-
-    if (!formData.endDate) {
-      newErrors.endDate = 'End date is required';
-    } else if (formData.startDate && new Date(formData.endDate) < new Date(formData.startDate)) {
-      newErrors.endDate = 'End date must be after start date';
+    if (!formData.planDate) {
+      newErrors.planDate = 'Plan date is required';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       toast({
         title: 'Validation Error',
@@ -129,11 +146,39 @@ export default function EditCamp() {
       return;
     }
 
-    toast({
-      title: 'Camp Updated Successfully!',
-      description: `${formData.name} has been updated.`,
-    });
-    navigate('/camps');
+    try {
+      const payload = {
+        name: formData.name,
+        village: formData.village,
+        district: formData.district,
+        location: formData.location,
+        planDate: formData.planDate,
+        description: formData.description,
+        campStatus: formData.campStatus,
+        doctorIds: formData.selectedDoctors,
+      };
+      const res = await fetch(`${API_BASE_URL}/camps/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to update camp');
+      }
+      toast({
+        title: 'Camp Updated Successfully!',
+        description: `${formData.name} has been updated.`,
+      });
+      navigate('/camps');
+    } catch (err) {
+      toast({
+        title: 'Update Failed',
+        description: 'Could not update camp. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -182,8 +227,7 @@ export default function EditCamp() {
                 />
                 {errors.name && (
                   <p className="text-xs text-destructive">{errors.name}</p>
-                )}
-              </div>
+                )}</div>
 
               {/* Location Row */}
               <div className="grid grid-cols-3 gap-3">
@@ -218,49 +262,32 @@ export default function EditCamp() {
                   )}
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="location" className="text-xs font-medium">Address</Label>
+                  <Label htmlFor="address" className="text-xs font-medium">Address</Label>
                   <Input
-                    id="location"
+                    id="address"
                     placeholder="Enter full address"
-                    value={formData.location}
-                    onChange={(e) => updateFormData('location', e.target.value)}
+                    value={formData.address}
+                    onChange={(e) => updateFormData('address', e.target.value)}
                     className="h-9 text-sm"
                   />
                 </div>
               </div>
 
-              {/* Date Row */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label htmlFor="startDate" className="text-xs font-medium">
-                    Start Date <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) => updateFormData('startDate', e.target.value)}
-                    className={`h-9 text-sm ${errors.startDate ? 'border-destructive' : ''}`}
-                  />
-                  {errors.startDate && (
-                    <p className="text-xs text-destructive">{errors.startDate}</p>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="endDate" className="text-xs font-medium">
-                    End Date <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) => updateFormData('endDate', e.target.value)}
-                    className={`h-9 text-sm ${errors.endDate ? 'border-destructive' : ''}`}
-                  />
-                  {errors.endDate && (
-                    <p className="text-xs text-destructive">{errors.endDate}</p>
-                  )}
-                </div>
+              {/* Plan Date */}
+              <div className="space-y-1">
+                <Label htmlFor="planDate" className="text-xs font-medium">
+                  Plan Date <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="planDate"
+                  type="date"
+                  value={formData.planDate}
+                  onChange={(e) => updateFormData('planDate', e.target.value)}
+                  className={`h-9 text-sm ${errors.planDate ? 'border-destructive' : ''}`}
+                />
+                {errors.planDate && (
+                  <p className="text-xs text-destructive">{errors.planDate}</p>
+                )}
               </div>
 
               {/* Description */}
@@ -291,9 +318,9 @@ export default function EditCamp() {
                 {statusOptions.map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => updateFormData('status', option.value)}
+                    onClick={() => updateFormData('campStatus', option.value)}
                     className={`w-full px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
-                      formData.status === option.value
+                      formData.campStatus === option.value
                         ? `${option.color} ring-2 ring-offset-1 ring-accent`
                         : 'bg-white border-border hover:bg-muted'
                     }`}
@@ -315,7 +342,7 @@ export default function EditCamp() {
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                {mockDoctors.map((doctor) => (
+                {doctors.map((doctor) => (
                   <div
                     key={doctor.id}
                     className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
@@ -351,3 +378,5 @@ export default function EditCamp() {
     </DashboardLayout>
   );
 }
+
+export default EditCamp;

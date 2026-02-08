@@ -7,24 +7,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchFilter } from '@/components/shared/SearchFilter';
-import { mockCamps, mockDoctors } from '@/data/mockData';
+// import { mockDoctors } from '@/data/mockData';
+import { useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 const statusColors = {
   draft: 'bg-stat-orange text-stat-orange-text border-stat-orange-text/20',
-  active: 'bg-stat-green text-stat-green-text border-stat-green-text/20',
+  start: 'bg-stat-green text-stat-green-text border-stat-green-text/20',
   closed: 'bg-muted text-muted-foreground border-muted-foreground/20',
 };
 
-export default function Camps() {
+function Camps() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [camps, setCamps] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/camps`)
+      .then((res) => res.json())
+      .then((data) => setCamps(data))
+      .catch(() => setCamps([]));
+    fetch(`${API_BASE_URL}/doctors`)
+      .then((res) => res.json())
+      .then((data) => setDoctors(data))
+      .catch(() => setDoctors([]));
+  }, []);
 
   const tabFilteredCamps =
     activeTab === 'all'
-      ? mockCamps
-      : mockCamps.filter((c) => c.status === activeTab);
+      ? camps
+      : camps.filter((c) => c.campStatus === activeTab);
 
   const filteredCamps = tabFilteredCamps.filter(
     (c) =>
@@ -52,7 +67,7 @@ export default function Camps() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList>
           <TabsTrigger value="all">All Camps</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="start">Active</TabsTrigger>
           <TabsTrigger value="draft">Draft</TabsTrigger>
           <TabsTrigger value="closed">Closed</TabsTrigger>
         </TabsList>
@@ -60,7 +75,8 @@ export default function Camps() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCamps.map((camp) => {
-          const doctors = mockDoctors.filter((d) => camp.doctorIds.includes(d.id));
+          // doctorIds may be string or number, so convert to string for comparison
+          const assignedDoctors = doctors.filter((d) => camp.doctorIds && camp.doctorIds.map(String).includes(String(d.id)));
 
           return (
             <Card
@@ -71,8 +87,8 @@ export default function Camps() {
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-lg">{camp.name}</CardTitle>
-                  <Badge className={cn('capitalize', statusColors[camp.status])}>
-                    {camp.status}
+                  <Badge className={cn('capitalize', statusColors[camp.campStatus])}>
+                    {camp.campStatus}
                   </Badge>
                 </div>
               </CardHeader>
@@ -87,19 +103,18 @@ export default function Camps() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      {new Date(camp.startDate).toLocaleDateString()} -{' '}
-                      {new Date(camp.endDate).toLocaleDateString()}
+                      {camp.planDate ? new Date(camp.planDate).toLocaleDateString() : '-'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Users className="h-4 w-4" />
-                    <span>{doctors.length} Doctors assigned</span>
+                    <span>{assignedDoctors.length} Doctors assigned</span>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t flex items-center justify-between">
                   <div className="flex -space-x-2">
-                    {doctors.slice(0, 3).map((doctor) => (
+                    {assignedDoctors.slice(0, 3).map((doctor) => (
                       <div
                         key={doctor.id}
                         className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium border-2 border-card"
@@ -121,3 +136,5 @@ export default function Camps() {
     </DashboardLayout>
   );
 }
+
+export default Camps;

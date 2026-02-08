@@ -17,19 +17,9 @@ import {
 import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { toast } from '@/hooks/use-toast';
 import { mockCamps } from '@/data/mockData';
+import { API_BASE_URL } from '@/lib/api';
 
-const specializations = [
-  'General Physician',
-  'Cardiologist',
-  'Neurologist',
-  'Orthopedist',
-  'Pediatrician',
-  'Dermatologist',
-  'Ophthalmologist',
-  'ENT Specialist',
-  'Psychiatrist',
-  'Gynecologist',
-];
+import { specializations } from '@/lib/api';
 
 interface FormErrors {
   name?: string;
@@ -93,7 +83,7 @@ export default function NewDoctor() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       toast({
         title: 'Validation Error',
@@ -103,11 +93,34 @@ export default function NewDoctor() {
       return;
     }
 
-    toast({
-      title: 'Doctor Added Successfully!',
-      description: `${formData.name} has been added to the system.`,
-    });
-    navigate('/doctors');
+    try {
+      const res = await fetch(`${API_BASE_URL}/doctors`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          specialization: formData.specialization,
+          phone: formData.phone,
+          email: formData.email,
+          campIds: formData.selectedCamps,
+          photoUrl,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to save doctor');
+      toast({
+        title: 'Doctor Added Successfully!',
+        description: `${formData.name} has been added to the system.`,
+      });
+      navigate('/doctors');
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save doctor. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCancel = () => {
