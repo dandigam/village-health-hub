@@ -1,12 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, FileText, Stethoscope, Pill, DollarSign, Calendar, Printer } from 'lucide-react';
+import { ArrowLeft, User, FileText, Printer } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { mockPatients, mockSOAPNotes, mockConsultations, mockPrescriptions, mockPayments, mockDoctors } from '@/data/mockData';
+import { VisitTimeline, type Visit } from '@/components/patients/VisitTimeline';
+import { mockPatients, mockSOAPNotes, mockConsultations, mockPrescriptions, mockPayments, mockDoctors, mockCamps } from '@/data/mockData';
 
 export default function PatientHistory() {
   const { id } = useParams();
@@ -20,6 +21,10 @@ export default function PatientHistory() {
 
   const getDoctorName = (doctorId: string) => {
     return mockDoctors.find(d => d.id === doctorId)?.name || 'Unknown';
+  };
+
+  const getCamp = (campId: string) => {
+    return mockCamps.find(c => c.id === campId);
   };
 
   const handlePrint = () => {
@@ -39,61 +44,77 @@ export default function PatientHistory() {
     );
   }
 
-  // Build timeline of all events
-  const timeline = [
-    ...patientSOAPs.map(s => ({
-      type: 'soap',
-      date: s.createdAt,
-      title: 'SOAP Note Created',
-      description: s.subjective.substring(0, 100) + '...',
-      status: s.status,
-      data: s,
-    })),
-    ...patientConsultations.map(c => ({
-      type: 'consultation',
-      date: c.createdAt,
-      title: 'Doctor Consultation',
-      description: `Diagnosis: ${c.diagnosis.join(', ')}`,
-      status: c.status,
-      data: c,
-    })),
-    ...patientPrescriptions.map(p => ({
-      type: 'prescription',
-      date: p.createdAt,
-      title: 'Prescription',
-      description: `${p.items.length} medicines prescribed`,
-      status: p.status,
-      data: p,
-    })),
-    ...patientPayments.map(p => ({
-      type: 'payment',
-      date: p.createdAt,
-      title: 'Payment',
-      description: `₹${p.paidAmount} / ₹${p.totalAmount}`,
-      status: p.status,
-      data: p,
-    })),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // Build visits from SOAP notes, consultations, and prescriptions
+  // Group by date to create unique visits
+  const visitMap = new Map<string, Visit>();
 
-  const getTimelineIcon = (type: string) => {
-    switch (type) {
-      case 'soap': return <FileText className="h-4 w-4" />;
-      case 'consultation': return <Stethoscope className="h-4 w-4" />;
-      case 'prescription': return <Pill className="h-4 w-4" />;
-      case 'payment': return <DollarSign className="h-4 w-4" />;
-      default: return <Calendar className="h-4 w-4" />;
-    }
-  };
+  patientSOAPs.forEach((soap, index) => {
+    const dateKey = new Date(soap.createdAt).toDateString();
+    const camp = getCamp(soap.campId);
+    const consultation = patientConsultations.find(c => c.soapNoteId === soap.id);
+    const prescription = consultation ? patientPrescriptions.find(p => p.consultationId === consultation.id) : null;
+    const payment = prescription ? patientPayments.find(pay => pay.prescriptionId === prescription.id) : null;
 
-  const getTimelineColor = (type: string) => {
-    switch (type) {
-      case 'soap': return 'bg-stat-blue text-stat-blue-text';
-      case 'consultation': return 'bg-stat-green text-stat-green-text';
-      case 'prescription': return 'bg-stat-purple text-stat-purple-text';
-      case 'payment': return 'bg-stat-orange text-stat-orange-text';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
+    const vitalsStr = [
+      soap.objective.bp && `BP: ${soap.objective.bp}`,
+      soap.objective.pulse && `Pulse: ${soap.objective.pulse}`,
+      soap.objective.spo2 && `SpO2: ${soap.objective.spo2}%`,
+    ].filter(Boolean).join(', ') || 'No vitals';
+
+    visitMap.set(dateKey + soap.id, {
+      id: soap.id,
+      visitNumber: patientSOAPs.length - index,
+      date: soap.createdAt,
+      campName: camp?.name || 'Unknown Camp',
+      amount: {
+        paid: payment?.paidAmount || 0,
+        pending: payment?.pendingAmount || 0,
+      },
+      chiefComplaint: consultation?.chiefComplaint || soap.subjective,
+      vitals: vitalsStr,
+      assessment: consultation?.diagnosis?.join(', ') || soap.assessment,
+      plan: soap.plan,
+      fullDetails: {
+        campId: soap.campId,
+        campName: camp?.name || 'Unknown Camp',
+        campLocation: camp?.location || 'Unknown',
+        visitDate: soap.createdAt,
+        paymentType: payment ? (payment.pendingAmount === 0 && payment.paidAmount === 0 ? 'Free' : 'Paid') : 'Free',
+        totalAmount: payment?.totalAmount || 0,
+        paidAmount: payment?.paidAmount || 0,
+        pendingAmount: payment?.pendingAmount || 0,
+        discountAmount: payment?.discountAmount || 0,
+        chiefComplaint: consultation?.chiefComplaint || soap.subjective,
+        vitals: soap.objective,
+        labs: consultation?.labTests || [],
+        assessment: consultation?.diagnosis?.join(', ') || soap.assessment,
+        plan: soap.plan,
+        soapNote: {
+          subjective: soap.subjective,
+          objective: soap.objective.notes || 'No notes',
+          assessment: soap.assessment,
+          plan: soap.plan,
+        },
+        prescription: prescription ? {
+          items: prescription.items.map(item => ({
+            medicineName: item.medicineName,
+            dosage: `${item.morning}-${item.afternoon}-${item.night}`,
+            quantity: item.quantity,
+            days: item.days,
+          })),
+        } : undefined,
+      },
+    });
+  });
+
+  const visits = Array.from(visitMap.values()).sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
+  // Re-number visits after sorting (latest = highest number)
+  visits.forEach((visit, index) => {
+    visit.visitNumber = visits.length - index;
+  });
 
   return (
     <DashboardLayout>
@@ -159,235 +180,144 @@ export default function PatientHistory() {
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left - Timeline */}
-        <div className="lg:col-span-2">
-          <Tabs defaultValue="timeline">
-            <TabsList className="mb-6 no-print">
-              <TabsTrigger value="timeline">Timeline</TabsTrigger>
-              <TabsTrigger value="soap">SOAP Notes ({patientSOAPs.length})</TabsTrigger>
-              <TabsTrigger value="consultations">Consultations ({patientConsultations.length})</TabsTrigger>
-              <TabsTrigger value="prescriptions">Prescriptions ({patientPrescriptions.length})</TabsTrigger>
-            </TabsList>
+      {/* Timeline Tabs - Full Width */}
+      <Tabs defaultValue="timeline">
+        <TabsList className="mb-6 no-print">
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="soap">SOAP Notes ({patientSOAPs.length})</TabsTrigger>
+          <TabsTrigger value="consultations">Consultations ({patientConsultations.length})</TabsTrigger>
+          <TabsTrigger value="prescriptions">Prescriptions ({patientPrescriptions.length})</TabsTrigger>
+        </TabsList>
 
-            <TabsContent value="timeline">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Visit History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {timeline.length > 0 ? (
-                    <div className="space-y-4">
-                      {timeline.map((item, index) => (
-                        <div key={index} className="flex gap-4 avoid-break">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTimelineColor(item.type)}`}>
-                            {getTimelineIcon(item.type)}
-                          </div>
-                          <div className="flex-1 pb-4 border-b last:border-b-0">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p className="font-medium">{item.title}</p>
-                                <p className="text-sm text-muted-foreground">{item.description}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground">
-                                  {new Date(item.date).toLocaleDateString()}
-                                </p>
-                                <Badge variant="outline" className="mt-1">{item.status}</Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+        <TabsContent value="timeline">
+          <Card>
+            <CardContent className="py-6">
+              <VisitTimeline visits={visits} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="soap">
+          <div className="space-y-4">
+            {patientSOAPs.map(soap => (
+              <Card key={soap.id} className="avoid-break">
+                <CardContent className="py-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="font-medium">SOAP Note</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(soap.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
-                  ) : (
-                    <p className="text-center text-muted-foreground py-8">
-                      No history found for this patient.
-                    </p>
-                  )}
+                    <Badge>{soap.status}</Badge>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="font-medium text-accent">Subjective</p>
+                      <p className="text-muted-foreground">{soap.subjective}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-accent">Assessment</p>
+                      <p className="text-muted-foreground">{soap.assessment}</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            </TabsContent>
+            ))}
+            {patientSOAPs.length === 0 && (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No SOAP notes found.
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
 
-            <TabsContent value="soap">
-              <div className="space-y-4">
-                {patientSOAPs.map(soap => (
-                  <Card key={soap.id} className="avoid-break">
-                    <CardContent className="py-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <p className="font-medium">SOAP Note</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(soap.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <Badge>{soap.status}</Badge>
-                      </div>
-                      <div className="grid md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <p className="font-medium text-accent">Subjective</p>
-                          <p className="text-muted-foreground">{soap.subjective}</p>
-                        </div>
-                        <div>
-                          <p className="font-medium text-accent">Assessment</p>
-                          <p className="text-muted-foreground">{soap.assessment}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {patientSOAPs.length === 0 && (
-                  <Card>
-                    <CardContent className="py-8 text-center text-muted-foreground">
-                      No SOAP notes found.
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
+        <TabsContent value="consultations">
+          <div className="space-y-4">
+            {patientConsultations.map(c => (
+              <Card key={c.id} className="avoid-break">
+                <CardContent className="py-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="font-medium">Consultation with {getDoctorName(c.doctorId)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(c.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge className="bg-stat-green text-stat-green-text">{c.status}</Badge>
+                  </div>
+                  <Separator className="my-3" />
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Chief Complaint:</span> {c.chiefComplaint}</p>
+                    <p><span className="font-medium">Diagnosis:</span> {c.diagnosis.join(', ')}</p>
+                    {c.labTests && c.labTests.length > 0 && (
+                      <p><span className="font-medium">Lab Tests:</span> {c.labTests.join(', ')}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {patientConsultations.length === 0 && (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No consultations found.
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
 
-            <TabsContent value="consultations">
-              <div className="space-y-4">
-                {patientConsultations.map(c => (
-                  <Card key={c.id} className="avoid-break">
-                    <CardContent className="py-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <p className="font-medium">Consultation with {getDoctorName(c.doctorId)}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(c.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <Badge className="bg-stat-green text-stat-green-text">{c.status}</Badge>
-                      </div>
-                      <Separator className="my-3" />
-                      <div className="space-y-2 text-sm">
-                        <p><span className="font-medium">Chief Complaint:</span> {c.chiefComplaint}</p>
-                        <p><span className="font-medium">Diagnosis:</span> {c.diagnosis.join(', ')}</p>
-                        {c.labTests && c.labTests.length > 0 && (
-                          <p><span className="font-medium">Lab Tests:</span> {c.labTests.join(', ')}</p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {patientConsultations.length === 0 && (
-                  <Card>
-                    <CardContent className="py-8 text-center text-muted-foreground">
-                      No consultations found.
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="prescriptions">
-              <div className="space-y-4">
-                {patientPrescriptions.map(p => (
-                  <Card key={p.id} className="avoid-break">
-                    <CardContent className="py-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <p className="font-medium">Prescription by {getDoctorName(p.doctorId)}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(p.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <Badge className={p.status === 'dispensed' ? 'bg-stat-green text-stat-green-text' : 'bg-stat-orange text-stat-orange-text'}>
-                          {p.status}
-                        </Badge>
-                      </div>
-                      <div className="border rounded-lg overflow-hidden">
-                        <table className="w-full text-sm">
-                          <thead className="bg-muted">
-                            <tr>
-                              <th className="p-2 text-left">Medicine</th>
-                              <th className="p-2 text-center">Dosage</th>
-                              <th className="p-2 text-center">Qty</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {p.items.map((item, i) => (
-                              <tr key={i} className="border-t">
-                                <td className="p-2">{item.medicineName}</td>
-                                <td className="p-2 text-center">{item.morning}-{item.afternoon}-{item.night}</td>
-                                <td className="p-2 text-center">{item.quantity}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {patientPrescriptions.length === 0 && (
-                  <Card>
-                    <CardContent className="py-8 text-center text-muted-foreground">
-                      No prescriptions found.
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Right - Summary */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Visit Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Visits</span>
-                <span className="font-semibold">{patientSOAPs.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Consultations</span>
-                <span className="font-semibold">{patientConsultations.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Prescriptions</span>
-                <span className="font-semibold">{patientPrescriptions.length}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Paid</span>
-                <span className="font-semibold text-stat-green-text">
-                  ₹{patientPayments.reduce((sum, p) => sum + p.paidAmount, 0)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Pending</span>
-                <span className="font-semibold text-destructive">
-                  ₹{patientPayments.reduce((sum, p) => sum + p.pendingAmount, 0)}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Registration Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Registered On</span>
-                <span>{new Date(patient.createdAt).toLocaleDateString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Father's Name</span>
-                <span>{patient.fatherName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Address</span>
-                <span>{patient.address}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+        <TabsContent value="prescriptions">
+          <div className="space-y-4">
+            {patientPrescriptions.map(p => (
+              <Card key={p.id} className="avoid-break">
+                <CardContent className="py-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="font-medium">Prescription by {getDoctorName(p.doctorId)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(p.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge className={p.status === 'dispensed' ? 'bg-stat-green text-stat-green-text' : 'bg-stat-orange text-stat-orange-text'}>
+                      {p.status}
+                    </Badge>
+                  </div>
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th className="p-2 text-left">Medicine</th>
+                          <th className="p-2 text-center">Dosage</th>
+                          <th className="p-2 text-center">Qty</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {p.items.map((item, i) => (
+                          <tr key={i} className="border-t">
+                            <td className="p-2">{item.medicineName}</td>
+                            <td className="p-2 text-center">{item.morning}-{item.afternoon}-{item.night}</td>
+                            <td className="p-2 text-center">{item.quantity}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {patientPrescriptions.length === 0 && (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No prescriptions found.
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </DashboardLayout>
   );
 }
