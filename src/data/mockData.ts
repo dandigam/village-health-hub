@@ -1,4 +1,4 @@
-import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment, Discount } from '@/types';
+import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment, Discount, Warehouse, SupplierMedicine, SupplierOrder, StockDistribution } from '@/types';
 
 export const mockUser: User = {
   id: '1',
@@ -459,3 +459,53 @@ export const mockCampStats: CampStats = {
   exitedPatients: 56,
   totalCollection: 45000,
 };
+
+// Warehouse Mock Data
+export const mockWarehouses: Warehouse[] = [
+  { id: '1', name: 'Central Warehouse Guntur', address: 'Industrial Area, Guntur, AP', supplierIds: ['1', '2'], createdAt: '2025-01-01T00:00:00Z' },
+  { id: '2', name: 'Bapatla Storage Unit', address: 'Main Road, Bapatla, AP', supplierIds: ['3'], createdAt: '2025-01-05T00:00:00Z' },
+];
+
+export const mockSupplierMedicines: SupplierMedicine[] = [
+  { supplierId: '1', medicineId: '1' },
+  { supplierId: '1', medicineId: '2' },
+  { supplierId: '1', medicineId: '7' },
+  { supplierId: '1', medicineId: '10' },
+  { supplierId: '2', medicineId: '3' },
+  { supplierId: '2', medicineId: '4' },
+  { supplierId: '2', medicineId: '8' },
+  { supplierId: '3', medicineId: '5' },
+  { supplierId: '3', medicineId: '6' },
+  { supplierId: '3', medicineId: '9' },
+];
+
+export const mockSupplierOrders: SupplierOrder[] = [
+  {
+    id: '1', supplierId: '1', warehouseId: '1',
+    items: [{ medicineId: '1', requestedQty: 200, receivedQty: 200 }, { medicineId: '7', requestedQty: 500, receivedQty: 500 }],
+    status: 'received', createdAt: '2025-01-10T00:00:00Z', receivedAt: '2025-01-12T00:00:00Z',
+  },
+  {
+    id: '2', supplierId: '2', warehouseId: '1',
+    items: [{ medicineId: '3', requestedQty: 100 }, { medicineId: '8', requestedQty: 150 }],
+    status: 'sent', createdAt: '2025-02-01T00:00:00Z',
+  },
+  {
+    id: '3', supplierId: '3', warehouseId: '2',
+    items: [{ medicineId: '5', requestedQty: 80 }, { medicineId: '9', requestedQty: 200 }],
+    status: 'pending', createdAt: '2025-02-10T00:00:00Z',
+  },
+];
+
+export const mockDistributions: StockDistribution[] = [
+  {
+    id: '1', warehouseId: '1', clientName: 'Bapatla Camp',
+    items: [{ medicineId: '1', requestedQty: 50, sentQty: 50 }, { medicineId: '7', requestedQty: 100, sentQty: 100 }],
+    status: 'sent', createdAt: '2025-01-15T00:00:00Z',
+  },
+  {
+    id: '2', warehouseId: '1', clientName: 'Vijayawada Camp',
+    items: [{ medicineId: '3', requestedQty: 30, sentQty: 20 }],
+    status: 'partial', createdAt: '2025-02-05T00:00:00Z', notes: 'Only 20 units available, remaining 10 on backorder',
+  },
+];
