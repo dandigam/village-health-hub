@@ -240,6 +240,25 @@ export const mockSOAPNotes: SOAPNote[] = [
     status: 'completed',
     createdAt: '2025-01-15T09:00:00Z',
   },
+  {
+    id: '4',
+    patientId: '1',
+    campId: '3',
+    createdBy: '1',
+    subjective: 'Follow-up visit. Patient reports reduced chest pain but occasional breathlessness persists. No new complaints.',
+    objective: {
+      weight: 71,
+      bp: '130/85',
+      pulse: 82,
+      temp: 98.4,
+      spo2: 97,
+      notes: 'Improved lung sounds, mild wheeze on exertion',
+    },
+    assessment: 'Hypertensive Heart Disease improving, Mild COPD stable',
+    plan: 'Continue current medications, follow-up in 1 month',
+    status: 'completed',
+    createdAt: '2026-02-14T09:00:00Z',
+  },
 ];
 
 export const mockMedicines: Medicine[] = [
