@@ -41,7 +41,7 @@ export function Sidebar() {
       <aside 
         className={cn(
           "relative bg-gradient-to-b from-[hsl(215,70%,18%)] to-[hsl(215,70%,22%)] min-h-screen flex flex-col border-r border-white/10 shadow-xl transition-all duration-300 ease-in-out",
-          isCollapsed ? "w-[68px]" : "w-64"
+          isCollapsed ? "w-[68px]" : "w-52"
         )}
       >
         {/* Header with Logo */}
