@@ -1,7 +1,6 @@
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Calendar } from 'lucide-react';
 
 export interface Visit {
   id: string;
@@ -70,61 +69,86 @@ export function VisitTimeline({ visits, selectedId, onSelect }: VisitTimelinePro
   }
 
   return (
-    <div className="relative">
-      {/* Vertical timeline line */}
-      <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
+    <div>
+      {/* Visits count header */}
+      <div className="flex items-center gap-2 mb-5 pb-3 border-b border-border">
+        <Calendar className="h-4 w-4 text-accent" />
+        <span className="text-sm font-semibold text-foreground">{visits.length} Visits</span>
+      </div>
 
-      <div className="space-y-1">
-        {visits.map((visit) => {
-          const isSelected = selectedId === visit.id;
+      {/* Timeline */}
+      <div className="relative">
+        {/* Vertical timeline line */}
+        <div className="absolute left-[18px] top-5 bottom-5 w-[2px] bg-border/60" />
 
-          return (
-            <div key={visit.id} className="relative">
-              {/* Timeline circle */}
+        <div className="space-y-4">
+          {visits.map((visit) => {
+            const isSelected = selectedId === visit.id;
+            const dateObj = new Date(visit.date);
+
+            return (
               <button
+                key={visit.id}
                 onClick={() => onSelect(visit)}
                 className={cn(
-                  "absolute left-0 z-10 w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-200 cursor-pointer border-2",
+                  "relative w-full text-left flex items-start gap-4 group transition-all duration-200 cursor-pointer rounded-lg px-2 py-3",
                   isSelected
-                    ? "bg-accent text-accent-foreground border-accent shadow-sm scale-105"
-                    : "bg-card text-muted-foreground border-border hover:border-accent/50 hover:text-foreground"
+                    ? "bg-accent/5"
+                    : "hover:bg-muted/40"
                 )}
               >
-                {visit.visitNumber}
-              </button>
-
-              {/* Visit row */}
-              <div className="ml-14">
-                <button
-                  onClick={() => onSelect(visit)}
-                  className={cn(
-                    "w-full text-left py-2 px-3 rounded-md transition-all duration-200 cursor-pointer",
-                    isSelected
-                      ? "bg-muted/50"
-                      : "hover:bg-muted/30"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 font-bold bg-accent/10 text-accent border-accent/20">
-                      Visit #{visit.visitNumber}
-                    </Badge>
-                    <span className="font-medium text-xs text-foreground">
-                      {new Date(visit.date).toLocaleDateString('en-IN', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </span>
-                    <span className="text-muted-foreground text-sm">|</span>
-                    <span className="text-xs font-medium text-foreground">
-                      {visit.campName}
-                    </span>
+                {/* Timeline node */}
+                <div className="relative z-10 flex-shrink-0 mt-0.5">
+                  <div
+                    className={cn(
+                      "w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200",
+                      isSelected
+                        ? "bg-accent text-accent-foreground shadow-md shadow-accent/25 scale-110"
+                        : "bg-muted text-muted-foreground group-hover:bg-accent/15 group-hover:text-accent"
+                    )}
+                  >
+                    {visit.visitNumber}
                   </div>
-                </button>
-              </div>
-            </div>
-          );
-        })}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0 flex items-center gap-3">
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      "text-[10px] px-2 py-0.5 h-5 font-semibold whitespace-nowrap rounded-full",
+                      isSelected
+                        ? "bg-accent/15 text-accent border border-accent/25"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    Visit #{visit.visitNumber}
+                  </Badge>
+
+                  <span className={cn(
+                    "text-xs font-medium tabular-nums",
+                    isSelected ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    {dateObj.toLocaleDateString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </span>
+
+                  <span className="text-border">|</span>
+
+                  <span className={cn(
+                    "text-xs font-medium truncate",
+                    isSelected ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    {visit.campName}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
