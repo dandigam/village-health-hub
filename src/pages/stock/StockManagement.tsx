@@ -53,10 +53,10 @@ export default function StockManagement() {
       <InventoryTab stockItems={stockItems} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <TabsList className="mb-6 flex-wrap">
-          <TabsTrigger value="warehouse">Warehouses</TabsTrigger>
-          <TabsTrigger value="distribution">Distribution</TabsTrigger>
-          <TabsTrigger value="orders">Supplier Orders</TabsTrigger>
+        <TabsList className="mb-6 flex-wrap bg-transparent p-0 h-auto border-b rounded-none w-full justify-start">
+          <TabsTrigger value="warehouse" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Warehouses</TabsTrigger>
+          <TabsTrigger value="distribution" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Distribution</TabsTrigger>
+          <TabsTrigger value="orders" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Supplier Orders</TabsTrigger>
         </TabsList>
 
         <TabsContent value="warehouse">
