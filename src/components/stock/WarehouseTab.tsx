@@ -12,10 +12,15 @@ import { mockWarehouses, mockSuppliers, mockMedicines, mockSupplierMedicines } f
 import { toast } from '@/hooks/use-toast';
 import type { Warehouse } from '@/types';
 
-export function WarehouseTab() {
+interface WarehouseTabProps {
+  showAddSupplier: boolean;
+  setShowAddSupplier: (v: boolean) => void;
+  showCreateWarehouse: boolean;
+  setShowCreateWarehouse: (v: boolean) => void;
+}
+
+export function WarehouseTab({ showAddSupplier, setShowAddSupplier, showCreateWarehouse, setShowCreateWarehouse }: WarehouseTabProps) {
   const [warehouses, setWarehouses] = useState<Warehouse[]>(mockWarehouses);
-  const [showCreateWarehouse, setShowCreateWarehouse] = useState(false);
-  const [showAddSupplier, setShowAddSupplier] = useState(false);
   const [supplierStep, setSupplierStep] = useState(1);
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
 
@@ -69,18 +74,6 @@ export function WarehouseTab() {
 
   return (
     <div className="space-y-6">
-      {/* Actions */}
-      <div className="flex gap-2 flex-wrap">
-        <Button variant="outline" onClick={() => setShowAddSupplier(true)}>
-          <Truck className="mr-2 h-4 w-4" />
-          Add Supplier
-        </Button>
-        <Button className="bg-accent hover:bg-accent/90" onClick={() => setShowCreateWarehouse(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Warehouse
-        </Button>
-      </div>
-
       {/* Warehouse List */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {warehouses.map(wh => {
