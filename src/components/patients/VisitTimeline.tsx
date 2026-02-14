@@ -104,8 +104,8 @@ export function VisitTimeline({ visits, selectedId, onSelect }: VisitTimelinePro
                       : "hover:bg-muted/30"
                   )}
                 >
-                  {/* Header line */}
-                  <div className="flex items-center gap-2 mb-0.5">
+                  {/* Date and Camp Name only */}
+                  <div className="flex items-center gap-2">
                     <span className="font-medium text-xs text-foreground">
                       {new Date(visit.date).toLocaleDateString('en-IN', {
                         day: '2-digit',
@@ -117,50 +117,6 @@ export function VisitTimeline({ visits, selectedId, onSelect }: VisitTimelinePro
                     <span className="text-xs font-medium text-foreground">
                       {visit.campName}
                     </span>
-                  </div>
-
-                  {/* Payment + complaint summary */}
-                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <span className="text-stat-green-text font-medium">₹{visit.amount.paid}</span>
-                    {visit.amount.pending > 0 && (
-                      <>
-                        <span>•</span>
-                        <span className="text-destructive font-medium">₹{visit.amount.pending} pending</span>
-                      </>
-                    )}
-                    <span>•</span>
-                    <span className="truncate max-w-[180px]">{visit.chiefComplaint}</span>
-                  </div>
-
-                  {/* Expanded clinical summary with animation */}
-                  <div
-                    className={cn(
-                      "grid transition-all duration-300 ease-in-out",
-                      isSelected
-                        ? "grid-rows-[1fr] opacity-100 mt-2"
-                        : "grid-rows-[0fr] opacity-0 mt-0"
-                    )}
-                  >
-                    <div className="overflow-hidden">
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Chief Complaint</p>
-                          <p className="text-xs text-foreground leading-snug">{visit.chiefComplaint}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Vitals</p>
-                          <p className="text-xs text-foreground leading-snug">{visit.vitals}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Assessment</p>
-                          <p className="text-xs text-foreground leading-snug">{visit.assessment}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Plan</p>
-                          <p className="text-xs text-foreground leading-snug">{visit.plan}</p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </button>
               </div>
