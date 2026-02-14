@@ -12,7 +12,7 @@ import { InventoryTab } from '@/components/stock/InventoryTab';
 const MIN_STOCK_LEVEL = 50;
 
 export default function StockManagement() {
-  const [activeTab, setActiveTab] = useState('warehouse');
+  const [activeTab, setActiveTab] = useState('inventory');
   const [showAddSupplier, setShowAddSupplier] = useState(false);
   const [showCreateWarehouse, setShowCreateWarehouse] = useState(false);
 
@@ -39,6 +39,7 @@ export default function StockManagement() {
         <div className="page-header flex items-center gap-4 flex-wrap">
           <h1 className="page-title">Stock</h1>
           <TabsList className="bg-transparent p-0 h-auto rounded-none border-none">
+            <TabsTrigger value="inventory" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Inventory</TabsTrigger>
             <TabsTrigger value="warehouse" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Warehouses</TabsTrigger>
             <TabsTrigger value="distribution" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Distribution</TabsTrigger>
             <TabsTrigger value="orders" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Supplier Orders</TabsTrigger>
@@ -55,6 +56,10 @@ export default function StockManagement() {
           </div>
         </div>
         <div className="mt-6">
+          <TabsContent value="inventory">
+            <InventoryTab stockItems={stockItems} />
+          </TabsContent>
+
           <TabsContent value="warehouse">
             <WarehouseTab
               showAddSupplier={showAddSupplier}
@@ -72,9 +77,6 @@ export default function StockManagement() {
             <SupplierOrdersTab />
           </TabsContent>
         </div>
-
-        {/* Inventory always visible */}
-        <InventoryTab stockItems={stockItems} />
       </Tabs>
     </DashboardLayout>
   );
