@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Heart,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -24,6 +25,7 @@ const mainNavItems = [
   { icon: Tent, label: 'Camps', href: '/camps' },
   { icon: Users, label: 'Patients', href: '/patients' },
   { icon: FileEdit, label: 'SOAP Notes', href: '/soap' },
+  { icon: Activity, label: 'Encounters', href: '/encounters' },
   { icon: Stethoscope, label: 'Consultations', href: '/consultations' },
   { icon: Pill, label: 'Pharmacy', href: '/pharmacy' },
   { icon: Package, label: 'Stock', href: '/stock' },

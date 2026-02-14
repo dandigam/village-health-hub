@@ -33,6 +33,9 @@ import DispenseMedicine from "./pages/pharmacy/DispenseMedicine";
 // Stock
 import StockManagement from "./pages/stock/StockManagement";
 
+// Encounters
+import Encounters from "./pages/encounters/Encounters";
+
 // Patient History
 import PatientHistory from "./pages/patients/PatientHistory";
 
@@ -89,6 +92,9 @@ const App = () => (
             <Route path="/pharmacy" element={<PharmacyDashboard />} />
             <Route path="/pharmacy/prescription/:id" element={<DispenseMedicine />} />
             <Route path="/pharmacy/dispense/:id" element={<DispenseMedicine />} />
+            
+            {/* Encounters */}
+            <Route path="/encounters" element={<Encounters />} />
             
             {/* Stock */}
             <Route path="/stock" element={<StockManagement />} />
