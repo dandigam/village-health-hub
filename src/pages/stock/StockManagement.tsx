@@ -54,10 +54,6 @@ export default function StockManagement() {
             </Button>
           </div>
         </div>
-
-        {/* Inventory always visible */}
-        <InventoryTab stockItems={stockItems} />
-
         <div className="mt-6">
           <TabsContent value="warehouse">
             <WarehouseTab
@@ -76,6 +72,9 @@ export default function StockManagement() {
             <SupplierOrdersTab />
           </TabsContent>
         </div>
+
+        {/* Inventory always visible */}
+        <InventoryTab stockItems={stockItems} />
       </Tabs>
     </DashboardLayout>
   );
