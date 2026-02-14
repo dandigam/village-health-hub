@@ -13,7 +13,7 @@ import { InventoryTab } from '@/components/stock/InventoryTab';
 const MIN_STOCK_LEVEL = 50;
 
 export default function StockManagement() {
-  const [activeTab, setActiveTab] = useState('warehouse');
+  const [activeTab, setActiveTab] = useState('inventory');
 
   const getStockWithDetails = () => {
     return mockStockItems.map(stock => {
@@ -39,27 +39,10 @@ export default function StockManagement() {
         <h1 className="page-title">Warehouse & Stock Management</h1>
       </div>
 
-      {/* Low Stock Alert */}
-      {lowStockItems.length > 0 && (
-        <Card className="mb-6 border-yellow-200 bg-yellow-50">
-          <CardContent className="py-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="font-medium text-yellow-800">Low Stock Alert</p>
-                <p className="text-sm text-yellow-700">
-                  {lowStockItems.length} items are running low on stock (below {MIN_STOCK_LEVEL} units)
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6 flex-wrap">
-          <TabsTrigger value="warehouse">Warehouses</TabsTrigger>
           <TabsTrigger value="inventory">Inventory</TabsTrigger>
+          <TabsTrigger value="warehouse">Warehouses</TabsTrigger>
           <TabsTrigger value="distribution">Distribution</TabsTrigger>
           <TabsTrigger value="orders">Supplier Orders</TabsTrigger>
         </TabsList>
