@@ -35,21 +35,9 @@ export default function StockManagement() {
 
   return (
     <DashboardLayout>
-      <div className="page-header">
+      <div className="page-header flex items-center justify-between flex-wrap gap-4">
         <h1 className="page-title">Stock</h1>
-      </div>
-
-      {/* Inventory always visible */}
-      <InventoryTab stockItems={stockItems} />
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <TabsList className="mb-4 flex-wrap bg-transparent p-0 h-auto border-b rounded-none w-full justify-start">
-          <TabsTrigger value="warehouse" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Warehouses</TabsTrigger>
-          <TabsTrigger value="distribution" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Distribution</TabsTrigger>
-          <TabsTrigger value="orders" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Supplier Orders</TabsTrigger>
-        </TabsList>
-
-        <div className="flex gap-2 flex-wrap mb-4">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => setShowAddSupplier(true)}>
             <Truck className="mr-2 h-4 w-4" />
             Add Supplier
@@ -59,6 +47,17 @@ export default function StockManagement() {
             Create Warehouse
           </Button>
         </div>
+      </div>
+
+      {/* Inventory always visible */}
+      <InventoryTab stockItems={stockItems} />
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+        <TabsList className="mb-6 flex-wrap bg-transparent p-0 h-auto border-b rounded-none w-full justify-start">
+          <TabsTrigger value="warehouse" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Warehouses</TabsTrigger>
+          <TabsTrigger value="distribution" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Distribution</TabsTrigger>
+          <TabsTrigger value="orders" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Supplier Orders</TabsTrigger>
+        </TabsList>
 
         <TabsContent value="warehouse">
           <WarehouseTab
