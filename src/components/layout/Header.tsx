@@ -23,7 +23,7 @@ export function Header() {
   };
 
   return (
-    <header className="h-16 bg-primary flex items-center justify-between px-4 lg:px-6 print:hidden">
+    <header className="h-16 bg-primary flex items-center justify-between px-4 lg:px-6 print:hidden sticky top-0 z-50">
       {/* Left: Logo & Camp Selector */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
