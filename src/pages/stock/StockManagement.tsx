@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Plus, Truck } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockMedicines, mockStockItems, mockSuppliers } from '@/data/mockData';
 import { WarehouseTab } from '@/components/stock/WarehouseTab';
@@ -44,16 +42,6 @@ export default function StockManagement() {
             <TabsTrigger value="distribution" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Distribution</TabsTrigger>
             <TabsTrigger value="orders" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Supplier Orders</TabsTrigger>
           </TabsList>
-          <div className="flex gap-2 flex-wrap ml-auto">
-            <Button variant="outline" onClick={() => setShowAddSupplier(true)}>
-              <Truck className="mr-2 h-4 w-4" />
-              Add Supplier
-            </Button>
-            <Button className="bg-accent hover:bg-accent/90" onClick={() => setShowCreateWarehouse(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Warehouse
-            </Button>
-          </div>
         </div>
         <div className="mt-6">
           <TabsContent value="inventory">
