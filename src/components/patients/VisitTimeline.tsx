@@ -104,8 +104,10 @@ export function VisitTimeline({ visits, selectedId, onSelect }: VisitTimelinePro
                       : "hover:bg-muted/30"
                   )}
                 >
-                  {/* Date and Camp Name only */}
                   <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 font-bold bg-accent/10 text-accent border-accent/20">
+                      Visit #{visit.visitNumber}
+                    </Badge>
                     <span className="font-medium text-xs text-foreground">
                       {new Date(visit.date).toLocaleDateString('en-IN', {
                         day: '2-digit',
