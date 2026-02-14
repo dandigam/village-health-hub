@@ -172,10 +172,10 @@ export default function PatientHistory() {
 
         <TabsContent value="timeline">
           {/* Split view: Timeline left, Detail panel right */}
-          <div className="flex gap-6">
-            <div className="w-[35%] flex-shrink-0">
+          <div className="flex gap-5">
+            <div className="w-[28%] flex-shrink-0">
               <Card>
-                <CardContent className="py-5">
+                <CardContent className="py-4">
                   <VisitTimeline
                     visits={visits}
                     selectedId={selectedVisit?.id || null}
@@ -184,7 +184,7 @@ export default function PatientHistory() {
                 </CardContent>
               </Card>
             </div>
-            <div className="w-[65%]">
+            <div className="flex-1">
               <Card className="sticky top-4">
                 <CardContent className="py-5">
                   <VisitDetailPanel visit={selectedVisit} />

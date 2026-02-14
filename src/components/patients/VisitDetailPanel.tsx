@@ -24,10 +24,10 @@ export function VisitDetailPanel({ visit }: VisitDetailPanelProps) {
   return (
     <div className="animate-in fade-in-0 slide-in-from-right-2 duration-300">
       {/* Header with actions */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-base font-semibold text-foreground">Visit #{visit.visitNumber}</h3>
-          <p className="text-xs text-muted-foreground">
+          <h3 className="text-sm font-semibold text-foreground">Visit #{visit.visitNumber}</h3>
+          <p className="text-[11px] text-muted-foreground">
             {new Date(fullDetails.visitDate).toLocaleDateString('en-IN', {
               weekday: 'long',
               day: '2-digit',
@@ -53,10 +53,10 @@ export function VisitDetailPanel({ visit }: VisitDetailPanelProps) {
       </div>
 
       {/* Section 1 — Camp Info */}
-      <div className="grid grid-cols-3 gap-4 mb-5">
+      <div className="grid grid-cols-3 gap-3 mb-3">
         <div>
-          <p className="text-xs text-muted-foreground mb-0.5">Visit Date</p>
-          <p className="text-sm font-medium">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70">Visit Date</p>
+          <p className="text-xs font-medium">
             {new Date(fullDetails.visitDate).toLocaleDateString('en-IN', {
               day: '2-digit',
               month: 'short',
@@ -65,46 +65,51 @@ export function VisitDetailPanel({ visit }: VisitDetailPanelProps) {
           </p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground mb-0.5">Camp</p>
-          <p className="text-sm font-medium">{fullDetails.campName}</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70">Camp</p>
+          <p className="text-xs font-medium">{fullDetails.campName}</p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground mb-0.5">Location</p>
-          <p className="text-sm font-medium">{fullDetails.campLocation}</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70">Location</p>
+          <p className="text-xs font-medium">{fullDetails.campLocation}</p>
         </div>
       </div>
 
-      <Separator className="mb-5" />
+      <Separator className="mb-3" />
 
-      {/* Section 2 — Payment */}
-      <div className="flex items-center gap-4 flex-wrap mb-5">
+      {/* Section 2 — Payment (single clean line) */}
+      <div className="flex items-center gap-2 flex-wrap mb-3">
         <Badge variant={fullDetails.paymentType === 'Free' ? 'secondary' : 'default'} className="text-xs">
           {fullDetails.paymentType}
         </Badge>
-        <div className="flex items-center gap-3 text-sm">
-          <span className="text-muted-foreground">Total: <span className="text-foreground font-medium">₹{fullDetails.totalAmount}</span></span>
-          <span className="text-stat-green-text font-medium">Paid: ₹{fullDetails.paidAmount}</span>
-          {fullDetails.pendingAmount > 0 && (
-            <span className="text-destructive font-medium">Pending: ₹{fullDetails.pendingAmount}</span>
-          )}
-          {fullDetails.discountAmount > 0 && (
-            <span className="text-stat-blue-text">Discount: ₹{fullDetails.discountAmount}</span>
-          )}
-        </div>
+        <span className="text-xs text-stat-green-text font-medium">Paid ₹{fullDetails.paidAmount}</span>
+        <span className="text-muted-foreground/40">•</span>
+        {fullDetails.pendingAmount > 0 && (
+          <>
+            <span className="text-xs text-destructive font-medium">Pending ₹{fullDetails.pendingAmount}</span>
+            <span className="text-muted-foreground/40">•</span>
+          </>
+        )}
+        <span className="text-xs text-muted-foreground">Total ₹{fullDetails.totalAmount}</span>
+        {fullDetails.discountAmount > 0 && (
+          <>
+            <span className="text-muted-foreground/40">•</span>
+            <span className="text-xs text-stat-blue-text">Disc ₹{fullDetails.discountAmount}</span>
+          </>
+        )}
       </div>
 
-      <Separator className="mb-5" />
+      <Separator className="mb-3" />
 
       {/* Section 3 — Clinical Summary */}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-5">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-3">
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Chief Complaint</p>
-          <p className="text-sm text-foreground leading-relaxed">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Chief Complaint</p>
+          <p className="text-xs text-foreground leading-snug">
             {fullDetails.chiefComplaint || 'Not recorded'}
           </p>
         </div>
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Vitals</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Vitals</p>
           <div className="flex flex-wrap gap-2">
             {fullDetails.vitals.weight && (
               <span className="text-xs bg-muted/60 px-2 py-1 rounded">Wt: {fullDetails.vitals.weight}kg</span>
@@ -124,13 +129,13 @@ export function VisitDetailPanel({ visit }: VisitDetailPanelProps) {
           </div>
         </div>
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Assessment</p>
-          <p className="text-sm text-foreground leading-relaxed">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Assessment</p>
+          <p className="text-xs text-foreground leading-snug">
             {fullDetails.assessment || 'Not recorded'}
           </p>
         </div>
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Labs</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Labs</p>
           {fullDetails.labs && fullDetails.labs.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
               {fullDetails.labs.map((lab, i) => (
@@ -138,17 +143,17 @@ export function VisitDetailPanel({ visit }: VisitDetailPanelProps) {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No labs ordered</p>
+            <p className="text-xs text-muted-foreground">No labs ordered</p>
           )}
         </div>
       </div>
 
-      <Separator className="mb-5" />
+      <Separator className="mb-3" />
 
       {/* Section 4 — Plan */}
-      <div className="mb-5">
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Plan / Advice</p>
-        <p className="text-sm text-foreground leading-relaxed">
+      <div className="mb-3">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-0.5">Plan / Advice</p>
+        <p className="text-xs text-foreground leading-snug">
           {fullDetails.plan || 'No plan recorded'}
         </p>
       </div>
@@ -156,25 +161,25 @@ export function VisitDetailPanel({ visit }: VisitDetailPanelProps) {
       {/* SOAP Note */}
       {fullDetails.soapNote && (
         <>
-          <Separator className="mb-5" />
-          <div className="mb-5">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">SOAP Note</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-muted/40 p-3 rounded-md">
-                <p className="text-xs text-muted-foreground mb-1">Subjective</p>
-                <p className="text-sm">{fullDetails.soapNote.subjective}</p>
+          <Separator className="mb-3" />
+          <div className="mb-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-2">SOAP Note</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-muted/30 p-2 rounded">
+                <p className="text-[10px] text-muted-foreground/70 mb-0.5">Subjective</p>
+                <p className="text-xs">{fullDetails.soapNote.subjective}</p>
               </div>
-              <div className="bg-muted/40 p-3 rounded-md">
-                <p className="text-xs text-muted-foreground mb-1">Objective</p>
-                <p className="text-sm">{fullDetails.soapNote.objective}</p>
+              <div className="bg-muted/30 p-2 rounded">
+                <p className="text-[10px] text-muted-foreground/70 mb-0.5">Objective</p>
+                <p className="text-xs">{fullDetails.soapNote.objective}</p>
               </div>
-              <div className="bg-muted/40 p-3 rounded-md">
-                <p className="text-xs text-muted-foreground mb-1">Assessment</p>
-                <p className="text-sm">{fullDetails.soapNote.assessment}</p>
+              <div className="bg-muted/30 p-2 rounded">
+                <p className="text-[10px] text-muted-foreground/70 mb-0.5">Assessment</p>
+                <p className="text-xs">{fullDetails.soapNote.assessment}</p>
               </div>
-              <div className="bg-muted/40 p-3 rounded-md">
-                <p className="text-xs text-muted-foreground mb-1">Plan</p>
-                <p className="text-sm">{fullDetails.soapNote.plan}</p>
+              <div className="bg-muted/30 p-2 rounded">
+                <p className="text-[10px] text-muted-foreground/70 mb-0.5">Plan</p>
+                <p className="text-xs">{fullDetails.soapNote.plan}</p>
               </div>
             </div>
           </div>
@@ -184,9 +189,9 @@ export function VisitDetailPanel({ visit }: VisitDetailPanelProps) {
       {/* Prescription */}
       {fullDetails.prescription && fullDetails.prescription.items.length > 0 && (
         <>
-          <Separator className="mb-5" />
+          <Separator className="mb-3" />
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Prescription</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mb-2">Prescription</p>
             <Table>
               <TableHeader>
                 <TableRow>
