@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, FileText, Printer } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -7,11 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { VisitTimeline, type Visit } from '@/components/patients/VisitTimeline';
+import { VisitDetailPanel } from '@/components/patients/VisitDetailPanel';
 import { mockPatients, mockSOAPNotes, mockConsultations, mockPrescriptions, mockPayments, mockDoctors, mockCamps } from '@/data/mockData';
 
 export default function PatientHistory() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
 
   const patient = mockPatients.find(p => p.id === id);
   const patientSOAPs = mockSOAPNotes.filter(s => s.patientId === id);
@@ -19,37 +22,22 @@ export default function PatientHistory() {
   const patientPrescriptions = mockPrescriptions.filter(p => p.patientId === id);
   const patientPayments = mockPayments.filter(p => p.patientId === id);
 
-  const getDoctorName = (doctorId: string) => {
-    return mockDoctors.find(d => d.id === doctorId)?.name || 'Unknown';
-  };
-
-  const getCamp = (campId: string) => {
-    return mockCamps.find(c => c.id === campId);
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const getDoctorName = (doctorId: string) => mockDoctors.find(d => d.id === doctorId)?.name || 'Unknown';
+  const getCamp = (campId: string) => mockCamps.find(c => c.id === campId);
 
   if (!patient) {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
           <p className="text-muted-foreground">Patient not found</p>
-          <Button className="mt-4" onClick={() => navigate('/patients')}>
-            Back to Patients
-          </Button>
+          <Button className="mt-4" onClick={() => navigate('/patients')}>Back to Patients</Button>
         </div>
       </DashboardLayout>
     );
   }
 
-  // Build visits from SOAP notes, consultations, and prescriptions
-  // Group by date to create unique visits
-  const visitMap = new Map<string, Visit>();
-
-  patientSOAPs.forEach((soap, index) => {
-    const dateKey = new Date(soap.createdAt).toDateString();
+  // Build visits
+  const visits: Visit[] = patientSOAPs.map((soap, index) => {
     const camp = getCamp(soap.campId);
     const consultation = patientConsultations.find(c => c.soapNoteId === soap.id);
     const prescription = consultation ? patientPrescriptions.find(p => p.consultationId === consultation.id) : null;
@@ -61,9 +49,9 @@ export default function PatientHistory() {
       soap.objective.spo2 && `SpO2: ${soap.objective.spo2}%`,
     ].filter(Boolean).join(', ') || 'No vitals';
 
-    visitMap.set(dateKey + soap.id, {
+    return {
       id: soap.id,
-      visitNumber: patientSOAPs.length - index,
+      visitNumber: 0,
       date: soap.createdAt,
       campName: camp?.name || 'Unknown Camp',
       amount: {
@@ -104,20 +92,16 @@ export default function PatientHistory() {
           })),
         } : undefined,
       },
-    });
-  });
+    };
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const visits = Array.from(visitMap.values()).sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-
-  // Re-number visits after sorting (latest = highest number)
   visits.forEach((visit, index) => {
     visit.visitNumber = visits.length - index;
   });
 
   return (
     <DashboardLayout>
+      {/* Page Header */}
       <div className="page-header no-print">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/patients')}>
@@ -125,62 +109,59 @@ export default function PatientHistory() {
           </Button>
           <div>
             <h1 className="page-title">Patient History</h1>
-            <p className="text-muted-foreground">{patient.patientId}</p>
+            <p className="text-muted-foreground text-sm">{patient.patientId}</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handlePrint}>
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="mr-2 h-4 w-4" />
             Print
           </Button>
-          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/soap/new')}>
+          <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => navigate('/soap/new')}>
             <FileText className="mr-2 h-4 w-4" />
             New SOAP Note
           </Button>
         </div>
       </div>
 
-      {/* Print Header - Only visible when printing */}
-      <div className="hidden print:block mb-6 soap-print-header">
+      {/* Print Header */}
+      <div className="hidden print:block mb-6">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold">Srini FOUNDATION</h1>
           <p className="text-sm text-muted-foreground">Medical Camp - Patient History Report</p>
-        </div>
-        <div className="text-sm">
-          <p><strong>Generated on:</strong> {new Date().toLocaleDateString()}</p>
         </div>
       </div>
 
       {/* Patient Info Card */}
       <Card className="mb-6">
-        <CardContent className="py-6">
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center">
-              <User className="h-10 w-10 text-accent" />
+        <CardContent className="py-5">
+          <div className="flex items-center gap-5">
+            <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+              <User className="h-7 w-7 text-accent" />
             </div>
-            <div className="flex-1 grid md:grid-cols-4 gap-4">
+            <div className="flex-1 grid grid-cols-4 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Full Name</p>
-                <p className="font-semibold">{patient.name} {patient.surname}</p>
+                <p className="text-xs text-muted-foreground">Full Name</p>
+                <p className="text-sm font-semibold">{patient.name} {patient.surname}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Age / Gender</p>
-                <p className="font-semibold">{patient.age} yrs / {patient.gender}</p>
+                <p className="text-xs text-muted-foreground">Age / Gender</p>
+                <p className="text-sm font-semibold">{patient.age} yrs / {patient.gender}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="font-semibold">{patient.phone}</p>
+                <p className="text-xs text-muted-foreground">Phone</p>
+                <p className="text-sm font-semibold">{patient.phone}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Village</p>
-                <p className="font-semibold">{patient.village}, {patient.district}</p>
+                <p className="text-xs text-muted-foreground">Village</p>
+                <p className="text-sm font-semibold">{patient.village}, {patient.district}</p>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Timeline Tabs - Full Width */}
+      {/* Tabs */}
       <Tabs defaultValue="timeline">
         <TabsList className="mb-6 no-print">
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
@@ -190,11 +171,27 @@ export default function PatientHistory() {
         </TabsList>
 
         <TabsContent value="timeline">
-          <Card>
-            <CardContent className="py-6">
-              <VisitTimeline visits={visits} />
-            </CardContent>
-          </Card>
+          {/* Split view: Timeline left, Detail panel right */}
+          <div className="flex gap-6">
+            <div className="w-[35%] flex-shrink-0">
+              <Card>
+                <CardContent className="py-5">
+                  <VisitTimeline
+                    visits={visits}
+                    selectedId={selectedVisit?.id || null}
+                    onSelect={setSelectedVisit}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="w-[65%]">
+              <Card className="sticky top-4">
+                <CardContent className="py-5">
+                  <VisitDetailPanel visit={selectedVisit} />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="soap">
