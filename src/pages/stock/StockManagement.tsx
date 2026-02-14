@@ -35,46 +35,47 @@ export default function StockManagement() {
 
   return (
     <DashboardLayout>
-      <div className="page-header flex items-center justify-between flex-wrap gap-4">
-        <h1 className="page-title">Stock</h1>
-        <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" onClick={() => setShowAddSupplier(true)}>
-            <Truck className="mr-2 h-4 w-4" />
-            Add Supplier
-          </Button>
-          <Button className="bg-accent hover:bg-accent/90" onClick={() => setShowCreateWarehouse(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Warehouse
-          </Button>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <div className="page-header flex items-center gap-4 flex-wrap">
+          <h1 className="page-title">Stock</h1>
+          <TabsList className="bg-transparent p-0 h-auto rounded-none border-none">
+            <TabsTrigger value="warehouse" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Warehouses</TabsTrigger>
+            <TabsTrigger value="distribution" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Distribution</TabsTrigger>
+            <TabsTrigger value="orders" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Supplier Orders</TabsTrigger>
+          </TabsList>
+          <div className="flex gap-2 flex-wrap ml-auto">
+            <Button variant="outline" onClick={() => setShowAddSupplier(true)}>
+              <Truck className="mr-2 h-4 w-4" />
+              Add Supplier
+            </Button>
+            <Button className="bg-accent hover:bg-accent/90" onClick={() => setShowCreateWarehouse(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Warehouse
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Inventory always visible */}
-      <InventoryTab stockItems={stockItems} />
+        {/* Inventory always visible */}
+        <InventoryTab stockItems={stockItems} />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <TabsList className="mb-6 flex-wrap bg-transparent p-0 h-auto border-b rounded-none w-full justify-start">
-          <TabsTrigger value="warehouse" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Warehouses</TabsTrigger>
-          <TabsTrigger value="distribution" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Distribution</TabsTrigger>
-          <TabsTrigger value="orders" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none">Supplier Orders</TabsTrigger>
-        </TabsList>
+        <div className="mt-6">
+          <TabsContent value="warehouse">
+            <WarehouseTab
+              showAddSupplier={showAddSupplier}
+              setShowAddSupplier={setShowAddSupplier}
+              showCreateWarehouse={showCreateWarehouse}
+              setShowCreateWarehouse={setShowCreateWarehouse}
+            />
+          </TabsContent>
 
-        <TabsContent value="warehouse">
-          <WarehouseTab
-            showAddSupplier={showAddSupplier}
-            setShowAddSupplier={setShowAddSupplier}
-            showCreateWarehouse={showCreateWarehouse}
-            setShowCreateWarehouse={setShowCreateWarehouse}
-          />
-        </TabsContent>
+          <TabsContent value="distribution">
+            <StockDistributionTab />
+          </TabsContent>
 
-        <TabsContent value="distribution">
-          <StockDistributionTab />
-        </TabsContent>
-
-        <TabsContent value="orders">
-          <SupplierOrdersTab />
-        </TabsContent>
+          <TabsContent value="orders">
+            <SupplierOrdersTab />
+          </TabsContent>
+        </div>
       </Tabs>
     </DashboardLayout>
   );
