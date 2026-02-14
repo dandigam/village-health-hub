@@ -1,10 +1,7 @@
 import { useState } from 'react';
-import { MoreHorizontal, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { VisitDetailsModal } from './VisitDetailsModal';
 
 export interface Visit {
   id: string;
@@ -59,16 +56,11 @@ export interface Visit {
 
 interface VisitTimelineProps {
   visits: Visit[];
+  selectedId: string | null;
+  onSelect: (visit: Visit) => void;
 }
 
-export function VisitTimeline({ visits }: VisitTimelineProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [modalVisit, setModalVisit] = useState<Visit | null>(null);
-
-  const handleToggle = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
+export function VisitTimeline({ visits, selectedId, onSelect }: VisitTimelineProps) {
   if (visits.length === 0) {
     return (
       <div className="text-center py-12">
@@ -78,160 +70,104 @@ export function VisitTimeline({ visits }: VisitTimelineProps) {
   }
 
   return (
-    <>
-      <div className="relative">
-        {/* Vertical timeline line */}
-        <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-border" />
+    <div className="relative">
+      {/* Vertical timeline line */}
+      <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
 
-        <div className="space-y-0">
-          {visits.map((visit) => (
+      <div className="space-y-1">
+        {visits.map((visit) => {
+          const isSelected = selectedId === visit.id;
+
+          return (
             <div key={visit.id} className="relative">
-              <Collapsible
-                open={expandedId === visit.id}
-                onOpenChange={() => handleToggle(visit.id)}
+              {/* Timeline circle */}
+              <button
+                onClick={() => onSelect(visit)}
+                className={cn(
+                  "absolute left-0 z-10 w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-200 cursor-pointer border-2",
+                  isSelected
+                    ? "bg-accent text-accent-foreground border-accent shadow-md scale-110"
+                    : "bg-card text-foreground border-border hover:border-accent/60 hover:scale-105"
+                )}
               >
-                {/* Timeline circle with visit number */}
-                <CollapsibleTrigger asChild>
-                  <button
+                {visit.visitNumber}
+              </button>
+
+              {/* Visit row */}
+              <div className="ml-14">
+                <button
+                  onClick={() => onSelect(visit)}
+                  className={cn(
+                    "w-full text-left py-3 px-3 rounded-md transition-all duration-200 cursor-pointer",
+                    isSelected
+                      ? "bg-accent/5"
+                      : "hover:bg-muted/40"
+                  )}
+                >
+                  {/* Header line */}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium text-sm text-foreground">
+                      {new Date(visit.date).toLocaleDateString('en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                    <span className="text-muted-foreground text-sm">|</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {visit.campName}
+                    </span>
+                  </div>
+
+                  {/* Payment + complaint summary */}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="text-stat-green-text font-medium">₹{visit.amount.paid}</span>
+                    {visit.amount.pending > 0 && (
+                      <>
+                        <span>•</span>
+                        <span className="text-destructive font-medium">₹{visit.amount.pending} pending</span>
+                      </>
+                    )}
+                    <span>•</span>
+                    <span className="truncate max-w-[180px]">{visit.chiefComplaint}</span>
+                  </div>
+
+                  {/* Expanded clinical summary with animation */}
+                  <div
                     className={cn(
-                      "absolute left-0 z-10 w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all cursor-pointer border-2",
-                      expandedId === visit.id
-                        ? "bg-accent text-accent-foreground border-accent shadow-md scale-110"
-                        : "bg-background text-foreground border-border hover:border-accent hover:scale-105"
+                      "grid transition-all duration-300 ease-in-out",
+                      isSelected
+                        ? "grid-rows-[1fr] opacity-100 mt-3"
+                        : "grid-rows-[0fr] opacity-0 mt-0"
                     )}
                   >
-                    {visit.visitNumber}
-                  </button>
-                </CollapsibleTrigger>
-
-                {/* Visit date row (collapsed state) */}
-                <div className="ml-14 pb-6">
-                  <CollapsibleTrigger asChild>
-                    <div
-                      className={cn(
-                        "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
-                        expandedId === visit.id
-                          ? "bg-accent/5 border border-accent/20"
-                          : "hover:bg-muted/50"
-                      )}
-                    >
-                      <div className="flex-1">
-                        <p className="font-medium text-foreground">
-                          {new Date(visit.date).toLocaleDateString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </p>
-                        <p className="text-sm text-muted-foreground">{visit.campName}</p>
-                      </div>
-                      <ChevronDown
-                        className={cn(
-                          "h-4 w-4 text-muted-foreground transition-transform",
-                          expandedId === visit.id && "rotate-180"
-                        )}
-                      />
-                    </div>
-                  </CollapsibleTrigger>
-
-                  {/* Expanded content - horizontal row */}
-                  <CollapsibleContent>
-                    <div className="mt-2 bg-white rounded-lg border border-border shadow-sm overflow-hidden">
-                      <div className="flex items-stretch divide-x divide-border">
-                        {/* Visit Date */}
-                        <div className="flex-shrink-0 w-24 p-3">
-                          <p className="text-xs text-muted-foreground mb-1">Visit Date</p>
-                          <p className="text-sm font-medium truncate">
-                            {new Date(visit.date).toLocaleDateString('en-IN', {
-                              day: '2-digit',
-                              month: 'short',
-                            })}
-                          </p>
+                    <div className="overflow-hidden">
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Chief Complaint</p>
+                          <p className="text-sm text-foreground leading-relaxed">{visit.chiefComplaint}</p>
                         </div>
-
-                        {/* Camp Name */}
-                        <div className="flex-shrink-0 w-28 p-3">
-                          <p className="text-xs text-muted-foreground mb-1">Camp</p>
-                          <p className="text-sm font-medium truncate" title={visit.campName}>
-                            {visit.campName}
-                          </p>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Vitals</p>
+                          <p className="text-sm text-foreground leading-relaxed">{visit.vitals}</p>
                         </div>
-
-                        {/* Amount */}
-                        <div className="flex-shrink-0 w-28 p-3">
-                          <p className="text-xs text-muted-foreground mb-1">Amount</p>
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm font-medium text-stat-green-text">₹{visit.amount.paid}</span>
-                            {visit.amount.pending > 0 && (
-                              <Badge variant="outline" className="text-xs px-1 py-0 text-destructive border-destructive/30">
-                                +₹{visit.amount.pending}
-                              </Badge>
-                            )}
-                          </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Assessment</p>
+                          <p className="text-sm text-foreground leading-relaxed">{visit.assessment}</p>
                         </div>
-
-                        {/* Chief Complaint */}
-                        <div className="flex-1 min-w-0 p-3">
-                          <p className="text-xs text-muted-foreground mb-1">Chief Complaint</p>
-                          <p className="text-sm truncate" title={visit.chiefComplaint}>
-                            {visit.chiefComplaint}
-                          </p>
-                        </div>
-
-                        {/* Labs / Vitals */}
-                        <div className="flex-shrink-0 w-32 p-3">
-                          <p className="text-xs text-muted-foreground mb-1">Vitals</p>
-                          <p className="text-sm truncate" title={visit.vitals}>
-                            {visit.vitals}
-                          </p>
-                        </div>
-
-                        {/* Assessment */}
-                        <div className="flex-1 min-w-0 p-3">
-                          <p className="text-xs text-muted-foreground mb-1">Assessment</p>
-                          <p className="text-sm truncate" title={visit.assessment}>
-                            {visit.assessment}
-                          </p>
-                        </div>
-
-                        {/* Plan */}
-                        <div className="flex-1 min-w-0 p-3">
-                          <p className="text-xs text-muted-foreground mb-1">Plan</p>
-                          <p className="text-sm truncate" title={visit.plan}>
-                            {visit.plan}
-                          </p>
-                        </div>
-
-                        {/* More icon */}
-                        <div className="flex-shrink-0 w-12 p-3 flex items-center justify-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setModalVisit(visit);
-                            }}
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Plan</p>
+                          <p className="text-sm text-foreground leading-relaxed">{visit.plan}</p>
                         </div>
                       </div>
                     </div>
-                  </CollapsibleContent>
-                </div>
-              </Collapsible>
+                  </div>
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-
-      {/* Visit Details Modal */}
-      <VisitDetailsModal
-        visit={modalVisit}
-        open={!!modalVisit}
-        onOpenChange={(open) => !open && setModalVisit(null)}
-      />
-    </>
+    </div>
   );
 }
