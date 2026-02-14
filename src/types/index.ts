@@ -212,6 +212,26 @@ export interface SupplierOrderItem {
 
 export type DistributionStatus = 'pending' | 'confirmed' | 'partial' | 'sent';
 
+export type RequestOrderStatus = 'draft' | 'pending' | 'partial' | 'sent' | 'cancelled';
+
+export interface RequestOrder {
+  id: string;
+  requestedBy: string;
+  clientName: string;
+  warehouseId: string;
+  items: RequestOrderItem[];
+  status: RequestOrderStatus;
+  createdAt: string;
+  updatedAt?: string;
+  notes?: string;
+}
+
+export interface RequestOrderItem {
+  medicineId: string;
+  requestedQty: number;
+  sendQty: number;
+}
+
 export interface StockDistribution {
   id: string;
   warehouseId: string;

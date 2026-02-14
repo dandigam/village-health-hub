@@ -1,4 +1,4 @@
-import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment, Discount, Warehouse, SupplierMedicine, SupplierOrder, StockDistribution } from '@/types';
+import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment, Discount, Warehouse, SupplierMedicine, SupplierOrder, StockDistribution, RequestOrder } from '@/types';
 
 export const mockUser: User = {
   id: '1',
@@ -507,5 +507,46 @@ export const mockDistributions: StockDistribution[] = [
     id: '2', warehouseId: '1', clientName: 'Vijayawada Camp',
     items: [{ medicineId: '3', requestedQty: 30, sentQty: 20 }],
     status: 'partial', createdAt: '2025-02-05T00:00:00Z', notes: 'Only 20 units available, remaining 10 on backorder',
+  },
+];
+
+export const mockRequestOrders: RequestOrder[] = [
+  {
+    id: '1', requestedBy: 'Dr. Ramesh Kumar', clientName: 'Bapatla Camp', warehouseId: '1',
+    items: [
+      { medicineId: '1', requestedQty: 100, sendQty: 0 },
+      { medicineId: '2', requestedQty: 100, sendQty: 0 },
+      { medicineId: '3', requestedQty: 80, sendQty: 0 },
+      { medicineId: '4', requestedQty: 50, sendQty: 0 },
+      { medicineId: '5', requestedQty: 100, sendQty: 0 },
+      { medicineId: '7', requestedQty: 200, sendQty: 0 },
+      { medicineId: '9', requestedQty: 150, sendQty: 0 },
+    ],
+    status: 'pending', createdAt: '2025-02-12T09:00:00Z',
+  },
+  {
+    id: '2', requestedBy: 'Nurse Priya', clientName: 'Vijayawada Camp', warehouseId: '1',
+    items: [
+      { medicineId: '1', requestedQty: 50, sendQty: 0 },
+      { medicineId: '6', requestedQty: 100, sendQty: 0 },
+      { medicineId: '8', requestedQty: 75, sendQty: 0 },
+    ],
+    status: 'pending', createdAt: '2025-02-11T14:30:00Z',
+  },
+  {
+    id: '3', requestedBy: 'Staff Ravi', clientName: 'Mangalagiri Camp', warehouseId: '2',
+    items: [
+      { medicineId: '2', requestedQty: 60, sendQty: 60 },
+      { medicineId: '5', requestedQty: 40, sendQty: 30 },
+    ],
+    status: 'draft', createdAt: '2025-02-10T11:00:00Z', notes: 'Awaiting stock confirmation',
+  },
+  {
+    id: '4', requestedBy: 'Dr. Ramesh Kumar', clientName: 'Bapatla Camp', warehouseId: '1',
+    items: [
+      { medicineId: '1', requestedQty: 50, sendQty: 50 },
+      { medicineId: '7', requestedQty: 100, sendQty: 100 },
+    ],
+    status: 'sent', createdAt: '2025-01-15T00:00:00Z',
   },
 ];
