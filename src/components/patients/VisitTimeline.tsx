@@ -60,6 +60,30 @@ interface VisitTimelineProps {
 }
 
 export function VisitTimeline({ visits, selectedId, onSelect }: VisitTimelineProps) {
+  // Build sparkline data: count visits per month over the last 12 months
+  const sparklineData = (() => {
+    const now = new Date();
+    const months: number[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const count = visits.filter(v => {
+        const d = new Date(v.date);
+        return d.getMonth() === m.getMonth() && d.getFullYear() === m.getFullYear();
+      }).length;
+      months.push(count);
+    }
+    return months;
+  })();
+
+  const maxVal = Math.max(...sparklineData, 1);
+  const sparkW = 80;
+  const sparkH = 24;
+  const points = sparklineData.map((v, i) => {
+    const x = (i / (sparklineData.length - 1)) * sparkW;
+    const y = sparkH - (v / maxVal) * (sparkH - 4) - 2;
+    return `${x},${y}`;
+  }).join(' ');
+
   if (visits.length === 0) {
     return (
       <div className="text-center py-12">
@@ -71,9 +95,25 @@ export function VisitTimeline({ visits, selectedId, onSelect }: VisitTimelinePro
   return (
     <div>
       {/* Visits count header */}
-      <div className="flex items-center gap-2 mb-5 pb-3 border-b border-border">
+      <div className="flex items-center gap-3 mb-5 pb-3 border-b border-border">
         <Calendar className="h-4 w-4 text-accent" />
         <span className="text-sm font-semibold text-foreground">{visits.length} Visits</span>
+        <svg width={sparkW} height={sparkH} className="ml-auto">
+          <polyline
+            points={points}
+            fill="none"
+            stroke="hsl(var(--accent))"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          {sparklineData.map((v, i) => {
+            if (v === 0) return null;
+            const x = (i / (sparklineData.length - 1)) * sparkW;
+            const y = sparkH - (v / maxVal) * (sparkH - 4) - 2;
+            return <circle key={i} cx={x} cy={y} r="2" fill="hsl(var(--accent))" />;
+          })}
+        </svg>
       </div>
 
       {/* Timeline */}
