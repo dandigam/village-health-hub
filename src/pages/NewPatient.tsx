@@ -132,7 +132,7 @@ export default function NewPatient() {
 
         {/* Stepper */}
         <div className="bg-card border rounded-lg p-4">
-          <PatientStepper steps={STEPS} currentStep={currentStep} />
+          <PatientStepper steps={STEPS} currentStep={currentStep} onStepClick={(stepId) => setCurrentStep(stepId)} />
         </div>
 
         {/* Step Content */}

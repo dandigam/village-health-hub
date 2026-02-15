@@ -9,18 +9,23 @@ interface Step {
 interface PatientStepperProps {
   steps: Step[];
   currentStep: number;
+  onStepClick?: (stepId: number) => void;
 }
 
-export function PatientStepper({ steps, currentStep }: PatientStepperProps) {
+export function PatientStepper({ steps, currentStep, onStepClick }: PatientStepperProps) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between">
         {steps.map((step, index) => (
           <div key={step.id} className="flex items-center flex-1">
-            <div className="flex items-center">
+            <button
+              type="button"
+              className="flex items-center cursor-pointer group"
+              onClick={() => onStepClick?.(step.id)}
+            >
               <div
                 className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-colors',
+                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-colors group-hover:ring-2 group-hover:ring-accent/30',
                   currentStep > step.id
                     ? 'bg-accent border-accent text-white'
                     : currentStep === step.id
@@ -36,13 +41,13 @@ export function PatientStepper({ steps, currentStep }: PatientStepperProps) {
               </div>
               <span
                 className={cn(
-                  'ml-2 text-sm font-medium whitespace-nowrap',
+                  'ml-2 text-sm font-medium whitespace-nowrap group-hover:text-accent transition-colors',
                   currentStep >= step.id ? 'text-foreground' : 'text-muted-foreground'
                 )}
               >
                 {step.title}
               </span>
-            </div>
+            </button>
             {index < steps.length - 1 && (
               <div
                 className={cn(
