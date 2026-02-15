@@ -33,6 +33,9 @@ import DispenseMedicine from "./pages/pharmacy/DispenseMedicine";
 // Stock
 import StockManagement from "./pages/stock/StockManagement";
 
+// Encounters
+import Encounters from "./pages/encounters/Encounters";
+
 // Patient History
 import PatientHistory from "./pages/patients/PatientHistory";
 
@@ -73,6 +76,7 @@ const App = () => (
             <Route path="/patients" element={<Patients />} />
             <Route path="/patients/new" element={<NewPatient />} />
             <Route path="/patients/:id" element={<PatientHistory />} />
+            <Route path="/patients/:id/edit" element={<NewPatient />} />
             
             {/* SOAP Notes */}
             <Route path="/soap" element={<SOAPNotesList />} />
@@ -80,15 +84,18 @@ const App = () => (
             <Route path="/soap/:id" element={<ViewSOAPNote />} />
             <Route path="/soap/:id/edit" element={<NewSOAPNote />} />
             
-{/* Consultations */}
-<Route path="/consultations" element={<ConsultationsList />} />
-<Route path="/consultations/new" element={<NewConsultation />} />
-<Route path="/consultations/doctor" element={<DoctorConsultation />} />
+            {/* Consultations */}
+            <Route path="/consultations" element={<ConsultationsList />} />
+            <Route path="/consultations/new" element={<NewConsultation />} />
+            <Route path="/consultations/doctor" element={<DoctorConsultation />} />
             
             {/* Pharmacy */}
             <Route path="/pharmacy" element={<PharmacyDashboard />} />
             <Route path="/pharmacy/prescription/:id" element={<DispenseMedicine />} />
             <Route path="/pharmacy/dispense/:id" element={<DispenseMedicine />} />
+            
+            {/* Encounters */}
+            <Route path="/encounters" element={<Encounters />} />
             
             {/* Stock */}
             <Route path="/stock" element={<StockManagement />} />

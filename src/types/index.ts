@@ -178,6 +178,76 @@ export interface StockItem {
   supplierId: string;
 }
 
+// Warehouse Types
+export interface Warehouse {
+  id: string;
+  name: string;
+  address: string;
+  supplierIds: string[];
+  createdAt: string;
+}
+
+export interface SupplierMedicine {
+  supplierId: string;
+  medicineId: string;
+}
+
+export type SupplierOrderStatus = 'pending' | 'sent' | 'received' | 'partial';
+
+export interface SupplierOrder {
+  id: string;
+  supplierId: string;
+  warehouseId: string;
+  items: SupplierOrderItem[];
+  status: SupplierOrderStatus;
+  createdAt: string;
+  receivedAt?: string;
+}
+
+export interface SupplierOrderItem {
+  medicineId: string;
+  requestedQty: number;
+  receivedQty?: number;
+}
+
+export type DistributionStatus = 'pending' | 'confirmed' | 'partial' | 'sent';
+
+export type RequestOrderStatus = 'draft' | 'pending' | 'partial' | 'sent' | 'cancelled';
+
+export interface RequestOrder {
+  id: string;
+  requestedBy: string;
+  clientName: string;
+  warehouseId: string;
+  items: RequestOrderItem[];
+  status: RequestOrderStatus;
+  createdAt: string;
+  updatedAt?: string;
+  notes?: string;
+}
+
+export interface RequestOrderItem {
+  medicineId: string;
+  requestedQty: number;
+  sendQty: number;
+}
+
+export interface StockDistribution {
+  id: string;
+  warehouseId: string;
+  clientName: string;
+  items: DistributionItem[];
+  status: DistributionStatus;
+  createdAt: string;
+  notes?: string;
+}
+
+export interface DistributionItem {
+  medicineId: string;
+  requestedQty: number;
+  sentQty: number;
+}
+
 // Stats Types
 export interface CampStats {
   totalPatients: number;

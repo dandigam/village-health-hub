@@ -4,9 +4,6 @@ import { ArrowLeft, User, FileText, Printer } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { VisitTimeline, type Visit } from '@/components/patients/VisitTimeline';
 import { VisitDetailPanel } from '@/components/patients/VisitDetailPanel';
 import { mockPatients, mockSOAPNotes, mockConsultations, mockPrescriptions, mockPayments, mockDoctors, mockCamps } from '@/data/mockData';
@@ -15,6 +12,7 @@ export default function PatientHistory() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   const patient = mockPatients.find(p => p.id === id);
   const patientSOAPs = mockSOAPNotes.filter(s => s.patientId === id);
@@ -99,6 +97,12 @@ export default function PatientHistory() {
     visit.visitNumber = visits.length - index;
   });
 
+  // Auto-select first visit on load
+  if (!initialized && visits.length > 0 && !selectedVisit) {
+    setSelectedVisit(visits[0]);
+    setInitialized(true);
+  }
+
   return (
     <DashboardLayout>
       {/* Page Header */}
@@ -161,160 +165,27 @@ export default function PatientHistory() {
         </CardContent>
       </Card>
 
-      {/* Tabs */}
-      <Tabs defaultValue="timeline">
-        <TabsList className="mb-6 no-print">
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          <TabsTrigger value="soap">SOAP Notes ({patientSOAPs.length})</TabsTrigger>
-          <TabsTrigger value="consultations">Consultations ({patientConsultations.length})</TabsTrigger>
-          <TabsTrigger value="prescriptions">Prescriptions ({patientPrescriptions.length})</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="timeline">
-          {/* Split view: Timeline left, Detail panel right */}
-          <div className="flex gap-5">
-            <div className="w-[28%] flex-shrink-0">
-              <Card>
-                <CardContent className="py-4">
-                  <VisitTimeline
-                    visits={visits}
-                    selectedId={selectedVisit?.id || null}
-                    onSelect={setSelectedVisit}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-            <div className="flex-1">
-              <Card className="sticky top-4">
-                <CardContent className="py-5">
-                  <VisitDetailPanel visit={selectedVisit} />
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="soap">
-          <div className="space-y-4">
-            {patientSOAPs.map(soap => (
-              <Card key={soap.id} className="avoid-break">
-                <CardContent className="py-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="font-medium">SOAP Note</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(soap.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge>{soap.status}</Badge>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="font-medium text-accent">Subjective</p>
-                      <p className="text-muted-foreground">{soap.subjective}</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-accent">Assessment</p>
-                      <p className="text-muted-foreground">{soap.assessment}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            {patientSOAPs.length === 0 && (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No SOAP notes found.
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="consultations">
-          <div className="space-y-4">
-            {patientConsultations.map(c => (
-              <Card key={c.id} className="avoid-break">
-                <CardContent className="py-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="font-medium">Consultation with {getDoctorName(c.doctorId)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(c.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge className="bg-stat-green text-stat-green-text">{c.status}</Badge>
-                  </div>
-                  <Separator className="my-3" />
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Chief Complaint:</span> {c.chiefComplaint}</p>
-                    <p><span className="font-medium">Diagnosis:</span> {c.diagnosis.join(', ')}</p>
-                    {c.labTests && c.labTests.length > 0 && (
-                      <p><span className="font-medium">Lab Tests:</span> {c.labTests.join(', ')}</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            {patientConsultations.length === 0 && (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No consultations found.
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="prescriptions">
-          <div className="space-y-4">
-            {patientPrescriptions.map(p => (
-              <Card key={p.id} className="avoid-break">
-                <CardContent className="py-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="font-medium">Prescription by {getDoctorName(p.doctorId)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(p.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge className={p.status === 'dispensed' ? 'bg-stat-green text-stat-green-text' : 'bg-stat-orange text-stat-orange-text'}>
-                      {p.status}
-                    </Badge>
-                  </div>
-                  <div className="border rounded-lg overflow-hidden">
-                    <table className="w-full text-sm">
-                      <thead className="bg-muted">
-                        <tr>
-                          <th className="p-2 text-left">Medicine</th>
-                          <th className="p-2 text-center">Dosage</th>
-                          <th className="p-2 text-center">Qty</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {p.items.map((item, i) => (
-                          <tr key={i} className="border-t">
-                            <td className="p-2">{item.medicineName}</td>
-                            <td className="p-2 text-center">{item.morning}-{item.afternoon}-{item.night}</td>
-                            <td className="p-2 text-center">{item.quantity}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            {patientPrescriptions.length === 0 && (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No prescriptions found.
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+      {/* Timeline view - no tabs */}
+      <div className="flex gap-5">
+        <div className="w-[28%] flex-shrink-0">
+          <Card>
+            <CardContent className="py-4">
+              <VisitTimeline
+                visits={visits}
+                selectedId={selectedVisit?.id || null}
+                onSelect={setSelectedVisit}
+              />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="flex-1">
+          <Card className="sticky top-4">
+            <CardContent className="py-5">
+              <VisitDetailPanel visit={selectedVisit} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </DashboardLayout>
   );
 }

@@ -7,66 +7,64 @@
 @layer base {
   :root {
     --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --foreground: 215 30% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 215 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 215 30% 12%;
 
-    --primary: 215 70% 25%;
+    --primary: 215 70% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 215 25% 15%;
+    --secondary: 210 18% 95%;
+    --secondary-foreground: 215 30% 12%;
 
-    --muted: 210 15% 94%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 210 14% 93%;
+    --muted-foreground: 215 20% 38%;
 
-    --accent: 350 85% 60%;
+    --accent: 215 60% 42%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 88%;
-    --ring: 215 70% 25%;
+    --border: 214 18% 88%;
+    --input: 214 18% 88%;
+    --ring: 215 65% 30%;
 
     --radius: 0.5rem;
 
-    /* Custom Medical Theme Colors */
-    --navy: 215 70% 20%;
-    --navy-light: 215 60% 30%;
-    --coral: 350 85% 60%;
-    --coral-light: 350 85% 70%;
-    --success: 142 70% 45%;
-    --warning: 38 92% 50%;
-    --info: 199 89% 48%;
+    /* Semantic Status Colors — muted, professional */
+    --navy: 215 70% 22%;
+    --navy-light: 215 55% 35%;
+    --success: 152 55% 38%;
+    --warning: 38 80% 48%;
+    --info: 210 65% 45%;
     
-    /* Stat Card Colors */
-    --stat-blue: 210 100% 95%;
-    --stat-blue-text: 210 100% 40%;
-    --stat-green: 142 70% 92%;
-    --stat-green-text: 142 70% 35%;
-    --stat-orange: 30 100% 92%;
-    --stat-orange-text: 30 100% 40%;
-    --stat-pink: 350 100% 95%;
-    --stat-pink-text: 350 85% 50%;
-    --stat-purple: 270 70% 94%;
-    --stat-purple-text: 270 70% 45%;
-    --stat-teal: 175 70% 92%;
-    --stat-teal-text: 175 70% 35%;
+    /* Stat Card Colors — vibrant tinted backgrounds */
+    --stat-blue: 210 55% 94%;
+    --stat-blue-text: 210 65% 35%;
+    --stat-green: 152 50% 92%;
+    --stat-green-text: 152 55% 30%;
+    --stat-orange: 30 65% 92%;
+    --stat-orange-text: 30 65% 35%;
+    --stat-pink: 340 50% 93%;
+    --stat-pink-text: 340 50% 38%;
+    --stat-purple: 260 45% 93%;
+    --stat-purple-text: 260 45% 38%;
+    --stat-teal: 175 50% 92%;
+    --stat-teal-text: 175 50% 30%;
 
-    --sidebar-background: 215 70% 20%;
+    --sidebar-background: 215 65% 22%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 350 85% 60%;
+    --sidebar-primary: 215 55% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 60% 30%;
+    --sidebar-accent: 215 50% 32%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 50% 35%;
-    --sidebar-ring: 350 85% 60%;
+    --sidebar-border: 215 45% 35%;
+    --sidebar-ring: 215 55% 45%;
   }
 
   .dark {
@@ -79,16 +77,16 @@
     --popover: 215 30% 14%;
     --popover-foreground: 210 20% 95%;
 
-    --primary: 350 85% 60%;
+    --primary: 215 55% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 25% 20%;
     --secondary-foreground: 210 20% 95%;
 
     --muted: 215 25% 18%;
-    --muted-foreground: 215 15% 60%;
+    --muted-foreground: 215 12% 60%;
 
-    --accent: 350 85% 60%;
+    --accent: 215 45% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
@@ -96,16 +94,16 @@
 
     --border: 215 25% 25%;
     --input: 215 25% 25%;
-    --ring: 350 85% 60%;
+    --ring: 215 55% 45%;
 
     --sidebar-background: 215 35% 12%;
     --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 350 85% 60%;
+    --sidebar-primary: 215 55% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 30% 20%;
     --sidebar-accent-foreground: 210 20% 95%;
     --sidebar-border: 215 25% 25%;
-    --sidebar-ring: 350 85% 60%;
+    --sidebar-ring: 215 55% 45%;
   }
 }
 
