@@ -11,8 +11,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useCurrentUser, useCamps } from '@/hooks/useApiData';
+import { useCamps } from '@/hooks/useApiData';
 import { useCamp } from '@/context/CampContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -21,12 +22,13 @@ interface HeaderProps {
 export function Header({ onMenuToggle }: HeaderProps) {
   const navigate = useNavigate();
   const { selectedCamp, setSelectedCamp } = useCamp();
-  const { data: user } = useCurrentUser();
+  const { user: authUser, logout } = useAuth();
   const { data: camps = [] } = useCamps();
 
-  const currentUser = user || { name: '', phone: '', avatar: undefined };
+  const currentUser = { name: authUser?.name || '', role: authUser?.role || '', avatar: undefined as string | undefined };
 
   const handleLogout = () => {
+    logout();
     navigate('/login');
   };
 
@@ -92,7 +94,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <Button variant="ghost" className="flex items-center gap-2 text-primary-foreground hover:bg-primary-foreground/10 px-1 sm:px-2">
               <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium">{currentUser.name}</p>
-                <p className="text-xs opacity-70">Front Desk | {currentUser.phone}</p>
+                <p className="text-xs opacity-70">{currentUser.role}</p>
               </div>
               <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                 <AvatarImage src={currentUser.avatar} alt={currentUser.name} />

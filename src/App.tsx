@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CampProvider } from "@/context/CampContext";
+import { AuthProvider } from "@/context/AuthContext";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Camps from "./pages/Camps";
@@ -14,6 +16,7 @@ import NewDoctor from "./pages/doctors/NewDoctor";
 import EditDoctor from "./pages/doctors/EditDoctor";
 import NewCamp from "./pages/camps/NewCamp";
 import EditCamp from "./pages/camps/EditCamp";
+import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
 // Pharmacy
@@ -51,55 +54,58 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
-            
-            <Route path="/dashboard" element={<Dashboard />} />
-            
-            {/* Camps */}
-            <Route path="/camps" element={<Camps />} />
-            <Route path="/camps/new" element={<NewCamp />} />
-            <Route path="/camps/:id" element={<EditCamp />} />
-            
-            {/* Patients */}
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/patients/new" element={<NewPatient />} />
-            <Route path="/patients/:id" element={<PatientHistory />} />
-            <Route path="/patients/:id/edit" element={<NewPatient />} />
-            
-            {/* Pharmacy */}
-            <Route path="/pharmacy" element={<PharmacyDashboard />} />
-            <Route path="/pharmacy/prescription/:id" element={<DispenseMedicine />} />
-            <Route path="/pharmacy/dispense/:id" element={<DispenseMedicine />} />
-            
-            {/* Encounters */}
-            <Route path="/encounters" element={<Encounters />} />
-            
-            {/* Stock */}
-            <Route path="/stock" element={<StockManagement />} />
-            
-            {/* Doctors */}
-            <Route path="/doctors" element={<Doctors />} />
-            <Route path="/doctors/new" element={<NewDoctor />} />
-            <Route path="/doctors/:id/edit" element={<EditDoctor />} />
-            
-            {/* Reports */}
-            <Route path="/reports" element={<ReportsHub />} />
-            <Route path="/reports/camps" element={<CampReports />} />
-            <Route path="/reports/patients" element={<PatientReports />} />
-            <Route path="/reports/medicines" element={<MedicineReports />} />
-            <Route path="/reports/discounts" element={<DiscountReports />} />
-            <Route path="/reports/doctors" element={<DoctorReports />} />
-            
-            {/* Settings & Profile */}
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/settings/id-cards" element={<IDCardPrintouts />} />
-            <Route path="/profile" element={<Profile />} />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              
+              <Route path="/dashboard" element={<ProtectedRoute routeKey="dashboard"><Dashboard /></ProtectedRoute>} />
+              
+              {/* Camps */}
+              <Route path="/camps" element={<ProtectedRoute routeKey="camps"><Camps /></ProtectedRoute>} />
+              <Route path="/camps/new" element={<ProtectedRoute routeKey="camps"><NewCamp /></ProtectedRoute>} />
+              <Route path="/camps/:id" element={<ProtectedRoute routeKey="camps"><EditCamp /></ProtectedRoute>} />
+              
+              {/* Patients */}
+              <Route path="/patients" element={<ProtectedRoute routeKey="patients"><Patients /></ProtectedRoute>} />
+              <Route path="/patients/new" element={<ProtectedRoute routeKey="patients"><NewPatient /></ProtectedRoute>} />
+              <Route path="/patients/:id" element={<ProtectedRoute routeKey="patients"><PatientHistory /></ProtectedRoute>} />
+              <Route path="/patients/:id/edit" element={<ProtectedRoute routeKey="patients"><NewPatient /></ProtectedRoute>} />
+              
+              {/* Pharmacy */}
+              <Route path="/pharmacy" element={<ProtectedRoute routeKey="pharmacy"><PharmacyDashboard /></ProtectedRoute>} />
+              <Route path="/pharmacy/prescription/:id" element={<ProtectedRoute routeKey="pharmacy"><DispenseMedicine /></ProtectedRoute>} />
+              <Route path="/pharmacy/dispense/:id" element={<ProtectedRoute routeKey="pharmacy"><DispenseMedicine /></ProtectedRoute>} />
+              
+              {/* Encounters */}
+              <Route path="/encounters" element={<ProtectedRoute routeKey="encounters"><Encounters /></ProtectedRoute>} />
+              
+              {/* Stock */}
+              <Route path="/stock" element={<ProtectedRoute routeKey="stock"><StockManagement /></ProtectedRoute>} />
+              
+              {/* Doctors */}
+              <Route path="/doctors" element={<ProtectedRoute routeKey="doctors"><Doctors /></ProtectedRoute>} />
+              <Route path="/doctors/new" element={<ProtectedRoute routeKey="doctors"><NewDoctor /></ProtectedRoute>} />
+              <Route path="/doctors/:id/edit" element={<ProtectedRoute routeKey="doctors"><EditDoctor /></ProtectedRoute>} />
+              
+              {/* Reports */}
+              <Route path="/reports" element={<ProtectedRoute routeKey="reports"><ReportsHub /></ProtectedRoute>} />
+              <Route path="/reports/camps" element={<ProtectedRoute routeKey="reports"><CampReports /></ProtectedRoute>} />
+              <Route path="/reports/patients" element={<ProtectedRoute routeKey="reports"><PatientReports /></ProtectedRoute>} />
+              <Route path="/reports/medicines" element={<ProtectedRoute routeKey="reports"><MedicineReports /></ProtectedRoute>} />
+              <Route path="/reports/discounts" element={<ProtectedRoute routeKey="reports"><DiscountReports /></ProtectedRoute>} />
+              <Route path="/reports/doctors" element={<ProtectedRoute routeKey="reports"><DoctorReports /></ProtectedRoute>} />
+              
+              {/* Settings & Profile */}
+              <Route path="/settings" element={<ProtectedRoute routeKey="dashboard"><Settings /></ProtectedRoute>} />
+              <Route path="/settings/id-cards" element={<ProtectedRoute routeKey="dashboard"><IDCardPrintouts /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute routeKey="dashboard"><Profile /></ProtectedRoute>} />
+              
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </CampProvider>
     </TooltipProvider>

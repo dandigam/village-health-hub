@@ -16,16 +16,18 @@ import {
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { useAuth } from '@/context/AuthContext';
+import { hasAccess } from '@/config/routeAccess';
 
-const mainNavItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Tent, label: 'Camps', href: '/camps' },
-  { icon: Users, label: 'Patients', href: '/patients' },
-  { icon: Activity, label: 'Encounters', href: '/encounters' },
-  { icon: Pill, label: 'Pharmacy', href: '/pharmacy' },
-  { icon: Package, label: 'Stock', href: '/stock' },
-  { icon: ClipboardList, label: 'Doctors', href: '/doctors' },
-  { icon: FileText, label: 'Reports', href: '/reports' },
+const allNavItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', routeKey: 'dashboard' },
+  { icon: Tent, label: 'Camps', href: '/camps', routeKey: 'camps' },
+  { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients' },
+  { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters' },
+  { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy' },
+  { icon: Package, label: 'Stock', href: '/stock', routeKey: 'stock' },
+  { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors' },
+  { icon: FileText, label: 'Reports', href: '/reports', routeKey: 'reports' },
 ];
 
 interface SidebarProps {
@@ -36,6 +38,9 @@ interface SidebarProps {
 export function Sidebar({ mobile, onNavigate }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const collapsed = mobile ? false : isCollapsed;
+  const { user } = useAuth();
+
+  const mainNavItems = allNavItems.filter(item => hasAccess(item.routeKey, user?.role));
 
   const handleNavClick = () => {
     if (onNavigate) onNavigate();
