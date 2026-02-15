@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { Search, Plus, Trash2, Pill } from 'lucide-react';
-import { mockMedicines, mockStockItems } from '@/data/mockData';
+import { useMedicines, useStockItems } from '@/hooks/useApiData';
 
 interface PrescriptionItem {
   id: string;
@@ -33,10 +33,12 @@ export function PlanTab({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Available medicines from mock data
+  const { data: medicinesData = [] } = useMedicines();
+  const { data: stockData = [] } = useStockItems();
+
   const availableMedicines = useMemo(() => {
-    return mockMedicines.map(medicine => {
-      const stockItem = mockStockItems.find(s => s.medicineId === medicine.id);
+    return medicinesData.map(medicine => {
+      const stockItem = stockData.find(s => s.medicineId === medicine.id);
       return {
         id: medicine.id,
         name: medicine.name,
@@ -44,7 +46,7 @@ export function PlanTab({
         qtyAvailable: stockItem?.quantity || 0,
       };
     });
-  }, []);
+  }, [medicinesData, stockData]);
 
   const filteredMedicines = useMemo(() => {
     if (!searchQuery) return availableMedicines;

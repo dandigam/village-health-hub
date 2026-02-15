@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Send, Package, CheckCircle, Eye, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockSupplierOrders, mockSuppliers, mockMedicines, mockStockItems, mockWarehouses, mockSupplierMedicines } from '@/data/mockData';
+import { useSupplierOrders, useSuppliers, useMedicines, useStockItems, useWarehouses, useSupplierMedicines } from '@/hooks/useApiData';
 import { toast } from '@/hooks/use-toast';
 import type { SupplierOrder, SupplierOrderItem } from '@/types';
 
@@ -20,29 +20,38 @@ const statusColors: Record<string, string> = {
 };
 
 export function SupplierOrdersTab() {
-  const [orders, setOrders] = useState<SupplierOrder[]>(mockSupplierOrders);
+  const { data: supplierOrders = [] } = useSupplierOrders();
+  const { data: suppliers = [] } = useSuppliers();
+  const { data: medicines = [] } = useMedicines();
+  const { data: stockItems = [] } = useStockItems();
+  const { data: warehouses = [] } = useWarehouses();
+  const { data: supplierMedicines = [] } = useSupplierMedicines();
+  const [orders, setOrders] = useState<SupplierOrder[]>([]);
   const [subTab, setSubTab] = useState('orders');
   const [showRequestStock, setShowRequestStock] = useState(false);
   const [showReceiveStock, setShowReceiveStock] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<SupplierOrder | null>(null);
   const [receiveOrder, setReceiveOrder] = useState<SupplierOrder | null>(null);
 
-  // Request Stock form
   const [reqSupplierId, setReqSupplierId] = useState('');
   const [reqWarehouseId, setReqWarehouseId] = useState('');
   const [reqItems, setReqItems] = useState<{ medicineId: string; requestedQty: number }[]>([]);
-
-  // Receive stock form
   const [receiveQtys, setReceiveQtys] = useState<Record<string, number>>({});
 
+  useEffect(() => {
+    if (supplierOrders.length > 0 && orders.length === 0) {
+      setOrders(supplierOrders);
+    }
+  }, [supplierOrders]);
+
   const getWarehouseStock = (medicineId: string) => {
-    const stock = mockStockItems.find(s => s.medicineId === medicineId);
+    const stock = stockItems.find(s => s.medicineId === medicineId);
     return stock?.quantity || 0;
   };
 
   const supplierMedicinesList = (supplierId: string) => {
-    const medIds = mockSupplierMedicines.filter(sm => sm.supplierId === supplierId).map(sm => sm.medicineId);
-    return mockMedicines.filter(m => medIds.includes(m.id));
+    const medIds = supplierMedicines.filter(sm => sm.supplierId === supplierId).map(sm => sm.medicineId);
+    return medicines.filter(m => medIds.includes(m.id));
   };
 
   const addReqItem = () => setReqItems([...reqItems, { medicineId: '', requestedQty: 0 }]);
@@ -59,7 +68,7 @@ export function SupplierOrdersTab() {
       updatedAt: now,
     };
     setOrders([newOrder, ...orders]);
-    const supplier = mockSuppliers.find(s => s.id === reqSupplierId);
+    const supplier = suppliers.find(s => s.id === reqSupplierId);
     toast({
       title: 'Request Sent to Supplier',
       description: `Stock request sent to ${supplier?.name}. Email notification will be sent.`,
@@ -90,7 +99,6 @@ export function SupplierOrdersTab() {
 
   const pendingOrders = orders.filter(o => o.status === 'sent' || o.status === 'pending');
 
-  // Monthly order tracking
   const ordersByMonth: Record<string, SupplierOrder[]> = {};
   orders.forEach(o => {
     const month = new Date(o.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
@@ -131,8 +139,8 @@ export function SupplierOrdersTab() {
                     </thead>
                     <tbody>
                       {orders.map(order => {
-                        const supplier = mockSuppliers.find(s => s.id === order.supplierId);
-                        const wh = mockWarehouses.find(w => w.id === order.warehouseId);
+                        const supplier = suppliers.find(s => s.id === order.supplierId);
+                        const wh = warehouses.find(w => w.id === order.warehouseId);
                         return (
                           <tr key={order.id}>
                             <td>{new Date(order.createdAt).toLocaleDateString()}</td>
@@ -165,7 +173,7 @@ export function SupplierOrdersTab() {
                 <CardContent>
                   <div className="space-y-2">
                     {monthOrders.map(order => {
-                      const supplier = mockSuppliers.find(s => s.id === order.supplierId);
+                      const supplier = suppliers.find(s => s.id === order.supplierId);
                       return (
                         <div key={order.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer" onClick={() => setSelectedOrder(order)}>
                           <div className="flex items-center gap-2">
@@ -192,8 +200,8 @@ export function SupplierOrdersTab() {
             <DialogTitle>Order Details</DialogTitle>
           </DialogHeader>
           {selectedOrder && (() => {
-            const supplier = mockSuppliers.find(s => s.id === selectedOrder.supplierId);
-            const wh = mockWarehouses.find(w => w.id === selectedOrder.warehouseId);
+            const supplier = suppliers.find(s => s.id === selectedOrder.supplierId);
+            const wh = warehouses.find(w => w.id === selectedOrder.warehouseId);
             return (
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2 text-sm">
@@ -207,7 +215,7 @@ export function SupplierOrdersTab() {
                     <thead><tr className="border-b bg-muted/50"><th className="p-2 text-left">Medicine</th><th className="p-2">Requested</th><th className="p-2">Received</th></tr></thead>
                     <tbody>
                       {selectedOrder.items.map((item, i) => {
-                        const med = mockMedicines.find(m => m.id === item.medicineId);
+                        const med = medicines.find(m => m.id === item.medicineId);
                         return (
                           <tr key={i} className="border-b last:border-b-0">
                             <td className="p-2">{med?.name || '-'}</td>
@@ -239,7 +247,7 @@ export function SupplierOrdersTab() {
                 <Select value={reqSupplierId} onValueChange={v => { setReqSupplierId(v); setReqItems([]); }}>
                   <SelectTrigger className="mt-2"><SelectValue placeholder="Select supplier" /></SelectTrigger>
                   <SelectContent>
-                    {mockSuppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                    {suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -248,7 +256,7 @@ export function SupplierOrdersTab() {
                 <Select value={reqWarehouseId} onValueChange={setReqWarehouseId}>
                   <SelectTrigger className="mt-2"><SelectValue placeholder="Select warehouse" /></SelectTrigger>
                   <SelectContent>
-                    {mockWarehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                    {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -314,7 +322,7 @@ export function SupplierOrdersTab() {
                 <SelectTrigger className="mt-2"><SelectValue placeholder="Select pending order" /></SelectTrigger>
                 <SelectContent>
                   {pendingOrders.map(o => {
-                    const supplier = mockSuppliers.find(s => s.id === o.supplierId);
+                    const supplier = suppliers.find(s => s.id === o.supplierId);
                     return <SelectItem key={o.id} value={o.id}>{supplier?.name} - {new Date(o.createdAt).toLocaleDateString()}</SelectItem>;
                   })}
                 </SelectContent>
@@ -327,7 +335,7 @@ export function SupplierOrdersTab() {
                   <thead><tr className="border-b bg-muted/50"><th className="p-2 text-left">Medicine</th><th className="p-2">Existing Qty</th><th className="p-2">New Qty</th></tr></thead>
                   <tbody>
                     {receiveOrder.items.map((item, i) => {
-                      const med = mockMedicines.find(m => m.id === item.medicineId);
+                      const med = medicines.find(m => m.id === item.medicineId);
                       const existingQty = getWarehouseStock(item.medicineId);
                       return (
                         <tr key={i} className="border-b last:border-b-0">

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { mockMedicines, mockSupplierMedicines } from '@/data/mockData';
+import { useMedicines, useSupplierMedicines } from '@/hooks/useApiData';
 import { toast } from '@/hooks/use-toast';
 import type { Supplier } from '@/types';
 
@@ -18,6 +18,8 @@ interface SupplierFormDialogProps {
 }
 
 export function SupplierFormDialog({ open, onOpenChange, supplier, onSave }: SupplierFormDialogProps) {
+  const { data: medicines = [] } = useMedicines();
+  const { data: supplierMedicinesList = [] } = useSupplierMedicines();
   const isEdit = !!supplier;
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
@@ -32,7 +34,7 @@ export function SupplierFormDialog({ open, onOpenChange, supplier, onSave }: Sup
         setName(supplier.name);
         setContact(supplier.contact);
         setAddress(supplier.address);
-        const existing = mockSupplierMedicines.filter(sm => sm.supplierId === supplier.id).map(sm => sm.medicineId);
+        const existing = supplierMedicinesList.filter(sm => sm.supplierId === supplier.id).map(sm => sm.medicineId);
         setSelectedMedicines(existing);
       } else {
         setName('');
@@ -43,9 +45,9 @@ export function SupplierFormDialog({ open, onOpenChange, supplier, onSave }: Sup
       setStep(1);
       setMedicineSearch('');
     }
-  }, [open, supplier]);
+  }, [open, supplier, supplierMedicinesList]);
 
-  const filteredMedicines = mockMedicines.filter(m =>
+  const filteredMedicines = medicines.filter(m =>
     m.name.toLowerCase().includes(medicineSearch.toLowerCase()) ||
     m.code.includes(medicineSearch)
   );
@@ -125,7 +127,7 @@ export function SupplierFormDialog({ open, onOpenChange, supplier, onSave }: Sup
             {selectedMedicines.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {selectedMedicines.map(id => {
-                  const med = mockMedicines.find(m => m.id === id);
+                  const med = medicines.find(m => m.id === id);
                   return med ? (
                     <Badge key={id} variant="secondary" className="text-xs gap-1">
                       {med.name}
