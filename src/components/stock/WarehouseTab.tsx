@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Plus, Warehouse as WarehouseIcon, MapPin, Truck, Edit2, Trash2, Phone, ChevronRight, Package } from 'lucide-react';
+import { Plus, Warehouse as WarehouseIcon, MapPin, Truck, Edit2, Trash2, Phone, Package, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { mockWarehouses, mockSuppliers, mockSupplierMedicines, mockMedicines } from '@/data/mockData';
 import { toast } from '@/hooks/use-toast';
 import { SupplierFormDialog } from './SupplierFormDialog';
@@ -20,12 +20,8 @@ interface WarehouseTabProps {
 export function WarehouseTab({ showAddSupplier, setShowAddSupplier, showCreateWarehouse, setShowCreateWarehouse }: WarehouseTabProps) {
   const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
   const [warehouses, setWarehouses] = useState<Warehouse[]>(mockWarehouses);
-
-  // Edit states
   const [editSupplier, setEditSupplier] = useState<Supplier | null>(null);
   const [editWarehouse, setEditWarehouse] = useState<Warehouse | null>(null);
-
-  // Delete states
   const [deleteSupplier, setDeleteSupplier] = useState<Supplier | null>(null);
   const [deleteWarehouse, setDeleteWarehouse] = useState<Warehouse | null>(null);
 
@@ -75,50 +71,68 @@ export function WarehouseTab({ showAddSupplier, setShowAddSupplier, showCreateWa
             <Plus className="mr-1 h-4 w-4" /> Add Supplier
           </Button>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {suppliers.map(s => {
-            const meds = mockSupplierMedicines.filter(sm => sm.supplierId === s.id);
-            return (
-              <Card key={s.id} className="group hover:shadow-md transition-shadow">
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                        <Truck className="h-4 w-4 text-primary" />
+        <div className="rounded-lg border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/30">
+                <TableHead className="w-[200px]">Supplier</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>Medicines</TableHead>
+                <TableHead className="text-right w-[120px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {suppliers.map(s => {
+                const meds = mockSupplierMedicines.filter(sm => sm.supplierId === s.id);
+                return (
+                  <TableRow key={s.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-md bg-primary/10 shrink-0">
+                          <Truck className="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        <span className="font-medium text-sm">{s.name}</span>
                       </div>
-                      <div className="min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{s.name}</h3>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Phone className="h-3 w-3" /> {s.contact}
-                        </p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <MapPin className="h-3 w-3" /> {s.address}
-                        </p>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Phone className="h-3 w-3" /> {s.contact}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {s.address}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {meds.slice(0, 3).map(sm => {
+                          const med = mockMedicines.find(m => m.id === sm.medicineId);
+                          return med ? <Badge key={sm.medicineId} variant="outline" className="text-[10px] px-1.5 py-0">{med.name}</Badge> : null;
+                        })}
+                        {meds.length > 3 && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">+{meds.length - 3}</Badge>}
+                        {meds.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
                       </div>
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditSupplier(s)}>
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteSupplier(s)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                  {meds.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t">
-                      <Package className="h-3 w-3 text-muted-foreground mt-0.5" />
-                      {meds.slice(0, 3).map(sm => {
-                        const med = mockMedicines.find(m => m.id === sm.medicineId);
-                        return med ? <Badge key={sm.medicineId} variant="outline" className="text-[10px] px-1.5 py-0">{med.name}</Badge> : null;
-                      })}
-                      {meds.length > 3 && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">+{meds.length - 3}</Badge>}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditSupplier(s)} title="View">
+                          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditSupplier(s)} title="Edit">
+                          <Edit2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setDeleteSupplier(s)} title="Delete">
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       </section>
 
@@ -135,90 +149,74 @@ export function WarehouseTab({ showAddSupplier, setShowAddSupplier, showCreateWa
             <Plus className="mr-1 h-4 w-4" /> Create Warehouse
           </Button>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {warehouses.map(wh => {
-            const whSuppliers = suppliers.filter(s => wh.supplierIds.includes(s.id));
-            return (
-              <Card key={wh.id} className="group hover:shadow-md transition-shadow">
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div className="p-2 rounded-lg bg-accent/10 shrink-0">
-                        <WarehouseIcon className="h-4 w-4 text-accent" />
+        <div className="rounded-lg border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/30">
+                <TableHead className="w-[200px]">Warehouse</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>Suppliers</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right w-[120px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {warehouses.map(wh => {
+                const whSuppliers = suppliers.filter(s => wh.supplierIds.includes(s.id));
+                return (
+                  <TableRow key={wh.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-md bg-accent/10 shrink-0">
+                          <WarehouseIcon className="h-3.5 w-3.5 text-accent" />
+                        </div>
+                        <span className="font-medium text-sm">{wh.name}</span>
                       </div>
-                      <div className="min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{wh.name}</h3>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <MapPin className="h-3 w-3" /> {wh.address}
-                        </p>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {wh.address}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {whSuppliers.map(s => (
+                          <Badge key={s.id} variant="secondary" className="text-[10px] px-1.5 py-0">{s.name}</Badge>
+                        ))}
+                        {whSuppliers.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
                       </div>
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditWarehouse(wh)}>
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteWarehouse(wh)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                  {whSuppliers.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t">
-                      <Truck className="h-3 w-3 text-muted-foreground mt-0.5" />
-                      {whSuppliers.map(s => (
-                        <Badge key={s.id} variant="secondary" className="text-[10px] px-1.5 py-0">{s.name}</Badge>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-[10px] text-muted-foreground mt-2">
-                    Created {new Date(wh.createdAt).toLocaleDateString()}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs text-muted-foreground">{new Date(wh.createdAt).toLocaleDateString()}</span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditWarehouse(wh)} title="View">
+                          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditWarehouse(wh)} title="Edit">
+                          <Edit2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setDeleteWarehouse(wh)} title="Delete">
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       </section>
 
       {/* ── Dialogs ── */}
-      <SupplierFormDialog
-        open={showAddSupplier}
-        onOpenChange={setShowAddSupplier}
-        onSave={handleSaveSupplier}
-      />
-      <SupplierFormDialog
-        open={!!editSupplier}
-        onOpenChange={(o) => { if (!o) setEditSupplier(null); }}
-        supplier={editSupplier}
-        onSave={handleSaveSupplier}
-      />
-      <WarehouseFormDialog
-        open={showCreateWarehouse}
-        onOpenChange={setShowCreateWarehouse}
-        suppliers={suppliers}
-        onSave={handleSaveWarehouse}
-      />
-      <WarehouseFormDialog
-        open={!!editWarehouse}
-        onOpenChange={(o) => { if (!o) setEditWarehouse(null); }}
-        warehouse={editWarehouse}
-        suppliers={suppliers}
-        onSave={handleSaveWarehouse}
-      />
-      <DeleteConfirmDialog
-        open={!!deleteSupplier}
-        onOpenChange={(o) => { if (!o) setDeleteSupplier(null); }}
-        title="Delete Supplier"
-        description={`Are you sure you want to delete "${deleteSupplier?.name}"? This will also remove them from any assigned warehouses.`}
-        onConfirm={handleDeleteSupplier}
-      />
-      <DeleteConfirmDialog
-        open={!!deleteWarehouse}
-        onOpenChange={(o) => { if (!o) setDeleteWarehouse(null); }}
-        title="Delete Warehouse"
-        description={`Are you sure you want to delete "${deleteWarehouse?.name}"? This action cannot be undone.`}
-        onConfirm={handleDeleteWarehouse}
-      />
+      <SupplierFormDialog open={showAddSupplier} onOpenChange={setShowAddSupplier} onSave={handleSaveSupplier} />
+      <SupplierFormDialog open={!!editSupplier} onOpenChange={(o) => { if (!o) setEditSupplier(null); }} supplier={editSupplier} onSave={handleSaveSupplier} />
+      <WarehouseFormDialog open={showCreateWarehouse} onOpenChange={setShowCreateWarehouse} suppliers={suppliers} onSave={handleSaveWarehouse} />
+      <WarehouseFormDialog open={!!editWarehouse} onOpenChange={(o) => { if (!o) setEditWarehouse(null); }} warehouse={editWarehouse} suppliers={suppliers} onSave={handleSaveWarehouse} />
+      <DeleteConfirmDialog open={!!deleteSupplier} onOpenChange={(o) => { if (!o) setDeleteSupplier(null); }} title="Delete Supplier" description={`Are you sure you want to delete "${deleteSupplier?.name}"? This will also remove them from any assigned warehouses.`} onConfirm={handleDeleteSupplier} />
+      <DeleteConfirmDialog open={!!deleteWarehouse} onOpenChange={(o) => { if (!o) setDeleteWarehouse(null); }} title="Delete Warehouse" description={`Are you sure you want to delete "${deleteWarehouse?.name}"? This action cannot be undone.`} onConfirm={handleDeleteWarehouse} />
     </div>
   );
 }
