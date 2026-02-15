@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, UserPlus } from 'lucide-react';
+import { Eye, Edit2, UserPlus } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -69,14 +69,26 @@ export default function Patients() {
                 <td>{patient.gender}</td>
                 <td className="uppercase">{patient.village}</td>
                 <td>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-accent"
-                    onClick={() => navigate(`/patients/${patient.id}`)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-accent"
+                      onClick={() => navigate(`/patients/${patient.id}`)}
+                      title="View History"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-primary"
+                      onClick={() => navigate(`/patients/${patient.id}/edit`)}
+                      title="Edit Patient"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
