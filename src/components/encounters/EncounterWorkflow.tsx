@@ -108,47 +108,49 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
   return (
     <div className="h-full flex flex-col bg-card rounded-lg border">
       {/* Patient Header */}
-      <div className="px-4 py-2.5 border-b flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="px-3 sm:px-4 py-2 sm:py-2.5 border-b flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {encounter.patient.photoUrl ? (
-            <img src={encounter.patient.photoUrl} alt="" className="h-9 w-9 rounded-full object-cover border" />
+            <img src={encounter.patient.photoUrl} alt="" className="h-8 w-8 sm:h-9 sm:w-9 rounded-full object-cover border shrink-0" />
           ) : (
-            <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground shrink-0">
               {encounter.patient.name.charAt(0)}
             </div>
           )}
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-foreground">{encounter.patient.name} {encounter.patient.surname}</p>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{encounter.patient.name} {encounter.patient.surname}</p>
               {encounter.isReturning && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.3)] bg-[hsl(var(--warning)/0.08)]">
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.3)] bg-[hsl(var(--warning)/0.08)] shrink-0">
                   <RotateCcw className="h-2.5 w-2.5 mr-0.5" />
                   Returning
                 </Badge>
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground">
-              {encounter.patient.age}Y • {encounter.patient.gender} • {encounter.patient.patientId} • {encounter.patient.village}
+            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
+              {encounter.patient.age}Y • {encounter.patient.gender} • {encounter.patient.patientId}
+              <span className="hidden sm:inline"> • {encounter.patient.village}</span>
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="h-7 text-xs">
-            <Save className="h-3 w-3 mr-1" />
-            Save
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <Button variant="outline" size="sm" className="h-7 text-[10px] sm:text-xs px-2 sm:px-3">
+            <Save className="h-3 w-3 sm:mr-1" />
+            <span className="hidden sm:inline">Save</span>
           </Button>
           {!isCompleted && activeStep === 4 && (
-            <Button size="sm" className="h-7 text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" onClick={onComplete}>
-              <Send className="h-3 w-3 mr-1" />
-              Send to Pharmacy
+            <Button size="sm" className="h-7 text-[10px] sm:text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white px-2 sm:px-3" onClick={onComplete}>
+              <Send className="h-3 w-3 sm:mr-1" />
+              <span className="hidden sm:inline">Send to Pharmacy</span>
+              <span className="sm:hidden">Send</span>
             </Button>
           )}
         </div>
       </div>
 
       {/* Stepper */}
-      <div className="px-4 py-2 border-b bg-muted/30">
-        <div className="flex items-center gap-1">
+      <div className="px-2 sm:px-4 py-2 border-b bg-muted/30 overflow-x-auto">
+        <div className="flex items-center gap-0.5 sm:gap-1 min-w-max">
           {steps.map((step, i) => {
             const isActive = activeStep === step.id;
             const isDone = activeStep > step.id || isCompleted;
@@ -157,7 +159,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
                 <button
                   onClick={() => handleStep(step.id)}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all',
+                    'flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap',
                     isActive
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : isDone
@@ -166,14 +168,15 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
                   )}
                 >
                   {isDone && !isActive ? (
-                    <Check className="h-3.5 w-3.5" />
+                    <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   ) : (
-                    <step.icon className="h-3.5 w-3.5" />
+                    <step.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   )}
-                  {step.label}
+                  <span className="hidden sm:inline">{step.label}</span>
+                  <span className="sm:hidden">{step.label.split(' ')[0]}</span>
                 </button>
                 {i < steps.length - 1 && (
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 mx-0.5" />
+                  <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground/40 mx-0.5" />
                 )}
               </div>
             );
@@ -193,24 +196,24 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
       </ScrollArea>
 
       {/* Bottom Action Bar */}
-      <div className="px-4 py-2.5 border-t bg-muted/20 flex items-center justify-between">
-        <Button variant="outline" size="sm" className="h-8 text-xs" disabled={activeStep <= 1} onClick={() => handleStep(activeStep - 1)}>
+      <div className="px-3 sm:px-4 py-2 sm:py-2.5 border-t bg-muted/20 flex items-center justify-between gap-2">
+        <Button variant="outline" size="sm" className="h-7 sm:h-8 text-[10px] sm:text-xs" disabled={activeStep <= 1} onClick={() => handleStep(activeStep - 1)}>
           Previous
         </Button>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="h-8 text-xs">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Button variant="outline" size="sm" className="h-7 sm:h-8 text-[10px] sm:text-xs hidden sm:flex">
             <Save className="h-3 w-3 mr-1" />
             Save Visit
           </Button>
           {activeStep < 5 ? (
-            <Button size="sm" className="h-8 text-xs" onClick={() => handleStep(activeStep + 1)}>
-              Next Step
-              <ChevronRight className="h-3 w-3 ml-1" />
+            <Button size="sm" className="h-7 sm:h-8 text-[10px] sm:text-xs" onClick={() => handleStep(activeStep + 1)}>
+              Next
+              <ChevronRight className="h-3 w-3 ml-0.5" />
             </Button>
           ) : (
-            <Button size="sm" className="h-8 text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" onClick={onComplete}>
+            <Button size="sm" className="h-7 sm:h-8 text-[10px] sm:text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" onClick={onComplete}>
               <Send className="h-3 w-3 mr-1" />
-              Send to Pharmacy
+              Send
             </Button>
           )}
         </div>
@@ -227,7 +230,7 @@ function VitalsStep({ data, onChange }: { data: VitalsData; onChange: (d: Vitals
     <div className="space-y-4">
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Vitals</h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           {([
             { label: 'BP (mmHg)', field: 'bp' as const, placeholder: '120/80' },
             { label: 'Temp (°F)', field: 'temp' as const, placeholder: '98.6' },
@@ -427,8 +430,8 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
       </div>
 
       {meds.length > 0 && (
-        <div className="border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[1fr_44px_44px_44px_56px_56px_32px] gap-0 bg-muted/50 px-3 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+        <div className="border rounded-lg overflow-x-auto">
+          <div className="grid grid-cols-[minmax(120px,1fr)_40px_40px_40px_50px_50px_32px] sm:grid-cols-[1fr_44px_44px_44px_56px_56px_32px] gap-0 bg-muted/50 px-2 sm:px-3 py-1.5 text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider min-w-[420px]">
             <span>Medicine</span>
             <span className="text-center">M</span>
             <span className="text-center">A</span>
@@ -441,25 +444,25 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
             const exceedsStock = med.qty > med.stockAvailable;
             return (
               <div key={med.id} className={cn(
-                "grid grid-cols-[1fr_44px_44px_44px_56px_56px_32px] gap-0 px-3 py-1.5 border-t text-sm items-center group",
+                "grid grid-cols-[minmax(120px,1fr)_40px_40px_40px_50px_50px_32px] sm:grid-cols-[1fr_44px_44px_44px_56px_56px_32px] gap-0 px-2 sm:px-3 py-1.5 border-t text-sm items-center group min-w-[420px]",
                 exceedsStock && "bg-destructive/5"
               )}>
                 <div className="min-w-0">
-                  <span className="truncate text-xs font-medium block">{med.name}</span>
+                  <span className="truncate text-[10px] sm:text-xs font-medium block">{med.name}</span>
                   {exceedsStock && (
-                    <span className="flex items-center gap-1 text-[10px] text-destructive mt-0.5">
-                      <AlertTriangle className="h-3 w-3" />
-                      Stock: {med.stockAvailable} (short by {med.qty - med.stockAvailable})
+                    <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-destructive mt-0.5">
+                      <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                      Short by {med.qty - med.stockAvailable}
                     </span>
                   )}
                 </div>
-                <Input type="number" min={0} max={9} value={med.m} onChange={(e) => updateMed(i, 'm', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
-                <Input type="number" min={0} max={9} value={med.a} onChange={(e) => updateMed(i, 'a', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
-                <Input type="number" min={0} max={9} value={med.n} onChange={(e) => updateMed(i, 'n', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
-                <Input type="number" min={1} max={365} value={med.days} onChange={(e) => updateMed(i, 'days', Number(e.target.value))} className="h-7 w-12 text-center text-xs mx-auto p-0" />
-                <span className={cn("text-center text-xs font-semibold", exceedsStock && "text-destructive")}>{med.qty}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMed(i)}>
-                  <Trash2 className="h-3 w-3" />
+                <Input type="number" min={0} max={9} value={med.m} onChange={(e) => updateMed(i, 'm', Number(e.target.value))} className="h-6 sm:h-7 w-9 sm:w-10 text-center text-[10px] sm:text-xs mx-auto p-0" />
+                <Input type="number" min={0} max={9} value={med.a} onChange={(e) => updateMed(i, 'a', Number(e.target.value))} className="h-6 sm:h-7 w-9 sm:w-10 text-center text-[10px] sm:text-xs mx-auto p-0" />
+                <Input type="number" min={0} max={9} value={med.n} onChange={(e) => updateMed(i, 'n', Number(e.target.value))} className="h-6 sm:h-7 w-9 sm:w-10 text-center text-[10px] sm:text-xs mx-auto p-0" />
+                <Input type="number" min={1} max={365} value={med.days} onChange={(e) => updateMed(i, 'days', Number(e.target.value))} className="h-6 sm:h-7 w-10 sm:w-12 text-center text-[10px] sm:text-xs mx-auto p-0" />
+                <span className={cn("text-center text-[10px] sm:text-xs font-semibold", exceedsStock && "text-destructive")}>{med.qty}</span>
+                <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6 opacity-60 sm:opacity-0 sm:group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMed(i)}>
+                  <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 </Button>
               </div>
             );

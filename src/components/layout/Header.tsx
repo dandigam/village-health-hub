@@ -1,4 +1,4 @@
-import { Bell, Search, User, LogOut, Settings, MapPin, ChevronDown, Check } from 'lucide-react';
+import { Bell, Search, User, LogOut, Settings, MapPin, ChevronDown, Check, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { mockUser, mockCamps } from '@/data/mockData';
 import { useCamp } from '@/context/CampContext';
 
-export function Header() {
+interface HeaderProps {
+  onMenuToggle?: () => void;
+}
+
+export function Header({ onMenuToggle }: HeaderProps) {
   const navigate = useNavigate();
   const { selectedCamp, setSelectedCamp } = useCamp();
 
@@ -23,12 +27,24 @@ export function Header() {
   };
 
   return (
-    <header className="h-16 bg-primary flex items-center justify-between px-4 lg:px-6 print:hidden sticky top-0 z-50">
-      {/* Left: Logo & Camp Selector */}
-      <div className="flex items-center gap-4">
+    <header className="h-14 sm:h-16 bg-primary flex items-center justify-between px-3 sm:px-4 lg:px-6 print:hidden sticky top-0 z-50">
+      {/* Left: Menu + Logo & Camp Selector */}
+      <div className="flex items-center gap-2 sm:gap-4">
+        {/* Mobile hamburger */}
+        {onMenuToggle && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
+            onClick={onMenuToggle}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
+
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-            <span className="text-xl font-bold text-primary-foreground">S</span>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+            <span className="text-lg sm:text-xl font-bold text-primary-foreground">S</span>
           </div>
           <div className="hidden sm:block">
             <span className="text-lg font-bold text-primary-foreground">Srini</span>
@@ -87,21 +103,21 @@ export function Header() {
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10">
-          <Bell className="h-5 w-5" />
+      <div className="flex items-center gap-1 sm:gap-3">
+        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9">
+          <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 text-primary-foreground hover:bg-primary-foreground/10">
+            <Button variant="ghost" className="flex items-center gap-2 text-primary-foreground hover:bg-primary-foreground/10 px-1 sm:px-2">
               <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium">{mockUser.name}</p>
                 <p className="text-xs opacity-70">Front Desk | {mockUser.phone}</p>
               </div>
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                 <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
-                <AvatarFallback className="bg-accent text-accent-foreground">
+                <AvatarFallback className="bg-accent text-accent-foreground text-xs">
                   {mockUser.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
