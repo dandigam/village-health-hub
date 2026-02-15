@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockPatients, mockCamps, mockConsultations, mockPrescriptions, mockPayments, mockDoctors, mockDiscounts, mockMedicines } from '@/data/mockData';
+import { usePatients, useCamps, useConsultations, usePrescriptions, usePayments, useDoctors, useDiscounts, useMedicines } from '@/hooks/useApiData';
 import { format } from 'date-fns';
 
 export default function PatientReports() {

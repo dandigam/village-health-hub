@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { mockSOAPNotes, mockPatients, mockMedicines } from '@/data/mockData';
+import { useSOAPNotes, usePatients, useMedicines } from '@/hooks/useApiData';
 
 interface PrescriptionItem {
   id: string;

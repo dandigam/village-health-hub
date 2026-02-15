@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/command';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { mockDoctors } from '@/data/mockData';
+import { useDoctors } from '@/hooks/useApiData';
 
 // Mock data for dropdowns
 const mockStates = ['Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu'];

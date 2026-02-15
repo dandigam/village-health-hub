@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Search, Bell, Filter, Maximize2, Minimize2, Users } from 'lucide-react';
-import { mockPatients, mockDoctors } from '@/data/mockData';
+import { usePatients, useDoctors } from '@/hooks/useApiData';
 import { Patient } from '@/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -23,29 +23,40 @@ export interface EncounterPatient {
   currentStep: number;
 }
 
-const buildEncounterQueue = (): EncounterPatient[] => {
-  const patients = mockPatients.slice(0, 6);
-  const statuses: EncounterStatus[] = ['waiting', 'in_progress', 'completed', 'waiting', 'in_progress', 'waiting'];
-  const arrivals = ['08:30 AM', '08:45 AM', '09:00 AM', '09:15 AM', '09:30 AM', '09:45 AM'];
-  
-  return patients.map((p, i) => ({
-    patient: p,
-    status: statuses[i],
-    arrivalTime: arrivals[i],
-    isReturning: i === 1 || i === 4,
-    assignedDoctor: statuses[i] === 'in_progress' ? mockDoctors[i % mockDoctors.length].name : undefined,
-    currentStep: statuses[i] === 'completed' ? 5 : statuses[i] === 'in_progress' ? 2 : 0,
-  }));
-};
-
 export default function Encounters() {
+  const { data: patients = [] } = usePatients();
+  const { data: doctors = [] } = useDoctors();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [encounterQueue, setEncounterQueue] = useState<EncounterPatient[]>(buildEncounterQueue);
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(encounterQueue[0]?.patient.id ?? null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [mobileQueueOpen, setMobileQueueOpen] = useState(false);
   const isMobile = useIsMobile();
+
+  const buildEncounterQueue = useMemo((): EncounterPatient[] => {
+    const sliced = patients.slice(0, 6);
+    const statuses: EncounterStatus[] = ['waiting', 'in_progress', 'completed', 'waiting', 'in_progress', 'waiting'];
+    const arrivals = ['08:30 AM', '08:45 AM', '09:00 AM', '09:15 AM', '09:30 AM', '09:45 AM'];
+    
+    return sliced.map((p, i) => ({
+      patient: p,
+      status: statuses[i],
+      arrivalTime: arrivals[i],
+      isReturning: i === 1 || i === 4,
+      assignedDoctor: statuses[i] === 'in_progress' ? doctors[i % doctors.length]?.name : undefined,
+      currentStep: statuses[i] === 'completed' ? 5 : statuses[i] === 'in_progress' ? 2 : 0,
+    }));
+  }, [patients, doctors]);
+
+  const [encounterQueue, setEncounterQueue] = useState<EncounterPatient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+
+  // Sync queue when data loads
+  useMemo(() => {
+    if (buildEncounterQueue.length > 0 && encounterQueue.length === 0) {
+      setEncounterQueue(buildEncounterQueue);
+      setSelectedPatientId(buildEncounterQueue[0]?.patient.id ?? null);
+    }
+  }, [buildEncounterQueue]);
 
   const [notifications] = useState([
     { id: '1', message: 'New patient registered: Rama Krishna', time: '2 min ago' },
@@ -116,7 +127,6 @@ export default function Encounters() {
         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           <h1 className="text-base sm:text-lg font-semibold text-foreground whitespace-nowrap">Encounters</h1>
           
-          {/* Mobile: Queue toggle button */}
           {isMobile && (
             <Button
               variant="outline"
@@ -221,7 +231,6 @@ export default function Encounters() {
 
       {/* Main Content */}
       <div className="flex gap-3 sm:gap-4 h-[calc(100vh-9rem)] sm:h-[calc(100vh-10rem)]">
-        {/* Left Panel — Queue (desktop only) */}
         {!isMobile && !isFullScreen && (
           <div className="w-[260px] lg:w-[280px] shrink-0 flex flex-col">
             <EncounterQueue
@@ -233,7 +242,6 @@ export default function Encounters() {
           </div>
         )}
 
-        {/* Right Panel — Workflow */}
         <div className="flex-1 flex flex-col min-w-0">
           {selectedEncounter ? (
             <EncounterWorkflow

@@ -5,7 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { History, ChevronDown, Stethoscope, Pill, Calendar, FileText, Activity } from 'lucide-react';
-import { mockSOAPNotes, mockConsultations, mockPrescriptions, mockDoctors, mockCamps } from '@/data/mockData';
+import { useSOAPNotes, useConsultations, usePrescriptions, useDoctors, useCamps } from '@/hooks/useApiData';
 
 interface PatientHistoryPanelProps {
   patientId: string;
@@ -15,17 +15,21 @@ export function PatientHistoryPanel({ patientId }: PatientHistoryPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedVisitIndex, setSelectedVisitIndex] = useState(0);
 
-  // Gather past data for this patient
-  const pastSOAPs = mockSOAPNotes.filter(s => s.patientId === patientId);
-  const pastConsultations = mockConsultations.filter(c => c.patientId === patientId);
-  const pastPrescriptions = mockPrescriptions.filter(p => p.patientId === patientId);
+  const { data: allSOAPNotes = [] } = useSOAPNotes();
+  const { data: allConsultations = [] } = useConsultations();
+  const { data: allPrescriptions = [] } = usePrescriptions();
+  const { data: allDoctors = [] } = useDoctors();
+  const { data: allCamps = [] } = useCamps();
 
-  // Build visits from consultations (completed ones)
+  const pastSOAPs = allSOAPNotes.filter(s => s.patientId === patientId);
+  const pastConsultations = allConsultations.filter(c => c.patientId === patientId);
+  const pastPrescriptions = allPrescriptions.filter(p => p.patientId === patientId);
+
   const visits = pastConsultations.map(consultation => {
     const soap = pastSOAPs.find(s => s.id === consultation.soapNoteId);
     const prescription = pastPrescriptions.find(p => p.id === consultation.prescriptionId);
-    const doctor = mockDoctors.find(d => d.id === consultation.doctorId);
-    const camp = mockCamps.find(c => c.id === consultation.campId);
+    const doctor = allDoctors.find(d => d.id === consultation.doctorId);
+    const camp = allCamps.find(c => c.id === consultation.campId);
 
     return {
       id: consultation.id,
@@ -44,9 +48,7 @@ export function PatientHistoryPanel({ patientId }: PatientHistoryPanelProps) {
     };
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  if (visits.length === 0) {
-    return null; // No history to show
-  }
+  if (visits.length === 0) return null;
 
   const selected = visits[selectedVisitIndex];
 
@@ -67,20 +69,10 @@ export function PatientHistoryPanel({ patientId }: PatientHistoryPanelProps) {
       <CollapsibleContent>
         <div className="border-b">
           <div className="flex">
-            {/* Visit tabs */}
             <div className="w-[140px] sm:w-[160px] border-r bg-muted/20 shrink-0">
               <ScrollArea className="h-[220px]">
                 {visits.map((visit, i) => (
-                  <button
-                    key={visit.id}
-                    onClick={() => setSelectedVisitIndex(i)}
-                    className={cn(
-                      "w-full text-left px-3 py-2 border-b border-border/50 transition-colors",
-                      i === selectedVisitIndex
-                        ? "bg-primary/10 border-l-2 border-l-primary"
-                        : "hover:bg-muted/40"
-                    )}
-                  >
+                  <button key={visit.id} onClick={() => setSelectedVisitIndex(i)} className={cn("w-full text-left px-3 py-2 border-b border-border/50 transition-colors", i === selectedVisitIndex ? "bg-primary/10 border-l-2 border-l-primary" : "hover:bg-muted/40")}>
                     <p className="text-[10px] font-semibold text-foreground">{visit.date}</p>
                     <p className="text-[9px] text-muted-foreground truncate">{visit.campName}</p>
                     <p className="text-[9px] text-muted-foreground truncate">{visit.doctorName}</p>
@@ -88,97 +80,43 @@ export function PatientHistoryPanel({ patientId }: PatientHistoryPanelProps) {
                 ))}
               </ScrollArea>
             </div>
-
-            {/* Visit details */}
             <ScrollArea className="flex-1 h-[220px]">
               {selected && (
                 <div className="p-3 space-y-3">
-                  {/* Vitals row */}
                   {selected.vitals && (
                     <div>
-                      <div className="flex items-center gap-1 mb-1">
-                        <Activity className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Vitals</span>
-                      </div>
+                      <div className="flex items-center gap-1 mb-1"><Activity className="h-3 w-3 text-muted-foreground" /><span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Vitals</span></div>
                       <div className="flex flex-wrap gap-2">
-                        {selected.vitals.bp && (
-                          <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">BP: {selected.vitals.bp}</span>
-                        )}
-                        {selected.vitals.pulse && (
-                          <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">Pulse: {selected.vitals.pulse}</span>
-                        )}
-                        {selected.vitals.weight && (
-                          <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">Wt: {selected.vitals.weight}kg</span>
-                        )}
-                        {selected.vitals.spo2 && (
-                          <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">SpO2: {selected.vitals.spo2}%</span>
-                        )}
-                        {selected.vitals.temp && (
-                          <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">Temp: {selected.vitals.temp}°F</span>
-                        )}
+                        {selected.vitals.bp && <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">BP: {selected.vitals.bp}</span>}
+                        {selected.vitals.pulse && <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">Pulse: {selected.vitals.pulse}</span>}
+                        {selected.vitals.weight && <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">Wt: {selected.vitals.weight}kg</span>}
+                        {selected.vitals.spo2 && <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">SpO2: {selected.vitals.spo2}%</span>}
+                        {selected.vitals.temp && <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-medium">Temp: {selected.vitals.temp}°F</span>}
                       </div>
                     </div>
                   )}
-
-                  {/* Chief Complaint */}
                   <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <FileText className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Chief Complaint</span>
-                    </div>
+                    <div className="flex items-center gap-1 mb-1"><FileText className="h-3 w-3 text-muted-foreground" /><span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Chief Complaint</span></div>
                     <p className="text-[11px] text-foreground">{selected.chiefComplaint}</p>
                   </div>
-
-                  {/* Diagnosis */}
                   <div>
-                    <div className="flex items-center gap-1 mb-1">
-                      <Stethoscope className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Diagnosis</span>
-                    </div>
+                    <div className="flex items-center gap-1 mb-1"><Stethoscope className="h-3 w-3 text-muted-foreground" /><span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Diagnosis</span></div>
                     <div className="flex flex-wrap gap-1">
-                      {selected.diagnosis.map((d, i) => (
-                        <Badge key={i} variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-primary/8 text-primary border-primary/25">
-                          {d}
-                        </Badge>
-                      ))}
+                      {selected.diagnosis.map((d, i) => (<Badge key={i} variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-primary/8 text-primary border-primary/25">{d}</Badge>))}
                     </div>
                   </div>
-
-                  {/* Assessment */}
-                  {selected.assessment && (
-                    <div>
-                      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Assessment</span>
-                      <p className="text-[11px] text-foreground mt-0.5">{selected.assessment}</p>
-                    </div>
-                  )}
-
-                  {/* Prescription */}
+                  {selected.assessment && (<div><span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Assessment</span><p className="text-[11px] text-foreground mt-0.5">{selected.assessment}</p></div>)}
                   {selected.prescription.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-1 mb-1">
-                        <Pill className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Prescription</span>
-                      </div>
+                      <div className="flex items-center gap-1 mb-1"><Pill className="h-3 w-3 text-muted-foreground" /><span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Prescription</span></div>
                       <div className="space-y-0.5">
                         {selected.prescription.map((item, i) => (
-                          <p key={i} className="text-[10px] text-foreground">
-                            <span className="font-medium">{item.medicineName}</span>
-                            <span className="text-muted-foreground ml-1">
-                              ({item.morning}-{item.afternoon}-{item.night}) × {item.days}d
-                            </span>
-                          </p>
+                          <p key={i} className="text-[10px] text-foreground"><span className="font-medium">{item.medicineName}</span><span className="text-muted-foreground ml-1">({item.morning}-{item.afternoon}-{item.night}) × {item.days}d</span></p>
                         ))}
                       </div>
                     </div>
                   )}
-
-                  {/* Lab Tests */}
-                  {selected.labTests.length > 0 && (
-                    <div>
-                      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Lab Tests</span>
-                      <p className="text-[10px] text-foreground mt-0.5">{selected.labTests.join(', ')}</p>
-                    </div>
-                  )}
+                  {selected.labTests.length > 0 && (<div><span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Lab Tests</span><p className="text-[10px] text-foreground mt-0.5">{selected.labTests.join(', ')}</p></div>)}
                 </div>
               )}
             </ScrollArea>

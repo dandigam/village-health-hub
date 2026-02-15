@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockMedicines, mockStockItems, mockSuppliers } from '@/data/mockData';
+import { useMedicines, useStockItems, useSuppliers } from '@/hooks/useApiData';
 import { WarehouseTab } from '@/components/stock/WarehouseTab';
 import { StockDistributionTab } from '@/components/stock/StockDistributionTab';
 import { SupplierOrdersTab } from '@/components/stock/SupplierOrdersTab';
@@ -14,10 +14,14 @@ export default function StockManagement() {
   const [showAddSupplier, setShowAddSupplier] = useState(false);
   const [showCreateWarehouse, setShowCreateWarehouse] = useState(false);
 
+  const { data: medicines = [] } = useMedicines();
+  const { data: stockItems = [] } = useStockItems();
+  const { data: suppliers = [] } = useSuppliers();
+
   const getStockWithDetails = () => {
-    return mockStockItems.map(stock => {
-      const medicine = mockMedicines.find(m => m.id === stock.medicineId);
-      const supplier = mockSuppliers.find(s => s.id === stock.supplierId);
+    return stockItems.map(stock => {
+      const medicine = medicines.find(m => m.id === stock.medicineId);
+      const supplier = suppliers.find(s => s.id === stock.supplierId);
       return {
         ...stock,
         medicineName: medicine?.name || 'Unknown',
@@ -29,7 +33,7 @@ export default function StockManagement() {
     });
   };
 
-  const stockItems = getStockWithDetails();
+  const stockItemDetails = getStockWithDetails();
 
   return (
     <DashboardLayout>
@@ -45,7 +49,7 @@ export default function StockManagement() {
         </div>
         <div className="mt-6">
           <TabsContent value="inventory">
-            <InventoryTab stockItems={stockItems} />
+            <InventoryTab stockItems={stockItemDetails} />
           </TabsContent>
 
           <TabsContent value="warehouse">

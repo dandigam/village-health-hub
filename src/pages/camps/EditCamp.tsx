@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { mockCamps, mockDoctors } from '@/data/mockData';
+import { useCamps, useDoctors } from '@/hooks/useApiData';
 
 interface FormErrors {
   name?: string;

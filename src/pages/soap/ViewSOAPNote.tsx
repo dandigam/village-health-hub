@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockSOAPNotes, mockPatients } from '@/data/mockData';
+import { useSOAPNotes, usePatients } from '@/hooks/useApiData';
 import { cn } from '@/lib/utils';
 
 const getInitials = (name?: string, surname?: string) => {
