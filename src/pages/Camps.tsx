@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, MapPin, Calendar, Users, ChevronRight } from 'lucide-react';
+import { Plus, MapPin, Calendar, Users, Eye, Edit, Play, Square } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchFilter } from '@/components/shared/SearchFilter';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
 import { mockCamps, mockDoctors } from '@/data/mockData';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
 
-const statusColors = {
-  draft: 'bg-stat-orange text-stat-orange-text border-stat-orange-text/20',
-  active: 'bg-stat-green text-stat-green-text border-stat-green-text/20',
-  closed: 'bg-muted text-muted-foreground border-muted-foreground/20',
+const statusColors: Record<string, string> = {
+  draft: 'bg-muted text-muted-foreground',
+  active: 'bg-stat-green/20 text-stat-green-text',
+  closed: 'bg-muted text-muted-foreground',
 };
 
 export default function Camps() {
@@ -33,6 +36,16 @@ export default function Camps() {
       c.district.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleStartCamp = (e: React.MouseEvent, campName: string) => {
+    e.stopPropagation();
+    toast({ title: 'Camp Started', description: `${campName} is now active.` });
+  };
+
+  const handleStopCamp = (e: React.MouseEvent, campName: string) => {
+    e.stopPropagation();
+    toast({ title: 'Camp Stopped', description: `${campName} has been closed.` });
+  };
+
   return (
     <DashboardLayout>
       <SearchFilter
@@ -49,74 +62,123 @@ export default function Camps() {
         }
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
         <TabsList>
-          <TabsTrigger value="all">All Camps</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="draft">Draft</TabsTrigger>
           <TabsTrigger value="closed">Closed</TabsTrigger>
         </TabsList>
       </Tabs>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCamps.map((camp) => {
-          const doctors = mockDoctors.filter((d) => camp.doctorIds.includes(d.id));
+      <div className="bg-card rounded-lg border shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/30">
+              <TableHead>Camp Name</TableHead>
+              <TableHead className="hidden sm:table-cell">Location</TableHead>
+              <TableHead className="hidden md:table-cell">Duration</TableHead>
+              <TableHead className="hidden lg:table-cell">Doctors</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredCamps.map((camp) => {
+              const doctors = mockDoctors.filter((d) => camp.doctorIds.includes(d.id));
 
-          return (
-            <Card
-              key={camp.id}
-              className="hover:shadow-lg transition-shadow cursor-pointer group"
-              onClick={() => navigate(`/camps/${camp.id}`)}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{camp.name}</CardTitle>
-                  <Badge className={cn('capitalize', statusColors[camp.status])}>
-                    {camp.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>
+              return (
+                <TableRow key={camp.id} className="hover:bg-muted/30">
+                  <TableCell>
+                    <div>
+                      <p className="font-medium text-sm">{camp.name}</p>
+                      <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {camp.village}, {camp.district}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5" />
                       {camp.village}, {camp.district}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      {new Date(camp.startDate).toLocaleDateString()} -{' '}
-                      {new Date(camp.endDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span>{doctors.length} Doctors assigned</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t flex items-center justify-between">
-                  <div className="flex -space-x-2">
-                    {doctors.slice(0, 3).map((doctor) => (
-                      <div
-                        key={doctor.id}
-                        className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium border-2 border-card"
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>
+                        {new Date(camp.startDate).toLocaleDateString()} – {new Date(camp.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Users className="h-3.5 w-3.5" />
+                      {doctors.length} assigned
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={cn('capitalize text-xs', statusColors[camp.status])}>
+                      {camp.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="View"
+                        onClick={() => navigate(`/camps/${camp.id}`)}
                       >
-                        {doctor.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
-                      </div>
-                    ))}
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="Edit"
+                        onClick={() => navigate(`/camps/${camp.id}/edit`)}
+                      >
+                        <Edit className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      {(camp.status === 'draft') && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title="Start Camp"
+                          onClick={(e) => handleStartCamp(e, camp.name)}
+                        >
+                          <Play className="h-4 w-4 text-stat-green-text" />
+                        </Button>
+                      )}
+                      {camp.status === 'active' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title="Stop Camp"
+                          onClick={(e) => handleStopCamp(e, camp.name)}
+                        >
+                          <Square className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {filteredCamps.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  No camps found matching your search.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </DashboardLayout>
   );
