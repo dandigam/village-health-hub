@@ -24,7 +24,7 @@ export function SummaryTab({
     <div className="space-y-6">
       {/* Summary Description */}
       <div>
-        <Label className="font-semibold text-gray-700 mb-2 block">
+        <Label className="font-semibold text-foreground mb-2 block">
           Summary Description
         </Label>
         <Textarea
@@ -45,7 +45,7 @@ export function SummaryTab({
             <div className="flex flex-wrap gap-2">
               {patientSummary.conditions.length > 0 ? (
                 patientSummary.conditions.map((condition, i) => (
-                  <Badge key={i} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  <Badge key={i} variant="outline" className="bg-stat-blue text-stat-blue-text border-[hsl(var(--stat-blue-text)/0.2)]">
                     {condition}
                   </Badge>
                 ))
@@ -64,7 +64,7 @@ export function SummaryTab({
             <div className="flex flex-wrap gap-2">
               {patientSummary.prescribedMedicines.length > 0 ? (
                 patientSummary.prescribedMedicines.map((medicine, i) => (
-                  <Badge key={i} variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  <Badge key={i} variant="outline" className="bg-stat-green text-stat-green-text border-[hsl(var(--stat-green-text)/0.2)]">
                     {medicine}
                   </Badge>
                 ))

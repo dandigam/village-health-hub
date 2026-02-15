@@ -183,7 +183,7 @@ export default function Login() {
         {/* Bottom Copyright */}
         <div className="p-6 text-center">
           <p className="text-xs text-muted-foreground">
-            © 2025 Srini Foundation. All rights reserved.
+            © 2026 Srini Foundation. All rights reserved.
           </p>
         </div>
       </div>
