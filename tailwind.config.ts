@@ -62,10 +62,6 @@ export default {
           DEFAULT: "hsl(var(--navy))",
           light: "hsl(var(--navy-light))",
         },
-        coral: {
-          DEFAULT: "hsl(var(--coral))",
-          light: "hsl(var(--coral-light))",
-        },
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
         info: "hsl(var(--info))",
