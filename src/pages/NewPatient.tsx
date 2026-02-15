@@ -104,9 +104,9 @@ export default function NewPatient() {
     navigate('/patients');
   };
 
-  const handleSendToSOAP = () => {
-    toast.success('Patient registered and sent to SOAP Notes');
-    navigate('/soap-notes');
+  const handleSendToEncounter = () => {
+    toast.success('Patient registered and sent to Encounters');
+    navigate('/encounters');
   };
 
   const handleSendToAdmin = () => {
@@ -184,9 +184,9 @@ export default function NewPatient() {
                   <Save className="h-4 w-4 mr-1" />
                   Save (Draft)
                 </Button>
-                <Button onClick={handleSendToSOAP} className="bg-accent hover:bg-accent/90">
+                <Button onClick={handleSendToEncounter} className="bg-accent hover:bg-accent/90">
                   <FileText className="h-4 w-4 mr-1" />
-                  Send to SOAP Notes
+                  Send to Encounters
                 </Button>
                 {requiresApproval && (
                   <Button variant="secondary" onClick={handleSendToAdmin}>

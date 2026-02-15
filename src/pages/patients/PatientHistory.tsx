@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { VisitTimeline, type Visit } from '@/components/patients/VisitTimeline';
 import { VisitDetailPanel } from '@/components/patients/VisitDetailPanel';
-import { usePatients, useSOAPNotes, useConsultations, usePrescriptions, usePayments, useDoctors, useCamps } from '@/hooks/useApiData';
+import { usePatients, usePrescriptions, usePayments, useDoctors, useCamps } from '@/hooks/useApiData';
 
 export default function PatientHistory() {
   const { id } = useParams();
@@ -15,16 +15,12 @@ export default function PatientHistory() {
   const [initialized, setInitialized] = useState(false);
 
   const { data: allPatients = [] } = usePatients();
-  const { data: allSOAPNotes = [] } = useSOAPNotes();
-  const { data: allConsultations = [] } = useConsultations();
   const { data: allPrescriptions = [] } = usePrescriptions();
   const { data: allPayments = [] } = usePayments();
   const { data: allDoctors = [] } = useDoctors();
   const { data: allCamps = [] } = useCamps();
 
   const patient = allPatients.find(p => p.id === id);
-  const patientSOAPs = allSOAPNotes.filter(s => s.patientId === id);
-  const patientConsultations = allConsultations.filter(c => c.patientId === id);
   const patientPrescriptions = allPrescriptions.filter(p => p.patientId === id);
   const patientPayments = allPayments.filter(p => p.patientId === id);
 
@@ -42,42 +38,35 @@ export default function PatientHistory() {
     );
   }
 
-  const visits: Visit[] = patientSOAPs.map((soap) => {
-    const camp = getCamp(soap.campId);
-    const consultation = patientConsultations.find(c => c.soapNoteId === soap.id);
-    const prescription = consultation ? patientPrescriptions.find(p => p.consultationId === consultation.id) : null;
-    const payment = prescription ? patientPayments.find(pay => pay.prescriptionId === prescription.id) : null;
-
-    const vitalsStr = [
-      soap.objective.bp && `BP: ${soap.objective.bp}`,
-      soap.objective.pulse && `Pulse: ${soap.objective.pulse}`,
-      soap.objective.spo2 && `SpO2: ${soap.objective.spo2}%`,
-    ].filter(Boolean).join(', ') || 'No vitals';
+  const visits: Visit[] = patientPrescriptions.map((prescription) => {
+    const camp = getCamp(prescription.campId);
+    const payment = patientPayments.find(pay => pay.prescriptionId === prescription.id);
+    const doctorName = getDoctorName(prescription.doctorId);
 
     return {
-      id: soap.id, visitNumber: 0, date: soap.createdAt,
+      id: prescription.id, visitNumber: 0, date: prescription.createdAt,
       campName: camp?.name || 'Unknown Camp',
       amount: { paid: payment?.paidAmount || 0, pending: payment?.pendingAmount || 0 },
-      chiefComplaint: consultation?.chiefComplaint || soap.subjective,
-      vitals: vitalsStr,
-      assessment: consultation?.diagnosis?.join(', ') || soap.assessment,
-      plan: soap.plan,
+      chiefComplaint: `Visit with ${doctorName}`,
+      vitals: 'No vitals',
+      assessment: '',
+      plan: '',
       fullDetails: {
-        campId: soap.campId, campName: camp?.name || 'Unknown Camp', campLocation: camp?.location || 'Unknown',
-        visitDate: soap.createdAt,
+        campId: prescription.campId, campName: camp?.name || 'Unknown Camp', campLocation: camp?.location || 'Unknown',
+        visitDate: prescription.createdAt,
         paymentType: payment ? (payment.pendingAmount === 0 && payment.paidAmount === 0 ? 'Free' : 'Paid') : 'Free',
         totalAmount: payment?.totalAmount || 0, paidAmount: payment?.paidAmount || 0,
         pendingAmount: payment?.pendingAmount || 0, discountAmount: payment?.discountAmount || 0,
-        chiefComplaint: consultation?.chiefComplaint || soap.subjective,
-        vitals: soap.objective, labs: consultation?.labTests || [],
-        assessment: consultation?.diagnosis?.join(', ') || soap.assessment, plan: soap.plan,
-        soapNote: { subjective: soap.subjective, objective: soap.objective.notes || 'No notes', assessment: soap.assessment, plan: soap.plan },
-        prescription: prescription ? {
+        chiefComplaint: `Visit with ${doctorName}`,
+        vitals: {}, labs: [],
+        assessment: '', plan: '',
+        soapNote: { subjective: '', objective: '', assessment: '', plan: '' },
+        prescription: {
           items: prescription.items.map(item => ({
             medicineName: item.medicineName, dosage: `${item.morning}-${item.afternoon}-${item.night}`,
             quantity: item.quantity, days: item.days,
           })),
-        } : undefined,
+        },
       },
     };
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -98,7 +87,7 @@ export default function PatientHistory() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Print</Button>
-          <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => navigate('/soap/new')}><FileText className="mr-2 h-4 w-4" />New SOAP Note</Button>
+          <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => navigate('/encounters')}><FileText className="mr-2 h-4 w-4" />New Encounter</Button>
         </div>
       </div>
       <div className="hidden print:block mb-6">
