@@ -41,8 +41,8 @@ const buildEncounterQueue = (): EncounterPatient[] => {
 export default function Encounters() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [encounterQueue, setEncounterQueue] = useState<EncounterPatient[]>(buildEncounterQueue);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(encounterQueue[0]?.patient.id ?? null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [mobileQueueOpen, setMobileQueueOpen] = useState(false);
   const isMobile = useIsMobile();
