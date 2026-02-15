@@ -352,12 +352,12 @@ function PrescriptionStep() {
               Search medicine by name or code...
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[400px] p-0" align="start">
-            <Command>
-              <CommandInput placeholder="Search medicine..." value={searchQuery} onValueChange={setSearchQuery} />
-              <CommandList>
-                <CommandEmpty>No medicine found.</CommandEmpty>
-                <CommandGroup heading="Available Medicines">
+          <PopoverContent className="w-[420px] p-0 bg-popover border shadow-lg" align="start">
+            <Command className="bg-transparent">
+              <CommandInput placeholder="Search medicine..." value={searchQuery} onValueChange={setSearchQuery} className="h-9 text-sm" />
+              <CommandList className="max-h-[280px]">
+                <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">No medicine found.</CommandEmpty>
+                <CommandGroup heading="Available Medicines" className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:font-semibold">
                   {filteredMedicines.map((medicine) => {
                     const isAdded = meds.some(item => item.name === medicine.name);
                     return (
@@ -366,20 +366,30 @@ function PrescriptionStep() {
                         value={medicine.name}
                         onSelect={() => addMedicine(medicine)}
                         disabled={isAdded}
-                        className={cn("flex items-center justify-between", isAdded && "opacity-50")}
+                        className={cn(
+                          "flex items-center justify-between py-2 px-3 rounded-md cursor-pointer",
+                          isAdded && "opacity-40 cursor-not-allowed"
+                        )}
                       >
-                        <div className="flex items-center gap-2">
-                          <Pill className="h-3.5 w-3.5 text-primary" />
+                        <div className="flex items-center gap-2.5">
+                          <Pill className="h-3.5 w-3.5 text-muted-foreground" />
                           <div>
-                            <p className="text-xs font-medium">{medicine.name}</p>
+                            <p className="text-xs font-medium text-foreground">{medicine.name}</p>
                             <p className="text-[10px] text-muted-foreground">{medicine.category}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant={medicine.qtyAvailable > 50 ? "default" : medicine.qtyAvailable > 0 ? "secondary" : "destructive"} className="text-[10px]">
+                          <span className={cn(
+                            "text-[10px] font-medium px-2 py-0.5 rounded-full",
+                            medicine.qtyAvailable > 50
+                              ? "bg-muted text-foreground"
+                              : medicine.qtyAvailable > 0
+                                ? "bg-muted text-muted-foreground"
+                                : "bg-destructive/10 text-destructive"
+                          )}>
                             Stock: {medicine.qtyAvailable}
-                          </Badge>
-                          {isAdded && <Badge variant="outline" className="text-[10px]">Added</Badge>}
+                          </span>
+                          {isAdded && <span className="text-[10px] text-muted-foreground italic">Added</span>}
                         </div>
                       </CommandItem>
                     );
