@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchFilter } from '@/components/shared/SearchFilter';
-import { mockSOAPNotes, mockPatients } from '@/data/mockData';
+import { useSOAPNotes, usePatients } from '@/hooks/useApiData';
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -33,19 +33,20 @@ export default function SOAPNotesList() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const { data: soapNotes = [] } = useSOAPNotes();
+  const { data: patients = [] } = usePatients();
 
   const getPatientInfo = (patientId: string) => {
-    return mockPatients.find(p => p.id === patientId);
+    return patients.find(p => p.id === patientId);
   };
 
   const tabFilteredNotes = activeTab === 'all' 
-    ? mockSOAPNotes 
-    : mockSOAPNotes.filter(n => n.status === activeTab);
+    ? soapNotes 
+    : soapNotes.filter(n => n.status === activeTab);
 
   const filteredNotes = useMemo(() => {
     if (!searchTerm) return tabFilteredNotes;
     const searchLower = searchTerm.toLowerCase();
-    
     return tabFilteredNotes.filter(note => {
       const patient = getPatientInfo(note.patientId);
       return (
@@ -54,7 +55,7 @@ export default function SOAPNotesList() {
         patient?.patientId?.toLowerCase().includes(searchLower)
       );
     });
-  }, [searchTerm, tabFilteredNotes]);
+  }, [searchTerm, tabFilteredNotes, patients]);
 
   return (
     <DashboardLayout>
@@ -66,18 +67,17 @@ export default function SOAPNotesList() {
         onChange={setSearchTerm}
         action={
           <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/soap/new')}>
-            <Plus className="mr-2 h-4 w-4" />
-            New SOAP Note
+            <Plus className="mr-2 h-4 w-4" /> New SOAP Note
           </Button>
         }
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
-          <TabsTrigger value="all">All Notes ({mockSOAPNotes.length})</TabsTrigger>
-          <TabsTrigger value="pending">Draft ({mockSOAPNotes.filter(n => n.status === 'pending').length})</TabsTrigger>
-          <TabsTrigger value="with_doctor">Sent ({mockSOAPNotes.filter(n => n.status === 'with_doctor').length})</TabsTrigger>
-          <TabsTrigger value="completed">Reviewed ({mockSOAPNotes.filter(n => n.status === 'completed').length})</TabsTrigger>
+          <TabsTrigger value="all">All Notes ({soapNotes.length})</TabsTrigger>
+          <TabsTrigger value="pending">Draft ({soapNotes.filter(n => n.status === 'pending').length})</TabsTrigger>
+          <TabsTrigger value="with_doctor">Sent ({soapNotes.filter(n => n.status === 'with_doctor').length})</TabsTrigger>
+          <TabsTrigger value="completed">Reviewed ({soapNotes.filter(n => n.status === 'completed').length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab}>
@@ -97,12 +97,8 @@ export default function SOAPNotesList() {
                         </Avatar>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-semibold text-foreground">
-                              {patient?.name} {patient?.surname}
-                            </h3>
-                            <span className="text-sm text-muted-foreground">
-                              • {patient?.age} yrs • {patient?.gender}
-                            </span>
+                            <h3 className="font-semibold text-foreground">{patient?.name} {patient?.surname}</h3>
+                            <span className="text-sm text-muted-foreground">• {patient?.age} yrs • {patient?.gender}</span>
                           </div>
                           <p className="text-sm text-muted-foreground font-mono">{patient?.patientId}</p>
                           <p className="text-sm mt-1 text-muted-foreground line-clamp-1">
@@ -116,18 +112,15 @@ export default function SOAPNotesList() {
                       <div className="flex items-center gap-2">
                         {getStatusBadge(note.status)}
                         <Button size="sm" variant="outline" onClick={() => navigate(`/soap/${note.id}`)}>
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
+                          <Eye className="h-4 w-4 mr-1" /> View
                         </Button>
                         {note.status === 'pending' && (
                           <>
                             <Button size="sm" variant="outline" onClick={() => navigate(`/soap/${note.id}/edit`)}>
-                              <Edit className="h-4 w-4 mr-1" />
-                              Edit
+                              <Edit className="h-4 w-4 mr-1" /> Edit
                             </Button>
                             <Button size="sm" className="bg-accent hover:bg-accent/90">
-                              <Send className="h-4 w-4 mr-1" />
-                              Send to Doctor
+                              <Send className="h-4 w-4 mr-1" /> Send to Doctor
                             </Button>
                           </>
                         )}

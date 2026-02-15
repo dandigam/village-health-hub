@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { Search, ArrowRight, UserPlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { mockPatients } from '@/data/mockData';
+import { usePatients } from '@/hooks/useApiData';
 import { useNavigate } from 'react-router-dom';
 
 export function PatientSearch() {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const { data: patients = [] } = usePatients();
   
   const filteredPatients = searchTerm
-    ? mockPatients.filter(
+    ? patients.filter(
         (p) =>
           p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           p.patientId.toLowerCase().includes(searchTerm.toLowerCase())
@@ -34,15 +35,11 @@ export function PatientSearch() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <Button
-          size="icon"
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-accent hover:bg-accent/90"
-        >
+        <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-accent hover:bg-accent/90">
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Search Results */}
       {filteredPatients.length > 0 && (
         <div className="space-y-2 mb-4 max-h-60 overflow-y-auto">
           {filteredPatients.map((patient) => (
@@ -53,9 +50,7 @@ export function PatientSearch() {
             >
               <div>
                 <p className="font-medium">{patient.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {patient.village} | {patient.patientId}
-                </p>
+                <p className="text-sm text-muted-foreground">{patient.village} | {patient.patientId}</p>
               </div>
               <span className="text-sm px-2 py-1 bg-muted rounded">{patient.age} Yrs</span>
             </div>
@@ -65,12 +60,8 @@ export function PatientSearch() {
 
       <div className="text-center text-muted-foreground my-4">(or)</div>
 
-      <Button 
-        className="w-full bg-accent hover:bg-accent/90"
-        onClick={() => navigate('/patients/new')}
-      >
-        <UserPlus className="mr-2 h-4 w-4" />
-        Add New Patient
+      <Button className="w-full bg-accent hover:bg-accent/90" onClick={() => navigate('/patients/new')}>
+        <UserPlus className="mr-2 h-4 w-4" /> Add New Patient
       </Button>
     </div>
   );

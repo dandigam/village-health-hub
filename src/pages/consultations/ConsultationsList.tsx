@@ -5,21 +5,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ConsultationRow } from '@/components/consultations/ConsultationRow';
-import { mockSOAPNotes, mockPatients, mockConsultations } from '@/data/mockData';
+import { useSOAPNotes, usePatients, useConsultations } from '@/hooks/useApiData';
 
 export default function ConsultationsList() {
   const [activeTab, setActiveTab] = useState('pending');
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: patients = [] } = usePatients();
+  const { data: soapNotes = [] } = useSOAPNotes();
+  const { data: consultations = [] } = useConsultations();
 
   const getPatientInfo = (patientId: string) => {
-    return mockPatients.find(p => p.id === patientId);
+    return patients.find(p => p.id === patientId);
   };
 
-  // Filter function
   const filterBySearch = (items: any[]) => {
     if (!searchQuery) return items;
     const searchLower = searchQuery.toLowerCase();
-    
     return items.filter(item => {
       const patient = getPatientInfo(item.patientId);
       return (
@@ -30,17 +31,14 @@ export default function ConsultationsList() {
     });
   };
 
-  // Pending SOAP notes (waiting for doctor)
-  const allPendingSOAPs = mockSOAPNotes.filter(n => n.status === 'pending' || n.status === 'with_doctor');
-  const pendingSOAPs = useMemo(() => filterBySearch(allPendingSOAPs), [searchQuery, allPendingSOAPs]);
+  const allPendingSOAPs = soapNotes.filter(n => n.status === 'pending' || n.status === 'with_doctor');
+  const pendingSOAPs = useMemo(() => filterBySearch(allPendingSOAPs), [searchQuery, allPendingSOAPs, patients]);
   
-  // In-progress consultations
-  const allInProgressConsultations = mockConsultations.filter(c => c.status === 'in_progress');
-  const inProgressConsultations = useMemo(() => filterBySearch(allInProgressConsultations), [searchQuery, allInProgressConsultations]);
+  const allInProgressConsultations = consultations.filter(c => c.status === 'in_progress');
+  const inProgressConsultations = useMemo(() => filterBySearch(allInProgressConsultations), [searchQuery, allInProgressConsultations, patients]);
   
-  // Completed consultations
-  const allCompletedConsultations = mockConsultations.filter(c => c.status === 'completed');
-  const completedConsultations = useMemo(() => filterBySearch(allCompletedConsultations), [searchQuery, allCompletedConsultations]);
+  const allCompletedConsultations = consultations.filter(c => c.status === 'completed');
+  const completedConsultations = useMemo(() => filterBySearch(allCompletedConsultations), [searchQuery, allCompletedConsultations, patients]);
 
   const currentCount = activeTab === 'pending' 
     ? pendingSOAPs.length 
@@ -56,47 +54,25 @@ export default function ConsultationsList() {
         </h1>
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search Patient by MR Number / First Name"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-10 bg-background border-border"
-          />
+          <Input placeholder="Search Patient by MR Number / First Name" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 h-10 bg-background border-border" />
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
-          <TabsTrigger value="pending">
-            Awaiting ({pendingSOAPs.length})
-          </TabsTrigger>
-          <TabsTrigger value="in_progress">
-            In Progress ({inProgressConsultations.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed">
-            Completed ({completedConsultations.length})
-          </TabsTrigger>
+          <TabsTrigger value="pending">Awaiting ({pendingSOAPs.length})</TabsTrigger>
+          <TabsTrigger value="in_progress">In Progress ({inProgressConsultations.length})</TabsTrigger>
+          <TabsTrigger value="completed">Completed ({completedConsultations.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending">
           <div className="grid gap-3">
             {pendingSOAPs.map((note) => {
               const patient = getPatientInfo(note.patientId);
-              return (
-                <ConsultationRow
-                  key={note.id}
-                  patient={patient}
-                  note={note}
-                  status="awaiting"
-                />
-              );
+              return <ConsultationRow key={note.id} patient={patient} note={note} status="awaiting" />;
             })}
             {pendingSOAPs.length === 0 && (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No patients awaiting consultation.
-                </CardContent>
-              </Card>
+              <Card><CardContent className="py-8 text-center text-muted-foreground">No patients awaiting consultation.</CardContent></Card>
             )}
           </div>
         </TabsContent>
@@ -105,23 +81,11 @@ export default function ConsultationsList() {
           <div className="grid gap-3">
             {inProgressConsultations.map((consultation) => {
               const patient = getPatientInfo(consultation.patientId);
-              const soapNote = mockSOAPNotes.find(n => n.patientId === consultation.patientId);
-              return (
-                <ConsultationRow
-                  key={consultation.id}
-                  patient={patient}
-                  note={soapNote}
-                  consultation={consultation}
-                  status="in_progress"
-                />
-              );
+              const soapNote = soapNotes.find(n => n.patientId === consultation.patientId);
+              return <ConsultationRow key={consultation.id} patient={patient} note={soapNote} consultation={consultation} status="in_progress" />;
             })}
             {inProgressConsultations.length === 0 && (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No consultations in progress.
-                </CardContent>
-              </Card>
+              <Card><CardContent className="py-8 text-center text-muted-foreground">No consultations in progress.</CardContent></Card>
             )}
           </div>
         </TabsContent>
@@ -130,23 +94,11 @@ export default function ConsultationsList() {
           <div className="grid gap-3">
             {completedConsultations.map((consultation) => {
               const patient = getPatientInfo(consultation.patientId);
-              const soapNote = mockSOAPNotes.find(n => n.patientId === consultation.patientId);
-              return (
-                <ConsultationRow
-                  key={consultation.id}
-                  patient={patient}
-                  note={soapNote}
-                  consultation={consultation}
-                  status="completed"
-                />
-              );
+              const soapNote = soapNotes.find(n => n.patientId === consultation.patientId);
+              return <ConsultationRow key={consultation.id} patient={patient} note={soapNote} consultation={consultation} status="completed" />;
             })}
             {completedConsultations.length === 0 && (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No completed consultations.
-                </CardContent>
-              </Card>
+              <Card><CardContent className="py-8 text-center text-muted-foreground">No completed consultations.</CardContent></Card>
             )}
           </div>
         </TabsContent>

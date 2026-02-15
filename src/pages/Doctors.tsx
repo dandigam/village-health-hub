@@ -9,13 +9,15 @@ import { SearchFilter } from '@/components/shared/SearchFilter';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { mockDoctors, mockCamps } from '@/data/mockData';
+import { useDoctors, useCamps } from '@/hooks/useApiData';
 
 export default function Doctors() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const { data: doctors = [] } = useDoctors();
+  const { data: camps = [] } = useCamps();
 
-  const filteredDoctors = mockDoctors.filter(
+  const filteredDoctors = doctors.filter(
     (d) =>
       d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -32,8 +34,7 @@ export default function Doctors() {
         onChange={setSearchTerm}
         action={
           <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/doctors/new')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Doctor
+            <Plus className="mr-2 h-4 w-4" /> Add Doctor
           </Button>
         }
       />
@@ -52,45 +53,38 @@ export default function Doctors() {
           </TableHeader>
           <TableBody>
             {filteredDoctors.map((doctor) => {
-              const assignedCamps = mockCamps.filter((c) => c.doctorIds.includes(doctor.id));
+              const assignedCamps = camps.filter((c) => c.doctorIds.includes(doctor.id));
               const initials = doctor.name.split(' ').map((n) => n[0]).join('');
-
               return (
                 <TableRow key={doctor.id} className="hover:bg-muted/30">
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
                         <AvatarImage src={doctor.photoUrl} alt={doctor.name} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {initials}
-                        </AvatarFallback>
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs">{initials}</AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-sm">{doctor.name}</p>
                         <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
-                          <Stethoscope className="h-3 w-3" />
-                          {doctor.specialization}
+                          <Stethoscope className="h-3 w-3" /> {doctor.specialization}
                         </p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Stethoscope className="h-3.5 w-3.5" />
-                      {doctor.specialization}
+                      <Stethoscope className="h-3.5 w-3.5" /> {doctor.specialization}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Phone className="h-3.5 w-3.5" />
-                      {doctor.phone}
+                      <Phone className="h-3.5 w-3.5" /> {doctor.phone}
                     </div>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     {doctor.email ? (
                       <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <Mail className="h-3.5 w-3.5" />
-                        {doctor.email}
+                        <Mail className="h-3.5 w-3.5" /> {doctor.email}
                       </div>
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
@@ -100,38 +94,22 @@ export default function Doctors() {
                     <div className="flex flex-wrap gap-1">
                       {assignedCamps.length > 0 ? (
                         assignedCamps.slice(0, 2).map((camp) => (
-                          <Badge key={camp.id} variant="secondary" className="text-xs">
-                            {camp.name}
-                          </Badge>
+                          <Badge key={camp.id} variant="secondary" className="text-xs">{camp.name}</Badge>
                         ))
                       ) : (
                         <span className="text-xs text-muted-foreground">No camps</span>
                       )}
                       {assignedCamps.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{assignedCamps.length - 2}
-                        </Badge>
+                        <Badge variant="outline" className="text-xs">+{assignedCamps.length - 2}</Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        title="View"
-                        onClick={() => navigate(`/doctors/${doctor.id}`)}
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="View" onClick={() => navigate(`/doctors/${doctor.id}`)}>
                         <Eye className="h-4 w-4 text-muted-foreground" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        title="Edit"
-                        onClick={() => navigate(`/doctors/${doctor.id}/edit`)}
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => navigate(`/doctors/${doctor.id}/edit`)}>
                         <Edit className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     </div>

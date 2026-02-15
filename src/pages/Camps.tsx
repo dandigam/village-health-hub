@@ -9,7 +9,7 @@ import { SearchFilter } from '@/components/shared/SearchFilter';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { mockCamps, mockDoctors } from '@/data/mockData';
+import { useCamps, useDoctors } from '@/hooks/useApiData';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 
@@ -23,11 +23,10 @@ export default function Camps() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const { data: camps = [] } = useCamps();
+  const { data: doctors = [] } = useDoctors();
 
-  const tabFilteredCamps =
-    activeTab === 'all'
-      ? mockCamps
-      : mockCamps.filter((c) => c.status === activeTab);
+  const tabFilteredCamps = activeTab === 'all' ? camps : camps.filter((c) => c.status === activeTab);
 
   const filteredCamps = tabFilteredCamps.filter(
     (c) =>
@@ -56,8 +55,7 @@ export default function Camps() {
         onChange={setSearchTerm}
         action={
           <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/camps/new')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create New Camp
+            <Plus className="mr-2 h-4 w-4" /> Create New Camp
           </Button>
         }
       />
@@ -85,83 +83,51 @@ export default function Camps() {
           </TableHeader>
           <TableBody>
             {filteredCamps.map((camp) => {
-              const doctors = mockDoctors.filter((d) => camp.doctorIds.includes(d.id));
-
+              const assignedDoctors = doctors.filter((d) => camp.doctorIds.includes(d.id));
               return (
                 <TableRow key={camp.id} className="hover:bg-muted/30">
                   <TableCell>
                     <div>
                       <p className="font-medium text-sm">{camp.name}</p>
                       <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {camp.village}, {camp.district}
+                        <MapPin className="h-3 w-3" /> {camp.village}, {camp.district}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {camp.village}, {camp.district}
+                      <MapPin className="h-3.5 w-3.5" /> {camp.village}, {camp.district}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Calendar className="h-3.5 w-3.5" />
-                      <span>
-                        {new Date(camp.startDate).toLocaleDateString()} – {new Date(camp.endDate).toLocaleDateString()}
-                      </span>
+                      <span>{new Date(camp.startDate).toLocaleDateString()} – {new Date(camp.endDate).toLocaleDateString()}</span>
                     </div>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Users className="h-3.5 w-3.5" />
-                      {doctors.length} assigned
+                      <Users className="h-3.5 w-3.5" /> {assignedDoctors.length} assigned
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={cn('capitalize text-xs', statusColors[camp.status])}>
-                      {camp.status}
-                    </Badge>
+                    <Badge className={cn('capitalize text-xs', statusColors[camp.status])}>{camp.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        title="View"
-                        onClick={() => navigate(`/camps/${camp.id}`)}
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="View" onClick={() => navigate(`/camps/${camp.id}`)}>
                         <Eye className="h-4 w-4 text-muted-foreground" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        title="Edit"
-                        onClick={() => navigate(`/camps/${camp.id}/edit`)}
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => navigate(`/camps/${camp.id}/edit`)}>
                         <Edit className="h-4 w-4 text-muted-foreground" />
                       </Button>
-                      {(camp.status === 'draft') && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="Start Camp"
-                          onClick={(e) => handleStartCamp(e, camp.name)}
-                        >
+                      {camp.status === 'draft' && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Start Camp" onClick={(e) => handleStartCamp(e, camp.name)}>
                           <Play className="h-4 w-4 text-stat-green-text" />
                         </Button>
                       )}
                       {camp.status === 'active' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="Stop Camp"
-                          onClick={(e) => handleStopCamp(e, camp.name)}
-                        >
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Stop Camp" onClick={(e) => handleStopCamp(e, camp.name)}>
                           <Square className="h-4 w-4 text-destructive" />
                         </Button>
                       )}

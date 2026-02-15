@@ -21,68 +21,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { mockCampStats, mockPatients, mockCamps } from '@/data/mockData';
+import { useCampStats, usePatients, useCamps } from '@/hooks/useApiData';
 import { cn } from '@/lib/utils';
-
-// Check if there's real data
-const hasActiveCamp = mockCamps.some(camp => camp.status === 'active');
-const hasPatients = mockPatients.length > 0;
-const hasDoctors = true; // Mock check
-const hasPharmacy = true; // Mock check
-const hasStock = true; // Mock check
-const showInsulinCard = true; // Toggle for insulin workflow
-
-// Status cards configuration
-const statusCards = [
-  { 
-    id: 'registrations',
-    title: 'Total Registrations', 
-    value: mockCampStats.totalPatients, 
-    icon: ClipboardList, 
-    variant: 'blue' as const,
-    filterStatus: 'all',
-  },
-  { 
-    id: 'doctor',
-    title: 'Patients at Doctor', 
-    value: mockCampStats.patientsAtDoctor, 
-    icon: Stethoscope, 
-    variant: 'orange' as const,
-    filterStatus: 'with_doctor',
-  },
-  { 
-    id: 'pharmacy',
-    title: 'Patients at Pharmacy', 
-    value: mockCampStats.patientsAtPharmacy, 
-    icon: Pill, 
-    variant: 'teal' as const,
-    filterStatus: 'at_pharmacy',
-  },
-  { 
-    id: 'cashier',
-    title: 'Patients at Cashier', 
-    value: mockCampStats.patientsAtCashier, 
-    icon: CreditCard, 
-    variant: 'green' as const,
-    filterStatus: 'at_cashier',
-  },
-  ...(showInsulinCard ? [{
-    id: 'insulin',
-    title: 'Patients at Insulin', 
-    value: 12, 
-    icon: Syringe, 
-    variant: 'purple' as const,
-    filterStatus: 'at_insulin',
-  }] : []),
-  { 
-    id: 'completed',
-    title: 'Completed', 
-    value: mockCampStats.exitedPatients, 
-    icon: LogOut, 
-    variant: 'pink' as const,
-    filterStatus: 'completed',
-  },
-];
 
 const variantStyles = {
   blue: 'stat-card-blue text-stat-blue-text',
@@ -102,27 +42,44 @@ const iconBgStyles = {
   teal: 'bg-stat-teal-text/10',
 };
 
-// Setup steps for first-time users
-const setupSteps = [
-  { id: 'camp', label: 'Create Camp', href: '/camps/new', icon: Tent, completed: hasActiveCamp },
-  { id: 'doctor', label: 'Add Doctor', href: '/doctors/new', icon: Users, completed: hasDoctors },
-  { id: 'pharmacy', label: 'Add Pharmacy', href: '/pharmacy', icon: Pill, completed: hasPharmacy },
-  { id: 'stock', label: 'Add Stock', href: '/stock', icon: Package, completed: hasStock },
-  { id: 'patient', label: 'Register First Patient', href: '/patients/new', icon: UserPlus, completed: hasPatients },
-];
-
-// Recent patients mock data with status
-const recentPatients = mockPatients.slice(0, 10).map((patient, index) => ({
-  ...patient,
-  status: ['At Doctor', 'At Pharmacy', 'At Cashier', 'Completed', 'Waiting'][index % 5],
-  lastUpdated: new Date(Date.now() - index * 1000 * 60 * 15).toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  }),
-}));
-
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { data: campStats } = useCampStats();
+  const { data: patients = [] } = usePatients();
+  const { data: camps = [] } = useCamps();
+
+  const hasActiveCamp = camps.some(camp => camp.status === 'active');
+  const hasPatients = patients.length > 0;
+  const hasDoctors = true;
+  const hasPharmacy = true;
+  const hasStock = true;
+  const showInsulinCard = true;
+
+  const stats = campStats || { totalPatients: 0, patientsAtDoctor: 0, patientsAtPharmacy: 0, patientsAtCashier: 0, exitedPatients: 0, totalCollection: 0 };
+
+  const statusCards = [
+    { id: 'registrations', title: 'Total Registrations', value: stats.totalPatients, icon: ClipboardList, variant: 'blue' as const, filterStatus: 'all' },
+    { id: 'doctor', title: 'Patients at Doctor', value: stats.patientsAtDoctor, icon: Stethoscope, variant: 'orange' as const, filterStatus: 'with_doctor' },
+    { id: 'pharmacy', title: 'Patients at Pharmacy', value: stats.patientsAtPharmacy, icon: Pill, variant: 'teal' as const, filterStatus: 'at_pharmacy' },
+    { id: 'cashier', title: 'Patients at Cashier', value: stats.patientsAtCashier, icon: CreditCard, variant: 'green' as const, filterStatus: 'at_cashier' },
+    ...(showInsulinCard ? [{ id: 'insulin', title: 'Patients at Insulin', value: 12, icon: Syringe, variant: 'purple' as const, filterStatus: 'at_insulin' }] : [] ),
+    { id: 'completed', title: 'Completed', value: stats.exitedPatients, icon: LogOut, variant: 'pink' as const, filterStatus: 'completed' },
+  ];
+
+  const setupSteps = [
+    { id: 'camp', label: 'Create Camp', href: '/camps/new', icon: Tent, completed: hasActiveCamp },
+    { id: 'doctor', label: 'Add Doctor', href: '/doctors/new', icon: Users, completed: hasDoctors },
+    { id: 'pharmacy', label: 'Add Pharmacy', href: '/pharmacy', icon: Pill, completed: hasPharmacy },
+    { id: 'stock', label: 'Add Stock', href: '/stock', icon: Package, completed: hasStock },
+    { id: 'patient', label: 'Register First Patient', href: '/patients/new', icon: UserPlus, completed: hasPatients },
+  ];
+
+  const recentPatients = patients.slice(0, 10).map((patient, index) => ({
+    ...patient,
+    currentStatus: ['At Doctor', 'At Pharmacy', 'At Cashier', 'Completed', 'Waiting'][index % 5],
+    lastUpdated: new Date(Date.now() - index * 1000 * 60 * 15).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+  }));
+
   const [isZeroState] = useState(!hasActiveCamp || !hasPatients);
 
   const handleCardClick = (filterStatus: string) => {
@@ -199,47 +156,20 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Button 
-              onClick={() => navigate('/patients/new')}
-              disabled={!hasActiveCamp}
-              className="flex items-center gap-2"
-            >
-              <UserPlus className="w-4 h-4" />
-              Add New Patient
+            <Button onClick={() => navigate('/patients/new')} disabled={!hasActiveCamp} className="flex items-center gap-2">
+              <UserPlus className="w-4 h-4" /> Add New Patient
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/patients')}
-              className="flex items-center gap-2"
-            >
-              <Search className="w-4 h-4" />
-              Find Patient
+            <Button variant="outline" onClick={() => navigate('/patients')} className="flex items-center gap-2">
+              <Search className="w-4 h-4" /> Find Patient
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/soap/new')}
-              disabled={!hasPatients}
-              className="flex items-center gap-2"
-            >
-              <FileEdit className="w-4 h-4" />
-              Add SOAP Notes
+            <Button variant="outline" onClick={() => navigate('/soap/new')} disabled={!hasPatients} className="flex items-center gap-2">
+              <FileEdit className="w-4 h-4" /> Add SOAP Notes
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/consultations/new')}
-              disabled={!hasPatients}
-              className="flex items-center gap-2"
-            >
-              <Stethoscope className="w-4 h-4" />
-              Start Consultation
+            <Button variant="outline" onClick={() => navigate('/consultations/new')} disabled={!hasPatients} className="flex items-center gap-2">
+              <Stethoscope className="w-4 h-4" /> Start Consultation
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/pharmacy')}
-              className="flex items-center gap-2"
-            >
-              <Pill className="w-4 h-4" />
-              Open Pharmacy
+            <Button variant="outline" onClick={() => navigate('/pharmacy')} className="flex items-center gap-2">
+              <Pill className="w-4 h-4" /> Open Pharmacy
             </Button>
           </div>
           {!hasActiveCamp && (
@@ -280,19 +210,19 @@ export default function Dashboard() {
                     <TableCell>
                       <Badge 
                         variant={
-                          patient.status === 'Completed' ? 'default' :
-                          patient.status === 'At Doctor' ? 'secondary' :
+                          patient.currentStatus === 'Completed' ? 'default' :
+                          patient.currentStatus === 'At Doctor' ? 'secondary' :
                           'outline'
                         }
                         className={cn(
-                          patient.status === 'Completed' && 'bg-stat-green text-stat-green-text hover:bg-stat-green',
-                          patient.status === 'At Doctor' && 'bg-stat-orange text-stat-orange-text',
-                          patient.status === 'At Pharmacy' && 'bg-stat-teal text-stat-teal-text',
-                          patient.status === 'At Cashier' && 'bg-stat-blue text-stat-blue-text',
-                          patient.status === 'Waiting' && 'bg-muted text-muted-foreground'
+                          patient.currentStatus === 'Completed' && 'bg-stat-green text-stat-green-text hover:bg-stat-green',
+                          patient.currentStatus === 'At Doctor' && 'bg-stat-orange text-stat-orange-text',
+                          patient.currentStatus === 'At Pharmacy' && 'bg-stat-teal text-stat-teal-text',
+                          patient.currentStatus === 'At Cashier' && 'bg-stat-blue text-stat-blue-text',
+                          patient.currentStatus === 'Waiting' && 'bg-muted text-muted-foreground'
                         )}
                       >
-                        {patient.status}
+                        {patient.currentStatus}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
@@ -306,11 +236,7 @@ export default function Dashboard() {
             <div className="text-center py-8 text-muted-foreground">
               <ClipboardList className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>No patients registered yet</p>
-              <Button 
-                variant="link" 
-                onClick={() => navigate('/patients/new')}
-                className="mt-2"
-              >
+              <Button variant="link" onClick={() => navigate('/patients/new')} className="mt-2">
                 Register your first patient
               </Button>
             </div>
