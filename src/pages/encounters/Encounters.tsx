@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Bell, Filter } from 'lucide-react';
+import { Search, Bell, Filter, Maximize2, Minimize2 } from 'lucide-react';
 import { mockPatients, mockSOAPNotes, mockConsultations, mockDoctors, mockCamps } from '@/data/mockData';
 import { Patient } from '@/types';
 
@@ -43,6 +43,7 @@ export default function Encounters() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [encounterQueue, setEncounterQueue] = useState<EncounterPatient[]>(buildEncounterQueue);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [notifications] = useState([
     { id: '1', message: 'New patient registered: Rama Krishna', time: '2 min ago' },
     { id: '2', message: 'Lab results ready for Ramana Babu', time: '5 min ago' },
@@ -129,6 +130,17 @@ export default function Encounters() {
         </div>
 
         <div className="flex items-center gap-2">
+          {selectedEncounter && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs gap-1.5"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+            >
+              {isFullScreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+              {isFullScreen ? 'Show Queue' : 'Full Screen'}
+            </Button>
+          )}
           <Badge variant="outline" className="text-[hsl(var(--info))] border-[hsl(var(--info)/0.3)] bg-[hsl(var(--info)/0.08)] text-xs px-2 py-0.5">
             {waitingCount} Waiting
           </Badge>
@@ -171,14 +183,16 @@ export default function Encounters() {
       {/* Main Content — Two Column */}
       <div className="flex gap-4 h-[calc(100vh-10rem)]">
         {/* Left Panel — Queue */}
-        <div className="w-[280px] shrink-0 flex flex-col">
-          <EncounterQueue
-            queue={filteredQueue}
-            selectedId={selectedPatientId}
-            onSelect={setSelectedPatientId}
-            onStartVisit={handleStartVisit}
-          />
-        </div>
+        {!isFullScreen && (
+          <div className="w-[280px] shrink-0 flex flex-col">
+            <EncounterQueue
+              queue={filteredQueue}
+              selectedId={selectedPatientId}
+              onSelect={setSelectedPatientId}
+              onStartVisit={handleStartVisit}
+            />
+          </div>
+        )}
 
         {/* Right Panel — Workflow / Details */}
         <div className="flex-1 flex flex-col min-w-0">

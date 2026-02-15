@@ -36,13 +36,67 @@ interface EncounterWorkflowProps {
 const steps = [
   { id: 1, label: 'Vitals & Reason', icon: Activity },
   { id: 2, label: 'SOAP Notes', icon: FileText },
-  { id: 3, label: 'Consultation', icon: Stethoscope },
+  { id: 3, label: 'At Doctor', icon: Stethoscope },
   { id: 4, label: 'Prescription', icon: Pill },
   { id: 5, label: 'Review', icon: ClipboardList },
 ];
 
+// ─── Form Data Types ─────────────────────────────────────────
+interface VitalsData {
+  bp: string;
+  temp: string;
+  pulse: string;
+  weight: string;
+  height: string;
+  spo2: string;
+  chiefComplaint: string;
+  nurseNotes: string;
+}
+
+interface SOAPData {
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+}
+
+interface ConsultationData {
+  observations: string;
+  diagnosis: string;
+  recommendations: string;
+  labTests: string;
+  followUp: string;
+}
+
+interface PrescriptionMed {
+  id: string;
+  name: string;
+  m: number;
+  a: number;
+  n: number;
+  days: number;
+  qty: number;
+  stockAvailable: number;
+}
+
 export function EncounterWorkflow({ encounter, onStepChange, onComplete }: EncounterWorkflowProps) {
   const [activeStep, setActiveStep] = useState(encounter.currentStep || 1);
+
+  // Shared form state
+  const [vitals, setVitals] = useState<VitalsData>({
+    bp: '', temp: '', pulse: '', weight: '', height: '', spo2: '',
+    chiefComplaint: '', nurseNotes: '',
+  });
+  const [soap, setSOAP] = useState<SOAPData>({
+    subjective: '', objective: '', assessment: '', plan: '',
+  });
+  const [consultation, setConsultation] = useState<ConsultationData>({
+    observations: '', diagnosis: '', recommendations: '', labTests: '', followUp: '',
+  });
+  const [meds, setMeds] = useState<PrescriptionMed[]>([
+    { id: 'rx-1', name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15, stockAvailable: 1000 },
+    { id: 'rx-2', name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10, stockAvailable: 350 },
+  ]);
 
   const handleStep = (step: number) => {
     setActiveStep(step);
@@ -57,11 +111,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
       <div className="px-4 py-2.5 border-b flex items-center justify-between">
         <div className="flex items-center gap-3">
           {encounter.patient.photoUrl ? (
-            <img
-              src={encounter.patient.photoUrl}
-              alt=""
-              className="h-9 w-9 rounded-full object-cover border"
-            />
+            <img src={encounter.patient.photoUrl} alt="" className="h-9 w-9 rounded-full object-cover border" />
           ) : (
             <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
               {encounter.patient.name.charAt(0)}
@@ -134,23 +184,17 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
       {/* Step Content */}
       <ScrollArea className="flex-1">
         <div className="p-4">
-          {activeStep === 1 && <VitalsStep />}
-          {activeStep === 2 && <SOAPStep />}
-          {activeStep === 3 && <ConsultationStep />}
-          {activeStep === 4 && <PrescriptionStep />}
-          {activeStep === 5 && <ReviewStep />}
+          {activeStep === 1 && <VitalsStep data={vitals} onChange={setVitals} />}
+          {activeStep === 2 && <SOAPStep data={soap} onChange={setSOAP} />}
+          {activeStep === 3 && <ConsultationStep data={consultation} onChange={setConsultation} />}
+          {activeStep === 4 && <PrescriptionStep meds={meds} setMeds={setMeds} />}
+          {activeStep === 5 && <ReviewStep vitals={vitals} soap={soap} consultation={consultation} meds={meds} />}
         </div>
       </ScrollArea>
 
       {/* Bottom Action Bar */}
       <div className="px-4 py-2.5 border-t bg-muted/20 flex items-center justify-between">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 text-xs"
-          disabled={activeStep <= 1}
-          onClick={() => handleStep(activeStep - 1)}
-        >
+        <Button variant="outline" size="sm" className="h-8 text-xs" disabled={activeStep <= 1} onClick={() => handleStep(activeStep - 1)}>
           Previous
         </Button>
         <div className="flex items-center gap-2">
@@ -164,11 +208,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
               <ChevronRight className="h-3 w-3 ml-1" />
             </Button>
           ) : (
-            <Button
-              size="sm"
-              className="h-8 text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white"
-              onClick={onComplete}
-            >
+            <Button size="sm" className="h-8 text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" onClick={onComplete}>
               <Send className="h-3 w-3 mr-1" />
               Send to Pharmacy
             </Button>
@@ -180,38 +220,37 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
 }
 
 // ─── Step 1: Vitals ──────────────────────────────────────────
-function VitalsStep() {
+function VitalsStep({ data, onChange }: { data: VitalsData; onChange: (d: VitalsData) => void }) {
+  const update = (field: keyof VitalsData, value: string) => onChange({ ...data, [field]: value });
+
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Vitals</h3>
         <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'BP (mmHg)', placeholder: '120/80' },
-            { label: 'Temp (°F)', placeholder: '98.6' },
-            { label: 'Pulse (bpm)', placeholder: '72' },
-            { label: 'Weight (kg)', placeholder: '65' },
-            { label: 'Height (cm)', placeholder: '170' },
-            { label: 'SpO2 (%)', placeholder: '98' },
-          ].map(v => (
+          {([
+            { label: 'BP (mmHg)', field: 'bp' as const, placeholder: '120/80' },
+            { label: 'Temp (°F)', field: 'temp' as const, placeholder: '98.6' },
+            { label: 'Pulse (bpm)', field: 'pulse' as const, placeholder: '72' },
+            { label: 'Weight (kg)', field: 'weight' as const, placeholder: '65' },
+            { label: 'Height (cm)', field: 'height' as const, placeholder: '170' },
+            { label: 'SpO2 (%)', field: 'spo2' as const, placeholder: '98' },
+          ]).map(v => (
             <div key={v.label}>
               <Label className="text-[11px] text-muted-foreground">{v.label}</Label>
-              <Input className="h-8 text-sm mt-1" placeholder={v.placeholder} />
+              <Input className="h-8 text-sm mt-1" placeholder={v.placeholder} value={data[v.field]} onChange={(e) => update(v.field, e.target.value)} />
             </div>
           ))}
         </div>
       </div>
-
       <div>
         <Label className="text-[11px] text-muted-foreground">Chief Complaint / Reason for Visit</Label>
-        <Textarea className="mt-1 min-h-[60px] text-sm" placeholder="Describe the patient's primary complaint..." />
+        <Textarea className="mt-1 min-h-[60px] text-sm" placeholder="Describe the patient's primary complaint..." value={data.chiefComplaint} onChange={(e) => update('chiefComplaint', e.target.value)} />
       </div>
-
       <div>
         <Label className="text-[11px] text-muted-foreground">Nurse Notes (Optional)</Label>
-        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Additional observations..." />
+        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Additional observations..." value={data.nurseNotes} onChange={(e) => update('nurseNotes', e.target.value)} />
       </div>
-
       <div>
         <Label className="text-[11px] text-muted-foreground">Upload Lab Reports / Images</Label>
         <div className="mt-1 border-2 border-dashed rounded-lg p-4 text-center hover:bg-muted/30 transition-colors cursor-pointer">
@@ -224,25 +263,22 @@ function VitalsStep() {
 }
 
 // ─── Step 2: SOAP Notes ──────────────────────────────────────
-function SOAPStep() {
+function SOAPStep({ data, onChange }: { data: SOAPData; onChange: (d: SOAPData) => void }) {
+  const update = (field: keyof SOAPData, value: string) => onChange({ ...data, [field]: value });
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <AlertTriangle className="h-3.5 w-3.5 text-[hsl(var(--info))]" />
-        Auto-saves every 5 seconds
-      </div>
-      {[
-        { label: 'Subjective', placeholder: 'Patient reports...' },
-        { label: 'Objective', placeholder: 'On examination...' },
-        { label: 'Assessment', placeholder: 'Clinical impression...' },
-        { label: 'Plan', placeholder: 'Treatment plan...' },
-      ].map(s => (
+      {([
+        { label: 'Subjective', field: 'subjective' as const, placeholder: 'Patient reports...' },
+        { label: 'Objective', field: 'objective' as const, placeholder: 'On examination...' },
+        { label: 'Assessment', field: 'assessment' as const, placeholder: 'Clinical impression...' },
+        { label: 'Plan', field: 'plan' as const, placeholder: 'Treatment plan...' },
+      ]).map(s => (
         <div key={s.label}>
           <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</Label>
-          <Textarea className="mt-1 min-h-[70px] text-sm" placeholder={s.placeholder} />
+          <Textarea className="mt-1 min-h-[70px] text-sm" placeholder={s.placeholder} value={data[s.field]} onChange={(e) => update(s.field, e.target.value)} />
         </div>
       ))}
-
       <div>
         <Label className="text-[11px] text-muted-foreground">Attach Documents</Label>
         <div className="mt-1 border-2 border-dashed rounded-lg p-3 text-center hover:bg-muted/30 transition-colors cursor-pointer">
@@ -254,51 +290,38 @@ function SOAPStep() {
   );
 }
 
-// ─── Step 3: Doctor Consultation ─────────────────────────────
-function ConsultationStep() {
+// ─── Step 3: At Doctor ───────────────────────────────────────
+function ConsultationStep({ data, onChange }: { data: ConsultationData; onChange: (d: ConsultationData) => void }) {
+  const update = (field: keyof ConsultationData, value: string) => onChange({ ...data, [field]: value });
+
   return (
     <div className="space-y-4">
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Doctor Observations</Label>
-        <Textarea className="mt-1 min-h-[70px] text-sm" placeholder="Clinical findings and observations..." />
+        <Textarea className="mt-1 min-h-[70px] text-sm" placeholder="Clinical findings and observations..." value={data.observations} onChange={(e) => update('observations', e.target.value)} />
       </div>
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Diagnosis</Label>
-        <Input className="h-8 text-sm mt-1" placeholder="Add diagnosis..." />
+        <Input className="h-8 text-sm mt-1" placeholder="Add diagnosis..." value={data.diagnosis} onChange={(e) => update('diagnosis', e.target.value)} />
       </div>
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendations</Label>
-        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Instructions and recommendations..." />
+        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Instructions and recommendations..." value={data.recommendations} onChange={(e) => update('recommendations', e.target.value)} />
       </div>
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Lab Tests Ordered</Label>
-        <Input className="h-8 text-sm mt-1" placeholder="e.g., CBC, Lipid Profile, ECG..." />
+        <Input className="h-8 text-sm mt-1" placeholder="e.g., CBC, Lipid Profile, ECG..." value={data.labTests} onChange={(e) => update('labTests', e.target.value)} />
       </div>
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Follow-up</Label>
-        <Input className="h-8 text-sm mt-1" placeholder="e.g., 2 weeks" />
+        <Input className="h-8 text-sm mt-1" placeholder="e.g., 2 weeks" value={data.followUp} onChange={(e) => update('followUp', e.target.value)} />
       </div>
     </div>
   );
 }
 
-// ─── Step 4: Prescription (Searchable + Editable Table) ──────
-interface PrescriptionMed {
-  id: string;
-  name: string;
-  m: number;
-  a: number;
-  n: number;
-  days: number;
-  qty: number;
-  stockAvailable: number;
-}
-
-function PrescriptionStep() {
-  const [meds, setMeds] = useState<PrescriptionMed[]>([
-    { id: 'rx-1', name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15, stockAvailable: 1000 },
-    { id: 'rx-2', name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10, stockAvailable: 350 },
-  ]);
+// ─── Step 4: Prescription ────────────────────────────────────
+function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds: (m: PrescriptionMed[]) => void }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -454,26 +477,56 @@ function PrescriptionStep() {
   );
 }
 
-// ─── Step 5: Review ──────────────────────────────────────────
-function ReviewStep() {
+// ─── Step 5: Review (Dynamic) ────────────────────────────────
+function ReviewStep({ vitals, soap, consultation, meds }: {
+  vitals: VitalsData;
+  soap: SOAPData;
+  consultation: ConsultationData;
+  meds: PrescriptionMed[];
+}) {
+  const vitalsText = [
+    vitals.bp && `BP: ${vitals.bp}`,
+    vitals.temp && `Temp: ${vitals.temp}°F`,
+    vitals.pulse && `Pulse: ${vitals.pulse}`,
+    vitals.weight && `Weight: ${vitals.weight}kg`,
+    vitals.height && `Height: ${vitals.height}cm`,
+    vitals.spo2 && `SpO2: ${vitals.spo2}%`,
+  ].filter(Boolean).join(', ');
+
+  const prescriptionText = meds.map(m =>
+    `${m.name} (${m.m}-${m.a}-${m.n} x ${m.days}d = ${m.qty})`
+  ).join(', ');
+
+  const sections = [
+    { label: 'Vitals', value: vitalsText, icon: Activity },
+    { label: 'Chief Complaint', value: vitals.chiefComplaint, icon: FileText },
+    { label: 'SOAP - Subjective', value: soap.subjective, icon: FileText },
+    { label: 'SOAP - Assessment', value: soap.assessment, icon: FileText },
+    { label: 'Diagnosis', value: consultation.diagnosis, icon: Stethoscope },
+    { label: 'Recommendations', value: consultation.recommendations, icon: ClipboardList },
+    { label: 'Lab Tests', value: consultation.labTests, icon: Activity },
+    { label: 'Prescription', value: prescriptionText, icon: Pill },
+    { label: 'Follow-up', value: consultation.followUp, icon: Stethoscope },
+  ];
+
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Visit Summary</h3>
-        <div className="space-y-3">
-          {[
-            { label: 'Vitals', value: 'BP: 120/80, Temp: 98.6°F, Pulse: 72, Weight: 65kg, SpO2: 98%' },
-            { label: 'Chief Complaint', value: 'Fever and body aches for 3 days' },
-            { label: 'Diagnosis', value: 'Viral fever with myalgia' },
-            { label: 'Prescription', value: 'PARACETAMOL 500 MG (1-1-1 x 5d), OMEPRAZOLE 20 MG (1-0-0 x 10d)' },
-            { label: 'Follow-up', value: '1 week' },
-          ].map(item => (
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Visit Summary</h3>
+      <div className="space-y-3">
+        {sections.map(item => {
+          const hasValue = !!item.value;
+          return (
             <div key={item.label} className="border rounded-lg p-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{item.label}</p>
-              <p className="text-xs text-foreground">{item.value}</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <item.icon className="h-3 w-3 text-muted-foreground" />
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{item.label}</p>
+              </div>
+              <p className={cn("text-xs", hasValue ? "text-foreground" : "text-muted-foreground/50 italic")}>
+                {hasValue ? item.value : 'Not recorded'}
+              </p>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
       <div>
