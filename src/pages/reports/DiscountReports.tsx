@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { mockDiscounts, mockPatients, mockDoctors, mockCamps, mockMedicines, mockPrescriptions } from '@/data/mockData';
+import { useDiscounts, usePatients, useDoctors, useCamps, useMedicines, usePrescriptions } from '@/hooks/useApiData';
 import { format } from 'date-fns';
 
 export default function DiscountReports() {

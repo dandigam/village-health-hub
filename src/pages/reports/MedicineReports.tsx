@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockMedicines, mockPrescriptions, mockPatients, mockDoctors, mockCamps, mockDiscounts } from '@/data/mockData';
+import { useMedicines, usePrescriptions, usePatients, useDoctors, useCamps, useDiscounts } from '@/hooks/useApiData';
 
 export default function MedicineReports() {
   const navigate = useNavigate();

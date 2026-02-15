@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
-import { mockCamps, mockPatients, mockConsultations, mockPrescriptions, mockPayments, mockDiscounts, mockDoctors } from '@/data/mockData';
+import { useCamps, usePatients, useConsultations, usePrescriptions, usePayments, useDiscounts, useDoctors } from '@/hooks/useApiData';
 
 export default function ReportsHub() {
   const navigate = useNavigate();

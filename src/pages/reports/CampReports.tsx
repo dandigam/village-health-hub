@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockCamps, mockPatients, mockConsultations, mockPrescriptions, mockPayments, mockDoctors, mockMedicines, mockDiscounts } from '@/data/mockData';
+import { useCamps, usePatients, useConsultations, usePrescriptions, usePayments, useDoctors, useMedicines, useDiscounts } from '@/hooks/useApiData';
 
 export default function CampReports() {
   const navigate = useNavigate();

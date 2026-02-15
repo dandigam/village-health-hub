@@ -22,7 +22,7 @@ import {
   User
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { mockCamps, mockDoctors } from '@/data/mockData';
+import { useCamps, useDoctors } from '@/hooks/useApiData';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 

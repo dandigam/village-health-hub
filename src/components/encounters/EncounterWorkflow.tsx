@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { EncounterPatient } from '@/pages/encounters/Encounters';
-import { mockMedicines, mockStockItems } from '@/data/mockData';
+import { useMedicines, useStockItems } from '@/hooks/useApiData';
 import { PatientHistoryPanel } from './PatientHistoryPanel';
 import {
   Activity,
