@@ -7,24 +7,24 @@
 @layer base {
   :root {
     --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    --foreground: 215 30% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 215 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 215 30% 12%;
 
-    --primary: 215 65% 30%;
+    --primary: 215 70% 32%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 18% 95%;
-    --secondary-foreground: 215 25% 15%;
+    --secondary-foreground: 215 30% 12%;
 
     --muted: 210 14% 93%;
-    --muted-foreground: 215 12% 50%;
+    --muted-foreground: 215 20% 38%;
 
-    --accent: 215 55% 40%;
+    --accent: 215 60% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 55%;
@@ -37,25 +37,25 @@
     --radius: 0.5rem;
 
     /* Semantic Status Colors — muted, professional */
-    --navy: 215 65% 22%;
-    --navy-light: 215 50% 35%;
-    --success: 152 45% 42%;
-    --warning: 38 70% 50%;
-    --info: 210 55% 50%;
+    --navy: 215 70% 22%;
+    --navy-light: 215 55% 35%;
+    --success: 152 55% 38%;
+    --warning: 38 80% 48%;
+    --info: 210 65% 45%;
     
-    /* Stat Card Colors — subtle tinted backgrounds */
-    --stat-blue: 210 50% 95%;
-    --stat-blue-text: 210 55% 40%;
-    --stat-green: 152 40% 93%;
-    --stat-green-text: 152 45% 35%;
-    --stat-orange: 30 55% 93%;
-    --stat-orange-text: 30 55% 40%;
-    --stat-pink: 340 40% 94%;
-    --stat-pink-text: 340 40% 45%;
-    --stat-purple: 260 35% 94%;
-    --stat-purple-text: 260 35% 45%;
-    --stat-teal: 175 40% 93%;
-    --stat-teal-text: 175 40% 35%;
+    /* Stat Card Colors — vibrant tinted backgrounds */
+    --stat-blue: 210 55% 94%;
+    --stat-blue-text: 210 65% 35%;
+    --stat-green: 152 50% 92%;
+    --stat-green-text: 152 55% 30%;
+    --stat-orange: 30 65% 92%;
+    --stat-orange-text: 30 65% 35%;
+    --stat-pink: 340 50% 93%;
+    --stat-pink-text: 340 50% 38%;
+    --stat-purple: 260 45% 93%;
+    --stat-purple-text: 260 45% 38%;
+    --stat-teal: 175 50% 92%;
+    --stat-teal-text: 175 50% 30%;
 
     --sidebar-background: 215 65% 22%;
     --sidebar-foreground: 0 0% 100%;
