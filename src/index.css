@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 30% 12%;
 
-    --primary: 346 72% 44%;
+    --primary: 215 70% 32%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 18% 95%;
@@ -24,7 +24,7 @@
     --muted: 210 14% 93%;
     --muted-foreground: 215 20% 38%;
 
-    --accent: 346 65% 50%;
+    --accent: 215 60% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 55%;
@@ -32,7 +32,7 @@
 
     --border: 214 18% 88%;
     --input: 214 18% 88%;
-    --ring: 346 72% 44%;
+    --ring: 215 65% 30%;
 
     --radius: 0.5rem;
 
@@ -59,12 +59,12 @@
 
     --sidebar-background: 215 65% 22%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 346 72% 44%;
+    --sidebar-primary: 215 55% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 346 65% 38%;
+    --sidebar-accent: 215 50% 32%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 215 45% 35%;
-    --sidebar-ring: 346 72% 44%;
+    --sidebar-ring: 215 55% 45%;
   }
 
   .dark {
@@ -77,7 +77,7 @@
     --popover: 215 30% 14%;
     --popover-foreground: 210 20% 95%;
 
-    --primary: 346 65% 50%;
+    --primary: 215 55% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 25% 20%;
@@ -86,7 +86,7 @@
     --muted: 215 25% 18%;
     --muted-foreground: 215 12% 60%;
 
-    --accent: 346 55% 55%;
+    --accent: 215 45% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
@@ -94,16 +94,16 @@
 
     --border: 215 25% 25%;
     --input: 215 25% 25%;
-    --ring: 346 65% 50%;
+    --ring: 215 55% 45%;
 
     --sidebar-background: 215 35% 12%;
     --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 346 65% 50%;
+    --sidebar-primary: 215 55% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 346 55% 42%;
-    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-accent: 215 30% 20%;
+    --sidebar-accent-foreground: 210 20% 95%;
     --sidebar-border: 215 25% 25%;
-    --sidebar-ring: 346 65% 50%;
+    --sidebar-ring: 215 55% 45%;
   }
 }
 
