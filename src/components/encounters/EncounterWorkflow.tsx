@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { EncounterPatient } from '@/pages/encounters/Encounters';
+import { mockMedicines, mockStockItems } from '@/data/mockData';
 import {
   Activity,
   Stethoscope,
@@ -18,6 +21,10 @@ import {
   Save,
   RotateCcw,
   AlertCircle,
+  ClipboardList,
+  Search,
+  Trash2,
+  Send,
 } from 'lucide-react';
 
 interface EncounterWorkflowProps {
@@ -31,6 +38,7 @@ const steps = [
   { id: 2, label: 'SOAP Notes', icon: FileText },
   { id: 3, label: 'Consultation', icon: Stethoscope },
   { id: 4, label: 'Prescription', icon: Pill },
+  { id: 5, label: 'Review', icon: ClipboardList },
 ];
 
 export function EncounterWorkflow({ encounter, onStepChange, onComplete }: EncounterWorkflowProps) {
@@ -81,8 +89,8 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
           </Button>
           {!isCompleted && activeStep === 4 && (
             <Button size="sm" className="h-7 text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" onClick={onComplete}>
-              <Check className="h-3 w-3 mr-1" />
-              Complete Visit
+              <Send className="h-3 w-3 mr-1" />
+              Send to Pharmacy
             </Button>
           )}
         </div>
@@ -130,6 +138,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
           {activeStep === 2 && <SOAPStep />}
           {activeStep === 3 && <ConsultationStep />}
           {activeStep === 4 && <PrescriptionStep />}
+          {activeStep === 5 && <ReviewStep />}
         </div>
       </ScrollArea>
 
@@ -149,7 +158,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
             <Save className="h-3 w-3 mr-1" />
             Save Visit
           </Button>
-          {activeStep < 4 ? (
+          {activeStep < 5 ? (
             <Button size="sm" className="h-8 text-xs" onClick={() => handleStep(activeStep + 1)}>
               Next Step
               <ChevronRight className="h-3 w-3 ml-1" />
@@ -160,8 +169,8 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
               className="h-8 text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white"
               onClick={onComplete}
             >
-              <Check className="h-3 w-3 mr-1" />
-              Complete Visit
+              <Send className="h-3 w-3 mr-1" />
+              Send to Pharmacy
             </Button>
           )}
         </div>
@@ -273,38 +282,137 @@ function ConsultationStep() {
   );
 }
 
-// ─── Step 4: Prescription ────────────────────────────────────
+// ─── Step 4: Prescription (Searchable + Editable Table) ──────
+interface PrescriptionMed {
+  id: string;
+  name: string;
+  m: number;
+  a: number;
+  n: number;
+  days: number;
+  qty: number;
+}
+
 function PrescriptionStep() {
-  const [meds] = useState([
-    { name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15 },
-    { name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10 },
+  const [meds, setMeds] = useState<PrescriptionMed[]>([
+    { id: 'rx-1', name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15 },
+    { id: 'rx-2', name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10 },
   ]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const availableMedicines = useMemo(() => {
+    return mockMedicines.map(medicine => {
+      const stockItem = mockStockItems.find(s => s.medicineId === medicine.id);
+      return { id: medicine.id, name: medicine.name, category: medicine.category, qtyAvailable: stockItem?.quantity || 0 };
+    });
+  }, []);
+
+  const filteredMedicines = useMemo(() => {
+    if (!searchQuery) return availableMedicines;
+    return availableMedicines.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [availableMedicines, searchQuery]);
+
+  const addMedicine = (medicine: typeof availableMedicines[0]) => {
+    if (meds.some(item => item.name === medicine.name)) {
+      setSearchOpen(false);
+      setSearchQuery('');
+      return;
+    }
+    const newMed: PrescriptionMed = {
+      id: `rx-${Date.now()}`,
+      name: medicine.name,
+      m: 1, a: 0, n: 1, days: 7,
+      qty: 14,
+    };
+    setMeds([...meds, newMed]);
+    setSearchOpen(false);
+    setSearchQuery('');
+  };
+
+  const updateMed = (index: number, field: 'm' | 'a' | 'n' | 'days', value: number) => {
+    const updated = [...meds];
+    updated[index] = { ...updated[index], [field]: value };
+    updated[index].qty = (updated[index].m + updated[index].a + updated[index].n) * updated[index].days;
+    setMeds(updated);
+  };
+
+  const removeMed = (index: number) => {
+    setMeds(meds.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="space-y-4">
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Add Medicine</Label>
-        <Input className="h-8 text-sm" placeholder="Search medicine by name or code..." />
+        <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full justify-start text-muted-foreground h-8 text-sm">
+              <Search className="mr-2 h-3.5 w-3.5" />
+              Search medicine by name or code...
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[400px] p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search medicine..." value={searchQuery} onValueChange={setSearchQuery} />
+              <CommandList>
+                <CommandEmpty>No medicine found.</CommandEmpty>
+                <CommandGroup heading="Available Medicines">
+                  {filteredMedicines.map((medicine) => {
+                    const isAdded = meds.some(item => item.name === medicine.name);
+                    return (
+                      <CommandItem
+                        key={medicine.id}
+                        value={medicine.name}
+                        onSelect={() => addMedicine(medicine)}
+                        disabled={isAdded}
+                        className={cn("flex items-center justify-between", isAdded && "opacity-50")}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Pill className="h-3.5 w-3.5 text-primary" />
+                          <div>
+                            <p className="text-xs font-medium">{medicine.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{medicine.category}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={medicine.qtyAvailable > 50 ? "default" : medicine.qtyAvailable > 0 ? "secondary" : "destructive"} className="text-[10px]">
+                            Stock: {medicine.qtyAvailable}
+                          </Badge>
+                          {isAdded && <Badge variant="outline" className="text-[10px]">Added</Badge>}
+                        </div>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {meds.length > 0 && (
         <div className="border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[1fr_40px_40px_40px_50px_50px] gap-0 bg-muted/50 px-3 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="grid grid-cols-[1fr_50px_50px_50px_60px_60px_36px] gap-0 bg-muted/50 px-3 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
             <span>Medicine</span>
             <span className="text-center">M</span>
             <span className="text-center">A</span>
             <span className="text-center">N</span>
             <span className="text-center">Days</span>
             <span className="text-center">Qty</span>
+            <span></span>
           </div>
           {meds.map((med, i) => (
-            <div key={i} className="grid grid-cols-[1fr_40px_40px_40px_50px_50px] gap-0 px-3 py-2 border-t text-sm items-center">
+            <div key={med.id} className="grid grid-cols-[1fr_50px_50px_50px_60px_60px_36px] gap-0 px-3 py-1.5 border-t text-sm items-center group">
               <span className="truncate text-xs font-medium">{med.name}</span>
-              <span className="text-center text-xs">{med.m}</span>
-              <span className="text-center text-xs">{med.a}</span>
-              <span className="text-center text-xs">{med.n}</span>
-              <span className="text-center text-xs">{med.days}</span>
-              <span className="text-center text-xs font-medium">{med.qty}</span>
+              <Input type="number" min={0} max={9} value={med.m} onChange={(e) => updateMed(i, 'm', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
+              <Input type="number" min={0} max={9} value={med.a} onChange={(e) => updateMed(i, 'a', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
+              <Input type="number" min={0} max={9} value={med.n} onChange={(e) => updateMed(i, 'n', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
+              <Input type="number" min={1} max={365} value={med.days} onChange={(e) => updateMed(i, 'days', Number(e.target.value))} className="h-7 w-12 text-center text-xs mx-auto p-0" />
+              <span className="text-center text-xs font-semibold">{med.qty}</span>
+              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMed(i)}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
             </div>
           ))}
         </div>
@@ -312,12 +420,39 @@ function PrescriptionStep() {
 
       <div className="flex gap-2">
         <Button variant="outline" size="sm" className="h-7 text-xs">
-          <Pill className="h-3 w-3 mr-1" />
+          <Send className="h-3 w-3 mr-1" />
           Send to Pharmacy
         </Button>
-        <Button variant="outline" size="sm" className="h-7 text-xs">
-          Print Rx
-        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Step 5: Review ──────────────────────────────────────────
+function ReviewStep() {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Visit Summary</h3>
+        <div className="space-y-3">
+          {[
+            { label: 'Vitals', value: 'BP: 120/80, Temp: 98.6°F, Pulse: 72, Weight: 65kg, SpO2: 98%' },
+            { label: 'Chief Complaint', value: 'Fever and body aches for 3 days' },
+            { label: 'Diagnosis', value: 'Viral fever with myalgia' },
+            { label: 'Prescription', value: 'PARACETAMOL 500 MG (1-1-1 x 5d), OMEPRAZOLE 20 MG (1-0-0 x 10d)' },
+            { label: 'Follow-up', value: '1 week' },
+          ].map(item => (
+            <div key={item.label} className="border rounded-lg p-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{item.label}</p>
+              <p className="text-xs text-foreground">{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-[11px] text-muted-foreground">Doctor's Final Notes</Label>
+        <Textarea className="mt-1 min-h-[60px] text-sm" placeholder="Any additional notes before completing the visit..." />
       </div>
     </div>
   );
