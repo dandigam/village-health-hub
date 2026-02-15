@@ -37,12 +37,15 @@ export function WarehouseFormDialog({ open, onOpenChange, warehouse, suppliers, 
   }, [open, warehouse]);
 
   const handleSave = () => {
+    const now = new Date().toISOString();
     const saved: Warehouse = {
       id: warehouse?.id || String(Date.now()),
       name,
       address,
       supplierIds: selectedSuppliers,
-      createdAt: warehouse?.createdAt || new Date().toISOString(),
+      status: 'active',
+      createdAt: warehouse?.createdAt || now,
+      updatedAt: now,
     };
     onSave(saved);
     toast({

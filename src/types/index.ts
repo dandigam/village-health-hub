@@ -1,20 +1,34 @@
-// User & Role Types
+// ============================================================
+// Domain Types — Backend-Ready, Spring Boot + MongoDB Compatible
+// ============================================================
+// Every entity includes: id, status (enum), createdAt, updatedAt
+// Related fields grouped into nested objects where logical.
+// All types are compatible with JSON serialization for REST APIs.
+// ============================================================
+
+// ── Base Entity ──────────────────────────────────────────────
+export interface BaseEntity {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── User & Auth ──────────────────────────────────────────────
 export type UserRole = 'super_admin' | 'camp_admin' | 'doctor' | 'pharmacy' | 'staff';
 
-export interface User {
-  id: string;
+export interface User extends BaseEntity {
   name: string;
   email: string;
   phone: string;
   role: UserRole;
   avatar?: string;
+  status: 'active' | 'inactive';
 }
 
-// Camp Types
+// ── Camp ─────────────────────────────────────────────────────
 export type CampStatus = 'draft' | 'active' | 'closed';
 
-export interface Camp {
-  id: string;
+export interface Camp extends BaseEntity {
   name: string;
   location: string;
   village: string;
@@ -28,20 +42,19 @@ export interface Camp {
   staffIds: string[];
 }
 
-// Doctor Types
-export interface Doctor {
-  id: string;
+// ── Doctor ───────────────────────────────────────────────────
+export interface Doctor extends BaseEntity {
   name: string;
   specialization: string;
   phone: string;
   email?: string;
   avatar?: string;
   photoUrl?: string;
+  status: 'active' | 'inactive';
 }
 
-// Patient Types
-export interface Patient {
-  id: string;
+// ── Patient ──────────────────────────────────────────────────
+export interface Patient extends BaseEntity {
   patientId: string; // Auto-generated camp-wise ID
   campId: string;
   name: string;
@@ -54,34 +67,33 @@ export interface Patient {
   village: string;
   district?: string;
   state?: string;
-  photoUrl?: string; // Patient photo URL
-  createdAt: string;
+  photoUrl?: string;
+  status: 'registered' | 'in_progress' | 'completed';
 }
 
-// SOAP Notes Types
-export interface SOAPNote {
-  id: string;
+// ── SOAP Notes ───────────────────────────────────────────────
+export interface SOAPObjective {
+  weight?: number;
+  bp?: string;
+  pulse?: number;
+  temp?: number;
+  spo2?: number;
+  notes?: string;
+}
+
+export interface SOAPNote extends BaseEntity {
   patientId: string;
   campId: string;
-  createdBy: string; // Staff ID
+  createdBy: string;
   subjective: string;
-  objective: {
-    weight?: number;
-    bp?: string;
-    pulse?: number;
-    temp?: number;
-    spo2?: number;
-    notes?: string;
-  };
+  objective: SOAPObjective;
   assessment: string;
   plan: string;
   status: 'pending' | 'with_doctor' | 'completed';
-  createdAt: string;
 }
 
-// Consultation Types
-export interface Consultation {
-  id: string;
+// ── Consultation ─────────────────────────────────────────────
+export interface Consultation extends BaseEntity {
   patientId: string;
   doctorId: string;
   campId: string;
@@ -94,16 +106,15 @@ export interface Consultation {
   notes?: string;
   prescriptionId?: string;
   status: 'in_progress' | 'completed';
-  createdAt: string;
 }
 
-// Medicine & Prescription Types
-export interface Medicine {
-  id: string;
+// ── Medicine & Prescription ──────────────────────────────────
+export interface Medicine extends BaseEntity {
   name: string;
   code: string;
   category: string;
   unitPrice: number;
+  status: 'available' | 'discontinued';
 }
 
 export interface PrescriptionItem {
@@ -116,37 +127,33 @@ export interface PrescriptionItem {
   days: number;
 }
 
-export interface Prescription {
-  id: string;
+export interface Prescription extends BaseEntity {
   consultationId: string;
   patientId: string;
   doctorId: string;
   campId: string;
   items: PrescriptionItem[];
   status: 'pending' | 'dispensed' | 'partial';
-  createdAt: string;
 }
 
-// Discount Types
+// ── Discount ─────────────────────────────────────────────────
 export type DiscountType = 'percentage' | 'fixed';
 
-export interface Discount {
-  id: string;
+export interface Discount extends BaseEntity {
   name: string;
   type: DiscountType;
-  value: number; // percentage (0-100) or fixed amount
+  value: number;
   campId: string;
   patientId: string;
   prescriptionId?: string;
   medicineIds?: string[];
-  appliedBy: string; // Doctor ID
+  appliedBy: string;
   reason?: string;
-  createdAt: string;
+  status: 'active' | 'expired';
 }
 
-// Payment Types
-export interface Payment {
-  id: string;
+// ── Payment ──────────────────────────────────────────────────
+export interface Payment extends BaseEntity {
   prescriptionId: string;
   patientId: string;
   campId: string;
@@ -156,19 +163,17 @@ export interface Payment {
   discountId?: string;
   discountAmount?: number;
   status: 'full' | 'partial' | 'pending';
-  createdAt: string;
 }
 
-// Stock Types
-export interface Supplier {
-  id: string;
+// ── Stock ────────────────────────────────────────────────────
+export interface Supplier extends BaseEntity {
   name: string;
   contact: string;
   address: string;
+  status: 'active' | 'inactive';
 }
 
-export interface StockItem {
-  id: string;
+export interface StockItem extends BaseEntity {
   medicineId: string;
   campId: string;
   quantity: number;
@@ -176,15 +181,15 @@ export interface StockItem {
   expiryDate: string;
   purchaseDate: string;
   supplierId: string;
+  status: 'available' | 'expired' | 'depleted';
 }
 
-// Warehouse Types
-export interface Warehouse {
-  id: string;
+// ── Warehouse ────────────────────────────────────────────────
+export interface Warehouse extends BaseEntity {
   name: string;
   address: string;
   supplierIds: string[];
-  createdAt: string;
+  status: 'active' | 'inactive';
 }
 
 export interface SupplierMedicine {
@@ -192,17 +197,8 @@ export interface SupplierMedicine {
   medicineId: string;
 }
 
+// ── Supplier Orders ──────────────────────────────────────────
 export type SupplierOrderStatus = 'pending' | 'sent' | 'received' | 'partial';
-
-export interface SupplierOrder {
-  id: string;
-  supplierId: string;
-  warehouseId: string;
-  items: SupplierOrderItem[];
-  status: SupplierOrderStatus;
-  createdAt: string;
-  receivedAt?: string;
-}
 
 export interface SupplierOrderItem {
   medicineId: string;
@@ -210,37 +206,16 @@ export interface SupplierOrderItem {
   receivedQty?: number;
 }
 
+export interface SupplierOrder extends BaseEntity {
+  supplierId: string;
+  warehouseId: string;
+  items: SupplierOrderItem[];
+  status: SupplierOrderStatus;
+  receivedAt?: string;
+}
+
+// ── Distribution ─────────────────────────────────────────────
 export type DistributionStatus = 'pending' | 'confirmed' | 'partial' | 'sent';
-
-export type RequestOrderStatus = 'draft' | 'pending' | 'partial' | 'sent' | 'cancelled';
-
-export interface RequestOrder {
-  id: string;
-  requestedBy: string;
-  clientName: string;
-  warehouseId: string;
-  items: RequestOrderItem[];
-  status: RequestOrderStatus;
-  createdAt: string;
-  updatedAt?: string;
-  notes?: string;
-}
-
-export interface RequestOrderItem {
-  medicineId: string;
-  requestedQty: number;
-  sendQty: number;
-}
-
-export interface StockDistribution {
-  id: string;
-  warehouseId: string;
-  clientName: string;
-  items: DistributionItem[];
-  status: DistributionStatus;
-  createdAt: string;
-  notes?: string;
-}
 
 export interface DistributionItem {
   medicineId: string;
@@ -248,7 +223,33 @@ export interface DistributionItem {
   sentQty: number;
 }
 
-// Stats Types
+export interface StockDistribution extends BaseEntity {
+  warehouseId: string;
+  clientName: string;
+  items: DistributionItem[];
+  status: DistributionStatus;
+  notes?: string;
+}
+
+// ── Request Orders ───────────────────────────────────────────
+export type RequestOrderStatus = 'draft' | 'pending' | 'partial' | 'sent' | 'cancelled';
+
+export interface RequestOrderItem {
+  medicineId: string;
+  requestedQty: number;
+  sendQty: number;
+}
+
+export interface RequestOrder extends BaseEntity {
+  requestedBy: string;
+  clientName: string;
+  warehouseId: string;
+  items: RequestOrderItem[];
+  status: RequestOrderStatus;
+  notes?: string;
+}
+
+// ── Stats ────────────────────────────────────────────────────
 export interface CampStats {
   totalPatients: number;
   patientsAtDoctor: number;

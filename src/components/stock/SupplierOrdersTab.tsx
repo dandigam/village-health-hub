@@ -48,13 +48,15 @@ export function SupplierOrdersTab() {
   const addReqItem = () => setReqItems([...reqItems, { medicineId: '', requestedQty: 0 }]);
 
   const handleSendRequest = () => {
+    const now = new Date().toISOString();
     const newOrder: SupplierOrder = {
       id: String(orders.length + 1),
       supplierId: reqSupplierId,
       warehouseId: reqWarehouseId,
       items: reqItems.map(i => ({ medicineId: i.medicineId, requestedQty: i.requestedQty })),
       status: 'sent',
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
     setOrders([newOrder, ...orders]);
     const supplier = mockSuppliers.find(s => s.id === reqSupplierId);

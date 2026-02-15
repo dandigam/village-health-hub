@@ -6,18 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockPrescriptions, mockPatients, mockDoctors } from '@/data/mockData';
+import { usePrescriptions, usePatients, useDoctors } from '@/hooks/useApiData';
 
 export default function PharmacyDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('pending');
+  const { data: prescriptions = [] } = usePrescriptions();
+  const { data: patients = [] } = usePatients();
+  const { data: doctors = [] } = useDoctors();
 
-  const getPatientInfo = (patientId: string) => mockPatients.find(p => p.id === patientId);
-  const getDoctorInfo = (doctorId: string) => mockDoctors.find(d => d.id === doctorId);
+  const getPatientInfo = (patientId: string) => patients.find(p => p.id === patientId);
+  const getDoctorInfo = (doctorId: string) => doctors.find(d => d.id === doctorId);
 
-  const pendingPrescriptions = mockPrescriptions.filter(p => p.status === 'pending');
-  const partialPrescriptions = mockPrescriptions.filter(p => p.status === 'partial');
-  const dispensedPrescriptions = mockPrescriptions.filter(p => p.status === 'dispensed');
+  const pendingPrescriptions = prescriptions.filter(p => p.status === 'pending');
+  const partialPrescriptions = prescriptions.filter(p => p.status === 'partial');
+  const dispensedPrescriptions = prescriptions.filter(p => p.status === 'dispensed');
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -38,60 +41,11 @@ export default function PharmacyDashboard() {
         <h1 className="page-title">Pharmacy Dashboard</h1>
       </div>
 
-      {/* Stats Row */}
       <div className="grid md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-stat-orange">
-                <Clock className="h-6 w-6 text-stat-orange-text" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{pendingPrescriptions.length}</p>
-                <p className="text-sm text-muted-foreground">Pending</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-stat-pink">
-                <AlertCircle className="h-6 w-6 text-stat-pink-text" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{partialPrescriptions.length}</p>
-                <p className="text-sm text-muted-foreground">Partial</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-stat-green">
-                <CheckCircle className="h-6 w-6 text-stat-green-text" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{dispensedPrescriptions.length}</p>
-                <p className="text-sm text-muted-foreground">Dispensed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-stat-blue">
-                <DollarSign className="h-6 w-6 text-stat-blue-text" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">₹12,450</p>
-                <p className="text-sm text-muted-foreground">Today's Collection</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-full bg-stat-orange"><Clock className="h-6 w-6 text-stat-orange-text" /></div><div><p className="text-2xl font-bold">{pendingPrescriptions.length}</p><p className="text-sm text-muted-foreground">Pending</p></div></div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-full bg-stat-pink"><AlertCircle className="h-6 w-6 text-stat-pink-text" /></div><div><p className="text-2xl font-bold">{partialPrescriptions.length}</p><p className="text-sm text-muted-foreground">Partial</p></div></div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-full bg-stat-green"><CheckCircle className="h-6 w-6 text-stat-green-text" /></div><div><p className="text-2xl font-bold">{dispensedPrescriptions.length}</p><p className="text-sm text-muted-foreground">Dispensed</p></div></div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="p-3 rounded-full bg-stat-blue"><DollarSign className="h-6 w-6 text-stat-blue-text" /></div><div><p className="text-2xl font-bold">₹12,450</p><p className="text-sm text-muted-foreground">Today's Collection</p></div></div></CardContent></Card>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -121,20 +75,16 @@ export default function PharmacyDashboard() {
                             <span className="font-medium">{prescription.items.length} medicines</span>
                             <span className="text-muted-foreground"> • Prescribed by {doctor?.name}</span>
                           </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(prescription.createdAt).toLocaleString()}
-                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">{new Date(prescription.createdAt).toLocaleString()}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {getStatusBadge(prescription.status)}
                         <Button size="sm" variant="outline" onClick={() => navigate(`/pharmacy/prescription/${prescription.id}`)}>
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
+                          <Eye className="h-4 w-4 mr-1" /> View
                         </Button>
                         <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => navigate(`/pharmacy/dispense/${prescription.id}`)}>
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Dispense
+                          <CheckCircle className="h-4 w-4 mr-1" /> Dispense
                         </Button>
                       </div>
                     </div>
@@ -143,11 +93,7 @@ export default function PharmacyDashboard() {
               );
             })}
             {pendingPrescriptions.length === 0 && (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No pending prescriptions.
-                </CardContent>
-              </Card>
+              <Card><CardContent className="py-8 text-center text-muted-foreground">No pending prescriptions.</CardContent></Card>
             )}
           </div>
         </TabsContent>
@@ -180,11 +126,7 @@ export default function PharmacyDashboard() {
               );
             })}
             {partialPrescriptions.length === 0 && (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No partial prescriptions.
-                </CardContent>
-              </Card>
+              <Card><CardContent className="py-8 text-center text-muted-foreground">No partial prescriptions.</CardContent></Card>
             )}
           </div>
         </TabsContent>
@@ -204,9 +146,7 @@ export default function PharmacyDashboard() {
                         <div>
                           <h3 className="font-semibold">{patient?.name} {patient?.surname}</h3>
                           <p className="text-sm text-muted-foreground">{patient?.patientId}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Dispensed: {new Date(prescription.createdAt).toLocaleString()}
-                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">Dispensed: {new Date(prescription.createdAt).toLocaleString()}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

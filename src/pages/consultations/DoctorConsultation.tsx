@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
-import { mockSOAPNotes, mockPatients, mockDoctors, mockMedicines, mockStockItems } from '@/data/mockData';
+import { useSOAPNotes, usePatients, useDoctors, useMedicines, useStockItems } from '@/hooks/useApiData';
 import { useCamp } from '@/context/CampContext';
 
 // Tab Components
@@ -29,9 +29,13 @@ export default function DoctorConsultation() {
   const soapId = searchParams.get('soapId');
   const patientId = searchParams.get('patientId');
 
-  const soapNote = mockSOAPNotes.find(n => n.id === soapId);
-  const patient = mockPatients.find(p => p.id === patientId);
-  const doctor = mockDoctors[0]; // Default doctor for mock
+  const { data: soapNotes = [] } = useSOAPNotes();
+  const { data: patients = [] } = usePatients();
+  const { data: allDoctors = [] } = useDoctors();
+
+  const soapNote = soapNotes.find(n => n.id === soapId);
+  const patient = patients.find(p => p.id === patientId);
+  const doctor = allDoctors[0]; // Default doctor for mock
 
   // UI State
   const [activeTab, setActiveTab] = useState('subject');

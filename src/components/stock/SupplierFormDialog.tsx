@@ -51,11 +51,15 @@ export function SupplierFormDialog({ open, onOpenChange, supplier, onSave }: Sup
   );
 
   const handleSave = () => {
+    const now = new Date().toISOString();
     const saved: Supplier = {
       id: supplier?.id || String(Date.now()),
       name,
       contact,
       address,
+      status: 'active',
+      createdAt: supplier?.createdAt || now,
+      updatedAt: now,
     };
     onSave(saved, selectedMedicines);
     toast({
