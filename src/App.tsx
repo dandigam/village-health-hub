@@ -84,10 +84,10 @@ const App = () => (
             <Route path="/soap/:id" element={<ViewSOAPNote />} />
             <Route path="/soap/:id/edit" element={<NewSOAPNote />} />
             
-{/* Consultations */}
-<Route path="/consultations" element={<ConsultationsList />} />
-<Route path="/consultations/new" element={<NewConsultation />} />
-<Route path="/consultations/doctor" element={<DoctorConsultation />} />
+            {/* Consultations */}
+            <Route path="/consultations" element={<ConsultationsList />} />
+            <Route path="/consultations/new" element={<NewConsultation />} />
+            <Route path="/consultations/doctor" element={<DoctorConsultation />} />
             
             {/* Pharmacy */}
             <Route path="/pharmacy" element={<PharmacyDashboard />} />

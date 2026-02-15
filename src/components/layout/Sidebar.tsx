@@ -52,7 +52,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
     <TooltipProvider delayDuration={0}>
       <aside 
         className={cn(
-          "relative bg-gradient-to-b from-[hsl(215,65%,20%)] to-[hsl(215,60%,25%)] flex flex-col border-r border-white/10 shadow-xl transition-all duration-300 ease-in-out",
+          "relative bg-gradient-to-b from-sidebar to-[hsl(var(--sidebar-accent))] flex flex-col border-r border-sidebar-border shadow-xl transition-all duration-300 ease-in-out",
           mobile ? "w-full min-h-screen" : "hidden md:flex min-h-screen",
           !mobile && (collapsed ? "w-[68px]" : "w-44"),
         )}
