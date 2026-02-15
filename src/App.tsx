@@ -76,6 +76,7 @@ const App = () => (
             <Route path="/patients" element={<Patients />} />
             <Route path="/patients/new" element={<NewPatient />} />
             <Route path="/patients/:id" element={<PatientHistory />} />
+            <Route path="/patients/:id/edit" element={<NewPatient />} />
             
             {/* SOAP Notes */}
             <Route path="/soap" element={<SOAPNotesList />} />
