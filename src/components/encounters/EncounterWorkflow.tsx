@@ -20,11 +20,11 @@ import {
   Upload,
   Save,
   RotateCcw,
-  AlertCircle,
   ClipboardList,
   Search,
   Trash2,
   Send,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface EncounterWorkflowProps {
@@ -228,7 +228,7 @@ function SOAPStep() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <AlertCircle className="h-3.5 w-3.5 text-[hsl(var(--info))]" />
+        <AlertTriangle className="h-3.5 w-3.5 text-[hsl(var(--info))]" />
         Auto-saves every 5 seconds
       </div>
       {[
@@ -291,12 +291,13 @@ interface PrescriptionMed {
   n: number;
   days: number;
   qty: number;
+  stockAvailable: number;
 }
 
 function PrescriptionStep() {
   const [meds, setMeds] = useState<PrescriptionMed[]>([
-    { id: 'rx-1', name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15 },
-    { id: 'rx-2', name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10 },
+    { id: 'rx-1', name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15, stockAvailable: 1000 },
+    { id: 'rx-2', name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10, stockAvailable: 350 },
   ]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -324,6 +325,7 @@ function PrescriptionStep() {
       name: medicine.name,
       m: 1, a: 0, n: 1, days: 7,
       qty: 14,
+      stockAvailable: medicine.qtyAvailable,
     };
     setMeds([...meds, newMed]);
     setSearchOpen(false);
@@ -403,7 +405,7 @@ function PrescriptionStep() {
 
       {meds.length > 0 && (
         <div className="border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[1fr_50px_50px_50px_60px_60px_36px] gap-0 bg-muted/50 px-3 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="grid grid-cols-[1fr_44px_44px_44px_56px_56px_32px] gap-0 bg-muted/50 px-3 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
             <span>Medicine</span>
             <span className="text-center">M</span>
             <span className="text-center">A</span>
@@ -412,19 +414,33 @@ function PrescriptionStep() {
             <span className="text-center">Qty</span>
             <span></span>
           </div>
-          {meds.map((med, i) => (
-            <div key={med.id} className="grid grid-cols-[1fr_50px_50px_50px_60px_60px_36px] gap-0 px-3 py-1.5 border-t text-sm items-center group">
-              <span className="truncate text-xs font-medium">{med.name}</span>
-              <Input type="number" min={0} max={9} value={med.m} onChange={(e) => updateMed(i, 'm', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
-              <Input type="number" min={0} max={9} value={med.a} onChange={(e) => updateMed(i, 'a', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
-              <Input type="number" min={0} max={9} value={med.n} onChange={(e) => updateMed(i, 'n', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
-              <Input type="number" min={1} max={365} value={med.days} onChange={(e) => updateMed(i, 'days', Number(e.target.value))} className="h-7 w-12 text-center text-xs mx-auto p-0" />
-              <span className="text-center text-xs font-semibold">{med.qty}</span>
-              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMed(i)}>
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
-          ))}
+          {meds.map((med, i) => {
+            const exceedsStock = med.qty > med.stockAvailable;
+            return (
+              <div key={med.id} className={cn(
+                "grid grid-cols-[1fr_44px_44px_44px_56px_56px_32px] gap-0 px-3 py-1.5 border-t text-sm items-center group",
+                exceedsStock && "bg-destructive/5"
+              )}>
+                <div className="min-w-0">
+                  <span className="truncate text-xs font-medium block">{med.name}</span>
+                  {exceedsStock && (
+                    <span className="flex items-center gap-1 text-[10px] text-destructive mt-0.5">
+                      <AlertTriangle className="h-3 w-3" />
+                      Stock: {med.stockAvailable} (short by {med.qty - med.stockAvailable})
+                    </span>
+                  )}
+                </div>
+                <Input type="number" min={0} max={9} value={med.m} onChange={(e) => updateMed(i, 'm', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
+                <Input type="number" min={0} max={9} value={med.a} onChange={(e) => updateMed(i, 'a', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
+                <Input type="number" min={0} max={9} value={med.n} onChange={(e) => updateMed(i, 'n', Number(e.target.value))} className="h-7 w-10 text-center text-xs mx-auto p-0" />
+                <Input type="number" min={1} max={365} value={med.days} onChange={(e) => updateMed(i, 'days', Number(e.target.value))} className="h-7 w-12 text-center text-xs mx-auto p-0" />
+                <span className={cn("text-center text-xs font-semibold", exceedsStock && "text-destructive")}>{med.qty}</span>
+                <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMed(i)}>
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            );
+          })}
         </div>
       )}
 
