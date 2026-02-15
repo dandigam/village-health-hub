@@ -34,7 +34,7 @@ const buildEncounterQueue = (): EncounterPatient[] => {
     arrivalTime: arrivals[i],
     isReturning: i === 1 || i === 4,
     assignedDoctor: statuses[i] === 'in_progress' ? mockDoctors[i % mockDoctors.length].name : undefined,
-    currentStep: statuses[i] === 'completed' ? 4 : statuses[i] === 'in_progress' ? 2 : 0,
+    currentStep: statuses[i] === 'completed' ? 5 : statuses[i] === 'in_progress' ? 2 : 0,
   }));
 };
 
@@ -90,7 +90,7 @@ export default function Encounters() {
     if (!selectedPatientId) return;
     setEncounterQueue(prev =>
       prev.map(e =>
-        e.patient.id === selectedPatientId ? { ...e, status: 'completed' as EncounterStatus, currentStep: 4 } : e
+        e.patient.id === selectedPatientId ? { ...e, status: 'completed' as EncounterStatus, currentStep: 5 } : e
       )
     );
   };
