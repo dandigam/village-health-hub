@@ -12,6 +12,7 @@ export default function PatientHistory() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   const patient = mockPatients.find(p => p.id === id);
   const patientSOAPs = mockSOAPNotes.filter(s => s.patientId === id);
@@ -95,6 +96,12 @@ export default function PatientHistory() {
   visits.forEach((visit, index) => {
     visit.visitNumber = visits.length - index;
   });
+
+  // Auto-select first visit on load
+  if (!initialized && visits.length > 0 && !selectedVisit) {
+    setSelectedVisit(visits[0]);
+    setInitialized(true);
+  }
 
   return (
     <DashboardLayout>
