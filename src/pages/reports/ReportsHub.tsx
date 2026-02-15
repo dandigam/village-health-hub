@@ -5,21 +5,20 @@ import {
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
-import { useCamps, usePatients, useConsultations, usePrescriptions, usePayments, useDiscounts, useDoctors } from '@/hooks/useApiData';
+import { useCamps, usePatients, usePrescriptions, usePayments, useDiscounts, useDoctors } from '@/hooks/useApiData';
 
 export default function ReportsHub() {
   const navigate = useNavigate();
 
   const { data: allPatients = [] } = usePatients();
-  const { data: allConsultations = [] } = useConsultations();
+  const { data: allPrescriptions = [] } = usePrescriptions();
   const { data: allPayments = [] } = usePayments();
   const { data: allDiscounts = [] } = useDiscounts();
   const { data: allCamps = [] } = useCamps();
-  const { data: allPrescriptions = [] } = usePrescriptions();
   const { data: allDoctors = [] } = useDoctors();
 
   const totalPatients = allPatients.length;
-  const totalConsultations = allConsultations.length;
+  const totalConsultations = allPrescriptions.length;
   const totalCollection = allPayments.reduce((sum, p) => sum + p.paidAmount, 0);
   const pendingPayments = allPayments.reduce((sum, p) => sum + p.pendingAmount, 0);
   const totalDiscounts = allDiscounts.reduce((sum, d) => d.type === 'fixed' ? sum + d.value : sum, 0);

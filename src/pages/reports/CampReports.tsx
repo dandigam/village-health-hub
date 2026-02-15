@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCamps, usePatients, useConsultations, usePrescriptions, usePayments, useDoctors, useMedicines, useDiscounts } from '@/hooks/useApiData';
+import { useCamps, usePatients, usePrescriptions, usePayments, useDoctors, useMedicines, useDiscounts } from '@/hooks/useApiData';
 
 export default function CampReports() {
   const navigate = useNavigate();
@@ -18,7 +18,6 @@ export default function CampReports() {
 
   const { data: camps = [] } = useCamps();
   const { data: patients = [] } = usePatients();
-  const { data: consultations = [] } = useConsultations();
   const { data: prescriptions = [] } = usePrescriptions();
   const { data: payments = [] } = usePayments();
   const { data: discounts = [] } = useDiscounts();
@@ -31,7 +30,7 @@ export default function CampReports() {
 
   const getCampStats = (campId: string) => {
     const campPatients = patients.filter(p => p.campId === campId);
-    const campConsultations = consultations.filter(c => c.campId === campId);
+    const campConsultations = prescriptions.filter(p => p.campId === campId);
     const campPrescriptions = prescriptions.filter(p => p.campId === campId);
     const campPayments = payments.filter(p => p.campId === campId);
     const campDiscounts = discounts.filter(d => d.campId === campId);
@@ -247,7 +246,7 @@ export default function CampReports() {
                         </TableHeader>
                         <TableBody>
                           {stats.doctors.map(doctor => {
-                            const consultCount = consultations.filter(c => c.campId === camp.id && c.doctorId === doctor.id).length;
+                            const consultCount = prescriptions.filter(p => p.campId === camp.id && p.doctorId === doctor.id).length;
                             return (
                               <TableRow key={doctor.id}>
                                 <TableCell className="py-2 text-xs font-medium">{doctor.name}</TableCell>

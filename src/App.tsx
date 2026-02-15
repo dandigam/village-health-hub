@@ -16,16 +16,6 @@ import NewCamp from "./pages/camps/NewCamp";
 import EditCamp from "./pages/camps/EditCamp";
 import NotFound from "./pages/NotFound";
 
-// SOAP Notes
-import SOAPNotesList from "./pages/soap/SOAPNotesList";
-import NewSOAPNote from "./pages/soap/NewSOAPNote";
-import ViewSOAPNote from "./pages/soap/ViewSOAPNote";
-
-// Consultations
-import ConsultationsList from "./pages/consultations/ConsultationsList";
-import NewConsultation from "./pages/consultations/NewConsultation";
-import DoctorConsultation from "./pages/consultations/DoctorConsultation";
-
 // Pharmacy
 import PharmacyDashboard from "./pages/pharmacy/PharmacyDashboard";
 import DispenseMedicine from "./pages/pharmacy/DispenseMedicine";
@@ -77,17 +67,6 @@ const App = () => (
             <Route path="/patients/new" element={<NewPatient />} />
             <Route path="/patients/:id" element={<PatientHistory />} />
             <Route path="/patients/:id/edit" element={<NewPatient />} />
-            
-            {/* SOAP Notes */}
-            <Route path="/soap" element={<SOAPNotesList />} />
-            <Route path="/soap/new" element={<NewSOAPNote />} />
-            <Route path="/soap/:id" element={<ViewSOAPNote />} />
-            <Route path="/soap/:id/edit" element={<NewSOAPNote />} />
-            
-            {/* Consultations */}
-            <Route path="/consultations" element={<ConsultationsList />} />
-            <Route path="/consultations/new" element={<NewConsultation />} />
-            <Route path="/consultations/doctor" element={<DoctorConsultation />} />
             
             {/* Pharmacy */}
             <Route path="/pharmacy" element={<PharmacyDashboard />} />

@@ -13,9 +13,7 @@ import {
   mockCamps,
   mockDoctors,
   mockPatients,
-  mockSOAPNotes,
   mockMedicines,
-  mockConsultations,
   mockPrescriptions,
   mockSuppliers,
   mockStockItems,
@@ -33,9 +31,7 @@ import type {
   Camp,
   Doctor,
   Patient,
-  SOAPNote,
   Medicine,
-  Consultation,
   Prescription,
   Supplier,
   StockItem,
@@ -104,28 +100,10 @@ export function usePatient(id: string) {
   });
 }
 
-export function useSOAPNotes() {
-  return useQuery({
-    queryKey: ['soapNotes'],
-    queryFn: () => fetchWithFallback<SOAPNote[]>('/soap-notes', mockSOAPNotes),
-    staleTime: STALE_TIME,
-    select: (res) => res.data,
-  });
-}
-
 export function useMedicines() {
   return useQuery({
     queryKey: ['medicines'],
     queryFn: () => fetchWithFallback<Medicine[]>('/medicines', mockMedicines),
-    staleTime: STALE_TIME,
-    select: (res) => res.data,
-  });
-}
-
-export function useConsultations() {
-  return useQuery({
-    queryKey: ['consultations'],
-    queryFn: () => fetchWithFallback<Consultation[]>('/consultations', mockConsultations),
     staleTime: STALE_TIME,
     select: (res) => res.data,
   });

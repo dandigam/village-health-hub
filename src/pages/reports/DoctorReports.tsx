@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useDoctors, useConsultations, usePrescriptions, usePatients, useCamps, useMedicines } from '@/hooks/useApiData';
+import { useDoctors, usePrescriptions, usePatients, useCamps, useMedicines } from '@/hooks/useApiData';
 import { format } from 'date-fns';
 
 export default function DoctorReports() {
@@ -18,7 +18,6 @@ export default function DoctorReports() {
   const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
 
   const { data: allDoctors = [] } = useDoctors();
-  const { data: allConsultations = [] } = useConsultations();
   const { data: allPrescriptions = [] } = usePrescriptions();
   const { data: allPatients = [] } = usePatients();
   const { data: allCamps = [] } = useCamps();
@@ -31,7 +30,7 @@ export default function DoctorReports() {
 
   const getDoctorStats = (doctorId: string) => {
     const doctor = allDoctors.find(d => d.id === doctorId);
-    const consultations = allConsultations.filter(c => c.doctorId === doctorId);
+    const consultations = allPrescriptions.filter(p => p.doctorId === doctorId);
     const prescriptions = allPrescriptions.filter(p => p.doctorId === doctorId);
     
     const campIds = [...new Set(consultations.map(c => c.campId))];
@@ -299,10 +298,10 @@ export default function DoctorReports() {
                               <TableRow key={consult.id}>
                                 <TableCell className="py-2 text-xs">{format(new Date(consult.createdAt), 'dd/MM/yyyy')}</TableCell>
                                 <TableCell className="py-2 text-xs font-medium">{patient?.name}</TableCell>
-                                <TableCell className="py-2 text-xs max-w-[200px] truncate">{consult.diagnosis.join(', ')}</TableCell>
+                                <TableCell className="py-2 text-xs max-w-[200px] truncate">{consult.items.map(i => i.medicineName).join(', ')}</TableCell>
                                 <TableCell className="py-2 text-xs">{camp?.name}</TableCell>
                                 <TableCell className="py-2 text-xs">
-                                  <Badge variant={consult.status === 'completed' ? 'default' : 'secondary'}>{consult.status}</Badge>
+                                  <Badge variant={consult.status === 'dispensed' ? 'default' : 'secondary'}>{consult.status}</Badge>
                                 </TableCell>
                               </TableRow>
                             );

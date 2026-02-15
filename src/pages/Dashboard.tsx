@@ -8,7 +8,6 @@ import {
   LogOut,
   UserPlus,
   Search,
-  FileEdit,
   Stethoscope,
   CheckCircle2,
   Circle,
@@ -162,11 +161,8 @@ export default function Dashboard() {
             <Button variant="outline" onClick={() => navigate('/patients')} className="flex items-center gap-2">
               <Search className="w-4 h-4" /> Find Patient
             </Button>
-            <Button variant="outline" onClick={() => navigate('/soap/new')} disabled={!hasPatients} className="flex items-center gap-2">
-              <FileEdit className="w-4 h-4" /> Add SOAP Notes
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/consultations/new')} disabled={!hasPatients} className="flex items-center gap-2">
-              <Stethoscope className="w-4 h-4" /> Start Consultation
+            <Button variant="outline" onClick={() => navigate('/encounters')} disabled={!hasPatients} className="flex items-center gap-2">
+              <Stethoscope className="w-4 h-4" /> Start Encounter
             </Button>
             <Button variant="outline" onClick={() => navigate('/pharmacy')} className="flex items-center gap-2">
               <Pill className="w-4 h-4" /> Open Pharmacy

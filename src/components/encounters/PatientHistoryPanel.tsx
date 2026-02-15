@@ -5,7 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { History, ChevronDown, Stethoscope, Pill, Calendar, FileText, Activity } from 'lucide-react';
-import { useSOAPNotes, useConsultations, usePrescriptions, useDoctors, useCamps } from '@/hooks/useApiData';
+import { usePrescriptions, useDoctors, useCamps } from '@/hooks/useApiData';
 
 interface PatientHistoryPanelProps {
   patientId: string;
@@ -15,36 +15,30 @@ export function PatientHistoryPanel({ patientId }: PatientHistoryPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedVisitIndex, setSelectedVisitIndex] = useState(0);
 
-  const { data: allSOAPNotes = [] } = useSOAPNotes();
-  const { data: allConsultations = [] } = useConsultations();
   const { data: allPrescriptions = [] } = usePrescriptions();
   const { data: allDoctors = [] } = useDoctors();
   const { data: allCamps = [] } = useCamps();
 
-  const pastSOAPs = allSOAPNotes.filter(s => s.patientId === patientId);
-  const pastConsultations = allConsultations.filter(c => c.patientId === patientId);
   const pastPrescriptions = allPrescriptions.filter(p => p.patientId === patientId);
 
-  const visits = pastConsultations.map(consultation => {
-    const soap = pastSOAPs.find(s => s.id === consultation.soapNoteId);
-    const prescription = pastPrescriptions.find(p => p.id === consultation.prescriptionId);
-    const doctor = allDoctors.find(d => d.id === consultation.doctorId);
-    const camp = allCamps.find(c => c.id === consultation.campId);
+  const visits = pastPrescriptions.map(prescription => {
+    const doctor = allDoctors.find(d => d.id === prescription.doctorId);
+    const camp = allCamps.find(c => c.id === prescription.campId);
 
     return {
-      id: consultation.id,
-      date: new Date(consultation.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+      id: prescription.id,
+      date: new Date(prescription.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
       campName: camp?.name || 'Unknown Camp',
       doctorName: doctor?.name || 'Unknown',
       specialization: doctor?.specialization || '',
-      chiefComplaint: consultation.chiefComplaint,
-      diagnosis: consultation.diagnosis,
-      vitals: soap?.objective,
-      subjective: soap?.subjective,
-      assessment: soap?.assessment,
-      plan: soap?.plan,
-      prescription: prescription?.items || [],
-      labTests: consultation.labTests || [],
+      chiefComplaint: `Visit with ${doctor?.name || 'Unknown'}`,
+      diagnosis: [] as string[],
+      vitals: undefined,
+      subjective: undefined,
+      assessment: undefined,
+      plan: undefined,
+      prescription: prescription.items || [],
+      labTests: [] as string[],
     };
   }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 

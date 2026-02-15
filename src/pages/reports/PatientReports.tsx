@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePatients, useCamps, useConsultations, usePrescriptions, usePayments, useDoctors, useDiscounts, useMedicines } from '@/hooks/useApiData';
+import { usePatients, useCamps, usePrescriptions, usePayments, useDoctors, useDiscounts, useMedicines } from '@/hooks/useApiData';
 import { format } from 'date-fns';
 
 export default function PatientReports() {
@@ -18,7 +18,6 @@ export default function PatientReports() {
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
   const { data: allPatients = [] } = usePatients();
-  const { data: allConsultations = [] } = useConsultations();
   const { data: allPrescriptions = [] } = usePrescriptions();
   const { data: allPayments = [] } = usePayments();
   const { data: allDiscounts = [] } = useDiscounts();
@@ -33,13 +32,13 @@ export default function PatientReports() {
 
   const getPatientDetails = (patientId: string) => {
     const patient = allPatients.find(p => p.id === patientId);
-    const consultations = allConsultations.filter(c => c.patientId === patientId);
+    const consultations = allPrescriptions.filter(p => p.patientId === patientId);
     const prescriptions = allPrescriptions.filter(p => p.patientId === patientId);
     const payments = allPayments.filter(p => p.patientId === patientId);
     const patientDiscounts = allDiscounts.filter(d => d.patientId === patientId);
     
-    const campsAttended = [...new Set(consultations.map(c => c.campId))];
-    const doctors = [...new Set(consultations.map(c => c.doctorId))];
+    const campsAttended = [...new Set(prescriptions.map(p => p.campId))];
+    const doctors = [...new Set(prescriptions.map(p => p.doctorId))];
     
     const medicines: { name: string; quantity: number; prescription: string }[] = [];
     prescriptions.forEach(rx => {
@@ -123,7 +122,7 @@ export default function PatientReports() {
               </TableHeader>
               <TableBody>
                 {filteredPatients.map(pt => {
-                  const visits = allConsultations.filter(c => c.patientId === pt.id).length;
+                  const visits = allPrescriptions.filter(p => p.patientId === pt.id).length;
                   const totalPaid = allPayments.filter(p => p.patientId === pt.id).reduce((sum, p) => sum + p.paidAmount, 0);
                   
                   return (
@@ -269,9 +268,9 @@ export default function PatientReports() {
                               <TableRow key={consult.id}>
                                 <TableCell className="py-2 text-xs">{format(new Date(consult.createdAt), 'dd/MM/yyyy')}</TableCell>
                                 <TableCell className="py-2 text-xs font-medium">{doctor?.name}</TableCell>
-                                <TableCell className="py-2 text-xs">{consult.diagnosis.join(', ')}</TableCell>
+                                <TableCell className="py-2 text-xs">{consult.items.map(i => i.medicineName).join(', ')}</TableCell>
                                 <TableCell className="py-2 text-xs">
-                                  <Badge variant={consult.status === 'completed' ? 'default' : 'secondary'}>{consult.status}</Badge>
+                                  <Badge variant={consult.status === 'dispensed' ? 'default' : 'secondary'}>{consult.status}</Badge>
                                 </TableCell>
                               </TableRow>
                             );
