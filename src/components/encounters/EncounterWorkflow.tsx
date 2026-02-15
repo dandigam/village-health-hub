@@ -332,12 +332,15 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const { data: medicines = [] } = useMedicines();
+  const { data: stockItems = [] } = useStockItems();
+
   const availableMedicines = useMemo(() => {
-    return mockMedicines.map(medicine => {
-      const stockItem = mockStockItems.find(s => s.medicineId === medicine.id);
+    return medicines.map(medicine => {
+      const stockItem = stockItems.find(s => s.medicineId === medicine.id);
       return { id: medicine.id, name: medicine.name, category: medicine.category, qtyAvailable: stockItem?.quantity || 0 };
     });
-  }, []);
+  }, [medicines, stockItems]);
 
   const filteredMedicines = useMemo(() => {
     if (!searchQuery) return availableMedicines;

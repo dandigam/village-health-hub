@@ -10,12 +10,19 @@ import { useCamps, usePatients, useConsultations, usePrescriptions, usePayments,
 export default function ReportsHub() {
   const navigate = useNavigate();
 
-  // Calculate summary stats
-  const totalPatients = mockPatients.length;
-  const totalConsultations = mockConsultations.length;
-  const totalCollection = mockPayments.reduce((sum, p) => sum + p.paidAmount, 0);
-  const pendingPayments = mockPayments.reduce((sum, p) => sum + p.pendingAmount, 0);
-  const totalDiscounts = mockDiscounts.reduce((sum, d) => d.type === 'fixed' ? sum + d.value : sum, 0);
+  const { data: allPatients = [] } = usePatients();
+  const { data: allConsultations = [] } = useConsultations();
+  const { data: allPayments = [] } = usePayments();
+  const { data: allDiscounts = [] } = useDiscounts();
+  const { data: allCamps = [] } = useCamps();
+  const { data: allPrescriptions = [] } = usePrescriptions();
+  const { data: allDoctors = [] } = useDoctors();
+
+  const totalPatients = allPatients.length;
+  const totalConsultations = allConsultations.length;
+  const totalCollection = allPayments.reduce((sum, p) => sum + p.paidAmount, 0);
+  const pendingPayments = allPayments.reduce((sum, p) => sum + p.pendingAmount, 0);
+  const totalDiscounts = allDiscounts.reduce((sum, d) => d.type === 'fixed' ? sum + d.value : sum, 0);
 
   const reportModules = [
     {
@@ -25,8 +32,8 @@ export default function ReportsHub() {
       color: 'bg-blue-500',
       bgLight: 'bg-blue-50',
       stats: [
-        { label: 'Total Camps', value: mockCamps.length },
-        { label: 'Active', value: mockCamps.filter(c => c.status === 'active').length },
+        { label: 'Total Camps', value: allCamps.length },
+        { label: 'Active', value: allCamps.filter(c => c.status === 'active').length },
       ],
       path: '/reports/camps',
     },
@@ -49,8 +56,8 @@ export default function ReportsHub() {
       color: 'bg-orange-500',
       bgLight: 'bg-orange-50',
       stats: [
-        { label: 'Medicines', value: mockPrescriptions.reduce((sum, p) => sum + p.items.length, 0) },
-        { label: 'Prescriptions', value: mockPrescriptions.length },
+        { label: 'Medicines', value: allPrescriptions.reduce((sum, p) => sum + p.items.length, 0) },
+        { label: 'Prescriptions', value: allPrescriptions.length },
       ],
       path: '/reports/medicines',
     },
@@ -61,7 +68,7 @@ export default function ReportsHub() {
       color: 'bg-teal-500',
       bgLight: 'bg-teal-50',
       stats: [
-        { label: 'Discounts Applied', value: mockDiscounts.length },
+        { label: 'Discounts Applied', value: allDiscounts.length },
         { label: 'Total Value', value: `₹${totalDiscounts}` },
       ],
       path: '/reports/discounts',
@@ -73,7 +80,7 @@ export default function ReportsHub() {
       color: 'bg-purple-500',
       bgLight: 'bg-purple-50',
       stats: [
-        { label: 'Doctors', value: mockDoctors.length },
+        { label: 'Doctors', value: allDoctors.length },
         { label: 'Consultations', value: totalConsultations },
       ],
       path: '/reports/doctors',
@@ -83,13 +90,11 @@ export default function ReportsHub() {
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        {/* Header */}
         <div>
           <h1 className="text-xl font-bold">History & Reporting Module</h1>
           <p className="text-sm text-muted-foreground">Comprehensive analytics and historical data</p>
         </div>
 
-        {/* Quick Stats */}
         <div className="grid grid-cols-5 gap-3">
           <Card>
             <CardContent className="p-3">
@@ -158,7 +163,6 @@ export default function ReportsHub() {
           </Card>
         </div>
 
-        {/* Report Modules */}
         <div className="grid grid-cols-1 gap-3">
           {reportModules.map((module, index) => (
             <Card 

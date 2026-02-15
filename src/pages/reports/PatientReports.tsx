@@ -17,18 +17,26 @@ export default function PatientReports() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
 
-  const filteredPatients = mockPatients.filter(p => 
+  const { data: allPatients = [] } = usePatients();
+  const { data: allConsultations = [] } = useConsultations();
+  const { data: allPrescriptions = [] } = usePrescriptions();
+  const { data: allPayments = [] } = usePayments();
+  const { data: allDiscounts = [] } = useDiscounts();
+  const { data: allCamps = [] } = useCamps();
+  const { data: allDoctors = [] } = useDoctors();
+
+  const filteredPatients = allPatients.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.phone.includes(searchTerm)
   );
 
   const getPatientDetails = (patientId: string) => {
-    const patient = mockPatients.find(p => p.id === patientId);
-    const consultations = mockConsultations.filter(c => c.patientId === patientId);
-    const prescriptions = mockPrescriptions.filter(p => p.patientId === patientId);
-    const payments = mockPayments.filter(p => p.patientId === patientId);
-    const discounts = mockDiscounts.filter(d => d.patientId === patientId);
+    const patient = allPatients.find(p => p.id === patientId);
+    const consultations = allConsultations.filter(c => c.patientId === patientId);
+    const prescriptions = allPrescriptions.filter(p => p.patientId === patientId);
+    const payments = allPayments.filter(p => p.patientId === patientId);
+    const patientDiscounts = allDiscounts.filter(d => d.patientId === patientId);
     
     const campsAttended = [...new Set(consultations.map(c => c.campId))];
     const doctors = [...new Set(consultations.map(c => c.doctorId))];
@@ -49,12 +57,12 @@ export default function PatientReports() {
       consultations,
       prescriptions,
       payments,
-      discounts,
-      campsAttended: campsAttended.map(id => mockCamps.find(c => c.id === id)),
-      doctors: doctors.map(id => mockDoctors.find(d => d.id === id)),
+      discounts: patientDiscounts,
+      campsAttended: campsAttended.map(id => allCamps.find(c => c.id === id)),
+      doctors: doctors.map(id => allDoctors.find(d => d.id === id)),
       medicines,
       totalPaid: payments.reduce((sum, p) => sum + p.paidAmount, 0),
-      totalDiscount: discounts.reduce((sum, d) => d.type === 'fixed' ? sum + d.value : sum, 0),
+      totalDiscount: patientDiscounts.reduce((sum, d) => d.type === 'fixed' ? sum + d.value : sum, 0),
     };
   };
 
@@ -114,21 +122,21 @@ export default function PatientReports() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPatients.map(patient => {
-                  const visits = mockConsultations.filter(c => c.patientId === patient.id).length;
-                  const totalPaid = mockPayments.filter(p => p.patientId === patient.id).reduce((sum, p) => sum + p.paidAmount, 0);
+                {filteredPatients.map(pt => {
+                  const visits = allConsultations.filter(c => c.patientId === pt.id).length;
+                  const totalPaid = allPayments.filter(p => p.patientId === pt.id).reduce((sum, p) => sum + p.paidAmount, 0);
                   
                   return (
                     <TableRow 
-                      key={patient.id} 
+                      key={pt.id} 
                       className="cursor-pointer hover:bg-muted/30"
-                      onClick={() => setSelectedPatient(patient.id)}
+                      onClick={() => setSelectedPatient(pt.id)}
                     >
-                      <TableCell className="py-2 text-xs font-mono">{patient.patientId}</TableCell>
-                      <TableCell className="py-2 text-xs font-medium">{patient.name} {patient.surname}</TableCell>
-                      <TableCell className="py-2 text-xs">{patient.age}Y / {patient.gender[0]}</TableCell>
-                      <TableCell className="py-2 text-xs">{patient.village}</TableCell>
-                      <TableCell className="py-2 text-xs">{patient.phone}</TableCell>
+                      <TableCell className="py-2 text-xs font-mono">{pt.patientId}</TableCell>
+                      <TableCell className="py-2 text-xs font-medium">{pt.name} {pt.surname}</TableCell>
+                      <TableCell className="py-2 text-xs">{pt.age}Y / {pt.gender[0]}</TableCell>
+                      <TableCell className="py-2 text-xs">{pt.village}</TableCell>
+                      <TableCell className="py-2 text-xs">{pt.phone}</TableCell>
                       <TableCell className="py-2 text-xs text-center">
                         <Badge variant="secondary">{visits}</Badge>
                       </TableCell>
@@ -256,7 +264,7 @@ export default function PatientReports() {
                         </TableHeader>
                         <TableBody>
                           {patient.consultations.map(consult => {
-                            const doctor = mockDoctors.find(d => d.id === consult.doctorId);
+                            const doctor = allDoctors.find(d => d.id === consult.doctorId);
                             return (
                               <TableRow key={consult.id}>
                                 <TableCell className="py-2 text-xs">{format(new Date(consult.createdAt), 'dd/MM/yyyy')}</TableCell>

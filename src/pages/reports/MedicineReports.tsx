@@ -16,26 +16,30 @@ export default function MedicineReports() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMedicine, setSelectedMedicine] = useState<string | null>(null);
 
-  const filteredMedicines = mockMedicines.filter(m => 
+  const { data: allMedicines = [] } = useMedicines();
+  const { data: allPrescriptions = [] } = usePrescriptions();
+  const { data: allPatients = [] } = usePatients();
+  const { data: allDoctors = [] } = useDoctors();
+  const { data: allCamps = [] } = useCamps();
+  const { data: allDiscounts = [] } = useDiscounts();
+
+  const filteredMedicines = allMedicines.filter(m => 
     m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     m.code.includes(searchTerm) ||
     m.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getMedicineStats = (medicineId: string) => {
-    const medicine = mockMedicines.find(m => m.id === medicineId);
+    const medicine = allMedicines.find(m => m.id === medicineId);
     
-    // Find all prescriptions containing this medicine
-    const prescriptionsWithMedicine = mockPrescriptions.filter(rx => 
+    const prescriptionsWithMedicine = allPrescriptions.filter(rx => 
       rx.items.some(item => item.medicineId === medicineId)
     );
 
-    // Get unique camps, patients, and doctors
     const campIds = [...new Set(prescriptionsWithMedicine.map(rx => rx.campId))];
     const patientIds = [...new Set(prescriptionsWithMedicine.map(rx => rx.patientId))];
     const doctorIds = [...new Set(prescriptionsWithMedicine.map(rx => rx.doctorId))];
 
-    // Calculate total quantity prescribed
     let totalQuantity = 0;
     prescriptionsWithMedicine.forEach(rx => {
       rx.items.forEach(item => {
@@ -45,8 +49,7 @@ export default function MedicineReports() {
       });
     });
 
-    // Get discounts linked to this medicine
-    const relatedDiscounts = mockDiscounts.filter(d => 
+    const relatedDiscounts = allDiscounts.filter(d => 
       d.medicineIds?.includes(medicineId)
     );
 
@@ -54,9 +57,9 @@ export default function MedicineReports() {
       medicine,
       totalQuantity,
       totalValue: totalQuantity * (medicine?.unitPrice || 0),
-      camps: campIds.map(id => mockCamps.find(c => c.id === id)).filter(Boolean),
-      patients: patientIds.map(id => mockPatients.find(p => p.id === id)).filter(Boolean),
-      doctors: doctorIds.map(id => mockDoctors.find(d => d.id === id)).filter(Boolean),
+      camps: campIds.map(id => allCamps.find(c => c.id === id)).filter(Boolean),
+      patients: patientIds.map(id => allPatients.find(p => p.id === id)).filter(Boolean),
+      doctors: doctorIds.map(id => allDoctors.find(d => d.id === id)).filter(Boolean),
       prescriptions: prescriptionsWithMedicine,
       discounts: relatedDiscounts,
     };
@@ -291,7 +294,7 @@ export default function MedicineReports() {
                         </TableHeader>
                         <TableBody>
                           {medicine.discounts.map(discount => {
-                            const patient = mockPatients.find(p => p.id === discount.patientId);
+                            const patient = allPatients.find(p => p.id === discount.patientId);
                             return (
                               <TableRow key={discount.id}>
                                 <TableCell className="py-2 text-xs font-medium">{discount.name}</TableCell>
