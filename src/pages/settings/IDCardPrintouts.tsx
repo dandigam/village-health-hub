@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { Card, CardContent } from '@/components/ui/card';
@@ -51,7 +51,9 @@ interface PersonData {
 
 export default function IDCardPrintouts() {
   const navigate = useNavigate();
-  const [selectedCamp, setSelectedCamp] = useState(mockCamps[0]?.id || '');
+  const { data: allCamps = [] } = useCamps();
+  const { data: allDoctors = [] } = useDoctors();
+  const [selectedCamp, setSelectedCamp] = useState('');
   const [selectedTab, setSelectedTab] = useState('doctors');
   const [showQRCode, setShowQRCode] = useState(true);
   const [showContact, setShowContact] = useState(true);
@@ -59,7 +61,9 @@ export default function IDCardPrintouts() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const cardsRef = useRef<HTMLDivElement>(null);
 
-  const currentCamp = mockCamps.find(c => c.id === selectedCamp);
+  useEffect(() => { if (allCamps.length > 0 && !selectedCamp) setSelectedCamp(allCamps[0]?.id || ''); }, [allCamps]);
+
+  const currentCamp = allCamps.find(c => c.id === selectedCamp);
 
   const getCampDates = () => {
     if (!currentCamp) return 'Camp Duration';
@@ -71,7 +75,7 @@ export default function IDCardPrintouts() {
   const getDataForTab = (): PersonData[] => {
     switch (selectedTab) {
       case 'doctors':
-        return mockDoctors.map(d => ({
+        return allDoctors.map(d => ({
           id: d.id,
           name: d.name,
           role: 'Doctor',
@@ -358,7 +362,7 @@ export default function IDCardPrintouts() {
                           <SelectValue placeholder="Select a camp" />
                         </SelectTrigger>
                         <SelectContent>
-                          {mockCamps.map(camp => (
+                          {allCamps.map(camp => (
                             <SelectItem key={camp.id} value={camp.id}>
                               {camp.name} – {camp.location}
                             </SelectItem>

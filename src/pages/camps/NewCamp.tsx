@@ -77,12 +77,13 @@ interface FormData {
   city: string;
   address: string;
   pinCode: string;
-  selectedDoctors: typeof mockDoctors;
+  selectedDoctors: any[];
   selectedVolunteers: typeof mockVolunteers;
 }
 
 export default function NewCamp() {
   const navigate = useNavigate();
+  const { data: allDoctors = [] } = useDoctors();
   const [currentStep, setCurrentStep] = useState(1);
   const [doctorSearch, setDoctorSearch] = useState('');
   const [volunteerSearch, setVolunteerSearch] = useState('');
@@ -129,7 +130,7 @@ export default function NewCamp() {
     navigate('/camps');
   };
 
-  const addDoctor = (doctor: (typeof mockDoctors)[0]) => {
+  const addDoctor = (doctor: (typeof allDoctors)[0]) => {
     if (!formData.selectedDoctors.find((d) => d.id === doctor.id)) {
       updateFormData('selectedDoctors', [...formData.selectedDoctors, doctor]);
     }
@@ -157,7 +158,7 @@ export default function NewCamp() {
     );
   };
 
-  const filteredDoctors = mockDoctors.filter(
+  const filteredDoctors = allDoctors.filter(
     (d) =>
       d.name.toLowerCase().includes(doctorSearch.toLowerCase()) &&
       !formData.selectedDoctors.find((sd) => sd.id === d.id)

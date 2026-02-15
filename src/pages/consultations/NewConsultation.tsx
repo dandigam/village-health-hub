@@ -59,8 +59,12 @@ export default function NewConsultation() {
   const soapId = searchParams.get('soapId');
   const patientId = searchParams.get('patientId');
 
-  const soapNote = mockSOAPNotes.find(n => n.id === soapId);
-  const patient = mockPatients.find(p => p.id === patientId);
+  const { data: allSOAPNotes = [] } = useSOAPNotes();
+  const { data: allPatients = [] } = usePatients();
+  const { data: allMedicines = [] } = useMedicines();
+
+  const soapNote = allSOAPNotes.find(n => n.id === soapId);
+  const patient = allPatients.find(p => p.id === patientId);
 
   // SOAP Notes State
   const [subjective, setSubjective] = useState(soapNote?.subjective || '');
@@ -116,12 +120,12 @@ export default function NewConsultation() {
 
   // Filtered medicines for search
   const filteredMedicines = useMemo(() => {
-    if (!medicineSearch) return mockMedicines;
-    return mockMedicines.filter(m => 
+    if (!medicineSearch) return allMedicines;
+    return allMedicines.filter(m => 
       m.name.toLowerCase().includes(medicineSearch.toLowerCase()) ||
       m.category.toLowerCase().includes(medicineSearch.toLowerCase())
     );
-  }, [medicineSearch]);
+  }, [medicineSearch, allMedicines]);
 
   // Auto-save effect
   const handleAutoSave = useCallback(() => {
@@ -157,7 +161,7 @@ export default function NewConsultation() {
 
   const addMedicine = () => {
     if (selectedMedicine) {
-      const medicine = mockMedicines.find(m => m.id === selectedMedicine);
+      const medicine = allMedicines.find(m => m.id === selectedMedicine);
       if (medicine && !prescriptionItems.find(p => p.medicineId === medicine.id)) {
         setPrescriptionItems([...prescriptionItems, {
           id: `rx-${Date.now()}`,

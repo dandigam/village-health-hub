@@ -17,21 +17,26 @@ export default function DoctorReports() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
 
-  const filteredDoctors = mockDoctors.filter(d => 
+  const { data: allDoctors = [] } = useDoctors();
+  const { data: allConsultations = [] } = useConsultations();
+  const { data: allPrescriptions = [] } = usePrescriptions();
+  const { data: allPatients = [] } = usePatients();
+  const { data: allCamps = [] } = useCamps();
+  const { data: allMedicines = [] } = useMedicines();
+
+  const filteredDoctors = allDoctors.filter(d => 
     d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     d.specialization.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getDoctorStats = (doctorId: string) => {
-    const doctor = mockDoctors.find(d => d.id === doctorId);
-    const consultations = mockConsultations.filter(c => c.doctorId === doctorId);
-    const prescriptions = mockPrescriptions.filter(p => p.doctorId === doctorId);
+    const doctor = allDoctors.find(d => d.id === doctorId);
+    const consultations = allConsultations.filter(c => c.doctorId === doctorId);
+    const prescriptions = allPrescriptions.filter(p => p.doctorId === doctorId);
     
-    // Get unique camps and patients
     const campIds = [...new Set(consultations.map(c => c.campId))];
     const patientIds = [...new Set(consultations.map(c => c.patientId))];
     
-    // Calculate medicines prescribed
     const medicineCount: Record<string, number> = {};
     prescriptions.forEach(rx => {
       rx.items.forEach(item => {
@@ -43,8 +48,8 @@ export default function DoctorReports() {
       doctor,
       consultations,
       prescriptions,
-      camps: campIds.map(id => mockCamps.find(c => c.id === id)).filter(Boolean),
-      patients: patientIds.map(id => mockPatients.find(p => p.id === id)).filter(Boolean),
+      camps: campIds.map(id => allCamps.find(c => c.id === id)).filter(Boolean),
+      patients: patientIds.map(id => allPatients.find(p => p.id === id)).filter(Boolean),
       medicineCount,
       totalPrescriptions: prescriptions.length,
     };
@@ -258,7 +263,7 @@ export default function DoctorReports() {
                         </TableHeader>
                         <TableBody>
                           {Object.entries(doctorStats.medicineCount).map(([medId, qty]) => {
-                            const medicine = mockMedicines.find(m => m.id === medId);
+                            const medicine = allMedicines.find(m => m.id === medId);
                             return medicine ? (
                               <TableRow key={medId}>
                                 <TableCell className="py-2 text-xs font-medium">{medicine.name}</TableCell>
@@ -288,8 +293,8 @@ export default function DoctorReports() {
                         </TableHeader>
                         <TableBody>
                           {doctorStats.consultations.map(consult => {
-                            const patient = mockPatients.find(p => p.id === consult.patientId);
-                            const camp = mockCamps.find(c => c.id === consult.campId);
+                            const patient = allPatients.find(p => p.id === consult.patientId);
+                            const camp = allCamps.find(c => c.id === consult.campId);
                             return (
                               <TableRow key={consult.id}>
                                 <TableCell className="py-2 text-xs">{format(new Date(consult.createdAt), 'dd/MM/yyyy')}</TableCell>

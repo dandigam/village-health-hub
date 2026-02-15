@@ -16,36 +16,45 @@ export default function CampReports() {
   const [selectedCamp, setSelectedCamp] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const { data: camps = [] } = useCamps();
+  const { data: patients = [] } = usePatients();
+  const { data: consultations = [] } = useConsultations();
+  const { data: prescriptions = [] } = usePrescriptions();
+  const { data: payments = [] } = usePayments();
+  const { data: discounts = [] } = useDiscounts();
+  const { data: doctors = [] } = useDoctors();
+  const { data: medicines = [] } = useMedicines();
+
   const filteredCamps = selectedCamp === 'all' 
-    ? mockCamps 
-    : mockCamps.filter(c => c.id === selectedCamp);
+    ? camps 
+    : camps.filter(c => c.id === selectedCamp);
 
   const getCampStats = (campId: string) => {
-    const patients = mockPatients.filter(p => p.campId === campId);
-    const consultations = mockConsultations.filter(c => c.campId === campId);
-    const prescriptions = mockPrescriptions.filter(p => p.campId === campId);
-    const payments = mockPayments.filter(p => p.campId === campId);
-    const discounts = mockDiscounts.filter(d => d.campId === campId);
-    const doctors = mockCamps.find(c => c.id === campId)?.doctorIds || [];
+    const campPatients = patients.filter(p => p.campId === campId);
+    const campConsultations = consultations.filter(c => c.campId === campId);
+    const campPrescriptions = prescriptions.filter(p => p.campId === campId);
+    const campPayments = payments.filter(p => p.campId === campId);
+    const campDiscounts = discounts.filter(d => d.campId === campId);
+    const doctorIds = camps.find(c => c.id === campId)?.doctorIds || [];
 
     const medicinesConsumed: Record<string, number> = {};
-    prescriptions.forEach(rx => {
+    campPrescriptions.forEach(rx => {
       rx.items.forEach(item => {
         medicinesConsumed[item.medicineId] = (medicinesConsumed[item.medicineId] || 0) + item.quantity;
       });
     });
 
     return {
-      patientCount: patients.length,
-      consultationCount: consultations.length,
-      totalCollection: payments.reduce((sum, p) => sum + p.paidAmount, 0),
-      pendingAmount: payments.reduce((sum, p) => sum + p.pendingAmount, 0),
-      totalDiscounts: discounts.reduce((sum, d) => d.type === 'percentage' ? sum : sum + d.value, 0),
-      doctorCount: doctors.length,
+      patientCount: campPatients.length,
+      consultationCount: campConsultations.length,
+      totalCollection: campPayments.reduce((sum, p) => sum + p.paidAmount, 0),
+      pendingAmount: campPayments.reduce((sum, p) => sum + p.pendingAmount, 0),
+      totalDiscounts: campDiscounts.reduce((sum, d) => d.type === 'percentage' ? sum : sum + d.value, 0),
+      doctorCount: doctorIds.length,
       medicinesConsumed,
-      patients,
-      doctors: mockDoctors.filter(d => doctors.includes(d.id)),
-      discounts,
+      patients: campPatients,
+      doctors: doctors.filter(d => doctorIds.includes(d.id)),
+      discounts: campDiscounts,
     };
   };
 
@@ -82,7 +91,7 @@ export default function CampReports() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Camps</SelectItem>
-                  {mockCamps.map(camp => (
+                  {camps.map(camp => (
                     <SelectItem key={camp.id} value={camp.id}>{camp.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -208,7 +217,7 @@ export default function CampReports() {
                         </TableHeader>
                         <TableBody>
                           {Object.entries(stats.medicinesConsumed).map(([medId, qty]) => {
-                            const medicine = mockMedicines.find(m => m.id === medId);
+                            const medicine = medicines.find(m => m.id === medId);
                             return medicine ? (
                               <TableRow key={medId}>
                                 <TableCell className="py-2 text-xs font-medium">{medicine.name}</TableCell>
@@ -238,7 +247,7 @@ export default function CampReports() {
                         </TableHeader>
                         <TableBody>
                           {stats.doctors.map(doctor => {
-                            const consultCount = mockConsultations.filter(c => c.campId === camp.id && c.doctorId === doctor.id).length;
+                            const consultCount = consultations.filter(c => c.campId === camp.id && c.doctorId === doctor.id).length;
                             return (
                               <TableRow key={doctor.id}>
                                 <TableCell className="py-2 text-xs font-medium">{doctor.name}</TableCell>
@@ -267,7 +276,7 @@ export default function CampReports() {
                         </TableHeader>
                         <TableBody>
                           {stats.discounts.map(discount => {
-                            const patient = mockPatients.find(p => p.id === discount.patientId);
+                            const patient = patients.find(p => p.id === discount.patientId);
                             return (
                               <TableRow key={discount.id}>
                                 <TableCell className="py-2 text-xs font-medium">{discount.name}</TableCell>
