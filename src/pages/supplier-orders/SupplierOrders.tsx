@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Send, Package, CheckCircle, Eye, Pencil, Clock } from 'lucide-react';
+import { Send, Eye, Pencil, Clock, Info } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSupplierOrders, useSuppliers, useMedicines, useStockItems, useWarehouses, useSupplierMedicines } from '@/hooks/useApiData';
+import { useSupplierOrders, useSuppliers, useMedicines, useStockItems, useSupplierMedicines } from '@/hooks/useApiData';
 import { toast } from '@/hooks/use-toast';
 import type { SupplierOrder } from '@/types';
 
@@ -27,7 +27,6 @@ export default function SupplierOrders() {
   const { data: suppliers = [] } = useSuppliers();
   const { data: medicines = [] } = useMedicines();
   const { data: stockItems = [] } = useStockItems();
-  const { data: warehouses = [] } = useWarehouses();
   const { data: supplierMedicines = [] } = useSupplierMedicines();
   const [orders, setOrders] = useState<SupplierOrder[]>([]);
   const [subTab, setSubTab] = useState('orders');
@@ -37,7 +36,6 @@ export default function SupplierOrders() {
   const [editQtys, setEditQtys] = useState<Record<string, number>>({});
 
   const [reqSupplierId, setReqSupplierId] = useState('');
-  const [reqWarehouseId, setReqWarehouseId] = useState('');
   const [reqItems, setReqItems] = useState<{ medicineId: string; requestedQty: number }[]>([]);
 
   useEffect(() => {
@@ -51,13 +49,28 @@ export default function SupplierOrders() {
     return medicines.filter(m => medIds.includes(m.id));
   };
 
+  // Auto-load medicines when supplier is selected
+  useEffect(() => {
+    if (reqSupplierId) {
+      const meds = supplierMedicinesList(reqSupplierId);
+      setReqItems(meds.map(m => ({ medicineId: m.id, requestedQty: 0 })));
+    } else {
+      setReqItems([]);
+    }
+  }, [reqSupplierId]);
+
   const handleSendRequest = () => {
+    const validItems = reqItems.filter(i => i.requestedQty > 0);
+    if (validItems.length === 0) {
+      toast({ title: 'Error', description: 'Enter quantity for at least one medicine.', variant: 'destructive' });
+      return;
+    }
     const now = new Date().toISOString();
     const newOrder: SupplierOrder = {
       id: String(orders.length + 1),
       supplierId: reqSupplierId,
-      warehouseId: reqWarehouseId,
-      items: reqItems.map(i => ({ medicineId: i.medicineId, requestedQty: i.requestedQty })),
+      warehouseId: '',
+      items: validItems.map(i => ({ medicineId: i.medicineId, requestedQty: i.requestedQty })),
       status: 'sent',
       createdAt: now,
       updatedAt: now,
@@ -67,7 +80,6 @@ export default function SupplierOrders() {
     toast({ title: 'Request Sent', description: `Stock request sent to ${supplier?.name}.` });
     setShowRequestStock(false);
     setReqSupplierId('');
-    setReqWarehouseId('');
     setReqItems([]);
   };
 
@@ -122,17 +134,15 @@ export default function SupplierOrders() {
                 <div className="data-table">
                   <table className="w-full">
                     <thead>
-                      <tr><th>Date</th><th>Supplier</th><th>Warehouse</th><th>Items</th><th>Status</th><th className="text-center">Actions</th></tr>
+                      <tr><th>Date</th><th>Supplier</th><th>Items</th><th>Status</th><th className="text-center">Actions</th></tr>
                     </thead>
                     <tbody>
                       {orders.map(order => {
                         const supplier = suppliers.find(s => s.id === order.supplierId);
-                        const wh = warehouses.find(w => w.id === order.warehouseId);
                         return (
                           <tr key={order.id}>
                             <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                             <td className="font-medium">{supplier?.name || '-'}</td>
-                            <td>{wh?.name || '-'}</td>
                             <td>{order.items.length} medicines</td>
                             <td><Badge className={statusColors[order.status]}>{order.status}</Badge></td>
                             <td>
@@ -194,32 +204,42 @@ export default function SupplierOrders() {
         </TabsContent>
       </Tabs>
 
-      {/* View Order Dialog */}
+      {/* View Order Dialog - Larger */}
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Order Details</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+            <DialogDescription>View the complete order information and item details.</DialogDescription>
+          </DialogHeader>
           {selectedOrder && (() => {
             const supplier = suppliers.find(s => s.id === selectedOrder.supplierId);
-            const wh = warehouses.find(w => w.id === selectedOrder.warehouseId);
             return (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><span className="text-muted-foreground">Supplier:</span> {supplier?.name}</div>
-                  <div><span className="text-muted-foreground">Warehouse:</span> {wh?.name}</div>
-                  <div><span className="text-muted-foreground">Date:</span> {new Date(selectedOrder.createdAt).toLocaleDateString()}</div>
-                  <div><span className="text-muted-foreground">Status:</span> <Badge className={statusColors[selectedOrder.status]}>{selectedOrder.status}</Badge></div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-xs">Supplier</p>
+                    <p className="font-medium">{supplier?.name}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-xs">Date</p>
+                    <p className="font-medium">{new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-xs">Status</p>
+                    <Badge className={statusColors[selectedOrder.status]}>{selectedOrder.status}</Badge>
+                  </div>
                 </div>
-                <div className="border rounded-lg">
+                <div className="border rounded-lg overflow-hidden">
                   <table className="w-full text-sm">
-                    <thead><tr className="border-b bg-muted/50"><th className="p-2 text-left">Medicine</th><th className="p-2 text-center">Requested</th><th className="p-2 text-center">Received</th></tr></thead>
+                    <thead><tr className="border-b bg-muted/50"><th className="p-3 text-left">Medicine</th><th className="p-3 text-center">Requested</th><th className="p-3 text-center">Received</th></tr></thead>
                     <tbody>
                       {selectedOrder.items.map((item, i) => {
                         const med = medicines.find(m => m.id === item.medicineId);
                         return (
                           <tr key={i} className="border-b last:border-b-0">
-                            <td className="p-2">{med?.name || '-'}</td>
-                            <td className="p-2 text-center">{item.requestedQty}</td>
-                            <td className="p-2 text-center">{item.receivedQty ?? '-'}</td>
+                            <td className="p-3 font-medium">{med?.name || '-'}</td>
+                            <td className="p-3 text-center">{item.requestedQty}</td>
+                            <td className="p-3 text-center">{item.receivedQty ?? '-'}</td>
                           </tr>
                         );
                       })}
@@ -232,24 +252,27 @@ export default function SupplierOrders() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Order (Enter Qty) Dialog */}
+      {/* Edit Order Dialog - Larger */}
       <Dialog open={!!editOrder} onOpenChange={() => setEditOrder(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Update Received Quantities</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Update Received Quantities</DialogTitle>
+            <DialogDescription>Enter the actual quantities received for each medicine.</DialogDescription>
+          </DialogHeader>
           {editOrder && (
-            <div className="space-y-3">
-              <div className="border rounded-lg">
+            <div className="space-y-4">
+              <div className="border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead><tr className="border-b bg-muted/50"><th className="p-2 text-left">Medicine</th><th className="p-2 text-center">Requested</th><th className="p-2 text-center">Received</th></tr></thead>
+                  <thead><tr className="border-b bg-muted/50"><th className="p-3 text-left">Medicine</th><th className="p-3 text-center">Requested</th><th className="p-3 text-center">Received</th></tr></thead>
                   <tbody>
                     {editOrder.items.map((item, i) => {
                       const med = medicines.find(m => m.id === item.medicineId);
                       return (
                         <tr key={i} className="border-b last:border-b-0">
-                          <td className="p-2">{med?.name || '-'}</td>
-                          <td className="p-2 text-center">{item.requestedQty}</td>
-                          <td className="p-2 text-center">
-                            <Input type="number" className="w-20 h-8 mx-auto text-center" value={editQtys[item.medicineId] ?? ''} onChange={e => setEditQtys({ ...editQtys, [item.medicineId]: Number(e.target.value) })} />
+                          <td className="p-3 font-medium">{med?.name || '-'}</td>
+                          <td className="p-3 text-center">{item.requestedQty}</td>
+                          <td className="p-3 text-center">
+                            <Input type="number" className="w-24 h-8 mx-auto text-center" value={editQtys[item.medicineId] ?? ''} onChange={e => setEditQtys({ ...editQtys, [item.medicineId]: Number(e.target.value) })} />
                           </td>
                         </tr>
                       );
@@ -266,70 +289,54 @@ export default function SupplierOrders() {
         </DialogContent>
       </Dialog>
 
-      {/* Request Stock Dialog */}
+      {/* Request Stock Dialog - Auto-loads medicines */}
       <Dialog open={showRequestStock} onOpenChange={setShowRequestStock}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>Request Stock from Supplier</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Request Stock from Supplier</DialogTitle>
+            <DialogDescription>Select a supplier and enter requested quantities for their medicines.</DialogDescription>
+          </DialogHeader>
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Button variant="link" className="p-0 h-auto text-sm" onClick={() => { setShowRequestStock(false); navigate('/suppliers/new'); }}>
                 + Add Supplier
               </Button>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label>Supplier</Label>
-                <Select value={reqSupplierId} onValueChange={v => { setReqSupplierId(v); setReqItems([]); }}>
-                  <SelectTrigger className="mt-2"><SelectValue placeholder="Select supplier" /></SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Destination Warehouse</Label>
-                <Select value={reqWarehouseId} onValueChange={setReqWarehouseId}>
-                  <SelectTrigger className="mt-2"><SelectValue placeholder="Select warehouse" /></SelectTrigger>
-                  <SelectContent>
-                    {warehouses.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label>Supplier</Label>
+              <Select value={reqSupplierId} onValueChange={setReqSupplierId}>
+                <SelectTrigger className="mt-2"><SelectValue placeholder="Select supplier" /></SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
             {reqSupplierId && (
               <div>
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-2 mb-3">
                   <Label>Medicines</Label>
-                  <Button size="sm" variant="outline" onClick={() => setReqItems([...reqItems, { medicineId: '', requestedQty: 0 }])}>
-                    <Plus className="mr-1 h-3 w-3" /> Add
-                  </Button>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Info className="h-3 w-3" />
+                    Auto-loaded from supplier's catalog
+                  </div>
                 </div>
                 {reqItems.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg">Add medicines to request.</p>
+                  <p className="text-sm text-muted-foreground text-center py-6 border rounded-lg">No medicines assigned to this supplier.</p>
                 ) : (
                   <div className="border rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
-                      <thead><tr className="bg-muted/50 border-b"><th className="p-2 text-left">Medicine Name</th><th className="p-2 text-center">Current Qty</th><th className="p-2 text-center">Request Qty</th><th className="p-2 w-10"></th></tr></thead>
+                      <thead><tr className="bg-muted/50 border-b"><th className="p-3 text-left">Medicine Name</th><th className="p-3 text-center">Current Qty</th><th className="p-3 text-center">Request Qty</th></tr></thead>
                       <tbody>
                         {reqItems.map((item, idx) => {
+                          const med = medicines.find(m => m.id === item.medicineId);
                           const currentQty = getWarehouseStock(item.medicineId);
                           return (
                             <tr key={idx} className="border-b last:border-b-0">
-                              <td className="p-2">
-                                <Select value={item.medicineId} onValueChange={v => { const u = [...reqItems]; u[idx].medicineId = v; setReqItems(u); }}>
-                                  <SelectTrigger className="h-8"><SelectValue placeholder="Select medicine" /></SelectTrigger>
-                                  <SelectContent>
-                                    {supplierMedicinesList(reqSupplierId).map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-                                  </SelectContent>
-                                </Select>
-                              </td>
-                              <td className="p-2 text-center text-muted-foreground">{item.medicineId ? currentQty : '-'}</td>
-                              <td className="p-2 text-center">
-                                <Input type="number" className="w-20 h-8 mx-auto text-center" value={item.requestedQty || ''} onChange={e => { const u = [...reqItems]; u[idx].requestedQty = Number(e.target.value); setReqItems(u); }} />
-                              </td>
-                              <td className="p-2 text-center">
-                                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setReqItems(reqItems.filter((_, i) => i !== idx))}>×</Button>
+                              <td className="p-3 font-medium">{med?.name || '-'}</td>
+                              <td className="p-3 text-center text-muted-foreground">{currentQty}</td>
+                              <td className="p-3 text-center">
+                                <Input type="number" className="w-24 h-8 mx-auto text-center" value={item.requestedQty || ''} onChange={e => { const u = [...reqItems]; u[idx].requestedQty = Number(e.target.value); setReqItems(u); }} />
                               </td>
                             </tr>
                           );
@@ -343,7 +350,7 @@ export default function SupplierOrders() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRequestStock(false)}>Cancel</Button>
-            <Button onClick={handleSendRequest} disabled={!reqSupplierId || !reqWarehouseId || reqItems.length === 0}>
+            <Button onClick={handleSendRequest} disabled={!reqSupplierId || reqItems.every(i => i.requestedQty <= 0)}>
               <Send className="mr-2 h-4 w-4" /> Send Request
             </Button>
           </DialogFooter>
