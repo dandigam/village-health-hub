@@ -1,4 +1,4 @@
-import { Bell, Search, User, LogOut, Settings, MapPin, ChevronDown, Check, Menu } from 'lucide-react';
+import { Bell, Search, User, LogOut, Settings, MapPin, ChevronDown, Check, Menu, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useCamps } from '@/hooks/useApiData';
+import { useCamps, useSupplierOrders } from '@/hooks/useApiData';
 import { useCamp } from '@/context/CampContext';
 import { useAuth } from '@/context/AuthContext';
 
@@ -24,6 +24,8 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const { selectedCamp, setSelectedCamp } = useCamp();
   const { user: authUser, logout } = useAuth();
   const { data: camps = [] } = useCamps();
+  const { data: supplierOrders = [] } = useSupplierOrders();
+  const pendingOrdersCount = supplierOrders.filter(o => o.status === 'sent' || o.status === 'pending').length;
 
   const currentUser = { name: authUser?.name || '', role: authUser?.role || '', avatar: undefined as string | undefined };
 
@@ -88,6 +90,14 @@ export function Header({ onMenuToggle }: HeaderProps) {
       <div className="flex items-center gap-1 sm:gap-3">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9">
           <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-9 sm:w-9" onClick={() => navigate('/supplier-orders')}>
+          <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+          {pendingOrdersCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+              {pendingOrdersCount}
+            </span>
+          )}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
