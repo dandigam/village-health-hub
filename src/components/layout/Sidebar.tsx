@@ -12,6 +12,9 @@ import {
   ChevronRight,
   Heart,
   Activity,
+  Truck,
+  ShoppingCart,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -26,6 +29,9 @@ const allNavItems = [
   { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters' },
   { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy' },
   { icon: Package, label: 'Stock', href: '/stock', routeKey: 'stock' },
+  { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers' },
+  { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders' },
+  { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders' },
   { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors' },
   { icon: FileText, label: 'Reports', href: '/reports', routeKey: 'reports' },
 ];
