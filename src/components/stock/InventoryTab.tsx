@@ -33,25 +33,15 @@ export function InventoryTab({ stockItems }: InventoryTabProps) {
             <thead>
               <tr>
                 <th>Medicine Name</th>
-                <th>Code</th>
-                <th>Category</th>
                 <th>Current Qty</th>
-                <th>Batch No.</th>
-                <th>Expiry Date</th>
-                <th>Supplier</th>
-                <th>Status</th>
+               <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {stockItems.map((item) => (
                 <tr key={item.id}>
                   <td className="font-medium">{item.medicineName}</td>
-                  <td className="font-mono text-sm">{item.medicineCode}</td>
-                  <td>{item.category}</td>
                   <td>{item.quantity}</td>
-                  <td>{item.batchNumber}</td>
-                  <td>{new Date(item.expiryDate).toLocaleDateString()}</td>
-                  <td>{item.supplierName}</td>
                   <td>
                     {item.isLowStock ? (
                       <Badge className="bg-red-100 text-red-700 border-red-200">Low Stock</Badge>
