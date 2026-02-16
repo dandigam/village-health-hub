@@ -26,6 +26,16 @@ import DispenseMedicine from "./pages/pharmacy/DispenseMedicine";
 // Stock
 import StockManagement from "./pages/stock/StockManagement";
 
+// Suppliers
+import Suppliers from "./pages/suppliers/Suppliers";
+import NewSupplier from "./pages/suppliers/NewSupplier";
+
+// Supplier Orders
+import SupplierOrders from "./pages/supplier-orders/SupplierOrders";
+
+// Distribution Orders
+import DistributionOrders from "./pages/distribution/DistributionOrders";
+
 // Encounters
 import Encounters from "./pages/encounters/Encounters";
 
@@ -83,6 +93,17 @@ const App = () => (
               
               {/* Stock */}
               <Route path="/stock" element={<ProtectedRoute routeKey="stock"><StockManagement /></ProtectedRoute>} />
+              
+              {/* Suppliers */}
+              <Route path="/suppliers" element={<ProtectedRoute routeKey="suppliers"><Suppliers /></ProtectedRoute>} />
+              <Route path="/suppliers/new" element={<ProtectedRoute routeKey="suppliers"><NewSupplier /></ProtectedRoute>} />
+              <Route path="/suppliers/:id/edit" element={<ProtectedRoute routeKey="suppliers"><NewSupplier /></ProtectedRoute>} />
+              
+              {/* Supplier Orders */}
+              <Route path="/supplier-orders" element={<ProtectedRoute routeKey="supplier-orders"><SupplierOrders /></ProtectedRoute>} />
+              
+              {/* Distribution Orders */}
+              <Route path="/distribution-orders" element={<ProtectedRoute routeKey="distribution-orders"><DistributionOrders /></ProtectedRoute>} />
               
               {/* Doctors */}
               <Route path="/doctors" element={<ProtectedRoute routeKey="doctors"><Doctors /></ProtectedRoute>} />
