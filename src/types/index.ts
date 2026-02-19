@@ -192,6 +192,19 @@ export interface Warehouse extends BaseEntity {
   status: 'active' | 'inactive';
 }
 
+export interface WarehouseInventoryItem {
+  id: number;
+  warehouseId: number;
+  warehouseName: string;
+  medicineId: number;
+  medicineName: string;
+  medicineType: string;
+  totalQty: number;
+  minimumQty: number;
+  updatedAt: string;
+  items: any[] | null;
+}
+
 export interface SupplierMedicine {
   supplierId: string;
   medicineId: string;

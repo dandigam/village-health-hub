@@ -6,7 +6,7 @@
  * Components don't need to know the data source.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchWithFallback } from '@/services/api';
 import {
   mockUser,
@@ -127,6 +127,38 @@ export function useSuppliers() {
   });
 }
 
+export function useSupplierList(warehouseId: number) {
+  return useQuery({
+    queryKey: ['suppliers', warehouseId],
+    queryFn: () =>
+      fetchWithFallback<Supplier[]>(
+        `/suppliers/warehouse/${warehouseId}`,
+        mockSuppliers
+      ),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+  });
+}
+
+export function useDeleteSupplier(warehouseId?: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (supplierId: number) =>
+      request(`/suppliers/${supplierId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['suppliers']);
+      if (warehouseId) {
+        queryClient.invalidateQueries(['suppliers', warehouseId]);
+      }
+    },
+  });
+}
+
+
+
 export function useStockItems() {
   return useQuery({
     queryKey: ['stockItems'],
@@ -181,12 +213,16 @@ export function useSupplierMedicines() {
   });
 }
 
-export function useSupplierOrders() {
+export function useSupplierOrders(warehouseId?: number) {
   return useQuery({
-    queryKey: ['supplierOrders'],
-    queryFn: () => fetchWithFallback<SupplierOrder[]>('/supplier-orders', mockSupplierOrders),
+    queryKey: ['supplierOrders', warehouseId],
+    queryFn: () => fetchWithFallback<SupplierOrder[]>(
+      warehouseId ? `/supplier-orders/warehouse/${warehouseId}` : '/supplier-orders',
+      mockSupplierOrders
+    ),
     staleTime: STALE_TIME,
     select: (res) => res.data,
+    enabled: !!warehouseId,
   });
 }
 
@@ -207,3 +243,58 @@ export function useRequestOrders() {
     select: (res) => res.data,
   });
 }
+
+// Types for states hierarchy
+export interface Mandal {
+  id: number;
+  name: string;
+}
+
+export interface District {
+  id: number;
+  name: string;
+  mandals: Mandal[];
+}
+
+export interface StateHierarchy {
+  id: number;
+  name: string;
+  districts: District[];
+}
+
+export function useStatesHierarchy() {
+  return useQuery({
+    queryKey: ['statesHierarchy'],
+    queryFn: () => fetchWithFallback<StateHierarchy[]>('/states/hierarchy', []),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+  });
+}
+
+export interface WarehouseInventoryItem {
+  id: number;
+  warehouseId: number;
+  warehouseName: string;
+  medicineId: number;
+  medicineName: string;
+  medicineType: string;
+  totalQty: number;
+  minimumQty: number;
+  updatedAt: string;
+  items: any[] | null;
+}
+
+export function useWarehouseInventory(warehouseId?: number) {
+  return useQuery({
+    queryKey: ['warehouseInventory', warehouseId],
+    queryFn: () => fetchWithFallback<WarehouseInventoryItem[]>(
+      `/warehouse-inventory/warehouse/${warehouseId}`,
+      []
+    ),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+    enabled: !!warehouseId,
+  });
+}
+
+

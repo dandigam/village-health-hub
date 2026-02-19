@@ -45,9 +45,9 @@ async function request<T>(endpoint: string, options: ApiRequestOptions = {}): Pr
     const token = localStorage.getItem('token');
     const response = await fetch(url, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    headers: {
+       'Content-Type': 'application/json',
+       // ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -62,6 +62,12 @@ async function request<T>(endpoint: string, options: ApiRequestOptions = {}): Pr
         response.status,
         endpoint
       );
+    }
+
+    // Handle 204 No Content responses
+    if (response.status === 204) {
+      console.log(`✅ [API Success] ${method} ${endpoint}`, { status: response.status });
+      return {} as T;
     }
 
     const data = await response.json();

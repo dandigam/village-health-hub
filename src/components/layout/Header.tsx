@@ -83,7 +83,10 @@ export function Header({ onMenuToggle }: HeaderProps) {
       <div className="hidden lg:flex items-center max-w-md flex-1 mx-8">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search Patient by MR Number / First Name / Surname" className="pl-10 bg-primary-foreground border-0" />
+          <Input 
+            placeholder={currentUser.role === "WARE_HOUSE" ? "Search Supplier Medicines..." : "Search Patient by MR Number / First Name / Surname"} 
+            className="pl-10 bg-primary-foreground border-0" 
+          />
         </div>
       </div>
 
