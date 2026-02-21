@@ -3,7 +3,7 @@ import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicin
 const ts = '2025-01-15T10:00:00Z';
 
 export const mockUser: User = {
-  id: '1', name: 'Venkatesh Dandigam', email: 'venkatesh@srinifoundation.org', phone: '9234644748', role: 'camp_admin', status: 'active', createdAt: ts, updatedAt: ts,
+  id: '1', name: 'Venkatesh Dandigam', email: 'venkatesh@healthcamppro.org', phone: '9234644748', role: 'camp_admin', status: 'active', createdAt: ts, updatedAt: ts,
 };
 
 export const mockCamps: Camp[] = [

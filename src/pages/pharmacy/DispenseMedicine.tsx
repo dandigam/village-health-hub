@@ -85,7 +85,7 @@ export default function DispenseMedicine() {
 
       <div className="hidden print:block mb-6 soap-print-header">
         <div className="text-center mb-4">
-          <h1 className="text-2xl font-bold">Srini FOUNDATION</h1>
+          <h1 className="text-2xl font-bold">HealthCamp PRO</h1>
           <p className="text-sm text-muted-foreground">Medical Camp - Prescription Bill</p>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
