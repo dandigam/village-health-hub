@@ -167,9 +167,9 @@ export default function Login() {
               </div>
             )}
 
-            {/* Sign Up - Card */}
+            {/* Sign Up - No card */}
             {mode === 'signup' && (
-              <div className="bg-background rounded-2xl border border-border shadow-xl shadow-black/5 p-6 sm:p-8">
+              <div>
                 <div className="mb-5">
                   <h1 className="text-2xl font-bold text-foreground">Create account</h1>
                   <p className="text-muted-foreground mt-1 text-sm">Register to get started</p>
