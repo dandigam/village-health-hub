@@ -167,9 +167,9 @@ export default function Login() {
               </div>
             )}
 
-            {/* Sign Up - No card */}
+            {/* Sign Up - Card */}
             {mode === 'signup' && (
-              <>
+              <div className="bg-background rounded-2xl border border-border shadow-xl shadow-black/5 p-6 sm:p-8">
                 <div className="mb-5">
                   <h1 className="text-2xl font-bold text-foreground">Create account</h1>
                   <p className="text-muted-foreground mt-1 text-sm">Register to get started</p>
@@ -240,7 +240,7 @@ export default function Login() {
                 <p className="text-center text-sm text-muted-foreground mt-5">
                   Already have an account?{' '}<button type="button" onClick={() => switchMode('signin')} className="text-primary hover:text-primary/80 font-medium transition-colors">Sign In</button>
                 </p>
-              </>
+              </div>
             )}
           </div>
         </div>
