@@ -123,27 +123,20 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Card */}
-            <div className="bg-background rounded-2xl border border-border shadow-xl shadow-black/5 p-6 sm:p-8">
-              <div className="mb-5">
-                <h1 className="text-2xl font-bold text-foreground">
-                  {mode === 'signin' ? 'Welcome back' : 'Create account'}
-                </h1>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  {mode === 'signin'
-                    ? 'Sign in to continue to your dashboard'
-                    : 'Register to get started'}
-                </p>
-              </div>
-
-              {displayError && (
-                <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                  {displayError}
+            {/* Sign In - Card */}
+            {mode === 'signin' && (
+              <div className="bg-background rounded-2xl border border-border shadow-xl shadow-black/5 p-6 sm:p-8">
+                <div className="mb-5">
+                  <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
+                  <p className="text-muted-foreground mt-1 text-sm">Sign in to continue to your dashboard</p>
                 </div>
-              )}
 
-              {/* ---- SIGN IN ---- */}
-              {mode === 'signin' && (
+                {displayError && (
+                  <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                    {displayError}
+                  </div>
+                )}
+
                 <form onSubmit={handleLogin} className="space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="userName" className="text-sm font-medium text-foreground">Username</Label>
@@ -167,10 +160,27 @@ export default function Login() {
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...</> : 'Sign In'}
                   </Button>
                 </form>
-              )}
 
-              {/* ---- SIGN UP ---- */}
-              {mode === 'signup' && (
+                <p className="text-center text-sm text-muted-foreground mt-5">
+                  Don't have an account?{' '}<button type="button" onClick={() => switchMode('signup')} className="text-primary hover:text-primary/80 font-medium transition-colors">Sign Up</button>
+                </p>
+              </div>
+            )}
+
+            {/* Sign Up - No card */}
+            {mode === 'signup' && (
+              <>
+                <div className="mb-5">
+                  <h1 className="text-2xl font-bold text-foreground">Create account</h1>
+                  <p className="text-muted-foreground mt-1 text-sm">Register to get started</p>
+                </div>
+
+                {displayError && (
+                  <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                    {displayError}
+                  </div>
+                )}
+
                 <form onSubmit={handleSignup} className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
@@ -226,16 +236,12 @@ export default function Login() {
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : 'Sign Up'}
                   </Button>
                 </form>
-              )}
 
-              <p className="text-center text-sm text-muted-foreground mt-5">
-                {mode === 'signin' ? (
-                  <>Don't have an account?{' '}<button type="button" onClick={() => switchMode('signup')} className="text-primary hover:text-primary/80 font-medium transition-colors">Sign Up</button></>
-                ) : (
-                  <>Already have an account?{' '}<button type="button" onClick={() => switchMode('signin')} className="text-primary hover:text-primary/80 font-medium transition-colors">Sign In</button></>
-                )}
-              </p>
-            </div>
+                <p className="text-center text-sm text-muted-foreground mt-5">
+                  Already have an account?{' '}<button type="button" onClick={() => switchMode('signin')} className="text-primary hover:text-primary/80 font-medium transition-colors">Sign In</button>
+                </p>
+              </>
+            )}
           </div>
         </div>
 
