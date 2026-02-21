@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Heart, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Heart, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import loginHero from '@/assets/login-hero.jpg';
 
@@ -90,31 +90,41 @@ export default function Login() {
       </div>
 
       {/* Right Side - Auth Form */}
-      <div className="w-full lg:w-[40%] flex flex-col min-h-screen bg-background">
-        <div className="lg:hidden p-6 flex items-center gap-3">
+      <div className="w-full lg:w-[40%] flex flex-col h-screen bg-background overflow-hidden">
+        <div className="lg:hidden p-4 flex items-center gap-3">
+          {mode === 'signup' && (
+            <button type="button" onClick={() => switchMode('signin')} className="mr-1 text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
             <Heart className="w-5 h-5 text-white" />
           </div>
           <span className="font-semibold text-foreground">{APP_NAME}</span>
         </div>
 
-        <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12">
-          <div className="w-full max-w-sm">
-            <div className="hidden lg:flex items-center gap-3 mb-10">
-              <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
-                <Heart className="w-6 h-6 text-white" />
+        <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-12 overflow-y-auto min-h-0">
+          <div className="w-full max-w-sm mx-auto">
+            <div className="hidden lg:flex items-center gap-3 mb-6">
+              {mode === 'signup' && (
+                <button type="button" onClick={() => switchMode('signin')} className="mr-1 text-muted-foreground hover:text-foreground transition-colors">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              )}
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
+                <Heart className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-bold text-lg text-foreground">{APP_NAME}</p>
+                <p className="font-bold text-base text-foreground">{APP_NAME}</p>
                 <p className="text-xs text-muted-foreground">{APP_TAGLINE}</p>
               </div>
             </div>
 
-            <div className="mb-8">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            <div className="mb-5">
+              <h1 className="text-2xl font-bold text-foreground">
                 {mode === 'signin' ? 'Welcome back' : 'Create account'}
               </h1>
-              <p className="text-muted-foreground mt-2 text-sm">
+              <p className="text-muted-foreground mt-1 text-sm">
                 {mode === 'signin'
                   ? 'Sign in to continue to your dashboard'
                   : 'Register to get started'}
@@ -122,7 +132,7 @@ export default function Login() {
             </div>
 
             {displayError && (
-              <div className="mb-5 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+              <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
                 {displayError}
               </div>
             )}
@@ -156,41 +166,43 @@ export default function Login() {
 
             {/* ---- SIGN UP ---- */}
             {mode === 'signup' && (
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Full Name</Label>
-                  <Input placeholder="Enter your full name" value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-11 bg-muted/50 border-input focus:bg-background transition-colors" />
+              <form onSubmit={handleSignup} className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium text-foreground">Full Name</Label>
+                    <Input placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-10 bg-muted/50 border-input focus:bg-background transition-colors" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium text-foreground">Username</Label>
+                    <Input placeholder="Choose username" value={userName} onChange={(e) => setUserName(e.target.value)} className="h-10 bg-muted/50 border-input focus:bg-background transition-colors" />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Email</Label>
-                  <Input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 bg-muted/50 border-input focus:bg-background transition-colors" />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium text-foreground">Email</Label>
+                    <Input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="h-10 bg-muted/50 border-input focus:bg-background transition-colors" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium text-foreground">Phone Number</Label>
+                    <Input type="tel" placeholder="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-10 bg-muted/50 border-input focus:bg-background transition-colors" />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Phone Number</Label>
-                  <Input type="tel" placeholder="Enter your phone number" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-11 bg-muted/50 border-input focus:bg-background transition-colors" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Username</Label>
-                  <Input placeholder="Choose a username" value={userName} onChange={(e) => setUserName(e.target.value)} className="h-11 bg-muted/50 border-input focus:bg-background transition-colors" />
-                </div>
-
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label className="text-sm font-medium text-foreground">Password</Label>
                   <div className="relative">
-                    <Input type={showPassword ? 'text' : 'password'} placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 bg-muted/50 border-input focus:bg-background transition-colors pr-10" />
+                    <Input type={showPassword ? 'text' : 'password'} placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-10 bg-muted/50 border-input focus:bg-background transition-colors pr-10" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label className="text-sm font-medium text-foreground">Who are you?</Label>
                   <Select value={role} onValueChange={setRole}>
-                    <SelectTrigger className="h-11 bg-muted/50 border-input focus:bg-background transition-colors">
+                    <SelectTrigger className="h-10 bg-muted/50 border-input focus:bg-background transition-colors">
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -205,13 +217,13 @@ export default function Login() {
                   </Select>
                 </div>
 
-                <Button type="submit" disabled={loading} className="w-full h-11 bg-primary hover:bg-primary/90 font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30">
+                <Button type="submit" disabled={loading} className="w-full h-10 bg-primary hover:bg-primary/90 font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30">
                   {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : 'Sign Up'}
                 </Button>
               </form>
             )}
 
-            <p className="text-center text-sm text-muted-foreground mt-8">
+            <p className="text-center text-sm text-muted-foreground mt-5">
               {mode === 'signin' ? (
                 <>Don't have an account?{' '}<button type="button" onClick={() => switchMode('signup')} className="text-primary hover:text-primary/80 font-medium transition-colors">Sign Up</button></>
               ) : (
@@ -221,7 +233,7 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="p-6 text-center">
+        <div className="p-4 text-center shrink-0">
           <p className="text-xs text-muted-foreground">© 2026 {APP_NAME}. All rights reserved.</p>
         </div>
       </div>
