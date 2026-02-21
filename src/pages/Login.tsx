@@ -106,18 +106,20 @@ export default function Login() {
         <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 lg:p-10 overflow-y-auto min-h-0">
           <div className="w-full max-w-[400px] mx-auto">
             {/* Logo above card */}
-            <div className="hidden lg:flex items-center justify-center gap-3 mb-6">
+            <div className="hidden lg:flex items-center gap-3 mb-6 relative">
               {mode === 'signup' && (
-                <button type="button" onClick={() => switchMode('signin')} className="mr-1 text-muted-foreground hover:text-foreground transition-colors">
+                <button type="button" onClick={() => switchMode('signin')} className="absolute left-0 text-muted-foreground hover:text-foreground transition-colors">
                   <ArrowLeft className="w-5 h-5" />
                 </button>
               )}
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
-                <Heart className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-bold text-base text-foreground">{APP_NAME}</p>
-                <p className="text-xs text-muted-foreground">{APP_TAGLINE}</p>
+              <div className="flex items-center gap-3 mx-auto">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
+                  <Heart className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-bold text-base text-foreground">{APP_NAME}</p>
+                  <p className="text-xs text-muted-foreground">{APP_TAGLINE}</p>
+                </div>
               </div>
             </div>
 
