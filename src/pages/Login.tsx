@@ -25,6 +25,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState('');
+  const registerUser = useRegisterUser();
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -44,7 +45,6 @@ export default function Login() {
     }
   };
 
-  const registerUser = useRegisterUser();
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError('');
