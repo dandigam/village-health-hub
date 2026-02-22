@@ -35,7 +35,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
   };
 
   return (
-    <header className="h-14 sm:h-16 bg-primary flex items-center justify-between px-3 sm:px-4 lg:px-6 print:hidden sticky top-0 z-50">
+    <header className="h-14 sm:h-16 bg-gradient-to-r from-primary to-accent flex items-center justify-between px-3 sm:px-4 lg:px-6 print:hidden sticky top-0 z-50 shadow-lg shadow-primary/20">
       <div className="flex items-center gap-2 sm:gap-4">
         {onMenuToggle && (
           <Button variant="ghost" size="icon" className="md:hidden text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9" onClick={onMenuToggle}>
