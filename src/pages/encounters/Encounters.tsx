@@ -89,6 +89,8 @@ export default function Encounters() {
   }, [encounterQueue, statusFilter, searchTerm]);
 
   const selectedEncounter = encounterQueue.find(e => e.patient.id === selectedPatientId);
+  const [currentDiagnoses, setCurrentDiagnoses] = useState<string[]>([]);
+  const [currentVitals, setCurrentVitals] = useState({ weight: '', bp: '', pulse: '', temp: '', spo2: '' });
 
   const handleStartVisit = (patientId: string) => {
     setEncounterQueue(prev =>
@@ -255,6 +257,8 @@ export default function Encounters() {
               encounter={selectedEncounter}
               onStepChange={handleStepChange}
               onComplete={handleCompleteVisit}
+              onDiagnosesChange={setCurrentDiagnoses}
+              onVitalsChange={setCurrentVitals}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center bg-card rounded-lg border">
@@ -271,7 +275,7 @@ export default function Encounters() {
         {/* Medical History - Right Panel */}
         {selectedEncounter && !isMobile && (
           <div className="w-[280px] lg:w-[300px] shrink-0 flex flex-col">
-            <MedicalHistoryPanel patientId={selectedEncounter.patient.id} />
+            <MedicalHistoryPanel patientId={selectedEncounter.patient.id} currentDiagnoses={currentDiagnoses} />
           </div>
         )}
       </div>
