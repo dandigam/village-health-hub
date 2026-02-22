@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { EncounterQueue } from '@/components/encounters/EncounterQueue';
 import { EncounterWorkflow } from '@/components/encounters/EncounterWorkflow';
+import { MedicalHistoryPanel } from '@/components/encounters/MedicalHistoryPanel';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -266,6 +267,13 @@ export default function Encounters() {
             </div>
           )}
         </div>
+
+        {/* Medical History - Right Panel */}
+        {selectedEncounter && !isMobile && (
+          <div className="w-[280px] lg:w-[300px] shrink-0 flex flex-col">
+            <MedicalHistoryPanel patientId={selectedEncounter.patient.id} />
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
