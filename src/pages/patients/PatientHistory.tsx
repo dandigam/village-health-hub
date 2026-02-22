@@ -98,7 +98,7 @@ export default function PatientHistory() {
         </div>
       </div>
       <div className="hidden print:block mb-6">
-        <div className="text-center mb-4"><h1 className="text-2xl font-bold">Srini FOUNDATION</h1><p className="text-sm text-muted-foreground">Medical Camp - Patient History Report</p></div>
+        <div className="text-center mb-4"><h1 className="text-2xl font-bold">HealthCamp PRO</h1><p className="text-sm text-muted-foreground">Medical Camp - Patient History Report</p></div>
       </div>
       <Card className="mb-6">
         <CardContent className="py-5">

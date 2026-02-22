@@ -257,8 +257,8 @@ export default function IDCardPrintouts() {
       return `
       <div class="id-card">
         <div class="card-header" style="background: ${getHeaderColor(person.role)}">
-          <div class="logo">SF</div>
-          <p class="org-name">Srini Foundation</p>
+           <div class="logo">HC</div>
+           <p class="org-name">HealthCamp Pro</p>
           <p class="camp-name">${currentCamp?.name || 'Medical Camp'}</p>
         </div>
         <div class="card-body">
@@ -471,9 +471,9 @@ export default function IDCardPrintouts() {
                           {/* Card Header */}
                           <div className={`${colors.headerBg} px-4 py-5 text-center text-white relative`}>
                             <div className="absolute top-2.5 left-2.5 w-7 h-7 bg-white/25 rounded-full flex items-center justify-center">
-                              <span className="text-[10px] font-bold">SF</span>
+                              <span className="text-[10px] font-bold">HC</span>
                             </div>
-                            <p className="text-sm font-semibold opacity-95 tracking-wide">Srini Foundation</p>
+                            <p className="text-sm font-semibold opacity-95 tracking-wide">HealthCamp Pro</p>
                             <p className="text-base font-bold mt-1">{currentCamp?.name || 'Medical Camp'}</p>
                           </div>
 

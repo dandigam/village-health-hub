@@ -31,7 +31,7 @@ export default function Profile() {
   
   const [profile, setProfile] = useState({
     name: 'Venkatesh Dandigam',
-    email: 'venkatesh.dandigam@srinifoundation.org',
+    email: 'venkatesh.dandigam@healthcamppro.org',
     phone: '+91 98765 43210',
     role: 'Camp Admin',
     department: 'Medical Operations',

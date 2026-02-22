@@ -47,8 +47,8 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <span className="text-lg sm:text-xl font-bold text-primary-foreground">S</span>
           </div>
           <div className="hidden sm:block">
-            <span className="text-lg font-bold text-primary-foreground">Srini</span>
-            <span className="text-xs text-primary-foreground/70 block -mt-1">FOUNDATION</span>
+            <span className="text-lg font-bold text-primary-foreground">HealthCamp</span>
+            <span className="text-xs text-primary-foreground/70 block -mt-1">PRO</span>
           </div>
         </div>
         <div className="hidden md:block border-l border-primary-foreground/20 pl-4 ml-2">

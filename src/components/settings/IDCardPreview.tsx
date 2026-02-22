@@ -66,9 +66,9 @@ export function IDCardPreview({
       {/* Card Header with Gradient */}
       <div className={`bg-gradient-to-br ${getHeaderGradient(person.role)} px-4 py-5 text-center text-white relative`}>
         <div className="absolute top-2 left-2 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-          <span className="text-[10px] font-bold">SF</span>
+          <span className="text-[10px] font-bold">HC</span>
         </div>
-        <p className="text-sm font-semibold tracking-wide">Srini Foundation</p>
+        <p className="text-sm font-semibold tracking-wide">HealthCamp Pro</p>
         <p className="text-lg font-bold mt-1">{campName}</p>
       </div>
 
