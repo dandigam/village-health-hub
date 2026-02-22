@@ -49,7 +49,7 @@ export default function ViewDoctor() {
             <Stethoscope className="h-4 w-4" /> {doctor.specialization}
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Phone className="h-4 w-4" /> {doctor.phoneNumber || doctor.phone}
+            <Phone className="h-4 w-4" /> {doctor.phoneNumber ?? doctor.phone}
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Mail className="h-4 w-4" /> {doctor.email || '—'}

@@ -16,8 +16,8 @@ export default function PatientHistory() {
 
   const { data: patientsRaw = [] } = usePatients();
   // Handle paginated API response (with 'content' array)
-  const allPatients = Array.isArray(patientsRaw.content)
-    ? patientsRaw.content
+  const allPatients = Array.isArray((patientsRaw as any).content)
+    ? (patientsRaw as any).content
     : Array.isArray(patientsRaw)
       ? patientsRaw
       : [];

@@ -34,8 +34,8 @@ export default function Suppliers() {
   const [deleteSupplierState, setDeleteSupplierState] = useState<Supplier | null>(null);
 
   // Returns medicines for a supplier, or empty array if none
-  const getMedicinesForSupplier = (supplierId: number) => {
-    const supplier = suppliers.find(s => s.id === supplierId);
+  const getMedicinesForSupplier = (supplierId: string | number) => {
+    const supplier = suppliers.find(s => String(s.id) === String(supplierId));
     return supplier?.medicines ?? [];
   };
 

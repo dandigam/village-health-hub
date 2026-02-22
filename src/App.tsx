@@ -16,6 +16,7 @@ import NewDoctor from "./pages/doctors/NewDoctor";
 import EditDoctor from "./pages/doctors/EditDoctor";
 import NewCamp from "./pages/camps/NewCamp";
 import EditCamp from "./pages/camps/EditCamp";
+import ViewCamp from "./pages/camps/ViewCamp";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
@@ -75,7 +76,8 @@ const App = () => (
               {/* Camps */}
               <Route path="/camps" element={<ProtectedRoute routeKey="camps"><Camps /></ProtectedRoute>} />
               <Route path="/camps/new" element={<ProtectedRoute routeKey="camps"><NewCamp /></ProtectedRoute>} />
-              <Route path="/camps/:id" element={<ProtectedRoute routeKey="camps"><EditCamp /></ProtectedRoute>} />
+              <Route path="/camps/:id" element={<ProtectedRoute routeKey="camps"><ViewCamp /></ProtectedRoute>} />
+              <Route path="/camps/:id/edit" element={<ProtectedRoute routeKey="camps"><EditCamp /></ProtectedRoute>} />
               
               {/* Patients */}
               <Route path="/patients" element={<ProtectedRoute routeKey="patients"><Patients /></ProtectedRoute>} />

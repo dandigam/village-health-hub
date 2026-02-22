@@ -26,8 +26,8 @@ export interface EncounterPatient {
 export default function Encounters() {
   const { data: patientsRaw = [] } = usePatients();
   // Handle paginated API response (with 'content' array)
-  const patientList = Array.isArray(patientsRaw.content)
-    ? patientsRaw.content
+  const patientList = Array.isArray((patientsRaw as any).content)
+    ? (patientsRaw as any).content
     : Array.isArray(patientsRaw)
       ? patientsRaw
       : [];

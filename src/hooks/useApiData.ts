@@ -1,64 +1,13 @@
-// Camp save mutation hook
-export function useSaveCamp() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (camp: any) => {
-      // If id is present, update; else, create
-      if (camp.id) {
-        return await api.put(`/camps/${camp.id}`, camp);
-      } else {
-        const { id, ...campData } = camp;
-        return await api.post('/camps', campData);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['camps'] });
-    },
-  });
-}
-// Doctor save mutation hook
-// Remove duplicate Doctor import
-import api from '@/services/api';
-
-export function useSaveDoctor() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (doctor: {
-      name: string;
-      specialization: string;
-      phoneNumber: string;
-      email: string;
-      doctorCamps: { id: number; doctor: string; camp: string }[];
-    }) => {
-      return await api.post('/doctors', doctor);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['doctors'] });
-    },
-  });
-}
-// Dashboard stats API hook
-export function useDashboardStats() {
-  return useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: async () => {
-      const res = await fetch('http://localhost:9090/api/dashboard');
-      if (!res.ok) throw new Error('Failed to fetch dashboard stats');
-      return res.json();
-    },
-    refetchOnWindowFocus: false,
-  });
-}
 /**
  * React Query hooks with automatic API → mock fallback.
  * 
  * Each hook tries the real API first. If the backend is unavailable
  * or returns empty data, it seamlessly falls back to mock data.
- * Components don't need to know the data source.
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchWithFallback } from '@/services/api';
+import { fetchWithFallback, request, API_BASE_URL } from '@/services/api';
+import api from '@/services/api';
 import {
   mockUser,
   mockCamps,
@@ -96,8 +45,9 @@ import type {
   RequestOrder,
 } from '@/types';
 
-// Stale time: 5 minutes — avoids hammering a potentially unavailable backend
 const STALE_TIME = 5 * 60 * 1000;
+
+// ── Query Hooks ──────────────────────────────────────────────
 
 export function useCurrentUser() {
   return useQuery({
@@ -191,25 +141,6 @@ export function useSupplierList(warehouseId: number) {
   });
 }
 
-export function useDeleteSupplier(warehouseId?: number) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (supplierId: number) =>
-      request(`/suppliers/${supplierId}`, {
-        method: 'DELETE',
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['suppliers']);
-      if (warehouseId) {
-        queryClient.invalidateQueries(['suppliers', warehouseId]);
-      }
-    },
-  });
-}
-
-
-
 export function useStockItems() {
   return useQuery({
     queryKey: ['stockItems'],
@@ -295,7 +226,8 @@ export function useRequestOrders() {
   });
 }
 
-// Types for states hierarchy
+// ── Location Hierarchy ───────────────────────────────────────
+
 export interface Mandal {
   id: number;
   name: string;
@@ -321,6 +253,8 @@ export function useStatesHierarchy() {
     select: (res) => res.data,
   });
 }
+
+// ── Warehouse Inventory ──────────────────────────────────────
 
 export interface WarehouseInventoryItem {
   id: number;
@@ -348,4 +282,93 @@ export function useWarehouseInventory(warehouseId?: number) {
   });
 }
 
+// ── Medical Conditions ───────────────────────────────────────
 
+export interface MedicalCondition {
+  id: number;
+  name: string;
+  description: string;
+  isActive: boolean;
+  displayOrder: number;
+}
+
+export function useMedicalConditions() {
+  return useQuery<MedicalCondition[]>({
+    queryKey: ['medical-conditions'],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/medical-conditions`);
+      if (!res.ok) throw new Error('Failed to fetch medical conditions');
+      return res.json();
+    },
+    staleTime: STALE_TIME,
+    select: (data) => Array.isArray(data) ? data.filter((c) => c.isActive).sort((a, b) => a.displayOrder - b.displayOrder) : [],
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+}
+
+// ── Dashboard Stats ──────────────────────────────────────────
+
+export function useDashboardStats() {
+  return useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/dashboard`);
+      if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+      return res.json();
+    },
+    refetchOnWindowFocus: false,
+  });
+}
+
+// ── Mutation Hooks ───────────────────────────────────────────
+
+export function useSaveCamp() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (camp: any) => {
+      if (camp.id) {
+        return await api.put(`/camps/${camp.id}`, camp);
+      } else {
+        const { id, ...campData } = camp;
+        return await api.post('/camps', campData);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['camps'] });
+    },
+  });
+}
+
+export function useSaveDoctor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (doctor: {
+      name: string;
+      specialization: string;
+      phoneNumber: string;
+      email: string;
+      doctorCamps: { id?: number; doctor: string; camp: string }[];
+      [key: string]: any;
+    }) => {
+      return await api.post('/doctors', doctor);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+    },
+  });
+}
+
+export function useDeleteSupplier(warehouseId?: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (supplierId: number) =>
+      request(`/suppliers/${supplierId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      if (warehouseId) {
+        queryClient.invalidateQueries({ queryKey: ['suppliers', warehouseId] });
+      }
+    },
+  });
+}

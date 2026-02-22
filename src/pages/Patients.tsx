@@ -14,8 +14,8 @@ export default function Patients() {
   // Handle paginated response with 'content' array
   const patients = Array.isArray(patientsRaw)
     ? patientsRaw
-    : Array.isArray(patientsRaw.content)
-      ? patientsRaw.content
+    : Array.isArray((patientsRaw as any).content)
+      ? (patientsRaw as any).content
       : [];
   const filteredPatients = patients.filter(
     (p) =>

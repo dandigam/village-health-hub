@@ -42,25 +42,27 @@ export default function NewPatient() {
     mandal: '',
     village: '',
     street: '',
+    pinCode: '',
   });
   // ...existing code...
   const { data: patientData, isLoading } = usePatient(id || '');
   useEffect(() => {
     if (id && patientData) {
+      const addr = typeof patientData.address === 'object' ? patientData.address : null;
       setDemographic({
-        firstName: patientData.firstName || '',
-        lastName: patientData.lastName || '',
-        fatherSpouseName: patientData.fatherSpouseName || '',
+        firstName: patientData.firstName || patientData.name || '',
+        lastName: patientData.lastName || patientData.surname || '',
+        fatherSpouseName: patientData.fatherSpouseName || patientData.fatherName || '',
         gender: patientData.gender || '',
         age: patientData.age ? String(patientData.age) : '',
         maritalStatus: patientData.maritalStatus || '',
-        phone: patientData.phoneNumber || '',
-        state: patientData.address?.state || '',
-        district: patientData.address?.district || '',
-        mandal: patientData.address?.mandal || '',
-        village: patientData.address?.cityVillage || '',
-        street: patientData.address?.streetAddress || '',
-        pinCode: patientData.address?.pinCode || '',
+        phone: patientData.phoneNumber || patientData.phone || '',
+        state: addr?.state || '',
+        district: addr?.district || '',
+        mandal: addr?.mandal || '',
+        village: addr?.cityVillage || patientData.village || '',
+        street: addr?.streetAddress || '',
+        pinCode: addr?.pinCode || '',
       });
       setPhotoUrl(patientData.photoUrl || null);
       setHistory({

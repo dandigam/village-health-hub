@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useMedicalConditions } from '@/services/api';
+import { useMedicalConditions } from '@/hooks/useApiData';
 
 interface HistoryData {
   hasPreviousTreatment: string;

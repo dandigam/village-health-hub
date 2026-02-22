@@ -26,15 +26,12 @@ export default function Camps() {
   const { data: camps = [] } = useCamps();
   const { data: doctors = [] } = useDoctors();
 
-
-  // Normalize camp fields for filtering and display
-  const normalize = (val: any) => (typeof val === 'string' ? val : '');
   const tabFilteredCamps = activeTab === 'all' ? camps : camps.filter((c) => c.status === activeTab);
   const filteredCamps = tabFilteredCamps.filter(
     (c) =>
-      normalize(c.campName).toLowerCase().includes(searchTerm.toLowerCase()) ||
-      normalize(c.city).toLowerCase().includes(searchTerm.toLowerCase()) ||
-      normalize(c.district).toLowerCase().includes(searchTerm.toLowerCase())
+      (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.village || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (c.district || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleStartCamp = (e: React.MouseEvent, campName: string) => {
@@ -90,21 +87,20 @@ export default function Camps() {
                 <TableRow key={camp.id} className="hover:bg-muted/30">
                   <TableCell>
                     <div>
-                      <p className="font-medium text-sm">{camp.campName}</p>
+                      <p className="font-medium text-sm">{camp.name}</p>
                       <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {camp.city}, {camp.district}
+                        <MapPin className="h-3 w-3" /> {camp.village}, {camp.district}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" /> {camp.city}, {camp.district}
+                      <MapPin className="h-3.5 w-3.5" /> {camp.village}, {camp.district}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Calendar className="h-3.5 w-3.5" />
-                      {/* If startDate/endDate exist, show them, else show dash */}
                       <span>{camp.startDate && camp.endDate ? `${new Date(camp.startDate).toLocaleDateString()} – ${new Date(camp.endDate).toLocaleDateString()}` : '—'}</span>
                     </div>
                   </TableCell>
@@ -125,12 +121,12 @@ export default function Camps() {
                         <Edit className="h-4 w-4 text-muted-foreground" />
                       </Button>
                       {camp.status === 'draft' && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Start Camp" onClick={(e) => handleStartCamp(e, camp.campName)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Start Camp" onClick={(e) => handleStartCamp(e, camp.name)}>
                           <Play className="h-4 w-4 text-stat-green-text" />
                         </Button>
                       )}
                       {camp.status === 'active' && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Stop Camp" onClick={(e) => handleStopCamp(e, camp.campName)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Stop Camp" onClick={(e) => handleStopCamp(e, camp.name)}>
                           <Square className="h-4 w-4 text-destructive" />
                         </Button>
                       )}

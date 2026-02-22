@@ -2,7 +2,7 @@ import { User, ClipboardList, CreditCard, MapPin, Camera } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useMedicalConditions } from '@/services/api';
+import { useMedicalConditions } from '@/hooks/useApiData';
 
 interface DemographicData {
   firstName: string;
