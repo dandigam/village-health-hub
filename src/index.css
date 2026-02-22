@@ -2,108 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Medical Camp Management System - Design System */
+/* Medical Camp Management System - Premium Design System */
 
 @layer base {
   :root {
-    --background: 216 25% 97%;
-    --foreground: 220 35% 10%;
+    --background: 220 20% 97%;
+    --foreground: 222 40% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 35% 10%;
+    --card-foreground: 222 40% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 35% 10%;
+    --popover-foreground: 222 40% 8%;
 
-    --primary: 220 85% 45%;
+    --primary: 222 80% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 216 20% 94%;
-    --secondary-foreground: 220 35% 10%;
+    --secondary: 220 18% 93%;
+    --secondary-foreground: 222 40% 8%;
 
-    --muted: 216 18% 91%;
-    --muted-foreground: 220 15% 42%;
+    --muted: 220 16% 91%;
+    --muted-foreground: 222 12% 46%;
 
-    --accent: 220 75% 52%;
+    --accent: 230 70% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 80% 58%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 216 22% 86%;
-    --input: 216 22% 86%;
-    --ring: 220 85% 45%;
+    --border: 220 18% 88%;
+    --input: 220 18% 88%;
+    --ring: 222 80% 48%;
 
     --radius: 0.625rem;
 
-    /* Semantic Status Colors — vivid, branded */
-    --navy: 220 80% 20%;
-    --navy-light: 220 65% 38%;
-    --success: 152 65% 40%;
-    --warning: 38 92% 50%;
-    --info: 215 80% 50%;
+    /* Semantic Status Colors */
+    --navy: 222 75% 18%;
+    --navy-light: 222 60% 35%;
+    --success: 158 60% 42%;
+    --warning: 38 88% 50%;
+    --info: 218 75% 52%;
     
-    /* Stat Card Colors — vibrant, saturated backgrounds */
-    --stat-blue: 215 80% 94%;
-    --stat-blue-text: 215 85% 38%;
-    --stat-green: 152 65% 90%;
-    --stat-green-text: 152 70% 28%;
-    --stat-orange: 28 85% 92%;
-    --stat-orange-text: 28 80% 38%;
-    --stat-pink: 340 70% 93%;
-    --stat-pink-text: 340 70% 40%;
-    --stat-purple: 262 65% 93%;
-    --stat-purple-text: 262 60% 42%;
-    --stat-teal: 175 65% 90%;
-    --stat-teal-text: 175 65% 28%;
+    /* Stat Card Colors — refined pastels */
+    --stat-blue: 218 75% 94%;
+    --stat-blue-text: 218 80% 35%;
+    --stat-green: 158 55% 90%;
+    --stat-green-text: 158 60% 26%;
+    --stat-orange: 30 80% 92%;
+    --stat-orange-text: 30 75% 36%;
+    --stat-pink: 340 65% 93%;
+    --stat-pink-text: 340 65% 38%;
+    --stat-purple: 265 55% 93%;
+    --stat-purple-text: 265 50% 40%;
+    --stat-teal: 178 55% 90%;
+    --stat-teal-text: 178 55% 26%;
 
-    --sidebar-background: 220 75% 18%;
+    /* Sidebar - Deep navy with sophistication */
+    --sidebar-background: 224 60% 14%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 220 80% 50%;
+    --sidebar-primary: 222 80% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 65% 28%;
+    --sidebar-accent: 224 50% 22%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 55% 32%;
-    --sidebar-ring: 220 80% 50%;
+    --sidebar-border: 224 40% 26%;
+    --sidebar-ring: 222 80% 55%;
+
+    /* Premium additions */
+    --shadow-color: 222 40% 8%;
+    --card-shadow: 0 1px 3px hsl(var(--shadow-color) / 0.04), 0 4px 12px hsl(var(--shadow-color) / 0.03);
+    --card-shadow-hover: 0 4px 16px hsl(var(--shadow-color) / 0.08), 0 8px 32px hsl(var(--shadow-color) / 0.04);
   }
 
   .dark {
-    --background: 220 30% 8%;
-    --foreground: 216 20% 95%;
+    --background: 224 30% 7%;
+    --foreground: 220 18% 95%;
 
-    --card: 220 30% 12%;
-    --card-foreground: 216 20% 95%;
+    --card: 224 28% 11%;
+    --card-foreground: 220 18% 95%;
 
-    --popover: 220 30% 12%;
-    --popover-foreground: 216 20% 95%;
+    --popover: 224 28% 11%;
+    --popover-foreground: 220 18% 95%;
 
-    --primary: 220 80% 55%;
+    --primary: 222 75% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 25% 18%;
-    --secondary-foreground: 216 20% 95%;
+    --secondary: 224 22% 16%;
+    --secondary-foreground: 220 18% 95%;
 
-    --muted: 220 25% 16%;
-    --muted-foreground: 220 12% 62%;
+    --muted: 224 22% 14%;
+    --muted-foreground: 222 10% 60%;
 
-    --accent: 220 65% 55%;
+    --accent: 230 60% 58%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 52%;
+    --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 25% 22%;
-    --input: 220 25% 22%;
-    --ring: 220 80% 55%;
+    --border: 224 22% 20%;
+    --input: 224 22% 20%;
+    --ring: 222 75% 58%;
 
-    --sidebar-background: 220 35% 10%;
-    --sidebar-foreground: 216 20% 95%;
-    --sidebar-primary: 220 80% 55%;
+    --sidebar-background: 224 32% 9%;
+    --sidebar-foreground: 220 18% 95%;
+    --sidebar-primary: 222 75% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 30% 18%;
-    --sidebar-accent-foreground: 216 20% 95%;
-    --sidebar-border: 220 25% 22%;
-    --sidebar-ring: 220 80% 55%;
+    --sidebar-accent: 224 28% 16%;
+    --sidebar-accent-foreground: 220 18% 95%;
+    --sidebar-border: 224 22% 20%;
+    --sidebar-ring: 222 75% 58%;
   }
 }
 
@@ -125,34 +131,41 @@
 }
 
 @layer components {
+  /* Premium Card System */
   .stat-card {
-    @apply rounded-xl border p-4 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+    @apply rounded-xl border p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+    box-shadow: var(--card-shadow);
+  }
+  
+  .stat-card:hover {
+    box-shadow: var(--card-shadow-hover);
   }
   
   .stat-card-blue {
-    @apply bg-[hsl(var(--stat-blue))] border-[hsl(var(--stat-blue-text)/0.2)];
+    @apply bg-[hsl(var(--stat-blue))] border-[hsl(var(--stat-blue-text)/0.15)];
   }
   
   .stat-card-green {
-    @apply bg-[hsl(var(--stat-green))] border-[hsl(var(--stat-green-text)/0.2)];
+    @apply bg-[hsl(var(--stat-green))] border-[hsl(var(--stat-green-text)/0.15)];
   }
   
   .stat-card-orange {
-    @apply bg-[hsl(var(--stat-orange))] border-[hsl(var(--stat-orange-text)/0.2)];
+    @apply bg-[hsl(var(--stat-orange))] border-[hsl(var(--stat-orange-text)/0.15)];
   }
   
   .stat-card-pink {
-    @apply bg-[hsl(var(--stat-pink))] border-[hsl(var(--stat-pink-text)/0.2)];
+    @apply bg-[hsl(var(--stat-pink))] border-[hsl(var(--stat-pink-text)/0.15)];
   }
   
   .stat-card-purple {
-    @apply bg-[hsl(var(--stat-purple))] border-[hsl(var(--stat-purple-text)/0.2)];
+    @apply bg-[hsl(var(--stat-purple))] border-[hsl(var(--stat-purple-text)/0.15)];
   }
   
   .stat-card-teal {
-    @apply bg-[hsl(var(--stat-teal))] border-[hsl(var(--stat-teal-text)/0.2)];
+    @apply bg-[hsl(var(--stat-teal))] border-[hsl(var(--stat-teal-text)/0.15)];
   }
 
+  /* Premium Page Layout */
   .page-header {
     @apply mb-6 flex items-center justify-between;
   }
@@ -161,25 +174,46 @@
     @apply text-2xl font-bold text-foreground tracking-tight;
   }
 
+  /* Premium Data Table */
   .data-table {
-    @apply w-full bg-card rounded-xl border overflow-hidden shadow-sm;
+    @apply w-full bg-card rounded-xl border overflow-hidden;
+    box-shadow: var(--card-shadow);
   }
 
   .data-table th {
-    @apply bg-muted/60 px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider;
+    @apply bg-muted/50 px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b;
   }
 
   .data-table td {
-    @apply px-4 py-3.5 text-sm border-t;
+    @apply px-4 py-3.5 text-sm border-t border-border/60;
   }
 
-  .data-table tr:hover td {
+  .data-table tr {
+    @apply transition-colors duration-150;
+  }
+
+  .data-table tbody tr:hover td {
     @apply bg-primary/[0.03];
   }
 
-  /* Utility: Glassmorphism */
+  /* Glassmorphism */
   .glass {
     @apply bg-white/70 backdrop-blur-lg border border-white/20;
+  }
+
+  /* Premium scrollbar */
+  .premium-scroll::-webkit-scrollbar {
+    width: 5px;
+  }
+  .premium-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .premium-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 10px;
+  }
+  .premium-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.35);
   }
 }
 
@@ -190,35 +224,34 @@
     print-color-adjust: exact !important;
   }
   
-  .print\\:hidden {
+  .print\:hidden {
     display: none !important;
   }
   
-  .print\\:block {
+  .print\:block {
     display: block !important;
   }
   
-  .print\\:shadow-none {
+  .print\:shadow-none {
     box-shadow: none !important;
   }
   
-  .print\\:border-0 {
+  .print\:border-0 {
     border: none !important;
   }
   
-  .print\\:p-0 {
+  .print\:p-0 {
     padding: 0 !important;
   }
   
-  .print\\:m-0 {
+  .print\:m-0 {
     margin: 0 !important;
   }
   
-  .print\\:bg-white {
+  .print\:bg-white {
     background-color: white !important;
   }
   
-  /* SOAP Note specific print styles */
   .soap-print-container {
     @apply max-w-none w-full;
   }
@@ -235,7 +268,6 @@
     @apply grid grid-cols-2 gap-4;
   }
   
-  /* Hide non-essential elements when printing */
   aside,
   nav,
   .no-print,
@@ -243,12 +275,10 @@
     display: none !important;
   }
   
-  /* Ensure content fits on page */
   main {
     @apply p-0 m-0 max-w-none;
   }
   
-  /* Page break controls */
   .page-break-before {
     page-break-before: always;
   }

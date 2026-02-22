@@ -143,15 +143,15 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
   const isCompleted = encounter.status === 'completed';
 
   return (
-    <div className="h-full flex flex-col bg-card rounded-lg border">
+    <div className="h-full flex flex-col bg-card rounded-xl border border-border/50" style={{ boxShadow: '0 1px 4px hsl(var(--shadow-color, 222 40% 8%) / 0.04)' }}>
       {/* Patient Header with vitals + diagnosis badges */}
-      <div className="px-3 sm:px-4 py-2 border-b">
+      <div className="px-3 sm:px-4 py-2.5 border-b border-border/40">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {encounter.patient.photoUrl ? (
-              <img src={encounter.patient.photoUrl} alt="" className="h-8 w-8 rounded-full object-cover border shrink-0" />
+              <img src={encounter.patient.photoUrl} alt="" className="h-9 w-9 rounded-full object-cover border border-border/40 shrink-0" />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground shrink-0">
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
                 {(encounter.patient.name || encounter.patient.firstName || '').charAt(0)}
               </div>
             )}
@@ -173,7 +173,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <Button variant="outline" size="sm" className="h-7 text-[10px] px-2">
+            <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 border-border/50">
               <Save className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">Save</span>
             </Button>
           </div>
@@ -181,41 +181,41 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
 
         {/* Vitals + Diagnosis summary bar */}
         {(object.weight || object.bp || object.pulse || assessment.diagnoses.length > 0) && (
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             {object.weight && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
-                <Scale className="h-2.5 w-2.5 text-muted-foreground" />{object.weight} kg
+              <span className="inline-flex items-center gap-1 text-[10px] bg-[hsl(var(--stat-blue))] text-[hsl(var(--stat-blue-text))] rounded-md px-2 py-0.5 font-medium">
+                <Scale className="h-2.5 w-2.5" />{object.weight} kg
               </span>
             )}
             {object.bp && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
-                <Droplets className="h-2.5 w-2.5 text-muted-foreground" />{object.bp}
+              <span className="inline-flex items-center gap-1 text-[10px] bg-[hsl(var(--stat-pink))] text-[hsl(var(--stat-pink-text))] rounded-md px-2 py-0.5 font-medium">
+                <Droplets className="h-2.5 w-2.5" />{object.bp}
               </span>
             )}
             {object.pulse && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
-                <Heart className="h-2.5 w-2.5 text-muted-foreground" />{object.pulse}
+              <span className="inline-flex items-center gap-1 text-[10px] bg-[hsl(var(--stat-orange))] text-[hsl(var(--stat-orange-text))] rounded-md px-2 py-0.5 font-medium">
+                <Heart className="h-2.5 w-2.5" />{object.pulse}
               </span>
             )}
             {object.temp && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
-                <Thermometer className="h-2.5 w-2.5 text-muted-foreground" />{object.temp}°F
+              <span className="inline-flex items-center gap-1 text-[10px] bg-[hsl(var(--stat-teal))] text-[hsl(var(--stat-teal-text))] rounded-md px-2 py-0.5 font-medium">
+                <Thermometer className="h-2.5 w-2.5" />{object.temp}°F
               </span>
             )}
             {object.spo2 && (
-              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
-                <Wind className="h-2.5 w-2.5 text-muted-foreground" />{object.spo2}%
+              <span className="inline-flex items-center gap-1 text-[10px] bg-[hsl(var(--stat-purple))] text-[hsl(var(--stat-purple-text))] rounded-md px-2 py-0.5 font-medium">
+                <Wind className="h-2.5 w-2.5" />{object.spo2}%
               </span>
             )}
             {assessment.diagnoses.map(d => (
-              <Badge key={d} variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-primary/30">{d}</Badge>
+              <Badge key={d} variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-primary/30 font-semibold">{d}</Badge>
             ))}
           </div>
         )}
       </div>
 
-      {/* Stepper */}
-      <div className="border-b bg-muted/20">
+      {/* Stepper - refined tabs */}
+      <div className="border-b border-border/40 bg-muted/15">
         <div className="flex">
           {steps.map((step) => {
             const isActive = activeStep === step.id;
@@ -225,14 +225,14 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
                 key={step.id}
                 onClick={() => handleStep(step.id)}
                 className={cn(
-                  'flex-1 py-2 px-2 text-center border-b-2 transition-all',
-                  isActive ? 'border-primary bg-primary/5' : isDone ? 'border-[hsl(var(--success))] bg-[hsl(var(--success)/0.03)]' : 'border-transparent hover:bg-muted/30'
+                  'flex-1 py-2.5 px-2 text-center border-b-2 transition-all duration-200',
+                  isActive ? 'border-primary bg-primary/[0.04]' : isDone ? 'border-[hsl(var(--success))] bg-[hsl(var(--success)/0.02)]' : 'border-transparent hover:bg-muted/20'
                 )}
               >
                 <p className={cn('text-[11px] font-semibold', isActive ? 'text-primary' : isDone ? 'text-[hsl(var(--success))]' : 'text-muted-foreground')}>
                   {step.label}
                 </p>
-                <p className="text-[9px] text-muted-foreground">{step.sub}</p>
+                <p className="text-[9px] text-muted-foreground/70">{step.sub}</p>
               </button>
             );
           })}
@@ -241,7 +241,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
 
       {/* Step Content */}
       <ScrollArea className="flex-1">
-        <div className="p-3 sm:p-4">
+        <div className="p-4 sm:p-5">
           {activeStep === 1 && <SubjectStep data={subject} onChange={setSubject} />}
           {activeStep === 2 && <ObjectStep data={object} onChange={handleObjectChange} />}
           {activeStep === 3 && <AssessmentStep data={assessment} onChange={handleAssessmentChange} />}
@@ -251,17 +251,17 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
       </ScrollArea>
 
       {/* Bottom Bar */}
-      <div className="px-3 py-2 border-t bg-muted/20 flex items-center justify-between">
-        <Button variant="outline" size="sm" className="h-7 text-[10px]" disabled={activeStep <= 1} onClick={() => handleStep(activeStep - 1)}>
+      <div className="px-4 py-2.5 border-t border-border/40 bg-muted/10 flex items-center justify-between">
+        <Button variant="outline" size="sm" className="h-8 text-xs border-border/50" disabled={activeStep <= 1} onClick={() => handleStep(activeStep - 1)}>
           Previous
         </Button>
         <div className="flex items-center gap-2">
           {activeStep < 5 ? (
-            <Button size="sm" className="h-7 text-[10px]" onClick={() => handleStep(activeStep + 1)}>
+            <Button size="sm" className="h-8 text-xs px-4" onClick={() => handleStep(activeStep + 1)}>
               Next <ChevronRight className="h-3 w-3 ml-0.5" />
             </Button>
           ) : (
-            <Button size="sm" className="h-7 text-[10px] bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" onClick={onComplete}>
+            <Button size="sm" className="h-8 text-xs px-4 bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" onClick={onComplete}>
               <Send className="h-3 w-3 mr-1" /> Send to Pharmacy
             </Button>
           )}
@@ -284,12 +284,12 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
     arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Conditions</Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Conditions</Label>
         <div className="flex flex-wrap gap-3">
           {CONDITIONS.map(c => (
-            <label key={c} className="flex items-center gap-1.5 cursor-pointer text-xs">
+            <label key={c} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
               <Checkbox checked={data.conditions.includes(c)} onCheckedChange={() => onChange({ ...data, conditions: toggleArray(data.conditions, c) })} />
               {c}
             </label>
@@ -298,10 +298,10 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
       </div>
 
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Presenting Complaints</Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Presenting Complaints</Label>
         <div className="flex flex-wrap gap-3 ml-1">
           {COMPLAINTS.map(c => (
-            <label key={c} className="flex items-center gap-1.5 cursor-pointer text-xs">
+            <label key={c} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
               <Checkbox checked={data.presentingComplaints.includes(c)} onCheckedChange={() => onChange({ ...data, presentingComplaints: toggleArray(data.presentingComplaints, c) })} />
               {c}
             </label>
@@ -310,10 +310,10 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
       </div>
 
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">What is the reason for today's visit?</Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">What is the reason for today's visit?</Label>
         <div className="flex flex-wrap gap-3 ml-1">
           {VISIT_REASONS.map(r => (
-            <label key={r} className="flex items-center gap-1.5 cursor-pointer text-xs">
+            <label key={r} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
               <Checkbox checked={data.reasonForVisit.includes(r)} onCheckedChange={() => onChange({ ...data, reasonForVisit: toggleArray(data.reasonForVisit, r) })} />
               {r}
             </label>
@@ -322,10 +322,10 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
       </div>
 
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Have you experienced any of the following recently?</Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Have you experienced any of the following recently?</Label>
         <div className="flex flex-wrap gap-3 ml-1">
           {SYMPTOMS.map(s => (
-            <label key={s} className="flex items-center gap-1.5 cursor-pointer text-xs">
+            <label key={s} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
               <Checkbox checked={data.recentSymptoms.includes(s)} onCheckedChange={() => onChange({ ...data, recentSymptoms: toggleArray(data.recentSymptoms, s) })} />
               {s}
             </label>
@@ -339,19 +339,19 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
           { key: 'isSmoking' as const, label: 'Smoking' },
           { key: 'isDrinking' as const, label: 'Drinking' },
         ]).map(q => (
-          <div key={q.key} className="flex items-center justify-between p-2 rounded border bg-background">
-            <span className="text-xs">{q.label}</span>
+          <div key={q.key} className="flex items-center justify-between p-2.5 rounded-lg border border-border/50 bg-card hover:bg-muted/20 transition-colors">
+            <span className="text-xs font-medium">{q.label}</span>
             <div className="flex gap-1.5">
-              <button type="button" className={cn('px-3 py-0.5 rounded text-[10px] font-medium border', data[q.key] ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:bg-muted/50')} onClick={() => onChange({ ...data, [q.key]: true })}>Yes</button>
-              <button type="button" className={cn('px-3 py-0.5 rounded text-[10px] font-medium border', !data[q.key] ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:bg-muted/50')} onClick={() => onChange({ ...data, [q.key]: false })}>No</button>
+              <button type="button" className={cn('px-3.5 py-1 rounded-md text-[10px] font-semibold border transition-all', data[q.key] ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'border-border/60 text-muted-foreground hover:bg-muted/50')} onClick={() => onChange({ ...data, [q.key]: true })}>Yes</button>
+              <button type="button" className={cn('px-3.5 py-1 rounded-md text-[10px] font-semibold border transition-all', !data[q.key] ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'border-border/60 text-muted-foreground hover:bg-muted/50')} onClick={() => onChange({ ...data, [q.key]: false })}>No</button>
             </div>
           </div>
         ))}
       </div>
 
       <div>
-        <Label className="text-[11px] text-muted-foreground">Additional Notes</Label>
-        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Any other observations..." value={data.additionalNotes} onChange={(e) => onChange({ ...data, additionalNotes: e.target.value })} />
+        <Label className="text-[11px] text-muted-foreground font-medium">Additional Notes</Label>
+        <Textarea className="mt-1.5 min-h-[50px] text-sm border-border/50 focus:border-primary/40" placeholder="Any other observations..." value={data.additionalNotes} onChange={(e) => onChange({ ...data, additionalNotes: e.target.value })} />
       </div>
     </div>
   );
@@ -378,33 +378,39 @@ function ObjectStep({ data, onChange }: { data: ObjectData; onChange: (d: Object
   ];
 
   return (
-    <div className="space-y-5">
-      {/* Vitals - card style matching reference */}
+    <div className="space-y-6">
+      {/* Vitals - premium card style */}
       <div className="flex flex-wrap gap-3">
         {vitals.map(v => (
-          <div key={v.field} className="flex items-center gap-2 border rounded-lg px-3 py-2.5 bg-background min-w-[150px] flex-1">
-            <v.icon className="h-4 w-4 text-primary shrink-0" />
-            <span className="text-xs text-muted-foreground shrink-0">{v.label}</span>
-            <Input
-              className="h-7 text-sm border-0 p-0 focus-visible:ring-0 bg-transparent flex-1 min-w-[40px]"
-              placeholder=""
-              value={data[v.field] as string}
-              onChange={(e) => updateVital(v.field, e.target.value)}
-            />
-            <span className="text-[10px] text-muted-foreground shrink-0">{v.unit}</span>
+          <div key={v.field} className="flex items-center gap-2.5 border border-border/50 rounded-xl px-3.5 py-3 bg-card min-w-[150px] flex-1 hover:border-primary/30 transition-colors" style={{ boxShadow: '0 1px 3px hsl(var(--shadow-color, 222 40% 8%) / 0.03)' }}>
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <v.icon className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] text-muted-foreground font-medium block">{v.label}</span>
+              <Input
+                className="h-6 text-sm font-semibold border-0 p-0 focus-visible:ring-0 bg-transparent"
+                placeholder="—"
+                value={data[v.field] as string}
+                onChange={(e) => updateVital(v.field, e.target.value)}
+              />
+            </div>
+            <span className="text-[10px] text-muted-foreground/60 shrink-0">{v.unit}</span>
           </div>
         ))}
       </div>
 
       {/* Lab Tests */}
       <div>
-        <div className="flex items-center gap-1.5 mb-2">
-          <FlaskConical className="h-3.5 w-3.5 text-primary" />
+        <div className="flex items-center gap-2 mb-3">
+          <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
+            <FlaskConical className="h-3.5 w-3.5 text-primary" />
+          </div>
           <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Lab Tests</Label>
         </div>
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border border-border/50 rounded-xl overflow-hidden" style={{ boxShadow: '0 1px 3px hsl(var(--shadow-color, 222 40% 8%) / 0.03)' }}>
           {/* Header */}
-          <div className="grid grid-cols-[70px_120px_140px_1fr] gap-0 bg-muted/50 px-3 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="grid grid-cols-[70px_120px_140px_1fr] gap-0 bg-muted/40 px-3 py-2.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border/40">
             <span>Name</span>
             <span>Date</span>
             <span>Test With Medicine</span>
@@ -412,12 +418,12 @@ function ObjectStep({ data, onChange }: { data: ObjectData; onChange: (d: Object
           </div>
           {/* Rows */}
           {data.labs.map((lab, i) => (
-            <div key={lab.name} className="grid grid-cols-[70px_120px_140px_1fr] gap-0 px-3 py-2 border-t items-center">
-              <span className="text-xs font-medium">{lab.name}</span>
+            <div key={lab.name} className="grid grid-cols-[70px_120px_140px_1fr] gap-0 px-3 py-2 border-t border-border/30 items-center hover:bg-muted/10 transition-colors">
+              <span className="text-xs font-semibold text-foreground">{lab.name}</span>
               <Input
                 type="text"
                 placeholder="dd-mm-yyyy"
-                className="h-7 text-xs w-[110px] px-2"
+                className="h-7 text-xs w-[110px] px-2 border-border/50"
                 value={lab.date}
                 onChange={(e) => updateLab(i, 'date', e.target.value)}
               />
@@ -428,7 +434,7 @@ function ObjectStep({ data, onChange }: { data: ObjectData; onChange: (d: Object
                     name={`med-${i}`}
                     checked={lab.withMedicine}
                     onChange={() => updateLab(i, 'withMedicine', true)}
-                    className="w-3.5 h-3.5 accent-primary"
+                    className="w-3.5 h-3.5 accent-[hsl(var(--primary))]"
                   />
                   Yes
                 </label>
@@ -438,13 +444,13 @@ function ObjectStep({ data, onChange }: { data: ObjectData; onChange: (d: Object
                     name={`med-${i}`}
                     checked={!lab.withMedicine}
                     onChange={() => updateLab(i, 'withMedicine', false)}
-                    className="w-3.5 h-3.5 accent-primary"
+                    className="w-3.5 h-3.5 accent-[hsl(var(--primary))]"
                   />
                   No
                 </label>
               </div>
               <Input
-                className="h-7 text-xs"
+                className="h-7 text-xs border-border/50"
                 placeholder="Enter result"
                 value={lab.result}
                 onChange={(e) => updateLab(i, 'result', e.target.value)}
@@ -477,16 +483,16 @@ function AssessmentStep({ data, onChange }: { data: AssessmentData; onChange: (d
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Diagnosis</Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Diagnosis</Label>
         <div className="flex flex-wrap gap-2">
           {DIAGNOSES.map(d => (
             <button
               key={d} type="button" onClick={() => toggleDiag(d)}
               className={cn(
-                'px-3 py-1 rounded-full text-xs font-medium border transition-colors',
-                data.diagnoses.includes(d) ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                'px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all duration-200',
+                data.diagnoses.includes(d) ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-card text-muted-foreground border-border/60 hover:border-primary/50 hover:text-foreground'
               )}
             >
               {d}
@@ -494,19 +500,19 @@ function AssessmentStep({ data, onChange }: { data: AssessmentData; onChange: (d
           ))}
         </div>
         {data.diagnoses.length > 0 && (
-          <div className="flex gap-1.5 mt-2">
+          <div className="flex gap-1.5 mt-2.5">
             {data.diagnoses.map(d => (
-              <Badge key={d} className="text-[10px] bg-primary/10 text-primary border-primary/30">{d}</Badge>
+              <Badge key={d} className="text-[10px] bg-primary/10 text-primary border-primary/30 font-semibold">{d}</Badge>
             ))}
           </div>
         )}
       </div>
 
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Clinical Assessment</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Clinical Assessment</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {checkboxes.map(c => (
-            <label key={c.key} className="flex items-center gap-2 p-2 rounded border bg-background hover:bg-muted/30 cursor-pointer text-xs">
+            <label key={c.key} className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border/50 bg-card hover:bg-muted/20 cursor-pointer text-xs font-medium transition-colors">
               <Checkbox checked={data[c.key] as boolean} onCheckedChange={(v) => onChange({ ...data, [c.key]: !!v })} />
               {c.label}
             </label>
@@ -516,12 +522,12 @@ function AssessmentStep({ data, onChange }: { data: AssessmentData; onChange: (d
 
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Doctor Notes</Label>
-        <Textarea className="mt-1 min-h-[70px] text-sm" placeholder="Clinical findings, diagnosis details..." value={data.doctorNotes} onChange={(e) => onChange({ ...data, doctorNotes: e.target.value })} />
+        <Textarea className="mt-1.5 min-h-[70px] text-sm border-border/50 focus:border-primary/40" placeholder="Clinical findings, diagnosis details..." value={data.doctorNotes} onChange={(e) => onChange({ ...data, doctorNotes: e.target.value })} />
       </div>
 
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Comments</Label>
-        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Additional comments or recommendations..." value={data.comments} onChange={(e) => onChange({ ...data, comments: e.target.value })} />
+        <Textarea className="mt-1.5 min-h-[50px] text-sm border-border/50 focus:border-primary/40" placeholder="Additional comments or recommendations..." value={data.comments} onChange={(e) => onChange({ ...data, comments: e.target.value })} />
       </div>
     </div>
   );
@@ -572,10 +578,10 @@ function PlanStep({ plan, setPlan }: { plan: PlanData; setPlan: (p: PlanData) =>
   const removeMed = (index: number) => setMeds(meds.filter((_, i) => i !== index));
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Inside Rx */}
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Inside RX (In-House Pharmacy)</Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Inside RX (In-House Pharmacy)</Label>
         <Popover open={searchOpen} onOpenChange={setSearchOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start text-muted-foreground h-8 text-sm mb-2">
@@ -608,8 +614,8 @@ function PlanStep({ plan, setPlan }: { plan: PlanData; setPlan: (p: PlanData) =>
         </Popover>
 
         {meds.length > 0 && (
-          <div className="border rounded-lg overflow-hidden">
-            <div className="grid grid-cols-[minmax(100px,1fr)_60px_repeat(3,36px)_45px_45px_28px] gap-0 bg-muted/50 px-2 py-1.5 text-[8px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="border border-border/50 rounded-xl overflow-hidden" style={{ boxShadow: '0 1px 3px hsl(var(--shadow-color, 222 40% 8%) / 0.03)' }}>
+            <div className="grid grid-cols-[minmax(100px,1fr)_60px_repeat(3,36px)_45px_45px_28px] gap-0 bg-muted/40 px-2 py-2 text-[8px] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border/40">
               <span>Medicine Name</span>
               <span className="text-center">Qty Avail</span>
               <span className="text-center">M</span>
