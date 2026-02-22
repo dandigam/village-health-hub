@@ -5,16 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { EncounterPatient } from '@/pages/encounters/Encounters';
 import { useMedicines, useStockItems } from '@/hooks/useApiData';
 import { PatientHistoryPanel } from './PatientHistoryPanel';
 import {
+  MessageSquare,
   Activity,
   Stethoscope,
-  FileText,
   Pill,
   Check,
   ChevronRight,
@@ -26,6 +28,14 @@ import {
   Trash2,
   Send,
   AlertTriangle,
+  Thermometer,
+  Heart,
+  Scale,
+  Ruler,
+  Wind,
+  Droplets,
+  FlaskConical,
+  ImageIcon,
 } from 'lucide-react';
 
 interface EncounterWorkflowProps {
@@ -35,38 +45,55 @@ interface EncounterWorkflowProps {
 }
 
 const steps = [
-  { id: 1, label: 'Vitals & Reason', icon: Activity },
-  { id: 2, label: 'SOAP Notes', icon: FileText },
-  { id: 3, label: 'At Doctor', icon: Stethoscope },
-  { id: 4, label: 'Prescription', icon: Pill },
+  { id: 1, label: 'Subject', icon: MessageSquare },
+  { id: 2, label: 'Object', icon: Activity },
+  { id: 3, label: 'Assessment', icon: Stethoscope },
+  { id: 4, label: 'Plan', icon: Pill },
   { id: 5, label: 'Review', icon: ClipboardList },
 ];
 
 // ─── Form Data Types ─────────────────────────────────────────
-interface VitalsData {
+interface SubjectData {
+  chiefComplaint: string;
+  historyOfPresentIllness: string;
+  painLevel: string;
+  symptomDuration: string;
+  // Checkbox questions
+  hasFever: boolean;
+  hasCough: boolean;
+  hasBreathingDifficulty: boolean;
+  hasChestPain: boolean;
+  hasNausea: boolean;
+  hasHeadache: boolean;
+  // Yes/No
+  isSmoker: boolean;
+  isAlcoholConsumer: boolean;
+  hasAllergies: boolean;
+  allergyDetails: string;
+  // Free text
+  additionalNotes: string;
+}
+
+interface ObjectData {
   bp: string;
   temp: string;
   pulse: string;
   weight: string;
   height: string;
   spo2: string;
-  chiefComplaint: string;
-  nurseNotes: string;
+  respiratoryRate: string;
+  bmi: string;
+  labNotes: string;
 }
 
-interface SOAPData {
-  subjective: string;
-  objective: string;
-  assessment: string;
-  plan: string;
-}
-
-interface ConsultationData {
-  observations: string;
-  diagnosis: string;
-  recommendations: string;
-  labTests: string;
-  followUp: string;
+interface AssessmentData {
+  primaryDiagnosis: boolean;
+  secondaryDiagnosis: boolean;
+  chronicCondition: boolean;
+  acuteCondition: boolean;
+  followUpRequired: boolean;
+  doctorNotes: string;
+  comments: string;
 }
 
 interface PrescriptionMed {
@@ -80,24 +107,36 @@ interface PrescriptionMed {
   stockAvailable: number;
 }
 
+interface PlanData {
+  insideRx: PrescriptionMed[];
+  outsideRx: string;
+  imaging: string;
+}
+
 export function EncounterWorkflow({ encounter, onStepChange, onComplete }: EncounterWorkflowProps) {
   const [activeStep, setActiveStep] = useState(encounter.currentStep || 1);
 
-  // Shared form state
-  const [vitals, setVitals] = useState<VitalsData>({
-    bp: '', temp: '', pulse: '', weight: '', height: '', spo2: '',
-    chiefComplaint: '', nurseNotes: '',
+  const [subject, setSubject] = useState<SubjectData>({
+    chiefComplaint: '', historyOfPresentIllness: '', painLevel: '', symptomDuration: '',
+    hasFever: false, hasCough: false, hasBreathingDifficulty: false, hasChestPain: false, hasNausea: false, hasHeadache: false,
+    isSmoker: false, isAlcoholConsumer: false, hasAllergies: false, allergyDetails: '',
+    additionalNotes: '',
   });
-  const [soap, setSOAP] = useState<SOAPData>({
-    subjective: '', objective: '', assessment: '', plan: '',
+  const [object, setObject] = useState<ObjectData>({
+    bp: '', temp: '', pulse: '', weight: '', height: '', spo2: '', respiratoryRate: '', bmi: '', labNotes: '',
   });
-  const [consultation, setConsultation] = useState<ConsultationData>({
-    observations: '', diagnosis: '', recommendations: '', labTests: '', followUp: '',
+  const [assessment, setAssessment] = useState<AssessmentData>({
+    primaryDiagnosis: false, secondaryDiagnosis: false, chronicCondition: false, acuteCondition: false, followUpRequired: false,
+    doctorNotes: '', comments: '',
   });
-  const [meds, setMeds] = useState<PrescriptionMed[]>([
-    { id: 'rx-1', name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15, stockAvailable: 1000 },
-    { id: 'rx-2', name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10, stockAvailable: 350 },
-  ]);
+  const [plan, setPlan] = useState<PlanData>({
+    insideRx: [
+      { id: 'rx-1', name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15, stockAvailable: 1000 },
+      { id: 'rx-2', name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10, stockAvailable: 350 },
+    ],
+    outsideRx: '',
+    imaging: '',
+  });
 
   const handleStep = (step: number) => {
     setActiveStep(step);
@@ -191,11 +230,11 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
       {/* Step Content */}
       <ScrollArea className="flex-1">
         <div className="p-4">
-          {activeStep === 1 && <VitalsStep data={vitals} onChange={setVitals} />}
-          {activeStep === 2 && <SOAPStep data={soap} onChange={setSOAP} />}
-          {activeStep === 3 && <ConsultationStep data={consultation} onChange={setConsultation} />}
-          {activeStep === 4 && <PrescriptionStep meds={meds} setMeds={setMeds} />}
-          {activeStep === 5 && <ReviewStep vitals={vitals} soap={soap} consultation={consultation} meds={meds} />}
+          {activeStep === 1 && <SubjectStep data={subject} onChange={setSubject} />}
+          {activeStep === 2 && <ObjectStep data={object} onChange={setObject} />}
+          {activeStep === 3 && <AssessmentStep data={assessment} onChange={setAssessment} />}
+          {activeStep === 4 && <PlanStep plan={plan} setPlan={setPlan} />}
+          {activeStep === 5 && <ReviewStep subject={subject} object={object} assessment={assessment} plan={plan} />}
         </div>
       </ScrollArea>
 
@@ -217,7 +256,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
           ) : (
             <Button size="sm" className="h-7 sm:h-8 text-[10px] sm:text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" onClick={onComplete}>
               <Send className="h-3 w-3 mr-1" />
-              Send
+              Send to Pharmacy
             </Button>
           )}
         </div>
@@ -226,41 +265,154 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
   );
 }
 
-// ─── Step 1: Vitals ──────────────────────────────────────────
-function VitalsStep({ data, onChange }: { data: VitalsData; onChange: (d: VitalsData) => void }) {
-  const update = (field: keyof VitalsData, value: string) => onChange({ ...data, [field]: value });
+// ─── Step 1: Subject ──────────────────────────────────────────
+function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: SubjectData) => void }) {
+  const update = <K extends keyof SubjectData>(field: K, value: SubjectData[K]) => onChange({ ...data, [field]: value });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Vitals</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Chief Complaint</Label>
+        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="What brings you in today?" value={data.chiefComplaint} onChange={(e) => update('chiefComplaint', e.target.value)} />
+      </div>
+
+      <div>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">History of Present Illness</Label>
+        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Describe onset, duration, severity..." value={data.historyOfPresentIllness} onChange={(e) => update('historyOfPresentIllness', e.target.value)} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-[11px] text-muted-foreground">Pain Level (0-10)</Label>
+          <Input className="h-8 text-sm mt-1" type="number" min="0" max="10" placeholder="0" value={data.painLevel} onChange={(e) => update('painLevel', e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-[11px] text-muted-foreground">Symptom Duration</Label>
+          <Input className="h-8 text-sm mt-1" placeholder="e.g., 3 days" value={data.symptomDuration} onChange={(e) => update('symptomDuration', e.target.value)} />
+        </div>
+      </div>
+
+      {/* Checkbox symptom questions */}
+      <div>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Symptoms Present</Label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {([
-            { label: 'BP (mmHg)', field: 'bp' as const, placeholder: '120/80' },
-            { label: 'Temp (°F)', field: 'temp' as const, placeholder: '98.6' },
-            { label: 'Pulse (bpm)', field: 'pulse' as const, placeholder: '72' },
-            { label: 'Weight (kg)', field: 'weight' as const, placeholder: '65' },
-            { label: 'Height (cm)', field: 'height' as const, placeholder: '170' },
-            { label: 'SpO2 (%)', field: 'spo2' as const, placeholder: '98' },
-          ]).map(v => (
-            <div key={v.label}>
-              <Label className="text-[11px] text-muted-foreground">{v.label}</Label>
-              <Input className="h-8 text-sm mt-1" placeholder={v.placeholder} value={data[v.field]} onChange={(e) => update(v.field, e.target.value)} />
-            </div>
+            { key: 'hasFever' as const, label: 'Fever' },
+            { key: 'hasCough' as const, label: 'Cough' },
+            { key: 'hasBreathingDifficulty' as const, label: 'Breathing Difficulty' },
+            { key: 'hasChestPain' as const, label: 'Chest Pain' },
+            { key: 'hasNausea' as const, label: 'Nausea / Vomiting' },
+            { key: 'hasHeadache' as const, label: 'Headache' },
+          ]).map(s => (
+            <label key={s.key} className="flex items-center gap-2 p-2 rounded-md border bg-background hover:bg-muted/30 cursor-pointer text-xs">
+              <Checkbox checked={data[s.key]} onCheckedChange={(v) => update(s.key, !!v)} />
+              {s.label}
+            </label>
           ))}
         </div>
       </div>
+
+      {/* Yes/No questions */}
       <div>
-        <Label className="text-[11px] text-muted-foreground">Chief Complaint / Reason for Visit</Label>
-        <Textarea className="mt-1 min-h-[60px] text-sm" placeholder="Describe the patient's primary complaint..." value={data.chiefComplaint} onChange={(e) => update('chiefComplaint', e.target.value)} />
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Social / Allergy History</Label>
+        <div className="space-y-2">
+          {([
+            { key: 'isSmoker' as const, label: 'Does the patient smoke?' },
+            { key: 'isAlcoholConsumer' as const, label: 'Does the patient consume alcohol?' },
+            { key: 'hasAllergies' as const, label: 'Does the patient have any known allergies?' },
+          ]).map(q => (
+            <div key={q.key} className="flex items-center justify-between p-2 rounded-md border bg-background">
+              <span className="text-xs">{q.label}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className={cn('px-3 py-1 rounded text-[10px] font-medium border transition-colors', data[q.key] ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:bg-muted/50')}
+                  onClick={() => update(q.key, true)}
+                >Yes</button>
+                <button
+                  type="button"
+                  className={cn('px-3 py-1 rounded text-[10px] font-medium border transition-colors', !data[q.key] ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:bg-muted/50')}
+                  onClick={() => update(q.key, false)}
+                >No</button>
+              </div>
+            </div>
+          ))}
+          {data.hasAllergies && (
+            <Input className="h-8 text-sm" placeholder="List allergies..." value={data.allergyDetails} onChange={(e) => update('allergyDetails', e.target.value)} />
+          )}
+        </div>
       </div>
+
       <div>
-        <Label className="text-[11px] text-muted-foreground">Nurse Notes (Optional)</Label>
-        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Additional observations..." value={data.nurseNotes} onChange={(e) => update('nurseNotes', e.target.value)} />
+        <Label className="text-[11px] text-muted-foreground">Additional Notes</Label>
+        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Any other observations..." value={data.additionalNotes} onChange={(e) => update('additionalNotes', e.target.value)} />
       </div>
+    </div>
+  );
+}
+
+// ─── Step 2: Object (Vitals & Labs) ──────────────────────────
+function ObjectStep({ data, onChange }: { data: ObjectData; onChange: (d: ObjectData) => void }) {
+  const update = (field: keyof ObjectData, value: string) => {
+    const newData = { ...data, [field]: value };
+    // Auto-calculate BMI
+    if ((field === 'weight' || field === 'height') && newData.weight && newData.height) {
+      const w = parseFloat(newData.weight);
+      const h = parseFloat(newData.height) / 100;
+      if (w > 0 && h > 0) {
+        newData.bmi = (w / (h * h)).toFixed(1);
+      }
+    }
+    onChange(newData);
+  };
+
+  const vitals = [
+    { label: 'BP', field: 'bp' as const, placeholder: '120/80', unit: 'mmHg', icon: Droplets },
+    { label: 'Temp', field: 'temp' as const, placeholder: '98.6', unit: '°F', icon: Thermometer },
+    { label: 'Pulse', field: 'pulse' as const, placeholder: '72', unit: 'bpm', icon: Heart },
+    { label: 'Weight', field: 'weight' as const, placeholder: '65', unit: 'kg', icon: Scale },
+    { label: 'Height', field: 'height' as const, placeholder: '170', unit: 'cm', icon: Ruler },
+    { label: 'SpO2', field: 'spo2' as const, placeholder: '98', unit: '%', icon: Wind },
+    { label: 'RR', field: 'respiratoryRate' as const, placeholder: '18', unit: '/min', icon: Wind },
+    { label: 'BMI', field: 'bmi' as const, placeholder: 'Auto', unit: '', icon: Activity },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Vitals</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {vitals.map(v => (
+          <div key={v.field} className="border rounded-lg p-2.5 bg-background">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <v.icon className="h-3.5 w-3.5 text-accent" />
+              <span className="text-[10px] text-muted-foreground font-medium">{v.label}</span>
+              {v.unit && <span className="text-[9px] text-muted-foreground/60">({v.unit})</span>}
+            </div>
+            <Input
+              className="h-7 text-sm"
+              placeholder={v.placeholder}
+              value={data[v.field]}
+              onChange={(e) => update(v.field, e.target.value)}
+              readOnly={v.field === 'bmi'}
+            />
+          </div>
+        ))}
+      </div>
+
       <div>
-        <Label className="text-[11px] text-muted-foreground">Upload Lab Reports / Images</Label>
-        <div className="mt-1 border-2 border-dashed rounded-lg p-4 text-center hover:bg-muted/30 transition-colors cursor-pointer">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <FlaskConical className="h-3.5 w-3.5 text-accent" />
+          <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Lab Notes / Orders</Label>
+        </div>
+        <Textarea className="min-h-[60px] text-sm" placeholder="Lab tests ordered, pending results..." value={data.labNotes} onChange={(e) => update('labNotes', e.target.value)} />
+      </div>
+
+      <div>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <Upload className="h-3.5 w-3.5 text-accent" />
+          <Label className="text-[11px] text-muted-foreground">Upload Lab Reports / Images</Label>
+        </div>
+        <div className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-muted/30 transition-colors cursor-pointer">
           <Upload className="h-5 w-5 mx-auto text-muted-foreground" />
           <p className="text-xs text-muted-foreground mt-1.5">Drop files or click to upload</p>
         </div>
@@ -269,71 +421,54 @@ function VitalsStep({ data, onChange }: { data: VitalsData; onChange: (d: Vitals
   );
 }
 
-// ─── Step 2: SOAP Notes ──────────────────────────────────────
-function SOAPStep({ data, onChange }: { data: SOAPData; onChange: (d: SOAPData) => void }) {
-  const update = (field: keyof SOAPData, value: string) => onChange({ ...data, [field]: value });
+// ─── Step 3: Assessment ──────────────────────────────────────
+function AssessmentStep({ data, onChange }: { data: AssessmentData; onChange: (d: AssessmentData) => void }) {
+  const updateBool = (field: keyof AssessmentData, value: boolean) => onChange({ ...data, [field]: value });
+  const updateStr = (field: keyof AssessmentData, value: string) => onChange({ ...data, [field]: value });
+
+  const checkboxes = [
+    { key: 'primaryDiagnosis' as const, label: 'Primary Diagnosis Confirmed' },
+    { key: 'secondaryDiagnosis' as const, label: 'Secondary Diagnosis Present' },
+    { key: 'chronicCondition' as const, label: 'Chronic Condition' },
+    { key: 'acuteCondition' as const, label: 'Acute Condition' },
+    { key: 'followUpRequired' as const, label: 'Follow-up Required' },
+  ];
 
   return (
     <div className="space-y-4">
-      {([
-        { label: 'Subjective', field: 'subjective' as const, placeholder: 'Patient reports...' },
-        { label: 'Objective', field: 'objective' as const, placeholder: 'On examination...' },
-        { label: 'Assessment', field: 'assessment' as const, placeholder: 'Clinical impression...' },
-        { label: 'Plan', field: 'plan' as const, placeholder: 'Treatment plan...' },
-      ]).map(s => (
-        <div key={s.label}>
-          <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</Label>
-          <Textarea className="mt-1 min-h-[70px] text-sm" placeholder={s.placeholder} value={data[s.field]} onChange={(e) => update(s.field, e.target.value)} />
-        </div>
-      ))}
       <div>
-        <Label className="text-[11px] text-muted-foreground">Attach Documents</Label>
-        <div className="mt-1 border-2 border-dashed rounded-lg p-3 text-center hover:bg-muted/30 transition-colors cursor-pointer">
-          <Upload className="h-4 w-4 mx-auto text-muted-foreground" />
-          <p className="text-[10px] text-muted-foreground mt-1">Images, lab results, documents</p>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Clinical Assessment</Label>
+        <div className="space-y-2">
+          {checkboxes.map(c => (
+            <label key={c.key} className="flex items-center gap-2.5 p-2.5 rounded-md border bg-background hover:bg-muted/30 cursor-pointer text-sm">
+              <Checkbox checked={data[c.key] as boolean} onCheckedChange={(v) => updateBool(c.key, !!v)} />
+              {c.label}
+            </label>
+          ))}
         </div>
+      </div>
+
+      <div>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Doctor Notes</Label>
+        <Textarea className="mt-1 min-h-[80px] text-sm" placeholder="Clinical findings, diagnosis details..." value={data.doctorNotes} onChange={(e) => updateStr('doctorNotes', e.target.value)} />
+      </div>
+
+      <div>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Comments</Label>
+        <Textarea className="mt-1 min-h-[60px] text-sm" placeholder="Additional comments or recommendations..." value={data.comments} onChange={(e) => updateStr('comments', e.target.value)} />
       </div>
     </div>
   );
 }
 
-// ─── Step 3: At Doctor ───────────────────────────────────────
-function ConsultationStep({ data, onChange }: { data: ConsultationData; onChange: (d: ConsultationData) => void }) {
-  const update = (field: keyof ConsultationData, value: string) => onChange({ ...data, [field]: value });
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Doctor Observations</Label>
-        <Textarea className="mt-1 min-h-[70px] text-sm" placeholder="Clinical findings and observations..." value={data.observations} onChange={(e) => update('observations', e.target.value)} />
-      </div>
-      <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Diagnosis</Label>
-        <Input className="h-8 text-sm mt-1" placeholder="Add diagnosis..." value={data.diagnosis} onChange={(e) => update('diagnosis', e.target.value)} />
-      </div>
-      <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendations</Label>
-        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Instructions and recommendations..." value={data.recommendations} onChange={(e) => update('recommendations', e.target.value)} />
-      </div>
-      <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Lab Tests Ordered</Label>
-        <Input className="h-8 text-sm mt-1" placeholder="e.g., CBC, Lipid Profile, ECG..." value={data.labTests} onChange={(e) => update('labTests', e.target.value)} />
-      </div>
-      <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Follow-up</Label>
-        <Input className="h-8 text-sm mt-1" placeholder="e.g., 2 weeks" value={data.followUp} onChange={(e) => update('followUp', e.target.value)} />
-      </div>
-    </div>
-  );
-}
-
-// ─── Step 4: Prescription ────────────────────────────────────
-function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds: (m: PrescriptionMed[]) => void }) {
+// ─── Step 4: Plan ────────────────────────────────────────────
+function PlanStep({ plan, setPlan }: { plan: PlanData; setPlan: (p: PlanData) => void }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data: medicines = [] } = useMedicines();
   const { data: stockItems = [] } = useStockItems();
+  const meds = plan.insideRx;
 
   const availableMedicines = useMemo(() => {
     return medicines.map(medicine => {
@@ -346,6 +481,8 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
     if (!searchQuery) return availableMedicines;
     return availableMedicines.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [availableMedicines, searchQuery]);
+
+  const setMeds = (newMeds: PrescriptionMed[]) => setPlan({ ...plan, insideRx: newMeds });
 
   const addMedicine = (medicine: typeof availableMedicines[0]) => {
     if (meds.some(item => item.name === medicine.name)) {
@@ -377,9 +514,10 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Inside Rx */}
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Add Medicine</Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Inside Rx (In-House Pharmacy)</Label>
         <Popover open={searchOpen} onOpenChange={setSearchOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start text-muted-foreground h-8 text-sm">
@@ -392,7 +530,7 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
               <CommandInput placeholder="Search medicine..." value={searchQuery} onValueChange={setSearchQuery} className="h-9 text-sm" />
               <CommandList className="max-h-[280px]">
                 <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">No medicine found.</CommandEmpty>
-                <CommandGroup heading="Available Medicines" className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:font-semibold">
+                <CommandGroup heading="Available Medicines">
                   {filteredMedicines.map((medicine) => {
                     const isAdded = meds.some(item => item.name === medicine.name);
                     return (
@@ -401,10 +539,7 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
                         value={medicine.name}
                         onSelect={() => addMedicine(medicine)}
                         disabled={isAdded}
-                        className={cn(
-                          "flex items-center justify-between py-2 px-3 rounded-md cursor-pointer",
-                          isAdded && "opacity-40 cursor-not-allowed"
-                        )}
+                        className={cn("flex items-center justify-between py-2 px-3 rounded-md cursor-pointer", isAdded && "opacity-40 cursor-not-allowed")}
                       >
                         <div className="flex items-center gap-2.5">
                           <Pill className="h-3.5 w-3.5 text-muted-foreground" />
@@ -413,19 +548,9 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
                             <p className="text-[10px] text-muted-foreground">{medicine.category}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "text-[10px] font-medium px-2 py-0.5 rounded-full",
-                            medicine.qtyAvailable > 50
-                              ? "bg-muted text-foreground"
-                              : medicine.qtyAvailable > 0
-                                ? "bg-muted text-muted-foreground"
-                                : "bg-destructive/10 text-destructive"
-                          )}>
-                            Stock: {medicine.qtyAvailable}
-                          </span>
-                          {isAdded && <span className="text-[10px] text-muted-foreground italic">Added</span>}
-                        </div>
+                        <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full", medicine.qtyAvailable > 50 ? "bg-muted text-foreground" : medicine.qtyAvailable > 0 ? "bg-muted text-muted-foreground" : "bg-destructive/10 text-destructive")}>
+                          Stock: {medicine.qtyAvailable}
+                        </span>
                       </CommandItem>
                     );
                   })}
@@ -434,99 +559,117 @@ function PrescriptionStep({ meds, setMeds }: { meds: PrescriptionMed[]; setMeds:
             </Command>
           </PopoverContent>
         </Popover>
-      </div>
 
-      {meds.length > 0 && (
-        <div className="border rounded-lg overflow-x-auto">
-          <div className="grid grid-cols-[minmax(120px,1fr)_40px_40px_40px_50px_50px_32px] sm:grid-cols-[1fr_44px_44px_44px_56px_56px_32px] gap-0 bg-muted/50 px-2 sm:px-3 py-1.5 text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider min-w-[420px]">
-            <span>Medicine</span>
-            <span className="text-center">M</span>
-            <span className="text-center">A</span>
-            <span className="text-center">N</span>
-            <span className="text-center">Days</span>
-            <span className="text-center">Qty</span>
-            <span></span>
-          </div>
-          {meds.map((med, i) => {
-            const exceedsStock = med.qty > med.stockAvailable;
-            return (
-              <div key={med.id} className={cn(
-                "grid grid-cols-[minmax(120px,1fr)_40px_40px_40px_50px_50px_32px] sm:grid-cols-[1fr_44px_44px_44px_56px_56px_32px] gap-0 px-2 sm:px-3 py-1.5 border-t text-sm items-center group min-w-[420px]",
-                exceedsStock && "bg-destructive/5"
-              )}>
-                <div className="min-w-0">
-                  <span className="truncate text-[10px] sm:text-xs font-medium block">{med.name}</span>
-                  {exceedsStock && (
-                    <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-destructive mt-0.5">
-                      <AlertTriangle className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                      Short by {med.qty - med.stockAvailable}
-                    </span>
-                  )}
+        {meds.length > 0 && (
+          <div className="border rounded-lg overflow-x-auto mt-2">
+            <div className="grid grid-cols-[minmax(120px,1fr)_40px_40px_40px_50px_50px_32px] gap-0 bg-muted/50 px-2 py-1.5 text-[9px] font-medium text-muted-foreground uppercase tracking-wider min-w-[420px]">
+              <span>Medicine</span>
+              <span className="text-center">M</span>
+              <span className="text-center">A</span>
+              <span className="text-center">N</span>
+              <span className="text-center">Days</span>
+              <span className="text-center">Qty</span>
+              <span></span>
+            </div>
+            {meds.map((med, i) => {
+              const exceedsStock = med.qty > med.stockAvailable;
+              return (
+                <div key={med.id} className={cn("grid grid-cols-[minmax(120px,1fr)_40px_40px_40px_50px_50px_32px] gap-0 px-2 py-1.5 border-t text-sm items-center group min-w-[420px]", exceedsStock && "bg-destructive/5")}>
+                  <div className="min-w-0">
+                    <span className="truncate text-[10px] font-medium block">{med.name}</span>
+                    {exceedsStock && (
+                      <span className="flex items-center gap-1 text-[9px] text-destructive mt-0.5">
+                        <AlertTriangle className="h-2.5 w-2.5" />Short by {med.qty - med.stockAvailable}
+                      </span>
+                    )}
+                  </div>
+                  <Input type="number" min={0} max={9} value={med.m} onChange={(e) => updateMed(i, 'm', Number(e.target.value))} className="h-6 w-9 text-center text-[10px] mx-auto p-0" />
+                  <Input type="number" min={0} max={9} value={med.a} onChange={(e) => updateMed(i, 'a', Number(e.target.value))} className="h-6 w-9 text-center text-[10px] mx-auto p-0" />
+                  <Input type="number" min={0} max={9} value={med.n} onChange={(e) => updateMed(i, 'n', Number(e.target.value))} className="h-6 w-9 text-center text-[10px] mx-auto p-0" />
+                  <Input type="number" min={1} max={365} value={med.days} onChange={(e) => updateMed(i, 'days', Number(e.target.value))} className="h-6 w-10 text-center text-[10px] mx-auto p-0" />
+                  <span className={cn("text-center text-[10px] font-semibold", exceedsStock && "text-destructive")}>{med.qty}</span>
+                  <Button variant="ghost" size="icon" className="h-5 w-5 opacity-60 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMed(i)}>
+                    <Trash2 className="h-2.5 w-2.5" />
+                  </Button>
                 </div>
-                <Input type="number" min={0} max={9} value={med.m} onChange={(e) => updateMed(i, 'm', Number(e.target.value))} className="h-6 sm:h-7 w-9 sm:w-10 text-center text-[10px] sm:text-xs mx-auto p-0" />
-                <Input type="number" min={0} max={9} value={med.a} onChange={(e) => updateMed(i, 'a', Number(e.target.value))} className="h-6 sm:h-7 w-9 sm:w-10 text-center text-[10px] sm:text-xs mx-auto p-0" />
-                <Input type="number" min={0} max={9} value={med.n} onChange={(e) => updateMed(i, 'n', Number(e.target.value))} className="h-6 sm:h-7 w-9 sm:w-10 text-center text-[10px] sm:text-xs mx-auto p-0" />
-                <Input type="number" min={1} max={365} value={med.days} onChange={(e) => updateMed(i, 'days', Number(e.target.value))} className="h-6 sm:h-7 w-10 sm:w-12 text-center text-[10px] sm:text-xs mx-auto p-0" />
-                <span className={cn("text-center text-[10px] sm:text-xs font-semibold", exceedsStock && "text-destructive")}>{med.qty}</span>
-                <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6 opacity-60 sm:opacity-0 sm:group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => removeMed(i)}>
-                  <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" className="h-7 text-xs">
-          <Send className="h-3 w-3 mr-1" />
-          Send to Pharmacy
-        </Button>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Outside Rx */}
+      <div>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Outside Rx (External Pharmacy)</Label>
+        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Medicines to be purchased outside..." value={plan.outsideRx} onChange={(e) => setPlan({ ...plan, outsideRx: e.target.value })} />
+      </div>
+
+      {/* Imaging */}
+      <div>
+        <div className="flex items-center gap-1.5 mb-1">
+          <ImageIcon className="h-3.5 w-3.5 text-accent" />
+          <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Imaging</Label>
+        </div>
+        <Textarea className="min-h-[50px] text-sm" placeholder="X-Ray, MRI, CT Scan orders..." value={plan.imaging} onChange={(e) => setPlan({ ...plan, imaging: e.target.value })} />
+      </div>
+
+      <Button size="sm" className="h-8 text-xs bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white">
+        <Send className="h-3.5 w-3.5 mr-1.5" />
+        Send to Pharmacy
+      </Button>
     </div>
   );
 }
 
-// ─── Step 5: Review (Dynamic) ────────────────────────────────
-function ReviewStep({ vitals, soap, consultation, meds }: {
-  vitals: VitalsData;
-  soap: SOAPData;
-  consultation: ConsultationData;
-  meds: PrescriptionMed[];
+// ─── Step 5: Review ──────────────────────────────────────────
+function ReviewStep({ subject, object, assessment, plan }: {
+  subject: SubjectData;
+  object: ObjectData;
+  assessment: AssessmentData;
+  plan: PlanData;
 }) {
   const vitalsText = [
-    vitals.bp && `BP: ${vitals.bp}`,
-    vitals.temp && `Temp: ${vitals.temp}°F`,
-    vitals.pulse && `Pulse: ${vitals.pulse}`,
-    vitals.weight && `Weight: ${vitals.weight}kg`,
-    vitals.height && `Height: ${vitals.height}cm`,
-    vitals.spo2 && `SpO2: ${vitals.spo2}%`,
+    object.bp && `BP: ${object.bp}`,
+    object.temp && `Temp: ${object.temp}°F`,
+    object.pulse && `Pulse: ${object.pulse}`,
+    object.weight && `Wt: ${object.weight}kg`,
+    object.height && `Ht: ${object.height}cm`,
+    object.spo2 && `SpO2: ${object.spo2}%`,
+    object.bmi && `BMI: ${object.bmi}`,
+  ].filter(Boolean).join(' • ');
+
+  const symptomsText = [
+    subject.hasFever && 'Fever',
+    subject.hasCough && 'Cough',
+    subject.hasBreathingDifficulty && 'Breathing Difficulty',
+    subject.hasChestPain && 'Chest Pain',
+    subject.hasNausea && 'Nausea',
+    subject.hasHeadache && 'Headache',
   ].filter(Boolean).join(', ');
 
-  const prescriptionText = meds.map(m =>
+  const prescriptionText = plan.insideRx.map(m =>
     `${m.name} (${m.m}-${m.a}-${m.n} x ${m.days}d = ${m.qty})`
   ).join(', ');
 
   const sections = [
     { label: 'Vitals', value: vitalsText, icon: Activity },
-    { label: 'Chief Complaint', value: vitals.chiefComplaint, icon: FileText },
-    { label: 'SOAP - Subjective', value: soap.subjective, icon: FileText },
-    { label: 'SOAP - Assessment', value: soap.assessment, icon: FileText },
-    { label: 'Diagnosis', value: consultation.diagnosis, icon: Stethoscope },
-    { label: 'Recommendations', value: consultation.recommendations, icon: ClipboardList },
-    { label: 'Lab Tests', value: consultation.labTests, icon: Activity },
-    { label: 'Prescription', value: prescriptionText, icon: Pill },
-    { label: 'Follow-up', value: consultation.followUp, icon: Stethoscope },
+    { label: 'Chief Complaint', value: subject.chiefComplaint, icon: MessageSquare },
+    { label: 'Symptoms', value: symptomsText, icon: MessageSquare },
+    { label: 'Assessment', value: assessment.doctorNotes, icon: Stethoscope },
+    { label: 'Inside Rx', value: prescriptionText, icon: Pill },
+    { label: 'Outside Rx', value: plan.outsideRx, icon: Pill },
+    { label: 'Imaging', value: plan.imaging, icon: ImageIcon },
+    { label: 'Comments', value: assessment.comments, icon: ClipboardList },
   ];
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Visit Summary</h3>
-      <div className="space-y-3">
+    <div className="space-y-3">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Visit Summary</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {sections.map(item => {
           const hasValue = !!item.value;
           return (
-            <div key={item.label} className="border rounded-lg p-3">
+            <div key={item.label} className="border rounded-lg p-2.5">
               <div className="flex items-center gap-1.5 mb-1">
                 <item.icon className="h-3 w-3 text-muted-foreground" />
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{item.label}</p>
@@ -541,7 +684,7 @@ function ReviewStep({ vitals, soap, consultation, meds }: {
 
       <div>
         <Label className="text-[11px] text-muted-foreground">Doctor's Final Notes</Label>
-        <Textarea className="mt-1 min-h-[60px] text-sm" placeholder="Any additional notes before completing the visit..." />
+        <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Any additional notes before completing the visit..." />
       </div>
     </div>
   );

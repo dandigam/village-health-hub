@@ -21,6 +21,7 @@ export const routeAccess: Record<string, AppRole[]> = {
   'distribution-orders': ["WARE_HOUSE", "ADMIN"],
   doctors: ["ADMIN"],
   reports: ["ADMIN"],
+  warehouses: ["ADMIN"],
 };
 
 /**
