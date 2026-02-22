@@ -59,8 +59,8 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
     <TooltipProvider delayDuration={0}>
       <aside 
         className={cn(
-          "relative bg-gradient-to-b from-[hsl(220,80%,18%)] via-sidebar to-[hsl(220,70%,12%)] flex flex-col border-r border-white/5 shadow-2xl transition-all duration-300 ease-in-out",
-          mobile ? "w-full min-h-screen" : "hidden md:flex min-h-screen",
+          "relative bg-gradient-to-b from-[hsl(220,80%,18%)] via-sidebar to-[hsl(220,70%,12%)] flex flex-col border-r border-white/5 shadow-2xl transition-all duration-300 ease-in-out h-screen sticky top-0",
+          mobile ? "w-full h-full" : "hidden md:flex",
           !mobile && (collapsed ? "w-[68px]" : "w-48"),
         )}
       >
@@ -75,7 +75,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
         )}
 
         {/* Navigation */}
-        <nav className="py-4 px-2 overflow-y-auto flex-1">
+        <nav className="pt-4 px-2 overflow-y-auto flex-1 min-h-0">
           <ul className="space-y-0.5">
             {mainNavItems.map((item) => (
               <li key={item.href}>
@@ -126,7 +126,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
         </nav>
 
         {/* Settings */}
-        <div className="p-2 border-t border-white/10">
+        <div className="p-2 border-t border-white/10 shrink-0">
           {collapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
