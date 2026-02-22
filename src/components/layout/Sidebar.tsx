@@ -52,16 +52,16 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
     if (onNavigate) onNavigate();
   };
 
-  const activeClass = 'bg-white/15 text-white shadow-sm';
-  const inactiveClass = 'text-white/70 hover:text-white hover:bg-white/8';
+  const activeClass = 'bg-white/20 text-white shadow-md shadow-black/10 border border-white/10';
+  const inactiveClass = 'text-white/65 hover:text-white hover:bg-white/10 border border-transparent';
 
   return (
     <TooltipProvider delayDuration={0}>
       <aside 
         className={cn(
-          "relative bg-gradient-to-b from-sidebar to-[hsl(var(--sidebar-accent))] flex flex-col border-r border-sidebar-border shadow-xl transition-all duration-300 ease-in-out",
+          "relative bg-gradient-to-b from-[hsl(220,80%,18%)] via-sidebar to-[hsl(220,70%,12%)] flex flex-col border-r border-white/5 shadow-2xl transition-all duration-300 ease-in-out",
           mobile ? "w-full min-h-screen" : "hidden md:flex min-h-screen",
-          !mobile && (collapsed ? "w-[68px]" : "w-44"),
+          !mobile && (collapsed ? "w-[68px]" : "w-48"),
         )}
       >
         {/* Header with Logo */}
@@ -69,7 +69,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
           "flex items-center h-14 sm:h-16 border-b border-white/10 transition-all duration-300",
           collapsed ? "justify-center px-2" : "px-4 gap-3"
         )}>
-          <div className="h-9 w-9 rounded-lg bg-white/15 flex items-center justify-center shadow-lg shrink-0">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 shrink-0 border border-white/10">
             <Heart className="h-5 w-5 text-white" fill="white" />
           </div>
           <div className={cn(

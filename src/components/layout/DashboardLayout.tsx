@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { PageTransition } from './PageTransition';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -26,7 +27,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Sidebar />
         )}
         <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto min-w-0">
-          {children}
+          <PageTransition>
+            {children}
+          </PageTransition>
         </main>
       </div>
     </div>
