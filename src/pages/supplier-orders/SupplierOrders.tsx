@@ -182,7 +182,7 @@ export default function SupplierOrders() {
       }
     } else {
       // Non-draft orders - fetch full details from API
-      setEditOrder({ id: order.id, loading: true }); // Open dialog with loading state
+      setEditOrder({ id: order.id, loading: true } as any); // Open dialog with loading state
       try {
         const response = await api.get(`/supplier-orders/${order.id}`, null);
         if (response.data) {
@@ -318,7 +318,7 @@ export default function SupplierOrders() {
   useEffect(() => {
     if (reqSupplierId) {
       const meds = supplierMedicinesList(reqSupplierId);
-      setReqItems(meds.map(m => ({ medicineId: m.id, requestedQty: 0 })));
+      setReqItems(meds.map(m => ({ medicineId: String(m.id), requestedQty: 0 })));
     } else {
       setReqItems([]);
     }

@@ -39,7 +39,7 @@ export default function EditDoctor() {
       setFormData({
         name: doctor.name,
         specialization: doctor.specialization,
-        phone: doctor.phoneNumber || doctor.phone || '',
+        phone: doctor.phoneNumber ?? doctor.phone ?? '',
         email: doctor.email || '',
         isActive: true,
         selectedCamps: assignedCamps,

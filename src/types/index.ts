@@ -1,10 +1,6 @@
 // ============================================================
 // Domain Types — Backend-Ready, Spring Boot + MongoDB Compatible
 // ============================================================
-// Every entity includes: id, status (enum), createdAt, updatedAt
-// Related fields grouped into nested objects where logical.
-// All types are compatible with JSON serialization for REST APIs.
-// ============================================================
 
 // ── Base Entity ──────────────────────────────────────────────
 export interface BaseEntity {
@@ -30,8 +26,10 @@ export type CampStatus = 'draft' | 'active' | 'closed';
 
 export interface Camp extends BaseEntity {
   name: string;
+  campName?: string; // API alias
   location: string;
   village: string;
+  city?: string; // API alias for village
   district: string;
   startDate: string;
   endDate: string;
@@ -47,6 +45,7 @@ export interface Doctor extends BaseEntity {
   name: string;
   specialization: string;
   phone: string;
+  phoneNumber?: string; // API alias
   email?: string;
   avatar?: string;
   photoUrl?: string;
@@ -54,21 +53,53 @@ export interface Doctor extends BaseEntity {
 }
 
 // ── Patient ──────────────────────────────────────────────────
+export interface PatientAddress {
+  stateId?: number;
+  districtId?: number;
+  mandalId?: number;
+  cityVillage?: string;
+  streetAddress?: string;
+  state?: string;
+  district?: string;
+  mandal?: string;
+  pinCode?: string;
+}
+
+export interface PatientMedicalHistory {
+  conditions?: string[];
+  previousHospital?: string;
+  currentMedications?: string;
+  pastSurgery?: string;
+}
+
 export interface Patient extends BaseEntity {
-  patientId: string; // Auto-generated camp-wise ID
+  patientId: string;
   campId: string;
+  // Supports both flat name and split name from API
   name: string;
+  firstName?: string;
+  lastName?: string;
   surname?: string;
   fatherName?: string;
+  fatherSpouseName?: string;
   age: number;
   gender: 'Male' | 'Female' | 'Other';
   phone: string;
-  address: string;
+  phoneNumber?: string; // API alias
+  // Address: can be string (mock) or object (API)
+  address: string | PatientAddress;
   village: string;
   district?: string;
   state?: string;
+  maritalStatus?: string;
   photoUrl?: string;
   status: 'registered' | 'in_progress' | 'completed';
+  // Medical history (API fields)
+  hasMedicalHistory?: boolean;
+  medicalHistory?: PatientMedicalHistory;
+  // Payment (API fields)
+  paymentType?: string;
+  paymentPercentage?: number;
 }
 
 // ── SOAP Notes ───────────────────────────────────────────────
@@ -170,6 +201,7 @@ export interface Supplier extends BaseEntity {
   name: string;
   contact: string;
   address: string;
+  medicines?: { id: string | number; name: string }[];
   status: 'active' | 'inactive';
 }
 
@@ -221,10 +253,13 @@ export interface SupplierOrderItem {
 
 export interface SupplierOrder extends BaseEntity {
   supplierId: string;
+  supplierName?: string; // API field
   warehouseId: string;
   items: SupplierOrderItem[];
   status: SupplierOrderStatus;
   receivedAt?: string;
+  loading?: boolean; // UI state for loading
+  [key: string]: any; // Allow extra API fields
 }
 
 // ── Distribution ─────────────────────────────────────────────
@@ -270,4 +305,13 @@ export interface CampStats {
   patientsAtCashier: number;
   exitedPatients: number;
   totalCollection: number;
+}
+
+// ── Paginated Response ───────────────────────────────────────
+export interface PaginatedResponse<T> {
+  content: T[];
+  totalElements?: number;
+  totalPages?: number;
+  size?: number;
+  number?: number;
 }

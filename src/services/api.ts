@@ -33,7 +33,7 @@ class ApiError extends Error {
   }
 }
 
-async function request<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
+export async function request<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
   const { method = 'GET', body, headers = {}, timeout = API_TIMEOUT } = options;
 
   const controller = new AbortController();
@@ -45,9 +45,9 @@ async function request<T>(endpoint: string, options: ApiRequestOptions = {}): Pr
     const token = localStorage.getItem('token');
     const response = await fetch(url, {
       method,
-    headers: {
-       'Content-Type': 'application/json',
-       // ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -64,7 +64,6 @@ async function request<T>(endpoint: string, options: ApiRequestOptions = {}): Pr
       );
     }
 
-    // Handle 204 No Content responses
     if (response.status === 204) {
       console.log(`✅ [API Success] ${method} ${endpoint}`, { status: response.status });
       return {} as T;
@@ -93,10 +92,6 @@ async function request<T>(endpoint: string, options: ApiRequestOptions = {}): Pr
 
 /**
  * Fetch data from the API with automatic mock fallback.
- * 
- * @param endpoint - API path (e.g., '/patients')
- * @param mockData - Fallback mock data to use if API is unavailable
- * @returns Object with `data` and `source` ('api' or 'mock')
  */
 export async function fetchWithFallback<T>(
   endpoint: string,
@@ -106,7 +101,6 @@ export async function fetchWithFallback<T>(
   try {
     const data = await request<T>(endpoint, options);
 
-    // If API returns empty array or null, use mock
     if (data === null || data === undefined || (Array.isArray(data) && data.length === 0)) {
       console.info(`🔄 [Fallback] ${endpoint} — API returned empty, using mock data`);
       return { data: mockData, source: 'mock' };
@@ -121,8 +115,6 @@ export async function fetchWithFallback<T>(
 
 /**
  * Mutation helper — POST/PUT/PATCH/DELETE with no mock fallback.
- * Mutations should fail visibly if the backend is down.
- * Falls back gracefully in dev by logging the intent.
  */
 export async function mutate<T>(
   endpoint: string,
@@ -131,7 +123,7 @@ export async function mutate<T>(
   try {
     return await request<T>(endpoint, options);
   } catch (error) {
-    console.warn(`🔄 [Mutation Skipped] ${options.method || 'POST'} ${endpoint} — backend unavailable. Data not persisted.`, error);
+    console.warn(`🔄 [Mutation Skipped] ${options.method || 'POST'} ${endpoint} — backend unavailable.`, error);
     return null;
   }
 }
@@ -139,44 +131,11 @@ export async function mutate<T>(
 // Convenience methods
 export const api = {
   get: <T>(endpoint: string, mockData: T) => fetchWithFallback<T>(endpoint, mockData),
-  
-  post: <T>(endpoint: string, body: unknown) =>
-    mutate<T>(endpoint, { method: 'POST', body }),
-
-  put: <T>(endpoint: string, body: unknown) =>
-    mutate<T>(endpoint, { method: 'PUT', body }),
-
-  patch: <T>(endpoint: string, body: unknown) =>
-    mutate<T>(endpoint, { method: 'PATCH', body }),
-
-  delete: <T>(endpoint: string) =>
-    mutate<T>(endpoint, { method: 'DELETE' }),
+  post: <T>(endpoint: string, body: unknown) => mutate<T>(endpoint, { method: 'POST', body }),
+  put: <T>(endpoint: string, body: unknown) => mutate<T>(endpoint, { method: 'PUT', body }),
+  patch: <T>(endpoint: string, body: unknown) => mutate<T>(endpoint, { method: 'PATCH', body }),
+  delete: <T>(endpoint: string) => mutate<T>(endpoint, { method: 'DELETE' }),
 };
 
 export { API_BASE_URL, ApiError };
 export default api;
-
-import { useQuery } from '@tanstack/react-query';
-
-export interface MedicalCondition {
-  id: number;
-  name: string;
-  description: string;
-  isActive: boolean;
-  displayOrder: number;
-}
-
-export function useMedicalConditions() {
-  return useQuery<MedicalCondition[]>({
-    queryKey: ['medical-conditions'],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/medical-conditions`);
-      if (!res.ok) throw new Error('Failed to fetch medical conditions');
-      return res.json();
-    },
-    staleTime: 5 * 60 * 1000,
-    select: (data) => Array.isArray(data) ? data.filter((c) => c.isActive).sort((a, b) => a.displayOrder - b.displayOrder) : [],
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
-}
