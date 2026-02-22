@@ -6,104 +6,104 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 30% 12%;
+    --background: 216 25% 97%;
+    --foreground: 220 35% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 30% 12%;
+    --card-foreground: 220 35% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 30% 12%;
+    --popover-foreground: 220 35% 10%;
 
-    --primary: 215 70% 32%;
+    --primary: 220 85% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 18% 95%;
-    --secondary-foreground: 215 30% 12%;
+    --secondary: 216 20% 94%;
+    --secondary-foreground: 220 35% 10%;
 
-    --muted: 210 14% 93%;
-    --muted-foreground: 215 20% 38%;
+    --muted: 216 18% 91%;
+    --muted-foreground: 220 15% 42%;
 
-    --accent: 215 60% 42%;
+    --accent: 220 75% 52%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 55%;
+    --destructive: 0 80% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 18% 88%;
-    --input: 214 18% 88%;
-    --ring: 215 65% 30%;
+    --border: 216 22% 86%;
+    --input: 216 22% 86%;
+    --ring: 220 85% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
-    /* Semantic Status Colors — muted, professional */
-    --navy: 215 70% 22%;
-    --navy-light: 215 55% 35%;
-    --success: 152 55% 38%;
-    --warning: 38 80% 48%;
-    --info: 210 65% 45%;
+    /* Semantic Status Colors — vivid, branded */
+    --navy: 220 80% 20%;
+    --navy-light: 220 65% 38%;
+    --success: 152 65% 40%;
+    --warning: 38 92% 50%;
+    --info: 215 80% 50%;
     
-    /* Stat Card Colors — vibrant tinted backgrounds */
-    --stat-blue: 210 55% 94%;
-    --stat-blue-text: 210 65% 35%;
-    --stat-green: 152 50% 92%;
-    --stat-green-text: 152 55% 30%;
-    --stat-orange: 30 65% 92%;
-    --stat-orange-text: 30 65% 35%;
-    --stat-pink: 340 50% 93%;
-    --stat-pink-text: 340 50% 38%;
-    --stat-purple: 260 45% 93%;
-    --stat-purple-text: 260 45% 38%;
-    --stat-teal: 175 50% 92%;
-    --stat-teal-text: 175 50% 30%;
+    /* Stat Card Colors — vibrant, saturated backgrounds */
+    --stat-blue: 215 80% 94%;
+    --stat-blue-text: 215 85% 38%;
+    --stat-green: 152 65% 90%;
+    --stat-green-text: 152 70% 28%;
+    --stat-orange: 28 85% 92%;
+    --stat-orange-text: 28 80% 38%;
+    --stat-pink: 340 70% 93%;
+    --stat-pink-text: 340 70% 40%;
+    --stat-purple: 262 65% 93%;
+    --stat-purple-text: 262 60% 42%;
+    --stat-teal: 175 65% 90%;
+    --stat-teal-text: 175 65% 28%;
 
-    --sidebar-background: 215 65% 22%;
+    --sidebar-background: 220 75% 18%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 215 55% 45%;
+    --sidebar-primary: 220 80% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 50% 32%;
+    --sidebar-accent: 220 65% 28%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 45% 35%;
-    --sidebar-ring: 215 55% 45%;
+    --sidebar-border: 220 55% 32%;
+    --sidebar-ring: 220 80% 50%;
   }
 
   .dark {
-    --background: 215 30% 10%;
-    --foreground: 210 20% 95%;
+    --background: 220 30% 8%;
+    --foreground: 216 20% 95%;
 
-    --card: 215 30% 14%;
-    --card-foreground: 210 20% 95%;
+    --card: 220 30% 12%;
+    --card-foreground: 216 20% 95%;
 
-    --popover: 215 30% 14%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 220 30% 12%;
+    --popover-foreground: 216 20% 95%;
 
-    --primary: 215 55% 45%;
+    --primary: 220 80% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 25% 20%;
-    --secondary-foreground: 210 20% 95%;
+    --secondary: 220 25% 18%;
+    --secondary-foreground: 216 20% 95%;
 
-    --muted: 215 25% 18%;
-    --muted-foreground: 215 12% 60%;
+    --muted: 220 25% 16%;
+    --muted-foreground: 220 12% 62%;
 
-    --accent: 215 45% 50%;
+    --accent: 220 65% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 50%;
+    --destructive: 0 70% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 25% 25%;
-    --input: 215 25% 25%;
-    --ring: 215 55% 45%;
+    --border: 220 25% 22%;
+    --input: 220 25% 22%;
+    --ring: 220 80% 55%;
 
-    --sidebar-background: 215 35% 12%;
-    --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 215 55% 45%;
+    --sidebar-background: 220 35% 10%;
+    --sidebar-foreground: 216 20% 95%;
+    --sidebar-primary: 220 80% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 30% 20%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 215 25% 25%;
-    --sidebar-ring: 215 55% 45%;
+    --sidebar-accent: 220 30% 18%;
+    --sidebar-accent-foreground: 216 20% 95%;
+    --sidebar-border: 220 25% 22%;
+    --sidebar-ring: 220 80% 55%;
   }
 }
 
@@ -114,13 +114,19 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-foreground;
   }
 }
 
 @layer components {
   .stat-card {
-    @apply rounded-lg border p-4 transition-shadow hover:shadow-md;
+    @apply rounded-xl border p-4 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
   }
   
   .stat-card-blue {

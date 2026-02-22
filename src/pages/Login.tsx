@@ -74,8 +74,8 @@ export default function Login() {
       {/* Left Side - Hero Image */}
       <div className="hidden lg:flex lg:w-[60%] relative">
         <img src={loginHero} alt="Medical camp" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-black/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(220,85%,20%,0.7)] via-[hsl(220,75%,30%,0.4)] to-[hsl(220,85%,20%,0.6)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(220,85%,10%,0.6)] via-transparent to-transparent" />
         <div className="absolute bottom-8 left-8 right-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -156,7 +156,7 @@ export default function Login() {
                     </div>
                   </div>
 
-                  <Button type="submit" disabled={loading} className="w-full h-11 bg-primary hover:bg-primary/90 font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30">
+                  <Button type="submit" disabled={loading} className="w-full h-11 font-semibold text-base">
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...</> : 'Sign In'}
                   </Button>
                 </form>
@@ -232,7 +232,7 @@ export default function Login() {
                     </Select>
                   </div>
 
-                  <Button type="submit" disabled={loading} className="w-full h-10 bg-primary hover:bg-primary/90 font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30">
+                  <Button type="submit" disabled={loading} className="w-full h-10 font-semibold text-base">
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : 'Sign Up'}
                   </Button>
                 </form>
