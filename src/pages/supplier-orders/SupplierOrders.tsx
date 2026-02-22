@@ -482,12 +482,12 @@ export default function SupplierOrders() {
                                 <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleViewOrder(order.id)}>
                                   <Eye className="h-4 w-4" />
                                 </Button>
-                                {(order.status?.toUpperCase() === 'DRAFT' || order.status?.toUpperCase() === 'PENDING') && (
+                                {order.status?.toUpperCase() === 'DRAFT' && (
                                   <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleEditClick(order)}>
                                     <Pencil className="h-4 w-4" />
                                   </Button>
                                 )}
-                                {(order.status?.toUpperCase() === 'DRAFT' || order.status?.toUpperCase() === 'PENDING') && (
+                                {order.status?.toUpperCase() === 'DRAFT' && (
                                   <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setCancelOrderId(order.id)}>
                                     <X className="h-4 w-4" />
                                   </Button>
@@ -542,11 +542,7 @@ export default function SupplierOrders() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Order Details</DialogTitle>
-            <DialogDescription>
-              {selectedOrder?.status?.toUpperCase() === 'PENDING' 
-                ? 'Enter received quantities and mark stock as received.' 
-                : 'View the complete order information and item details.'}
-            </DialogDescription>
+            <DialogDescription>View the complete order information and item details.</DialogDescription>
           </DialogHeader>
           {loadingOrder ? (
             <div className="flex items-center justify-center py-8">
@@ -582,34 +578,13 @@ export default function SupplierOrders() {
                       <tr key={item.id || i} className="border-b last:border-b-0">
                         <td className="p-3 font-medium">{item.medicineName}</td>
                         <td className="p-3 text-center">{item.requestedQuantity}</td>
-                        <td className="p-3 text-center">
-                          {selectedOrder.status?.toUpperCase() === 'PENDING' ? (
-                            <Input 
-                              type="number" 
-                              min="0"
-                              max={item.requestedQuantity}
-                              className="w-24 h-8 mx-auto text-center" 
-                              value={receivedQtys[item.id] ?? ''} 
-                              onChange={e => setReceivedQtys({ ...receivedQtys, [item.id]: Number(e.target.value) })} 
-                            />
-                          ) : (
-                            item.receivedQuantity ?? '-'
-                          )}
-                        </td>
+                        <td className="p-3 text-center">{item.receivedQuantity ?? '-'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
-          )}
-          {selectedOrder?.status?.toUpperCase() === 'PENDING' && (
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setSelectedOrder(null); setReceivedQtys({}); }}>Cancel</Button>
-              <Button onClick={handleReceiveStock}>
-                <Save className="mr-2 h-4 w-4" /> Save
-              </Button>
-            </DialogFooter>
           )}
         </DialogContent>
       </Dialog>
