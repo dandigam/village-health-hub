@@ -7,7 +7,7 @@ import { CampProvider } from "@/context/CampContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import DashboardRouter from "./pages/dashboard/DashboardRouter";
 import Camps from "./pages/Camps";
 import Patients from "./pages/Patients";
 import NewPatient from "./pages/NewPatient";
@@ -71,7 +71,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               
-              <Route path="/dashboard" element={<ProtectedRoute routeKey="dashboard"><Dashboard /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute routeKey="dashboard"><DashboardRouter /></ProtectedRoute>} />
               
               {/* Camps */}
               <Route path="/camps" element={<ProtectedRoute routeKey="camps"><Camps /></ProtectedRoute>} />
