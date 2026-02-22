@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import { EncounterPatient } from '@/pages/encounters/Encounters';
 import { useMedicines, useStockItems } from '@/hooks/useApiData';
-import { PatientHistoryPanel } from './PatientHistoryPanel';
+
 import {
   MessageSquare,
   Activity,
@@ -188,8 +188,6 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
         </div>
       </div>
 
-      {/* Patient Medical History (collapsible) */}
-      <PatientHistoryPanel patientId={encounter.patient.id} />
 
       {/* Stepper */}
       <div className="px-2 sm:px-4 py-2 border-b bg-muted/30 overflow-x-auto">
