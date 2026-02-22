@@ -155,3 +155,28 @@ export const api = {
 
 export { API_BASE_URL, ApiError };
 export default api;
+
+import { useQuery } from '@tanstack/react-query';
+
+export interface MedicalCondition {
+  id: number;
+  name: string;
+  description: string;
+  isActive: boolean;
+  displayOrder: number;
+}
+
+export function useMedicalConditions() {
+  return useQuery<MedicalCondition[]>({
+    queryKey: ['medical-conditions'],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/medical-conditions`);
+      if (!res.ok) throw new Error('Failed to fetch medical conditions');
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    select: (data) => Array.isArray(data) ? data.filter((c) => c.isActive).sort((a, b) => a.displayOrder - b.displayOrder) : [],
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+}

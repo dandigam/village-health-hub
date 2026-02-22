@@ -10,13 +10,18 @@ import { usePatients } from '@/hooks/useApiData';
 export default function Patients() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: patients = [] } = usePatients();
-
+  const { data: patientsRaw = [] } = usePatients();
+  // Handle paginated response with 'content' array
+  const patients = Array.isArray(patientsRaw)
+    ? patientsRaw
+    : Array.isArray(patientsRaw.content)
+      ? patientsRaw.content
+      : [];
   const filteredPatients = patients.filter(
     (p) =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.surname?.toLowerCase().includes(searchTerm.toLowerCase())
+      (p.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.patientId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.lastName?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -54,18 +59,18 @@ export default function Patients() {
               <tr key={patient.id}>
                 <td>
                   <Avatar>
-                    <AvatarImage src={patient.photoUrl} alt={patient.name} />
+                    <AvatarImage src={patient.photoUrl || undefined} alt={patient.firstName || ''} />
                     <AvatarFallback className="bg-accent/10 text-accent">
-                      {patient.name.charAt(0)}
+                      {(patient.firstName || '').charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                 </td>
                 <td className="font-mono text-sm">{patient.patientId}</td>
-                <td className="font-medium">{patient.name} {patient.surname}</td>
-                <td>{patient.fatherName}</td>
+                <td className="font-medium">{patient.firstName} {patient.lastName}</td>
+                <td>{patient.fatherSpouseName}</td>
                 <td>{patient.age}</td>
                 <td>{patient.gender}</td>
-                <td className="uppercase">{patient.village}</td>
+                <td className="uppercase">{patient.address?.cityVillage}</td>
                 <td>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" className="text-accent" onClick={() => navigate(`/patients/${patient.id}`)} title="View History">

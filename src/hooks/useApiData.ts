@@ -1,3 +1,54 @@
+// Camp save mutation hook
+export function useSaveCamp() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (camp: any) => {
+      // If id is present, update; else, create
+      if (camp.id) {
+        return await api.put(`/camps/${camp.id}`, camp);
+      } else {
+        const { id, ...campData } = camp;
+        return await api.post('/camps', campData);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['camps'] });
+    },
+  });
+}
+// Doctor save mutation hook
+// Remove duplicate Doctor import
+import api from '@/services/api';
+
+export function useSaveDoctor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (doctor: {
+      name: string;
+      specialization: string;
+      phoneNumber: string;
+      email: string;
+      doctorCamps: { id: number; doctor: string; camp: string }[];
+    }) => {
+      return await api.post('/doctors', doctor);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+    },
+  });
+}
+// Dashboard stats API hook
+export function useDashboardStats() {
+  return useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const res = await fetch('http://localhost:9090/api/dashboard');
+      if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+      return res.json();
+    },
+    refetchOnWindowFocus: false,
+  });
+}
 /**
  * React Query hooks with automatic API → mock fallback.
  * 

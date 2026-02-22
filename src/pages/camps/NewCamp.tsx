@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/command';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { useDoctors } from '@/hooks/useApiData';
+import { useDoctors, useSaveCamp } from '@/hooks/useApiData';
 
 // Mock data for dropdowns
 const mockStates = ['Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu'];
@@ -122,12 +122,38 @@ export default function NewCamp() {
     });
   };
 
-  const handleSubmit = () => {
-    toast({
-      title: 'Camp Created Successfully!',
-      description: `${formData.campName} has been created and is ready for activation.`,
-    });
-    navigate('/camps');
+  const saveCamp = useSaveCamp();
+
+  const handleSubmit = async () => {
+    // Prepare payload
+    const payload = {
+      // id: 0, // Remove id for save
+      campName: formData.campName,
+      organizerName: formData.organizerName,
+      organizerPhone: formData.organizerPhone,
+      organizerEmail: formData.organizerEmail,
+      stateId: 0, // Replace with actual stateId if available
+      state: formData.state,
+      districtId: 0, // Replace with actual districtId if available
+      district: formData.district,
+      mandalId: 0, // Replace with actual mandalId if available
+      mandal: formData.mandal,
+      city: formData.city,
+      address: formData.address,
+      pinCode: formData.pinCode,
+      doctorIds: formData.selectedDoctors.map(d => d.id),
+      volunteerIds: formData.selectedVolunteers.map(v => v.id),
+    };
+    try {
+      await saveCamp.mutateAsync(payload);
+      toast({
+        title: 'Camp Created Successfully!',
+        description: `${formData.campName} has been created and is ready for activation.`,
+      });
+      navigate('/camps');
+    } catch (e) {
+      toast({ title: 'API Error', description: 'Failed to create camp.', variant: 'destructive' });
+    }
   };
 
   const addDoctor = (doctor: (typeof allDoctors)[0]) => {

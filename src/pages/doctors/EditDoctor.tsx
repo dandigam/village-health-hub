@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { toast } from '@/hooks/use-toast';
-import { useCamps, useDoctors } from '@/hooks/useApiData';
+import { useCamps, useDoctors, useSaveDoctor } from '@/hooks/useApiData';
 
 const specializations = [
   'General Physician', 'Cardiologist', 'Neurologist', 'Orthopedist', 'Pediatrician',
@@ -25,7 +25,7 @@ export default function EditDoctor() {
   const { id } = useParams();
   const { data: doctors = [] } = useDoctors();
   const { data: camps = [] } = useCamps();
-  const doctor = doctors.find((d) => d.id === id);
+  const doctor = doctors.find((d) => String(d.id) === String(id));
 
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -37,8 +37,12 @@ export default function EditDoctor() {
     if (doctor) {
       const assignedCamps = camps.filter((c) => c.doctorIds.includes(doctor.id)).map((c) => c.id);
       setFormData({
-        name: doctor.name, specialization: doctor.specialization, phone: doctor.phone,
-        email: doctor.email || '', isActive: true, selectedCamps: assignedCamps,
+        name: doctor.name,
+        specialization: doctor.specialization,
+        phone: doctor.phoneNumber || doctor.phone || '',
+        email: doctor.email || '',
+        isActive: true,
+        selectedCamps: assignedCamps,
       });
       setPhotoUrl(doctor.photoUrl || null);
     }
@@ -79,10 +83,33 @@ export default function EditDoctor() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (!validateForm()) { toast({ title: 'Validation Error', description: 'Please fix the errors in the form.', variant: 'destructive' }); return; }
-    toast({ title: 'Doctor Updated Successfully!', description: `${formData.name}'s details have been updated.` });
-    navigate('/doctors');
+  const saveDoctor = useSaveDoctor();
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast({ title: 'Validation Error', description: 'Please fix the errors in the form.', variant: 'destructive' });
+      return;
+    }
+    // Map doctorCamps to request format
+    const doctorCamps = formData.selectedCamps.map((campId) => ({
+      doctor: formData.name,
+      camp: campId,
+    }));
+    const payload = {
+      id,
+      name: formData.name,
+      specialization: formData.specialization,
+      phoneNumber: formData.phone,
+      email: formData.email,
+      doctorCamps,
+    };
+    try {
+      await saveDoctor.mutateAsync(payload);
+      toast({ title: 'Doctor Updated Successfully!', description: `${formData.name}'s details have been updated.` });
+      navigate('/doctors');
+    } catch (e) {
+      toast({ title: 'API Error', description: 'Failed to update doctor.', variant: 'destructive' });
+    }
   };
 
   return (

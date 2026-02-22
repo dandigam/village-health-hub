@@ -26,13 +26,15 @@ export default function Camps() {
   const { data: camps = [] } = useCamps();
   const { data: doctors = [] } = useDoctors();
 
-  const tabFilteredCamps = activeTab === 'all' ? camps : camps.filter((c) => c.status === activeTab);
 
+  // Normalize camp fields for filtering and display
+  const normalize = (val: any) => (typeof val === 'string' ? val : '');
+  const tabFilteredCamps = activeTab === 'all' ? camps : camps.filter((c) => c.status === activeTab);
   const filteredCamps = tabFilteredCamps.filter(
     (c) =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.village.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.district.toLowerCase().includes(searchTerm.toLowerCase())
+      normalize(c.campName).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      normalize(c.city).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      normalize(c.district).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleStartCamp = (e: React.MouseEvent, campName: string) => {
@@ -83,26 +85,27 @@ export default function Camps() {
           </TableHeader>
           <TableBody>
             {filteredCamps.map((camp) => {
-              const assignedDoctors = doctors.filter((d) => camp.doctorIds.includes(d.id));
+              const assignedDoctors = doctors.filter((d) => camp.doctorIds && camp.doctorIds.includes(d.id));
               return (
                 <TableRow key={camp.id} className="hover:bg-muted/30">
                   <TableCell>
                     <div>
-                      <p className="font-medium text-sm">{camp.name}</p>
+                      <p className="font-medium text-sm">{camp.campName}</p>
                       <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {camp.village}, {camp.district}
+                        <MapPin className="h-3 w-3" /> {camp.city}, {camp.district}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" /> {camp.village}, {camp.district}
+                      <MapPin className="h-3.5 w-3.5" /> {camp.city}, {camp.district}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Calendar className="h-3.5 w-3.5" />
-                      <span>{new Date(camp.startDate).toLocaleDateString()} – {new Date(camp.endDate).toLocaleDateString()}</span>
+                      {/* If startDate/endDate exist, show them, else show dash */}
+                      <span>{camp.startDate && camp.endDate ? `${new Date(camp.startDate).toLocaleDateString()} – ${new Date(camp.endDate).toLocaleDateString()}` : '—'}</span>
                     </div>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
@@ -111,7 +114,7 @@ export default function Camps() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={cn('capitalize text-xs', statusColors[camp.status])}>{camp.status}</Badge>
+                    <Badge className={cn('capitalize text-xs', statusColors[camp.status] || '')}>{camp.status || 'draft'}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
@@ -122,12 +125,12 @@ export default function Camps() {
                         <Edit className="h-4 w-4 text-muted-foreground" />
                       </Button>
                       {camp.status === 'draft' && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Start Camp" onClick={(e) => handleStartCamp(e, camp.name)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Start Camp" onClick={(e) => handleStartCamp(e, camp.campName)}>
                           <Play className="h-4 w-4 text-stat-green-text" />
                         </Button>
                       )}
                       {camp.status === 'active' && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Stop Camp" onClick={(e) => handleStopCamp(e, camp.name)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Stop Camp" onClick={(e) => handleStopCamp(e, camp.campName)}>
                           <Square className="h-4 w-4 text-destructive" />
                         </Button>
                       )}

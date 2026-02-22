@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ClipboardList, 
@@ -20,7 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useCampStats, usePatients, useCamps } from '@/hooks/useApiData';
+import { usePatients, useCamps, useDashboardStats } from '@/hooks/useApiData';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
 const variantStyles = {
@@ -43,9 +44,23 @@ const iconBgStyles = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { data: campStats } = useCampStats();
-  const { data: patients = [] } = usePatients();
+  // Fetch dashboard stats from custom hook
+  const { data: dashboardStats = {} } = useDashboardStats();
+  const { data: patientsRaw = [], refetch: refetchPatients } = usePatients();
+  // Handle paginated API response (with 'content' array)
+  const patientList = Array.isArray(patientsRaw.content)
+    ? patientsRaw.content
+    : Array.isArray(patientsRaw)
+      ? patientsRaw
+      : [];
+  // Sort by createdAt descending and take first 5
+  const patients = [...patientList].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
   const { data: camps = [] } = useCamps();
+
+  // Refetch patients on mount to ensure fresh API call after login
+  useEffect(() => {
+    refetchPatients();
+  }, []);
 
   const hasActiveCamp = camps.some(camp => camp.status === 'active');
   const hasPatients = patients.length > 0;
@@ -54,15 +69,15 @@ export default function Dashboard() {
   const hasStock = true;
   const showInsulinCard = true;
 
-  const stats = campStats || { totalPatients: 0, patientsAtDoctor: 0, patientsAtPharmacy: 0, patientsAtCashier: 0, exitedPatients: 0, totalCollection: 0 };
+  const stats = dashboardStats || { totalRegistrations: 0, patientsAtDoctor: 0, patientsAtPharmacy: 0, patientsAtCashier: 0, patientsAtInsulin: 0, completed: 0 };
 
   const statusCards = [
-    { id: 'registrations', title: 'Total Registrations', value: stats.totalPatients, icon: ClipboardList, variant: 'blue' as const, filterStatus: 'all' },
+    { id: 'registrations', title: 'Total Registrations', value: stats.totalRegistrations, icon: ClipboardList, variant: 'blue' as const, filterStatus: 'all' },
     { id: 'doctor', title: 'Patients at Doctor', value: stats.patientsAtDoctor, icon: Stethoscope, variant: 'orange' as const, filterStatus: 'with_doctor' },
     { id: 'pharmacy', title: 'Patients at Pharmacy', value: stats.patientsAtPharmacy, icon: Pill, variant: 'teal' as const, filterStatus: 'at_pharmacy' },
     { id: 'cashier', title: 'Patients at Cashier', value: stats.patientsAtCashier, icon: CreditCard, variant: 'green' as const, filterStatus: 'at_cashier' },
-    ...(showInsulinCard ? [{ id: 'insulin', title: 'Patients at Insulin', value: 12, icon: Syringe, variant: 'purple' as const, filterStatus: 'at_insulin' }] : [] ),
-    { id: 'completed', title: 'Completed', value: stats.exitedPatients, icon: LogOut, variant: 'pink' as const, filterStatus: 'completed' },
+    ...(showInsulinCard ? [{ id: 'insulin', title: 'Patients at Insulin', value: stats.patientsAtInsulin, icon: Syringe, variant: 'purple' as const, filterStatus: 'at_insulin' }] : [] ),
+    { id: 'completed', title: 'Completed', value: stats.completed, icon: LogOut, variant: 'pink' as const, filterStatus: 'completed' },
   ];
 
   const setupSteps = [
@@ -73,11 +88,27 @@ export default function Dashboard() {
     { id: 'patient', label: 'Register First Patient', href: '/patients/new', icon: UserPlus, completed: hasPatients },
   ];
 
-  const recentPatients = patients.slice(0, 10).map((patient, index) => ({
-    ...patient,
-    currentStatus: ['At Doctor', 'At Pharmacy', 'At Cashier', 'Completed', 'Waiting'][index % 5],
-    lastUpdated: new Date(Date.now() - index * 1000 * 60 * 15).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-  }));
+  // Hardcode patient status for dashboard display based on index
+  // Map new API patient fields for dashboard display
+  const recentPatients = patients.map((patient, idx) => {
+    let currentStatus = 'Waiting';
+    if (idx === 0) currentStatus = 'At Doctor';
+    else if (idx === 1) currentStatus = 'At Pharmacy';
+    else if (idx === 2) currentStatus = 'At Cashier';
+    else if (idx === 3) currentStatus = 'Completed';
+    // Use new API fields for name, phone, address
+    return {
+      ...patient,
+      name: patient.firstName || patient.name || '',
+      surname: patient.lastName || patient.surname || '',
+      phone: patient.phoneNumber || patient.phone || '',
+      address: patient.address?.streetAddress || patient.address || '',
+      currentStatus,
+      lastUpdated: patient.updatedAt
+        ? new Date(patient.updatedAt).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, month: 'short', day: 'numeric' })
+        : '-',
+    };
+  });
 
   const [isZeroState] = useState(!hasActiveCamp || !hasPatients);
 

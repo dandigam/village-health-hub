@@ -2,6 +2,7 @@ import { User, ClipboardList, CreditCard, MapPin, Camera } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useMedicalConditions } from '@/services/api';
 
 interface DemographicData {
   firstName: string;
@@ -39,7 +40,7 @@ interface ReviewStepProps {
 }
 
 const CONDITIONS_MAP: Record<string, string> = {
-  diabetes: 'Diabetes',
+  diabetes: 'Diabetes-dadn',
   hypertension: 'Hypertension',
   heart_disease: 'Heart Disease',
   asthma: 'Asthma / Breathing Issues',
@@ -56,7 +57,7 @@ const STATE_MAP: Record<string, string> = {
 
 export function ReviewStep({ demographic, history, payment, photoUrl }: ReviewStepProps) {
   const requiresApproval = payment.paymentType === 'paid' && payment.paymentPercentage && payment.paymentPercentage !== '100';
-  
+  const { data: allConditions = [] } = useMedicalConditions();
   const initials = `${demographic.firstName?.[0] || ''}${demographic.lastName?.[0] || ''}`.toUpperCase();
 
   return (
@@ -119,15 +120,13 @@ export function ReviewStep({ demographic, history, payment, photoUrl }: ReviewSt
                   <MapPin className="h-3 w-3 text-accent" />
                   <span className="text-xs text-muted-foreground">Address</span>
                 </div>
-                <p className="font-medium">
-                  {[
-                    demographic.street,
-                    demographic.village,
-                    demographic.mandal,
-                    demographic.district,
-                    STATE_MAP[demographic.state] || demographic.state,
-                  ].filter(Boolean).join(', ') || '-'}
-                </p>
+                              <p className="font-medium">{[
+                                demographic.street,
+                                demographic.village,
+                                demographic.mandal,
+                                demographic.district,
+                                demographic.state,
+                              ].filter(Boolean).join(', ') || '-'}</p>
               </div>
             </div>
           </div>
@@ -160,15 +159,14 @@ export function ReviewStep({ demographic, history, payment, photoUrl }: ReviewSt
                 <div className="col-span-2">
                   <span className="text-muted-foreground text-xs">Conditions</span>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {history.conditions.length > 0 ? (
-                      history.conditions.map((c) => (
-                        <Badge key={c} variant="secondary" className="text-xs">
-                          {CONDITIONS_MAP[c] || c}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="font-medium">-</span>
-                    )}
+                  {history.conditions.length > 0 ? history.conditions.map((c) => {
+                    const cond = allConditions.find((mc) => String(mc.id) === String(c));
+                    return (
+                      <Badge key={c} variant="secondary" className="text-xs">
+                        {cond ? cond.name : c}
+                      </Badge>
+                    );
+                  }) : <span className="font-medium">-</span>}
                   </div>
                 </div>
                 <div>

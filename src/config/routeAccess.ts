@@ -13,7 +13,7 @@ export const routeAccess: Record<string, AppRole[]> = {
   dashboard: ["ADMIN", "DOCTOR", "NURSE", "PHARMACIST", "WARE_HOUSE", "FRONT_DESK"],
   camps: ["ADMIN"],
   patients: ["ADMIN", "DOCTOR", "NURSE", "FRONT_DESK"],
-  encounters: ["DOCTOR", "NURSE"],
+  encounters: ["DOCTOR", "NURSE","ADMIN"],
   pharmacy: ["PHARMACIST", "ADMIN"],
   stock: ["WARE_HOUSE", "ADMIN"],
   suppliers: ["WARE_HOUSE", "ADMIN"],
