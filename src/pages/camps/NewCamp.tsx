@@ -221,32 +221,34 @@ export default function NewCamp() {
       </div>
 
       {/* Compact Progress Steps */}
-      <div className="mb-5 max-w-2xl mx-auto">
-        <div className="flex items-center justify-between">
+      {/* Progress Steps */}
+      <div className="mb-6 max-w-3xl mx-auto px-4">
+        <div className="flex items-start justify-between">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center flex-1">
-              <div className="flex flex-col items-center">
-                <div
+              <div className="flex flex-col items-center min-w-[72px]">
+                <button
+                  type="button"
                   className={cn(
-                    'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer text-xs',
+                    'w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer border-2',
                     currentStep === step.id
-                      ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
+                      ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/30 scale-110'
                       : currentStep > step.id
-                      ? 'bg-[hsl(var(--success))] text-white'
-                      : 'bg-muted text-muted-foreground'
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted/50 text-muted-foreground border-muted-foreground/20 hover:border-primary/40'
                   )}
                   onClick={() => setCurrentStep(step.id)}
                 >
                   {currentStep > step.id ? (
-                    <Check className="h-4 w-4" />
+                    <Check className="h-5 w-5" />
                   ) : (
-                    <step.icon className="h-4 w-4" />
+                    <step.icon className="h-5 w-5" />
                   )}
-                </div>
+                </button>
                 <span
                   className={cn(
-                    'text-[10px] mt-1.5 text-center font-medium',
-                    currentStep === step.id ? 'text-primary' : 'text-muted-foreground'
+                    'text-xs mt-2 text-center font-semibold whitespace-nowrap',
+                    currentStep === step.id ? 'text-primary' : currentStep > step.id ? 'text-primary' : 'text-muted-foreground'
                   )}
                 >
                   {step.title}
@@ -255,8 +257,8 @@ export default function NewCamp() {
               {index < steps.length - 1 && (
                 <div
                   className={cn(
-                    'flex-1 h-0.5 mx-1.5 rounded-full',
-                    currentStep > step.id ? 'bg-[hsl(var(--success))]' : 'bg-muted'
+                    'flex-1 h-[3px] mx-1 rounded-full mt-[22px] transition-colors duration-200',
+                    currentStep > step.id ? 'bg-primary' : 'bg-muted-foreground/15'
                   )}
                 />
               )}
