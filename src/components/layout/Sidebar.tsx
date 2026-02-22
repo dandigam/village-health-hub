@@ -53,23 +53,44 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
     if (onNavigate) onNavigate();
   };
 
-  const activeClass = 'bg-white/20 text-white shadow-md shadow-black/10 border border-white/10';
-  const inactiveClass = 'text-white/65 hover:text-white hover:bg-white/10 border border-transparent';
+  const activeClass = 'bg-white/[0.14] text-white border-l-[3px] border-l-[hsl(200,90%,60%)] shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]';
+  const inactiveClass = 'text-white/55 hover:text-white/90 hover:bg-white/[0.06] border-l-[3px] border-l-transparent';
+
+  const renderNavItem = (item: typeof allNavItems[0], isActive: boolean) => (
+    <>
+      <item.icon className={cn(
+        "h-[17px] w-[17px] shrink-0 transition-all duration-200",
+        isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80"
+      )} />
+      {!collapsed && (
+        <span className={cn("truncate text-[13px]", isActive ? "font-semibold" : "font-medium")}>
+          {item.label}
+        </span>
+      )}
+    </>
+  );
 
   return (
     <TooltipProvider delayDuration={0}>
       <aside 
         className={cn(
-          "relative bg-gradient-to-b from-[hsl(220,80%,18%)] via-sidebar to-[hsl(220,70%,12%)] flex flex-col border-r border-white/5 shadow-2xl transition-all duration-300 ease-in-out h-screen sticky top-0",
+          "relative flex flex-col border-r border-white/[0.06] h-screen sticky top-0 transition-all duration-300 ease-in-out premium-scroll",
+          "bg-[hsl(224,58%,12%)]",
           mobile ? "w-full h-full" : "hidden md:flex",
           !mobile && (collapsed ? "w-[68px]" : "w-48"),
         )}
+        style={{
+          background: 'linear-gradient(180deg, hsl(224, 58%, 15%) 0%, hsl(224, 55%, 11%) 50%, hsl(228, 50%, 9%) 100%)',
+        }}
       >
-        {/* Collapse Toggle Button - desktop only */}
+        {/* Subtle top glow */}
+        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[hsl(222,80%,50%)]/[0.06] to-transparent pointer-events-none" />
+
+        {/* Collapse Toggle */}
         {!mobile && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-3 top-6 h-6 w-6 rounded-full bg-white shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:scale-110 transition-all duration-200 z-10"
+            className="absolute -right-3 top-6 h-6 w-6 rounded-full bg-card shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:scale-110 transition-all duration-200 z-10"
           >
             {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
           </button>
@@ -89,12 +110,17 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
                         className={({ isActive }) =>
                           cn(
                             'group flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-all duration-200',
-                            isActive ? activeClass : inactiveClass
+                            isActive 
+                              ? 'bg-white/[0.14] text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]' 
+                              : 'text-white/55 hover:text-white/90 hover:bg-white/[0.06]'
                           )
                         }
                       >
                         {({ isActive }) => (
-                          <item.icon className={cn("h-[18px] w-[18px] transition-transform duration-200", !isActive && "group-hover:scale-110")} />
+                          <item.icon className={cn(
+                            "h-[17px] w-[17px] transition-all duration-200",
+                            isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80"
+                          )} />
                         )}
                       </NavLink>
                     </TooltipTrigger>
@@ -108,17 +134,12 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
                     onClick={handleNavClick}
                     className={({ isActive }) =>
                       cn(
-                        'group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                        'group flex items-center gap-2.5 px-3 py-2 rounded-r-lg text-sm transition-all duration-200',
                         isActive ? activeClass : inactiveClass
                       )
                     }
                   >
-                    {({ isActive }) => (
-                      <>
-                        <item.icon className={cn("h-[18px] w-[18px] shrink-0 transition-transform duration-200", !isActive && "group-hover:scale-110")} />
-                        <span className="truncate">{item.label}</span>
-                      </>
-                    )}
+                    {({ isActive }) => renderNavItem(item, isActive)}
                   </NavLink>
                 )}
               </li>
@@ -126,8 +147,8 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
           </ul>
         </nav>
 
-        {/* Settings */}
-        <div className="p-2 border-t border-white/10 shrink-0">
+        {/* Settings - pinned bottom */}
+        <div className="p-2 border-t border-white/[0.08] shrink-0">
           {collapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -137,12 +158,17 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
                   className={({ isActive }) =>
                     cn(
                       'group flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-all duration-200',
-                      isActive ? activeClass : inactiveClass
+                      isActive 
+                        ? 'bg-white/[0.14] text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]' 
+                        : 'text-white/55 hover:text-white/90 hover:bg-white/[0.06]'
                     )
                   }
                 >
                   {({ isActive }) => (
-                    <Settings className={cn("h-[18px] w-[18px] transition-transform duration-200", !isActive && "group-hover:scale-110 group-hover:rotate-45")} />
+                    <Settings className={cn(
+                      "h-[17px] w-[17px] transition-all duration-200",
+                      isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80 group-hover:rotate-45"
+                    )} />
                   )}
                 </NavLink>
               </TooltipTrigger>
@@ -156,15 +182,20 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
               onClick={handleNavClick}
               className={({ isActive }) =>
                 cn(
-                  'group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                  'group flex items-center gap-2.5 px-3 py-2 rounded-r-lg text-sm transition-all duration-200',
                   isActive ? activeClass : inactiveClass
                 )
               }
             >
               {({ isActive }) => (
                 <>
-                  <Settings className={cn("h-[18px] w-[18px] shrink-0 transition-transform duration-200", !isActive && "group-hover:scale-110 group-hover:rotate-45")} />
-                  <span>Settings</span>
+                  <Settings className={cn(
+                    "h-[17px] w-[17px] shrink-0 transition-all duration-200",
+                    isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80 group-hover:rotate-45"
+                  )} />
+                  <span className={cn("truncate text-[13px]", isActive ? "font-semibold" : "font-medium")}>
+                    Settings
+                  </span>
                 </>
               )}
             </NavLink>
