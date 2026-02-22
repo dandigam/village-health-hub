@@ -36,11 +36,13 @@ export default function EditPatient() {
 		age: '',
 		maritalStatus: '',
 		phone: '',
-		state: '',
-		district: '',
-		mandal: '',
-		village: '',
-		street: '',
+		address: {
+			stateId: '',
+			districtId: '',
+			mandalId: '',
+			village: '',
+			street: '',
+		},
 	});
 	const [history, setHistory] = useState({
 		hasPreviousTreatment: '',
@@ -65,11 +67,13 @@ export default function EditPatient() {
 				age: patientData.age ? String(patientData.age) : '',
 				maritalStatus: patientData.maritalStatus || '',
 				phone: patientData.phoneNumber || patientData.phone || '',
-				state: addr?.stateId !== undefined && addr?.stateId !== null ? String(addr.stateId) : '',
-				district: addr?.districtId !== undefined && addr?.districtId !== null ? String(addr.districtId) : '',
-				mandal: addr?.mandalId !== undefined && addr?.mandalId !== null ? String(addr.mandalId) : '',
-				village: addr?.cityVillage || patientData.village || '',
-				street: addr?.streetAddress || '',
+				address: {
+					stateId: addr?.stateId !== undefined && addr?.stateId !== null ? String(addr.stateId) : '',
+					districtId: addr?.districtId !== undefined && addr?.districtId !== null ? String(addr.districtId) : '',
+					mandalId: addr?.mandalId !== undefined && addr?.mandalId !== null ? String(addr.mandalId) : '',
+					village: addr?.cityVillage || patientData.village || '',
+					street: addr?.streetAddress || '',
+				},
 			});
 			setPhotoUrl(patientData.photoUrl || null);
 			setHistory({
@@ -86,8 +90,12 @@ export default function EditPatient() {
 		}
 	}, [patientData]);
 
-	const updateDemographic = (field: keyof typeof demographic, value: string) => {
-		setDemographic((prev) => ({ ...prev, [field]: value }));
+	const updateDemographic = (field: keyof typeof demographic, value: any) => {
+		if (field === 'address') {
+			setDemographic((prev) => ({ ...prev, address: value }));
+		} else {
+			setDemographic((prev) => ({ ...prev, [field]: value }));
+		}
 	};
 	const updateHistory = <K extends keyof typeof history>(field: K, value: typeof history[K]) => {
 		setHistory((prev) => ({ ...prev, [field]: value }));

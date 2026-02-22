@@ -2,7 +2,7 @@ import { User, ClipboardList, CreditCard, MapPin, Camera } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useMedicalConditions } from '@/hooks/useApiData';
+import { useMedicalConditions, useStatesHierarchy } from '@/hooks/useApiData';
 
 interface DemographicData {
   firstName: string;
@@ -12,11 +12,13 @@ interface DemographicData {
   age: string;
   maritalStatus: string;
   phone: string;
-  state: string;
-  district: string;
-  mandal: string;
-  village: string;
-  street: string;
+  address: {
+    stateId: string;
+    districtId: string;
+    mandalId: string;
+    village: string;
+    street: string;
+  };
 }
 
 interface HistoryData {
@@ -56,6 +58,20 @@ const STATE_MAP: Record<string, string> = {
 };
 
 export function ReviewStep({ demographic, history, payment, photoUrl }: ReviewStepProps) {
+    const { data: statesHierarchy = [] } = useStatesHierarchy();
+
+    // Lookup address names from hierarchy
+    let stateName = '';
+    let districtName = '';
+    let mandalName = '';
+    if (demographic.address) {
+      const state = statesHierarchy.find(s => String(s.id) === String(demographic.address.stateId));
+      stateName = state?.name || '';
+      const district = state?.districts?.find(d => String(d.id) === String(demographic.address.districtId));
+      districtName = district?.name || '';
+      const mandal = district?.mandals?.find(m => String(m.id) === String(demographic.address.mandalId));
+      mandalName = mandal?.name || '';
+    }
   const requiresApproval = payment.paymentType === 'paid' && payment.paymentPercentage && payment.paymentPercentage !== '100';
   const { data: allConditions = [] } = useMedicalConditions();
   const initials = `${demographic.firstName?.[0] || ''}${demographic.lastName?.[0] || ''}`.toUpperCase();
@@ -121,11 +137,11 @@ export function ReviewStep({ demographic, history, payment, photoUrl }: ReviewSt
                   <span className="text-xs text-muted-foreground">Address</span>
                 </div>
                               <p className="font-medium">{[
-                                demographic.street,
-                                demographic.village,
-                                demographic.mandal,
-                                demographic.district,
-                                demographic.state,
+                                demographic.address?.street,
+                                demographic.address?.village,
+                                mandalName,
+                                districtName,
+                                stateName,
                               ].filter(Boolean).join(', ') || '-'}</p>
               </div>
             </div>
