@@ -62,8 +62,8 @@ export default function Login() {
     setLocalError('');
   };
 
-  const APP_NAME = 'HealthCamp Pro';
-  const APP_TAGLINE = 'Medical Camp Management';
+  const APP_NAME = 'Medical Camp';
+  const APP_TAGLINE = 'Management System';
 
   const formVariants = {
     initial: { opacity: 0, x: mode === 'signup' ? 30 : -30 },
@@ -117,8 +117,8 @@ export default function Login() {
             End-to-end patient management, pharmacy workflows, and real-time analytics — all in one platform.
           </p>
           <div className="flex items-center gap-3 mt-5">
-            <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
-              <Heart className="w-5 h-5 text-white" fill="currentColor" />
+            <div className="w-10 h-10 rounded-xl bg-[hsl(340,70%,50%)]/20 backdrop-blur-sm flex items-center justify-center border border-[hsl(340,70%,60%)]/30">
+              <Heart className="w-5 h-5 text-[hsl(340,75%,60%)]" fill="currentColor" />
             </div>
             <div>
               <p className="text-white font-semibold text-sm">{APP_NAME}</p>
@@ -136,8 +136,8 @@ export default function Login() {
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-            <Heart className="w-5 h-5 text-white" fill="currentColor" />
+          <div className="w-10 h-10 rounded-xl bg-[hsl(340,70%,50%)]/20 flex items-center justify-center border border-[hsl(340,70%,60%)]/30">
+            <Heart className="w-5 h-5 text-[hsl(340,75%,60%)]" fill="currentColor" />
           </div>
           <span className="font-bold text-foreground">{APP_NAME}</span>
         </div>
@@ -157,8 +157,8 @@ export default function Login() {
                 </button>
               )}
               <div className="flex items-center gap-3 mx-auto">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-                  <Heart className="w-5 h-5 text-white" fill="currentColor" />
+                <div className="w-11 h-11 rounded-xl bg-[hsl(340,70%,50%)]/20 flex items-center justify-center border border-[hsl(340,70%,60%)]/30">
+                  <Heart className="w-5 h-5 text-[hsl(340,75%,60%)]" fill="currentColor" />
                 </div>
                 <div>
                   <p className="font-bold text-lg text-foreground tracking-tight">{APP_NAME}</p>

@@ -69,8 +69,8 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
           "flex items-center h-14 sm:h-16 border-b border-white/10 transition-all duration-300",
           collapsed ? "justify-center px-2" : "px-4 gap-3"
         )}>
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 shrink-0 border border-white/10">
-            <Heart className="h-5 w-5 text-white" fill="white" />
+          <div className="h-9 w-9 rounded-xl bg-[hsl(340,70%,50%)]/20 flex items-center justify-center shadow-lg shadow-[hsl(340,70%,50%)]/20 shrink-0 border border-[hsl(340,70%,60%)]/30">
+            <Heart className="h-5 w-5 text-[hsl(340,75%,60%)]" fill="currentColor" />
           </div>
           <div className={cn(
             "overflow-hidden transition-all duration-300",

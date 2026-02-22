@@ -1,4 +1,4 @@
-import { Bell, Search, User, LogOut, Settings, MapPin, ChevronDown, Check, Menu, ShoppingCart } from 'lucide-react';
+import { Bell, Search, User, LogOut, Settings, MapPin, ChevronDown, Check, Menu, ShoppingCart, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,12 +43,12 @@ export function Header({ onMenuToggle }: HeaderProps) {
           </Button>
         )}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
-            <span className="text-lg sm:text-xl font-bold text-primary-foreground">S</span>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[hsl(340,70%,50%)]/20 backdrop-blur-sm flex items-center justify-center border border-[hsl(340,70%,60%)]/30">
+            <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-[hsl(340,75%,60%)]" fill="currentColor" />
           </div>
           <div className="hidden sm:block">
-            <span className="text-lg font-bold text-primary-foreground tracking-tight">HealthCamp</span>
-            <span className="text-[10px] text-primary-foreground/60 block -mt-1 font-semibold uppercase tracking-widest">PRO</span>
+            <span className="text-sm font-bold text-primary-foreground tracking-tight leading-tight block">Medical Camp</span>
+            <span className="text-[10px] text-primary-foreground/70 block -mt-0.5 font-medium">Management System</span>
           </div>
         </div>
         <div className="hidden md:block border-l border-primary-foreground/20 pl-4 ml-2">
