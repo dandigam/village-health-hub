@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { toast } from '@/hooks/use-toast';
-import { useCamps } from '@/hooks/useApiData';
+import { useCamps, useSaveDoctor } from '@/hooks/useApiData';
 
 const specializations = [
   'General Physician', 'Cardiologist', 'Neurologist', 'Orthopedist', 'Pediatrician',
@@ -70,13 +70,32 @@ export default function NewDoctor() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const saveDoctor = useSaveDoctor();
+
+  const handleSubmit = async () => {
     if (!validateForm()) {
       toast({ title: 'Validation Error', description: 'Please fix the errors in the form.', variant: 'destructive' });
       return;
     }
-    toast({ title: 'Doctor Added Successfully!', description: `${formData.name} has been added to the system.` });
-    navigate('/doctors');
+    // Map doctorCamps to request format
+    const doctorCamps = formData.selectedCamps.map((campId) => ({
+      doctor: formData.name,
+      camp: campId,
+    }));
+    const payload = {
+      name: formData.name,
+      specialization: formData.specialization,
+      phoneNumber: formData.phone,
+      email: formData.email,
+      doctorCamps,
+    };
+    try {
+      await saveDoctor.mutateAsync(payload);
+      toast({ title: 'Doctor Added Successfully!', description: `${formData.name} has been added to the system.` });
+      navigate('/doctors');
+    } catch (e) {
+      toast({ title: 'API Error', description: 'Failed to save doctor.', variant: 'destructive' });
+    }
   };
 
   const handleCancel = () => navigate('/doctors');

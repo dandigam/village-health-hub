@@ -24,7 +24,13 @@ export interface EncounterPatient {
 }
 
 export default function Encounters() {
-  const { data: patients = [] } = usePatients();
+  const { data: patientsRaw = [] } = usePatients();
+  // Handle paginated API response (with 'content' array)
+  const patientList = Array.isArray(patientsRaw.content)
+    ? patientsRaw.content
+    : Array.isArray(patientsRaw)
+      ? patientsRaw
+      : [];
   const { data: doctors = [] } = useDoctors();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -33,19 +39,19 @@ export default function Encounters() {
   const isMobile = useIsMobile();
 
   const buildEncounterQueue = useMemo((): EncounterPatient[] => {
-    const sliced = patients.slice(0, 6);
+    const sliced = patientList.slice(0, 6);
+    // Hardcode status for each patient by index
     const statuses: EncounterStatus[] = ['waiting', 'in_progress', 'completed', 'waiting', 'in_progress', 'waiting'];
     const arrivals = ['08:30 AM', '08:45 AM', '09:00 AM', '09:15 AM', '09:30 AM', '09:45 AM'];
-    
     return sliced.map((p, i) => ({
       patient: p,
-      status: statuses[i],
-      arrivalTime: arrivals[i],
+      status: statuses[i] || 'waiting',
+      arrivalTime: arrivals[i] || '08:30 AM',
       isReturning: i === 1 || i === 4,
       assignedDoctor: statuses[i] === 'in_progress' ? doctors[i % doctors.length]?.name : undefined,
       currentStep: statuses[i] === 'completed' ? 5 : statuses[i] === 'in_progress' ? 2 : 0,
     }));
-  }, [patients, doctors]);
+  }, [patientList, doctors]);
 
   const [encounterQueue, setEncounterQueue] = useState<EncounterPatient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);

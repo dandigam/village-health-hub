@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { User, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PhotoUpload } from '@/components/shared/PhotoUpload';
+import { useStatesHierarchy } from '@/hooks/useApiData';
 
 interface DemographicData {
   firstName: string;
@@ -19,9 +21,9 @@ interface DemographicData {
   age: string;
   maritalStatus: string;
   phone: string;
-  state: string;
-  district: string;
-  mandal: string;
+  state: string; // stores stateId as string
+  district: string; // stores districtId as string
+  mandal: string; // stores mandalId as string
   village: string;
   street: string;
 }
@@ -34,6 +36,29 @@ interface DemographicStepProps {
 }
 
 export function DemographicStep({ data, photoUrl, onUpdate, onPhotoChange }: DemographicStepProps) {
+  const { data: statesHierarchy = [] } = useStatesHierarchy();
+
+  // Derive available districts and mandals from API data
+  // Find selected state, district, mandal objects for display
+  // Always use stateId, districtId, mandalId for value and lookup
+  const selectedState = useMemo(() => statesHierarchy.find(s => String(s.id) === String(data.state)), [statesHierarchy, data.state]);
+  const availableDistricts = useMemo(() => selectedState?.districts ?? [], [selectedState]);
+  const selectedDistrict = useMemo(() => availableDistricts.find(d => String(d.id) === String(data.district)), [availableDistricts, data.district]);
+  const availableMandals = useMemo(() => selectedDistrict?.mandals ?? [], [selectedDistrict]);
+  const selectedMandal = useMemo(() => availableMandals.find(m => String(m.id) === String(data.mandal)), [availableMandals, data.mandal]);
+
+  // Reset dependent fields when parent changes
+  const handleStateChange = (value: string) => {
+    onUpdate('state', value);
+    onUpdate('district', '');
+    onUpdate('mandal', '');
+  };
+
+  const handleDistrictChange = (value: string) => {
+    onUpdate('district', value);
+    onUpdate('mandal', '');
+  };
+
   return (
     <div className="flex gap-4">
       {/* Main Form */}
@@ -153,43 +178,58 @@ export function DemographicStep({ data, photoUrl, onUpdate, onPhotoChange }: Dem
             <div className="grid grid-cols-4 gap-3 mb-3">
               <div className="space-y-1">
                 <Label htmlFor="state" className="text-xs font-medium">State</Label>
-                <Select value={data.state} onValueChange={(v) => onUpdate('state', v)}>
+                <Select value={data.state || ''} onValueChange={handleStateChange}>
                   <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder="Select">
+                      {selectedState ? selectedState.name : ''}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="AP">Andhra Pradesh</SelectItem>
-                    <SelectItem value="TS">Telangana</SelectItem>
-                    <SelectItem value="KA">Karnataka</SelectItem>
-                    <SelectItem value="TN">Tamil Nadu</SelectItem>
+                    {statesHierarchy.map(s => (
+                      <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="district" className="text-xs font-medium">District</Label>
                 <Select
-                  value={data.district}
-                  onValueChange={(v) => onUpdate('district', v)}
+                  value={data.district || ''}
+                  onValueChange={handleDistrictChange}
+                  disabled={!data.state}
                 >
                   <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder="Select">
+                      {selectedDistrict ? selectedDistrict.name : ''}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Guntur">Guntur</SelectItem>
-                    <SelectItem value="Krishna">Krishna</SelectItem>
-                    <SelectItem value="Prakasam">Prakasam</SelectItem>
+                    {availableDistricts.map(d => (
+                      <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="mandal" className="text-xs font-medium">Mandal</Label>
-                <Select value={data.mandal} onValueChange={(v) => onUpdate('mandal', v)}>
+                <Select 
+                  value={data.mandal || ''}
+                  onValueChange={(v) => onUpdate('mandal', v)}
+                  disabled={!data.district}
+                >
                   <SelectTrigger className="h-9 text-sm">
-                    <SelectValue placeholder="Select" />
+                    <SelectValue placeholder="Select">
+                      {selectedMandal ? selectedMandal.name : ''}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Bapatla">Bapatla</SelectItem>
-                    <SelectItem value="Mangalagiri">Mangalagiri</SelectItem>
+                    {availableMandals.length > 0 ? (
+                      availableMandals.map(m => (
+                        <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="__none" disabled>No mandals available</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>

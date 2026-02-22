@@ -115,12 +115,12 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
             <img src={encounter.patient.photoUrl} alt="" className="h-8 w-8 sm:h-9 sm:w-9 rounded-full object-cover border shrink-0" />
           ) : (
             <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground shrink-0">
-              {encounter.patient.name.charAt(0)}
+              {(encounter.patient.name || encounter.patient.firstName || '').charAt(0)}
             </div>
           )}
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{encounter.patient.name} {encounter.patient.surname}</p>
+              <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{encounter.patient.name || encounter.patient.firstName || ''} {encounter.patient.surname || encounter.patient.lastName || ''}</p>
               {encounter.isReturning && (
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.3)] bg-[hsl(var(--warning)/0.08)] shrink-0">
                   <RotateCcw className="h-2.5 w-2.5 mr-0.5" />

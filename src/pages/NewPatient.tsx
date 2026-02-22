@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { usePatient } from '@/hooks/useApiData';
+import { useNavigate, useParams } from 'react-router-dom';
 import { X, ChevronLeft, ChevronRight, Save, FileText, ShieldCheck } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,8 @@ import { HistoryStep } from '@/components/patients/HistoryStep';
 import { PaymentStep } from '@/components/patients/PaymentStep';
 import { ReviewStep } from '@/components/patients/ReviewStep';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
+import { api } from '@/services/api';
 
 const STEPS = [
   { id: 1, title: 'Demographic Details' },
@@ -18,9 +21,13 @@ const STEPS = [
 ];
 
 export default function NewPatient() {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Remove duplicate isLoading declaration
 
   const [demographic, setDemographic] = useState({
     firstName: '',
@@ -36,6 +43,39 @@ export default function NewPatient() {
     village: '',
     street: '',
   });
+  // ...existing code...
+  const { data: patientData, isLoading } = usePatient(id || '');
+  useEffect(() => {
+    if (id && patientData) {
+      setDemographic({
+        firstName: patientData.firstName || '',
+        lastName: patientData.lastName || '',
+        fatherSpouseName: patientData.fatherSpouseName || '',
+        gender: patientData.gender || '',
+        age: patientData.age ? String(patientData.age) : '',
+        maritalStatus: patientData.maritalStatus || '',
+        phone: patientData.phoneNumber || '',
+        state: patientData.address?.state || '',
+        district: patientData.address?.district || '',
+        mandal: patientData.address?.mandal || '',
+        village: patientData.address?.cityVillage || '',
+        street: patientData.address?.streetAddress || '',
+        pinCode: patientData.address?.pinCode || '',
+      });
+      setPhotoUrl(patientData.photoUrl || null);
+      setHistory({
+        hasPreviousTreatment: patientData.hasMedicalHistory ? 'yes' : 'no',
+        conditions: patientData.medicalHistory?.conditions || [],
+        previousHospital: patientData.medicalHistory?.previousHospital || '',
+        currentMedications: patientData.medicalHistory?.currentMedications || '',
+        pastSurgery: patientData.medicalHistory?.pastSurgery || '',
+      });
+      setPayment({
+        paymentType: patientData.paymentType || '',
+        paymentPercentage: patientData.paymentPercentage ? String(patientData.paymentPercentage) : '',
+      });
+    }
+  }, [id, patientData]);
 
   const [history, setHistory] = useState({
     hasPreviousTreatment: '',
@@ -49,10 +89,6 @@ export default function NewPatient() {
     paymentType: '',
     paymentPercentage: '',
   });
-
-  const updateDemographic = (field: keyof typeof demographic, value: string) => {
-    setDemographic((prev) => ({ ...prev, [field]: value }));
-  };
 
   const updateHistory = <K extends keyof typeof history>(field: K, value: typeof history[K]) => {
     setHistory((prev) => ({ ...prev, [field]: value }));
@@ -99,14 +135,85 @@ export default function NewPatient() {
 
   const requiresApproval = payment.paymentType === 'paid' && payment.paymentPercentage && payment.paymentPercentage !== '100';
 
-  const handleSaveDraft = () => {
-    toast.success('Patient saved as draft');
-    navigate('/patients');
+  const handleSaveDraft = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        firstName: demographic.firstName,
+        lastName: demographic.lastName,
+        fatherSpouseName: demographic.fatherSpouseName,
+        gender: demographic.gender,
+        age: Number(demographic.age),
+        maritalStatus: demographic.maritalStatus,
+        phoneNumber: demographic.phone,
+        photoUrl,
+        address: {
+          stateId: demographic.state ? Number(demographic.state) : undefined,
+          districtId: demographic.district ? Number(demographic.district) : undefined,
+          mandalId: demographic.mandal ? Number(demographic.mandal) : undefined,
+          cityVillage: demographic.village,
+          streetAddress: demographic.street,
+          pinCode: demographic.pinCode,
+        },
+        hasMedicalHistory: history.hasPreviousTreatment === 'yes',
+        medicalHistory: history.hasPreviousTreatment === 'yes' ? {
+          conditions: history.conditions,
+          previousHospital: history.previousHospital,
+          currentMedications: history.currentMedications,
+          pastSurgery: history.pastSurgery,
+        } : null,
+        paymentType: payment.paymentType,
+        paymentPercentage: payment.paymentPercentage ? Number(payment.paymentPercentage) : null,
+        draft: true,
+      };
+      await api.post('/patients', payload);
+      toast.success('Patient saved as draft');
+      navigate('/patients');
+    } catch (e) {
+      toast.error('Failed to save draft');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSendToEncounter = () => {
-    toast.success('Patient registered and sent to Encounters');
-    navigate('/encounters');
+  const handleSendToEncounter = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        firstName: demographic.firstName,
+        lastName: demographic.lastName,
+        fatherSpouseName: demographic.fatherSpouseName,
+        gender: demographic.gender,
+        age: Number(demographic.age),
+        maritalStatus: demographic.maritalStatus,
+        phoneNumber: demographic.phone,
+        photoUrl,
+        address: {
+          stateId: demographic.state ? Number(demographic.state) : undefined,
+          districtId: demographic.district ? Number(demographic.district) : undefined,
+          mandalId: demographic.mandal ? Number(demographic.mandal) : undefined,
+          cityVillage: demographic.village,
+          streetAddress: demographic.street,
+          pinCode: demographic.pinCode,
+        },
+        hasMedicalHistory: history.hasPreviousTreatment === 'yes',
+        medicalHistory: history.hasPreviousTreatment === 'yes' ? {
+          conditions: history.conditions,
+          previousHospital: history.previousHospital,
+          currentMedications: history.currentMedications,
+          pastSurgery: history.pastSurgery,
+        } : null,
+        paymentType: payment.paymentType,
+        paymentPercentage: payment.paymentPercentage ? Number(payment.paymentPercentage) : null,
+      };
+      await api.post('/patients', payload);
+      toast.success('Patient registered and sent to Encounters');
+      navigate('/encounters');
+    } catch (e) {
+      toast.error('Failed to register patient');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSendToAdmin = () => {
@@ -118,23 +225,46 @@ export default function NewPatient() {
     navigate('/patients');
   };
 
+  // Stepper: block next step unless valid, allow editing previous steps
+  const handleStepClick = (stepId: number) => {
+    if (stepId < currentStep) {
+      setCurrentStep(stepId);
+    } else if (stepId === currentStep) {
+      return;
+    } else {
+      // Only allow forward if all previous steps are valid
+      let valid = true;
+      for (let i = 1; i < stepId; i++) {
+        if (!validateStep(i)) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid) setCurrentStep(stepId);
+    }
+  };
+
+  const updateDemographic = (field: keyof typeof demographic, value: string) => {
+    setDemographic((prev) => ({ ...prev, [field]: value }));
+  };
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <DashboardLayout>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">Add New Patient</h1>
-          <Button variant="outline" size="sm" onClick={handleCancel}>
+          <h1 className="text-xl font-semibold text-foreground">{id ? 'Edit Patient' : 'Add New Patient'}</h1>
+          <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSubmitting}>
             <X className="h-4 w-4 mr-1" />
             Cancel
           </Button>
         </div>
-
         {/* Stepper */}
         <div className="bg-card border rounded-lg p-4">
-          <PatientStepper steps={STEPS} currentStep={currentStep} onStepClick={(stepId) => setCurrentStep(stepId)} />
+          <PatientStepper steps={STEPS} currentStep={currentStep} onStepClick={handleStepClick} />
         </div>
-
         {/* Step Content */}
         <div className="min-h-[400px]">
           {currentStep === 1 && (
@@ -160,36 +290,34 @@ export default function NewPatient() {
             />
           )}
         </div>
-
         {/* Navigation Buttons */}
         <div className="flex items-center justify-between border-t pt-4">
           <div>
             {currentStep > 1 && (
-              <Button variant="outline" onClick={handleBack}>
+              <Button variant="outline" onClick={handleBack} disabled={isSubmitting}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
             )}
           </div>
-
           <div className="flex gap-2">
             {currentStep < 4 ? (
-              <Button onClick={handleNext} className="bg-accent hover:bg-accent/90">
+              <Button onClick={handleNext} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
                 Next
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
               <>
-                <Button variant="outline" onClick={handleSaveDraft}>
+                <Button variant="outline" onClick={handleSaveDraft} disabled={isSubmitting}>
                   <Save className="h-4 w-4 mr-1" />
                   Save (Draft)
                 </Button>
-                <Button onClick={handleSendToEncounter} className="bg-accent hover:bg-accent/90">
+                <Button onClick={handleSendToEncounter} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
                   <FileText className="h-4 w-4 mr-1" />
-                  Send to Encounters
+                  {id ? 'Update Patient' : 'Send to Encounters'}
                 </Button>
                 {requiresApproval && (
-                  <Button variant="secondary" onClick={handleSendToAdmin}>
+                  <Button variant="secondary" onClick={handleSendToAdmin} disabled={isSubmitting}>
                     <ShieldCheck className="h-4 w-4 mr-1" />
                     Send to Administration
                   </Button>

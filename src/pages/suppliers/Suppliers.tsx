@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Pencil, Trash2, Truck } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -8,26 +8,48 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DeleteConfirmDialog } from '@/components/stock/DeleteConfirmDialog';
-import { useSuppliers, useSupplierMedicines, useMedicines } from '@/hooks/useApiData';
+import { useSupplierList } from '@/hooks/useApiData';
 import { toast } from '@/hooks/use-toast';
 import type { Supplier } from '@/types';
+import { useAuth } from '@/context/AuthContext';
+import { api } from '@/services/api';
 
 export default function Suppliers() {
   const navigate = useNavigate();
-  const { data: suppliers = [] } = useSuppliers();
-  const { data: supplierMedicines = [] } = useSupplierMedicines();
-  const { data: medicines = [] } = useMedicines();
-  const [viewSupplier, setViewSupplier] = useState<Supplier | null>(null);
-  const [deleteSupplier, setDeleteSupplier] = useState<Supplier | null>(null);
+  const {user: authUser} = useAuth();
+  const warehouseId = authUser?.wareHouse?.id ? Number(authUser.wareHouse.id) : undefined;
+  const { data: suppliers = [], refetch: refetchSuppliers } = useSupplierList(warehouseId);
 
-  const getMedicinesForSupplier = (supplierId: string) => {
-    const medIds = supplierMedicines.filter(sm => sm.supplierId === supplierId).map(sm => sm.medicineId);
-    return medicines.filter(m => medIds.includes(m.id));
+  // Helper to reload suppliers after add/edit/delete
+  const reloadSuppliers = () => {
+    if (typeof refetchSuppliers === 'function') refetchSuppliers();
   };
 
-  const handleDelete = () => {
-    toast({ title: 'Supplier Deleted', description: `${deleteSupplier?.name} has been removed.` });
-    setDeleteSupplier(null);
+  // Always fetch fresh data when page loads (on mount or navigation)
+  useEffect(() => {
+    reloadSuppliers();
+  }, []);
+
+  const [viewSupplier, setViewSupplier] = useState<Supplier | null>(null);
+  const [deleteSupplierState, setDeleteSupplierState] = useState<Supplier | null>(null);
+
+  // Returns medicines for a supplier, or empty array if none
+  const getMedicinesForSupplier = (supplierId: number) => {
+    const supplier = suppliers.find(s => s.id === supplierId);
+    return supplier?.medicines ?? [];
+  };
+
+  const handleDelete = async () => {
+    if (!deleteSupplierState?.id) return;
+    try {
+      const result = await api.delete(`/suppliers/warehouse/${warehouseId}/supplier/${deleteSupplierState.id}`);
+      if (result === null) throw new Error('Failed to delete supplier');
+      toast({ title: 'Supplier Deleted', description: `${deleteSupplierState.name} has been removed.` });
+      setDeleteSupplierState(null);
+      reloadSuppliers();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to delete supplier', variant: 'destructive' });
+    }
   };
 
   return (
@@ -39,6 +61,7 @@ export default function Suppliers() {
         </Button>
       </div>
 
+      <TooltipProvider delayDuration={0}>
       <Card>
         <CardContent className="p-0">
           <div className="data-table">
@@ -56,7 +79,11 @@ export default function Suppliers() {
                 {suppliers.length === 0 ? (
                   <tr><td colSpan={5} className="text-center py-8 text-muted-foreground">No suppliers found.</td></tr>
                 ) : suppliers.map(supplier => {
-                  const meds = getMedicinesForSupplier(supplier.id);
+                  if (!supplier) return null;
+                  // Prefer supplier.medicines if present and non-empty, otherwise fallback
+                  const meds = (supplier.medicines && supplier.medicines.length > 0)
+                    ? supplier.medicines
+                    : getMedicinesForSupplier(supplier.id);
                   const visibleMeds = meds.slice(0, 3);
                   const remainingMeds = meds.slice(3);
 
@@ -78,20 +105,18 @@ export default function Suppliers() {
                             <Badge key={m.id} variant="secondary" className="text-xs">{m.name}</Badge>
                           ))}
                           {remainingMeds.length > 0 && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Badge variant="outline" className="text-xs cursor-pointer">+{remainingMeds.length} more</Badge>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-[240px]">
-                                  <div className="space-y-1">
-                                    {remainingMeds.map(m => (
-                                      <p key={m.id} className="text-xs">{m.name}</p>
-                                    ))}
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Badge variant="outline" className="text-xs cursor-pointer hover:bg-muted">+{remainingMeds.length} more</Badge>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-[280px] p-2 z-[100]">
+                                <div className="flex flex-wrap gap-1">
+                                  {remainingMeds.map(m => (
+                                    <Badge key={m.id} variant="secondary" className="text-xs">{m.name}</Badge>
+                                  ))}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
                           )}
                           {meds.length === 0 && <span className="text-xs text-muted-foreground">None</span>}
                         </div>
@@ -101,10 +126,10 @@ export default function Suppliers() {
                           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setViewSupplier(supplier)}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => navigate(`/suppliers/${supplier.id}/edit`)}>
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => navigate(`/suppliers/${supplier.id}/edit`, { state: { supplier } })}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteSupplier(supplier)}>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteSupplierState(supplier)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -117,6 +142,7 @@ export default function Suppliers() {
           </div>
         </CardContent>
       </Card>
+      </TooltipProvider>
 
       {/* View Supplier Dialog */}
       <Dialog open={!!viewSupplier} onOpenChange={() => setViewSupplier(null)}>
@@ -151,10 +177,10 @@ export default function Suppliers() {
 
       {/* Delete Confirm */}
       <DeleteConfirmDialog
-        open={!!deleteSupplier}
-        onOpenChange={() => setDeleteSupplier(null)}
+        open={!!deleteSupplierState}
+        onOpenChange={() => setDeleteSupplierState(null)}
         title="Delete Supplier"
-        description={`Are you sure you want to delete "${deleteSupplier?.name}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${deleteSupplierState?.name}"? This action cannot be undone.`}
         onConfirm={handleDelete}
       />
     </DashboardLayout>

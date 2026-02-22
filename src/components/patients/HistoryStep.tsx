@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMedicalConditions } from '@/services/api';
 
 interface HistoryData {
   hasPreviousTreatment: string;
@@ -19,20 +20,18 @@ interface HistoryStepProps {
   onUpdate: <K extends keyof HistoryData>(field: K, value: HistoryData[K]) => void;
 }
 
-const CONDITIONS = [
-  { id: 'diabetes', label: 'Diabetes' },
-  { id: 'hypertension', label: 'Hypertension' },
-  { id: 'heart_disease', label: 'Heart Disease' },
-  { id: 'asthma', label: 'Asthma / Breathing Issues' },
-  { id: 'thyroid', label: 'Thyroid' },
-  { id: 'other', label: 'Other' },
-];
 
 export function HistoryStep({ data, onUpdate }: HistoryStepProps) {
+  const { data: conditions = [], isLoading } = useMedicalConditions();
+  console.log(conditions);
   const handleConditionChange = (conditionId: string, checked: boolean) => {
-    const newConditions = checked
-      ? [...data.conditions, conditionId]
-      : data.conditions.filter((c) => c !== conditionId);
+    let newConditions;
+    if (checked) {
+      // Avoid duplicates
+      newConditions = Array.from(new Set([...data.conditions, conditionId]));
+    } else {
+      newConditions = data.conditions.filter((c) => c !== conditionId);
+    }
     onUpdate('conditions', newConditions);
   };
 
@@ -77,23 +76,33 @@ export function HistoryStep({ data, onUpdate }: HistoryStepProps) {
             <div className="space-y-2">
               <Label className="text-sm font-medium">Conditions</Label>
               <div className="grid grid-cols-3 gap-3">
-                {CONDITIONS.map((condition) => (
-                  <div key={condition.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={condition.id}
-                      checked={data.conditions.includes(condition.id)}
-                      onCheckedChange={(checked) =>
-                        handleConditionChange(condition.id, checked as boolean)
-                      }
-                    />
-                    <Label
-                      htmlFor={condition.id}
-                      className="text-sm font-normal cursor-pointer"
-                    >
-                      {condition.label}
-                    </Label>
-                  </div>
-                ))}
+                {isLoading ? (
+                  <div>Loading conditions...</div>
+                ) : (
+                  conditions.map((condition) => {
+                    // Pre-select if condition.id matches any in data.conditions
+                    const checked = data.conditions.some(
+                      (c) => String(c) === String(condition.id)
+                    );
+                    return (
+                      <div key={condition.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={String(condition.id)}
+                          checked={checked}
+                          onCheckedChange={(checked) =>
+                            handleConditionChange(String(condition.id), checked as boolean)
+                          }
+                        />
+                        <Label
+                          htmlFor={String(condition.id)}
+                          className="text-sm font-normal cursor-pointer"
+                        >
+                          {condition.name}
+                        </Label>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 

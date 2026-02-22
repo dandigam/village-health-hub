@@ -1,3 +1,54 @@
+// Camp save mutation hook
+export function useSaveCamp() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (camp: any) => {
+      // If id is present, update; else, create
+      if (camp.id) {
+        return await api.put(`/camps/${camp.id}`, camp);
+      } else {
+        const { id, ...campData } = camp;
+        return await api.post('/camps', campData);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['camps'] });
+    },
+  });
+}
+// Doctor save mutation hook
+// Remove duplicate Doctor import
+import api from '@/services/api';
+
+export function useSaveDoctor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (doctor: {
+      name: string;
+      specialization: string;
+      phoneNumber: string;
+      email: string;
+      doctorCamps: { id: number; doctor: string; camp: string }[];
+    }) => {
+      return await api.post('/doctors', doctor);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+    },
+  });
+}
+// Dashboard stats API hook
+export function useDashboardStats() {
+  return useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const res = await fetch('http://localhost:9090/api/dashboard');
+      if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+      return res.json();
+    },
+    refetchOnWindowFocus: false,
+  });
+}
 /**
  * React Query hooks with automatic API → mock fallback.
  * 
@@ -6,7 +57,7 @@
  * Components don't need to know the data source.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchWithFallback } from '@/services/api';
 import {
   mockUser,
@@ -127,6 +178,38 @@ export function useSuppliers() {
   });
 }
 
+export function useSupplierList(warehouseId: number) {
+  return useQuery({
+    queryKey: ['suppliers', warehouseId],
+    queryFn: () =>
+      fetchWithFallback<Supplier[]>(
+        `/suppliers/warehouse/${warehouseId}`,
+        mockSuppliers
+      ),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+  });
+}
+
+export function useDeleteSupplier(warehouseId?: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (supplierId: number) =>
+      request(`/suppliers/${supplierId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['suppliers']);
+      if (warehouseId) {
+        queryClient.invalidateQueries(['suppliers', warehouseId]);
+      }
+    },
+  });
+}
+
+
+
 export function useStockItems() {
   return useQuery({
     queryKey: ['stockItems'],
@@ -181,12 +264,16 @@ export function useSupplierMedicines() {
   });
 }
 
-export function useSupplierOrders() {
+export function useSupplierOrders(warehouseId?: number) {
   return useQuery({
-    queryKey: ['supplierOrders'],
-    queryFn: () => fetchWithFallback<SupplierOrder[]>('/supplier-orders', mockSupplierOrders),
+    queryKey: ['supplierOrders', warehouseId],
+    queryFn: () => fetchWithFallback<SupplierOrder[]>(
+      warehouseId ? `/supplier-orders/warehouse/${warehouseId}` : '/supplier-orders',
+      mockSupplierOrders
+    ),
     staleTime: STALE_TIME,
     select: (res) => res.data,
+    enabled: !!warehouseId,
   });
 }
 
@@ -207,3 +294,58 @@ export function useRequestOrders() {
     select: (res) => res.data,
   });
 }
+
+// Types for states hierarchy
+export interface Mandal {
+  id: number;
+  name: string;
+}
+
+export interface District {
+  id: number;
+  name: string;
+  mandals: Mandal[];
+}
+
+export interface StateHierarchy {
+  id: number;
+  name: string;
+  districts: District[];
+}
+
+export function useStatesHierarchy() {
+  return useQuery({
+    queryKey: ['statesHierarchy'],
+    queryFn: () => fetchWithFallback<StateHierarchy[]>('/states/hierarchy', []),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+  });
+}
+
+export interface WarehouseInventoryItem {
+  id: number;
+  warehouseId: number;
+  warehouseName: string;
+  medicineId: number;
+  medicineName: string;
+  medicineType: string;
+  totalQty: number;
+  minimumQty: number;
+  updatedAt: string;
+  items: any[] | null;
+}
+
+export function useWarehouseInventory(warehouseId?: number) {
+  return useQuery({
+    queryKey: ['warehouseInventory', warehouseId],
+    queryFn: () => fetchWithFallback<WarehouseInventoryItem[]>(
+      `/warehouse-inventory/warehouse/${warehouseId}`,
+      []
+    ),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+    enabled: !!warehouseId,
+  });
+}
+
+

@@ -7,6 +7,10 @@ interface AuthUser {
   id: number;
   name: string;
   role: AppRole;
+  wareHouse?: {
+    id: number | string;
+    name?: string;
+  };
 }
 
 interface AuthState {

@@ -57,13 +57,13 @@ export function Header({ onMenuToggle }: HeaderProps) {
               <Button variant="ghost" className="h-auto p-2 text-primary-foreground hover:bg-primary-foreground/10 flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary-foreground/70" />
                 <div className="text-left">
-                  <p className="text-sm font-medium">{selectedCamp || 'Select Camp'}</p>
-                  <p className="text-[10px] text-primary-foreground/70">Current Camp</p>
+                  <p className="text-sm font-medium">{currentUser.name ? currentUser.name : selectedCamp || 'Select Camp'}</p>
+                 {currentUser.role !== "WARE_HOUSE" ? <p className="text-[10px] text-primary-foreground/70">Current Camp</p> : null}
                 </div>
-                <ChevronDown className="h-4 w-4 text-primary-foreground/70" />
+                {currentUser.role !== "WARE_HOUSE" ? <ChevronDown className="h-4 w-4 text-primary-foreground/70" /> : null}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 z-50 bg-card">
+           {currentUser.role !== "WARE_HOUSE" ? <DropdownMenuContent align="start" className="w-56 z-50 bg-card">
               <DropdownMenuLabel>Select Camp Location</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {camps.map((camp) => (
@@ -75,7 +75,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
                   {selectedCamp === camp.name && <Check className="h-4 w-4 text-primary" />}
                 </DropdownMenuItem>
               ))}
-            </DropdownMenuContent>
+            </DropdownMenuContent> : null}
           </DropdownMenu>
         </div>
       </div>
@@ -83,7 +83,10 @@ export function Header({ onMenuToggle }: HeaderProps) {
       <div className="hidden lg:flex items-center max-w-md flex-1 mx-8">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search Patient by MR Number / First Name / Surname" className="pl-10 bg-primary-foreground border-0" />
+          <Input 
+            placeholder={currentUser.role === "WARE_HOUSE" ? "Search Supplier Medicines..." : "Search Patient by MR Number / First Name / Surname"} 
+            className="pl-10 bg-primary-foreground border-0" 
+          />
         </div>
       </div>
 

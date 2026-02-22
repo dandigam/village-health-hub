@@ -14,13 +14,20 @@ export default function PatientHistory() {
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [initialized, setInitialized] = useState(false);
 
-  const { data: allPatients = [] } = usePatients();
+  const { data: patientsRaw = [] } = usePatients();
+  // Handle paginated API response (with 'content' array)
+  const allPatients = Array.isArray(patientsRaw.content)
+    ? patientsRaw.content
+    : Array.isArray(patientsRaw)
+      ? patientsRaw
+      : [];
   const { data: allPrescriptions = [] } = usePrescriptions();
   const { data: allPayments = [] } = usePayments();
   const { data: allDoctors = [] } = useDoctors();
   const { data: allCamps = [] } = useCamps();
 
-  const patient = allPatients.find(p => p.id === id);
+  // Ensure id types match (string vs number)
+  const patient = allPatients.find(p => String(p.id) === String(id));
   const patientPrescriptions = allPrescriptions.filter(p => p.patientId === id);
   const patientPayments = allPayments.filter(p => p.patientId === id);
 
@@ -98,10 +105,10 @@ export default function PatientHistory() {
           <div className="flex items-center gap-5">
             <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0"><User className="h-7 w-7 text-accent" /></div>
             <div className="flex-1 grid grid-cols-4 gap-4">
-              <div><p className="text-xs text-muted-foreground">Full Name</p><p className="text-sm font-semibold">{patient.name} {patient.surname}</p></div>
+              <div><p className="text-xs text-muted-foreground">Full Name</p><p className="text-sm font-semibold">{patient.name || patient.firstName || ''} {patient.surname || patient.lastName || ''}</p></div>
               <div><p className="text-xs text-muted-foreground">Age / Gender</p><p className="text-sm font-semibold">{patient.age} yrs / {patient.gender}</p></div>
-              <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm font-semibold">{patient.phone}</p></div>
-              <div><p className="text-xs text-muted-foreground">Village</p><p className="text-sm font-semibold">{patient.village}, {patient.district}</p></div>
+              <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm font-semibold">{patient.phone || patient.phoneNumber || ''}</p></div>
+              <div><p className="text-xs text-muted-foreground">Village</p><p className="text-sm font-semibold">{patient.village || patient.address?.cityVillage || ''}, {patient.district || patient.address?.district || ''}</p></div>
             </div>
           </div>
         </CardContent>
