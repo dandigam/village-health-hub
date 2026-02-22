@@ -35,20 +35,20 @@ export function Header({ onMenuToggle }: HeaderProps) {
   };
 
   return (
-    <header className="h-14 sm:h-16 bg-gradient-to-r from-primary to-accent flex items-center justify-between px-3 sm:px-4 lg:px-6 print:hidden sticky top-0 z-50 shadow-lg shadow-primary/20">
+    <header className="h-14 sm:h-16 bg-gradient-to-r from-[hsl(220,80%,18%)] via-primary to-accent flex items-center justify-between px-3 sm:px-4 lg:px-6 print:hidden sticky top-0 z-50 shadow-lg shadow-primary/15">
       <div className="flex items-center gap-2 sm:gap-4">
         {onMenuToggle && (
-          <Button variant="ghost" size="icon" className="md:hidden text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9" onClick={onMenuToggle}>
+          <Button variant="ghost" size="icon" className="md:hidden text-primary-foreground hover:bg-white/10 h-9 w-9" onClick={onMenuToggle}>
             <Menu className="h-5 w-5" />
           </Button>
         )}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
             <span className="text-lg sm:text-xl font-bold text-primary-foreground">S</span>
           </div>
           <div className="hidden sm:block">
-            <span className="text-lg font-bold text-primary-foreground">HealthCamp</span>
-            <span className="text-xs text-primary-foreground/70 block -mt-1">PRO</span>
+            <span className="text-lg font-bold text-primary-foreground tracking-tight">HealthCamp</span>
+            <span className="text-[10px] text-primary-foreground/60 block -mt-1 font-semibold uppercase tracking-widest">PRO</span>
           </div>
         </div>
         <div className="hidden md:block border-l border-primary-foreground/20 pl-4 ml-2">

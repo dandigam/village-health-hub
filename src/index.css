@@ -158,23 +158,28 @@
   }
 
   .page-title {
-    @apply text-2xl font-semibold text-foreground;
+    @apply text-2xl font-bold text-foreground tracking-tight;
   }
 
   .data-table {
-    @apply w-full bg-card rounded-lg border overflow-hidden;
+    @apply w-full bg-card rounded-xl border overflow-hidden shadow-sm;
   }
 
   .data-table th {
-    @apply bg-muted/50 px-4 py-3 text-left text-sm font-medium text-muted-foreground;
+    @apply bg-muted/60 px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider;
   }
 
   .data-table td {
-    @apply px-4 py-3 text-sm border-t;
+    @apply px-4 py-3.5 text-sm border-t;
   }
 
   .data-table tr:hover td {
-    @apply bg-muted/30;
+    @apply bg-primary/[0.03];
+  }
+
+  /* Utility: Glassmorphism */
+  .glass {
+    @apply bg-white/70 backdrop-blur-lg border border-white/20;
   }
 }
 
