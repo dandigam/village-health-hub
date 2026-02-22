@@ -199,20 +199,20 @@ export default function NewCamp() {
   return (
     <DashboardLayout>
       {/* Sticky Header */}
-      <div className="sticky top-0 z-10 bg-background border-b -mx-3 sm:-mx-4 lg:-mx-6 -mt-3 sm:-mt-4 lg:-mt-6 px-3 sm:px-4 lg:px-6 py-3 mb-4">
-        <div className="flex items-center justify-between">
+      <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border/60 -mx-3 sm:-mx-4 lg:-mx-6 -mt-3 sm:-mt-4 lg:-mt-6 px-4 sm:px-6 lg:px-8 py-3 mb-6" style={{ boxShadow: '0 1px 8px hsl(var(--shadow-color) / 0.04)' }}>
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/camps')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted" onClick={() => navigate('/camps')}>
               <X className="h-4 w-4" />
             </Button>
-            <h1 className="text-lg font-bold text-foreground">Create New Camp</h1>
+            <h1 className="text-lg font-bold text-foreground tracking-tight">Create New Camp</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleSaveDraft}>
+            <Button variant="outline" size="sm" onClick={handleSaveDraft} className="h-9 px-4 border-border/60">
               <Save className="mr-1.5 h-3.5 w-3.5" />
               Save Draft
             </Button>
-            <Button size="sm" onClick={handleSubmit}>
+            <Button size="sm" onClick={handleSubmit} className="h-9 px-5">
               <Send className="mr-1.5 h-3.5 w-3.5" />
               Submit
             </Button>
@@ -220,24 +220,24 @@ export default function NewCamp() {
         </div>
       </div>
 
-      {/* Compact Progress Steps */}
-      {/* Progress Steps */}
-      <div className="mb-6 max-w-3xl mx-auto px-4">
+      {/* Premium Progress Steps */}
+      <div className="mb-8 max-w-3xl mx-auto px-4">
         <div className="flex items-start justify-between">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center flex-1">
-              <div className="flex flex-col items-center min-w-[72px]">
+              <div className="flex flex-col items-center min-w-[80px]">
                 <button
                   type="button"
                   className={cn(
-                    'w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer border-2',
+                    'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer border-2',
                     currentStep === step.id
-                      ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/30 scale-110'
+                      ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25 scale-110'
                       : currentStep > step.id
                       ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-muted/50 text-muted-foreground border-muted-foreground/20 hover:border-primary/40'
+                      : 'bg-card text-muted-foreground border-border hover:border-primary/40 hover:shadow-md'
                   )}
                   onClick={() => setCurrentStep(step.id)}
+                  style={currentStep === step.id ? { boxShadow: '0 4px 16px hsl(var(--primary) / 0.3)' } : {}}
                 >
                   {currentStep > step.id ? (
                     <Check className="h-5 w-5" />
@@ -247,20 +247,24 @@ export default function NewCamp() {
                 </button>
                 <span
                   className={cn(
-                    'text-xs mt-2 text-center font-semibold whitespace-nowrap',
-                    currentStep === step.id ? 'text-primary' : currentStep > step.id ? 'text-primary' : 'text-muted-foreground'
+                    'text-[11px] mt-2.5 text-center font-semibold whitespace-nowrap transition-colors duration-200',
+                    currentStep === step.id ? 'text-primary' : currentStep > step.id ? 'text-primary/80' : 'text-muted-foreground'
                   )}
                 >
                   {step.title}
                 </span>
               </div>
               {index < steps.length - 1 && (
-                <div
-                  className={cn(
-                    'flex-1 h-[3px] mx-1 rounded-full mt-[22px] transition-colors duration-200',
-                    currentStep > step.id ? 'bg-primary' : 'bg-muted-foreground/15'
-                  )}
-                />
+                <div className="flex-1 mx-2 mt-[24px]">
+                  <div className="relative h-[3px] rounded-full bg-border/60 overflow-hidden">
+                    <div
+                      className={cn(
+                        'absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-500',
+                        currentStep > step.id ? 'w-full' : 'w-0'
+                      )}
+                    />
+                  </div>
+                </div>
               )}
             </div>
           ))}
@@ -268,17 +272,19 @@ export default function NewCamp() {
       </div>
 
       {/* Form Content */}
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader className="pb-3 pt-4 px-5">
-          <CardTitle className="flex items-center gap-2 text-base">
-            {(() => {
-              const StepIcon = steps[currentStep - 1].icon;
-              return StepIcon ? <StepIcon className="h-4 w-4 text-primary" /> : null;
-            })()}
+      <Card className="max-w-2xl mx-auto border-border/50 shadow-sm">
+        <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
+          <CardTitle className="flex items-center gap-2.5 text-base">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              {(() => {
+                const StepIcon = steps[currentStep - 1].icon;
+                return StepIcon ? <StepIcon className="h-4 w-4 text-primary" /> : null;
+              })()}
+            </div>
             {steps[currentStep - 1].title}
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-5 pb-5">
+        <CardContent className="px-6 py-5">
           {/* Step 1: Camp Details */}
           {currentStep === 1 && (
             <div className="space-y-4">
@@ -707,19 +713,19 @@ export default function NewCamp() {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-5 pt-4 border-t">
-            <Button variant="outline" size="sm" onClick={handlePrev} disabled={currentStep === 1}>
+          <div className="flex items-center justify-between mt-6 pt-5 border-t border-border/40">
+            <Button variant="outline" size="sm" onClick={handlePrev} disabled={currentStep === 1} className="h-9 px-4">
               <ChevronLeft className="mr-1.5 h-3.5 w-3.5" />
               Previous
             </Button>
 
             {currentStep < 5 ? (
-              <Button size="sm" onClick={handleNext}>
+              <Button size="sm" onClick={handleNext} className="h-9 px-5">
                 Next
                 <ChevronRight className="ml-1.5 h-3.5 w-3.5" />
               </Button>
             ) : (
-              <Button size="sm" onClick={handleSubmit}>
+              <Button size="sm" onClick={handleSubmit} className="h-9 px-5">
                 <Check className="mr-1.5 h-3.5 w-3.5" />
                 Create Camp
               </Button>
