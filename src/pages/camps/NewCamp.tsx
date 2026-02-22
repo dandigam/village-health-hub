@@ -199,54 +199,54 @@ export default function NewCamp() {
   return (
     <DashboardLayout>
       {/* Sticky Header */}
-      <div className="sticky top-0 z-10 bg-background border-b -mx-6 -mt-6 px-6 py-4 mb-6">
+      <div className="sticky top-0 z-10 bg-background border-b -mx-3 sm:-mx-4 lg:-mx-6 -mt-3 sm:-mt-4 lg:-mt-6 px-3 sm:px-4 lg:px-6 py-3 mb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/camps')}>
-              <X className="h-5 w-5" />
-            </Button>
-            <h1 className="text-2xl font-bold text-foreground">Create New Camp</h1>
-          </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleSaveDraft}>
-              <Save className="mr-2 h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/camps')}>
+              <X className="h-4 w-4" />
+            </Button>
+            <h1 className="text-lg font-bold text-foreground">Create New Camp</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleSaveDraft}>
+              <Save className="mr-1.5 h-3.5 w-3.5" />
               Save Draft
             </Button>
-            <Button className="bg-accent hover:bg-accent/90" onClick={handleSubmit}>
-              <Send className="mr-2 h-4 w-4" />
+            <Button size="sm" onClick={handleSubmit}>
+              <Send className="mr-1.5 h-3.5 w-3.5" />
               Submit
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div className="mb-8">
+      {/* Compact Progress Steps */}
+      <div className="mb-5 max-w-2xl mx-auto">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center flex-1">
               <div className="flex flex-col items-center">
                 <div
                   className={cn(
-                    'w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer',
+                    'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer text-xs',
                     currentStep === step.id
-                      ? 'bg-accent text-accent-foreground'
+                      ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
                       : currentStep > step.id
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-[hsl(var(--success))] text-white'
                       : 'bg-muted text-muted-foreground'
                   )}
                   onClick={() => setCurrentStep(step.id)}
                 >
                   {currentStep > step.id ? (
-                    <Check className="h-5 w-5" />
+                    <Check className="h-4 w-4" />
                   ) : (
-                    <step.icon className="h-5 w-5" />
+                    <step.icon className="h-4 w-4" />
                   )}
                 </div>
                 <span
                   className={cn(
-                    'text-xs mt-2 text-center',
-                    currentStep === step.id ? 'text-accent font-medium' : 'text-muted-foreground'
+                    'text-[10px] mt-1.5 text-center font-medium',
+                    currentStep === step.id ? 'text-primary' : 'text-muted-foreground'
                   )}
                 >
                   {step.title}
@@ -255,8 +255,8 @@ export default function NewCamp() {
               {index < steps.length - 1 && (
                 <div
                   className={cn(
-                    'flex-1 h-1 mx-2',
-                    currentStep > step.id ? 'bg-green-500' : 'bg-muted'
+                    'flex-1 h-0.5 mx-1.5 rounded-full',
+                    currentStep > step.id ? 'bg-[hsl(var(--success))]' : 'bg-muted'
                   )}
                 />
               )}
@@ -266,21 +266,21 @@ export default function NewCamp() {
       </div>
 
       {/* Form Content */}
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader className="pb-3 pt-4 px-5">
+          <CardTitle className="flex items-center gap-2 text-base">
             {(() => {
               const StepIcon = steps[currentStep - 1].icon;
-              return StepIcon ? <StepIcon className="h-5 w-5 text-accent" /> : null;
+              return StepIcon ? <StepIcon className="h-4 w-4 text-primary" /> : null;
             })()}
             {steps[currentStep - 1].title}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-5 pb-5">
           {/* Step 1: Camp Details */}
           {currentStep === 1 && (
-            <div className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="campName">Camp Name *</Label>
                   <Input
@@ -351,8 +351,8 @@ export default function NewCamp() {
 
           {/* Step 2: Location */}
           {currentStep === 2 && (
-            <div className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>State</Label>
                   <Select value={formData.state} onValueChange={(v) => updateFormData('state', v)}>
@@ -419,14 +419,14 @@ export default function NewCamp() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2 md:col-span-2">
+                <div className="space-y-1.5 col-span-2">
                   <Label htmlFor="address">Address *</Label>
                   <Textarea
                     id="address"
                     placeholder="Enter full address"
                     value={formData.address}
                     onChange={(e) => updateFormData('address', e.target.value)}
-                    rows={3}
+                    rows={2}
                   />
                 </div>
                 <div className="space-y-2">
@@ -445,8 +445,8 @@ export default function NewCamp() {
 
           {/* Step 3: Assign Doctors */}
           {currentStep === 3 && (
-            <div className="space-y-6">
-              <div className="space-y-2">
+            <div className="space-y-4">
+              <div className="space-y-1.5">
                 <Label>Search and Add Doctors</Label>
                 <Command className="rounded-lg border">
                   <CommandInput
@@ -483,12 +483,12 @@ export default function NewCamp() {
               </div>
 
               {formData.selectedDoctors.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Selected Doctors ({formData.selectedDoctors.length})</Label>
-                  <div className="flex flex-wrap gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Selected Doctors ({formData.selectedDoctors.length})</Label>
+                  <div className="flex flex-wrap gap-2">
                     {formData.selectedDoctors.map((doctor) => (
-                      <Card key={doctor.id} className="p-3 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-medium">
+                      <Card key={doctor.id} className="p-2 flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-semibold">
                           {doctor.name
                             .split(' ')
                             .map((n) => n[0])
@@ -516,8 +516,8 @@ export default function NewCamp() {
 
           {/* Step 4: Assign Volunteers */}
           {currentStep === 4 && (
-            <div className="space-y-6">
-              <div className="space-y-2">
+            <div className="space-y-4">
+              <div className="space-y-1.5">
                 <Label>Search and Add Volunteers</Label>
                 <Command className="rounded-lg border">
                   <CommandInput
@@ -551,9 +551,9 @@ export default function NewCamp() {
               </div>
 
               {formData.selectedVolunteers.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Selected Volunteers ({formData.selectedVolunteers.length})</Label>
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Selected Volunteers ({formData.selectedVolunteers.length})</Label>
+                  <div className="flex flex-wrap gap-1.5">
                     {formData.selectedVolunteers.map((volunteer) => (
                       <Badge
                         key={volunteer.id}
@@ -577,19 +577,19 @@ export default function NewCamp() {
 
           {/* Step 5: Summary */}
           {currentStep === 5 && (
-            <div className="space-y-6">
+            <div className="space-y-3">
               {/* Camp Details Summary */}
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <User className="h-4 w-4 text-accent" />
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5 text-primary" />
                     Camp Details
                   </h3>
-                  <Button variant="ghost" size="sm" onClick={() => setCurrentStep(1)}>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setCurrentStep(1)}>
                     Edit
                   </Button>
                 </div>
-                <div className="grid md:grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <span className="text-muted-foreground">Camp Name:</span>{' '}
                     <span className="font-medium">{formData.campName || '-'}</span>
@@ -616,17 +616,17 @@ export default function NewCamp() {
               </div>
 
               {/* Location Summary */}
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-accent" />
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-primary" />
                     Location
                   </h3>
-                  <Button variant="ghost" size="sm" onClick={() => setCurrentStep(2)}>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setCurrentStep(2)}>
                     Edit
                   </Button>
                 </div>
-                <div className="grid md:grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <span className="text-muted-foreground">State:</span>{' '}
                     <span className="font-medium">{formData.state || '-'}</span>
@@ -643,7 +643,7 @@ export default function NewCamp() {
                     <span className="text-muted-foreground">City:</span>{' '}
                     <span className="font-medium">{formData.city || '-'}</span>
                   </div>
-                  <div className="md:col-span-2">
+                  <div className="col-span-2">
                     <span className="text-muted-foreground">Address:</span>{' '}
                     <span className="font-medium">{formData.address || '-'}</span>
                   </div>
@@ -655,13 +655,13 @@ export default function NewCamp() {
               </div>
 
               {/* Doctors Summary */}
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Stethoscope className="h-4 w-4 text-accent" />
-                    Assigned Doctors ({formData.selectedDoctors.length})
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    <Stethoscope className="h-3.5 w-3.5 text-primary" />
+                    Doctors ({formData.selectedDoctors.length})
                   </h3>
-                  <Button variant="ghost" size="sm" onClick={() => setCurrentStep(3)}>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setCurrentStep(3)}>
                     Edit
                   </Button>
                 </div>
@@ -679,13 +679,13 @@ export default function NewCamp() {
               </div>
 
               {/* Volunteers Summary */}
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Users className="h-4 w-4 text-accent" />
-                    Assigned Volunteers ({formData.selectedVolunteers.length})
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5 text-primary" />
+                    Volunteers ({formData.selectedVolunteers.length})
                   </h3>
-                  <Button variant="ghost" size="sm" onClick={() => setCurrentStep(4)}>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setCurrentStep(4)}>
                     Edit
                   </Button>
                 </div>
@@ -705,20 +705,20 @@ export default function NewCamp() {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t">
-            <Button variant="outline" onClick={handlePrev} disabled={currentStep === 1}>
-              <ChevronLeft className="mr-2 h-4 w-4" />
+          <div className="flex items-center justify-between mt-5 pt-4 border-t">
+            <Button variant="outline" size="sm" onClick={handlePrev} disabled={currentStep === 1}>
+              <ChevronLeft className="mr-1.5 h-3.5 w-3.5" />
               Previous
             </Button>
 
             {currentStep < 5 ? (
-              <Button onClick={handleNext}>
+              <Button size="sm" onClick={handleNext}>
                 Next
-                <ChevronRight className="ml-2 h-4 w-4" />
+                <ChevronRight className="ml-1.5 h-3.5 w-3.5" />
               </Button>
             ) : (
-              <Button className="bg-accent hover:bg-accent/90" onClick={handleSubmit}>
-                <Check className="mr-2 h-4 w-4" />
+              <Button size="sm" onClick={handleSubmit}>
+                <Check className="mr-1.5 h-3.5 w-3.5" />
                 Create Camp
               </Button>
             )}
