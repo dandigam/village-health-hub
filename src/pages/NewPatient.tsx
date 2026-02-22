@@ -37,11 +37,13 @@ export default function NewPatient() {
     age: '',
     maritalStatus: '',
     phone: '',
-    state: '',
-    district: '',
-    mandal: '',
-    village: '',
-    street: '',
+    address: {
+      stateId: '',
+      districtId: '',
+      mandalId: '',
+      village: '',
+      street: '',
+    },
     pinCode: '',
   });
   // ...existing code...
@@ -57,11 +59,13 @@ export default function NewPatient() {
         age: patientData.age ? String(patientData.age) : '',
         maritalStatus: patientData.maritalStatus || '',
         phone: patientData.phoneNumber || patientData.phone || '',
-        state: addr?.state || '',
-        district: addr?.district || '',
-        mandal: addr?.mandal || '',
-        village: addr?.cityVillage || patientData.village || '',
-        street: addr?.streetAddress || '',
+        address: {
+          stateId: addr?.stateId !== undefined && addr?.stateId !== null ? String(addr.stateId) : '',
+          districtId: addr?.districtId !== undefined && addr?.districtId !== null ? String(addr.districtId) : '',
+          mandalId: addr?.mandalId !== undefined && addr?.mandalId !== null ? String(addr.mandalId) : '',
+          village: addr?.cityVillage || patientData.village || '',
+          street: addr?.streetAddress || '',
+        },
         pinCode: addr?.pinCode || '',
       });
       setPhotoUrl(patientData.photoUrl || null);
@@ -91,6 +95,14 @@ export default function NewPatient() {
     paymentType: '',
     paymentPercentage: '',
   });
+
+  const updateDemographic = (field: keyof typeof demographic, value: any) => {
+    if (field === 'address') {
+      setDemographic((prev) => ({ ...prev, address: value }));
+    } else {
+      setDemographic((prev) => ({ ...prev, [field]: value }));
+    }
+  };
 
   const updateHistory = <K extends keyof typeof history>(field: K, value: typeof history[K]) => {
     setHistory((prev) => ({ ...prev, [field]: value }));
@@ -141,6 +153,7 @@ export default function NewPatient() {
     setIsSubmitting(true);
     try {
       const payload = {
+        ...(id ? { id } : {}),
         firstName: demographic.firstName,
         lastName: demographic.lastName,
         fatherSpouseName: demographic.fatherSpouseName,
@@ -150,11 +163,11 @@ export default function NewPatient() {
         phoneNumber: demographic.phone,
         photoUrl,
         address: {
-          stateId: demographic.state ? Number(demographic.state) : undefined,
-          districtId: demographic.district ? Number(demographic.district) : undefined,
-          mandalId: demographic.mandal ? Number(demographic.mandal) : undefined,
-          cityVillage: demographic.village,
-          streetAddress: demographic.street,
+          stateId: demographic.address.stateId ? Number(demographic.address.stateId) : undefined,
+          districtId: demographic.address.districtId ? Number(demographic.address.districtId) : undefined,
+          mandalId: demographic.address.mandalId ? Number(demographic.address.mandalId) : undefined,
+          cityVillage: demographic.address.village,
+          streetAddress: demographic.address.street,
           pinCode: demographic.pinCode,
         },
         hasMedicalHistory: history.hasPreviousTreatment === 'yes',
@@ -182,6 +195,7 @@ export default function NewPatient() {
     setIsSubmitting(true);
     try {
       const payload = {
+        ...(id ? { id } : {}),
         firstName: demographic.firstName,
         lastName: demographic.lastName,
         fatherSpouseName: demographic.fatherSpouseName,
@@ -191,11 +205,11 @@ export default function NewPatient() {
         phoneNumber: demographic.phone,
         photoUrl,
         address: {
-          stateId: demographic.state ? Number(demographic.state) : undefined,
-          districtId: demographic.district ? Number(demographic.district) : undefined,
-          mandalId: demographic.mandal ? Number(demographic.mandal) : undefined,
-          cityVillage: demographic.village,
-          streetAddress: demographic.street,
+          stateId: demographic.address.stateId ? Number(demographic.address.stateId) : undefined,
+          districtId: demographic.address.districtId ? Number(demographic.address.districtId) : undefined,
+          mandalId: demographic.address.mandalId ? Number(demographic.address.mandalId) : undefined,
+          cityVillage: demographic.address.village,
+          streetAddress: demographic.address.street,
           pinCode: demographic.pinCode,
         },
         hasMedicalHistory: history.hasPreviousTreatment === 'yes',
@@ -246,9 +260,6 @@ export default function NewPatient() {
     }
   };
 
-  const updateDemographic = (field: keyof typeof demographic, value: string) => {
-    setDemographic((prev) => ({ ...prev, [field]: value }));
-  };
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -310,7 +321,7 @@ export default function NewPatient() {
               </Button>
             ) : (
               <>
-                <Button variant="outline" onClick={handleSaveDraft} disabled={isSubmitting}>
+                <Button variant="outline" onClick={handleSaveDraft} disabled={isSubmitting || !!id}>
                   <Save className="h-4 w-4 mr-1" />
                   Save (Draft)
                 </Button>

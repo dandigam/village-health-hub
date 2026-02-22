@@ -1,3 +1,18 @@
+// User registration mutation hook
+export function useRegisterUser() {
+  return useMutation({
+    mutationFn: async (user: {
+      fullName: string;
+      username: string;
+      email: string;
+      phoneNumber: string;
+      password: string;
+      role: string;
+    }) => {
+      return await api.post('/users/register', user);
+    },
+  });
+}
 /**
  * React Query hooks with automatic API → mock fallback.
  * 

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Heart, Eye, EyeOff, Loader2, ArrowLeft, Shield, Users, Activity } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useRegisterUser } from '@/hooks/useApiData';
 import loginHero from '@/assets/login-hero.jpg';
 
 type AuthMode = 'signin' | 'signup';
@@ -43,6 +44,7 @@ export default function Login() {
     }
   };
 
+  const registerUser = useRegisterUser();
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError('');
@@ -50,9 +52,20 @@ export default function Login() {
       setLocalError('Please fill in all fields');
       return;
     }
-    console.log('Signup:', { fullName, email, phone, userName, password, role });
-    setLocalError('');
-    setMode('signin');
+    try {
+      await registerUser.mutateAsync({
+        fullName,
+        username: userName,
+        email,
+        phoneNumber: phone,
+        password,
+        role,
+      });
+      setLocalError('');
+      setMode('signin');
+    } catch (err) {
+      setLocalError('Registration failed. Please try again.');
+    }
   };
 
   const displayError = localError || authError;

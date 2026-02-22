@@ -13,6 +13,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PhotoUpload } from '@/components/shared/PhotoUpload';
 import { useStatesHierarchy } from '@/hooks/useApiData';
 
+interface AddressData {
+  stateId: string;
+  districtId: string;
+  mandalId: string;
+  village: string;
+  street: string;
+}
+
 interface DemographicData {
   firstName: string;
   lastName: string;
@@ -21,11 +29,7 @@ interface DemographicData {
   age: string;
   maritalStatus: string;
   phone: string;
-  state: string; // stores stateId as string
-  district: string; // stores districtId as string
-  mandal: string; // stores mandalId as string
-  village: string;
-  street: string;
+  address: AddressData;
 }
 
 interface DemographicStepProps {
@@ -38,25 +42,34 @@ interface DemographicStepProps {
 export function DemographicStep({ data, photoUrl, onUpdate, onPhotoChange }: DemographicStepProps) {
   const { data: statesHierarchy = [] } = useStatesHierarchy();
 
+  // Always use data.address reference to ensure reactivity
+  const address = data.address;
+  // Fallback for undefined address (should not happen if parent initializes correctly)
+  if (!address) {
+    throw new Error('DemographicStep: address object is missing from data');
+  }
+
   // Derive available districts and mandals from API data
-  // Find selected state, district, mandal objects for display
-  // Always use stateId, districtId, mandalId for value and lookup
-  const selectedState = useMemo(() => statesHierarchy.find(s => String(s.id) === String(data.state)), [statesHierarchy, data.state]);
+  const selectedState = useMemo(() => statesHierarchy.find(s => String(s.id) === String(address.stateId)), [statesHierarchy, address.stateId]);
   const availableDistricts = useMemo(() => selectedState?.districts ?? [], [selectedState]);
-  const selectedDistrict = useMemo(() => availableDistricts.find(d => String(d.id) === String(data.district)), [availableDistricts, data.district]);
+  const selectedDistrict = useMemo(() => availableDistricts.find(d => String(d.id) === String(address.districtId)), [availableDistricts, address.districtId]);
   const availableMandals = useMemo(() => selectedDistrict?.mandals ?? [], [selectedDistrict]);
-  const selectedMandal = useMemo(() => availableMandals.find(m => String(m.id) === String(data.mandal)), [availableMandals, data.mandal]);
+  const selectedMandal = useMemo(() => availableMandals.find(m => String(m.id) === String(address.mandalId)), [availableMandals, address.mandalId]);
 
   // Reset dependent fields when parent changes
+  const handleAddressUpdate = (field: keyof AddressData, value: string) => {
+    onUpdate('address', { ...address, [field]: value });
+  };
+
   const handleStateChange = (value: string) => {
-    onUpdate('state', value);
-    onUpdate('district', '');
-    onUpdate('mandal', '');
+    handleAddressUpdate('stateId', value);
+    handleAddressUpdate('districtId', '');
+    handleAddressUpdate('mandalId', '');
   };
 
   const handleDistrictChange = (value: string) => {
-    onUpdate('district', value);
-    onUpdate('mandal', '');
+    handleAddressUpdate('districtId', value);
+    handleAddressUpdate('mandalId', '');
   };
 
   return (
@@ -178,7 +191,7 @@ export function DemographicStep({ data, photoUrl, onUpdate, onPhotoChange }: Dem
             <div className="grid grid-cols-4 gap-3 mb-3">
               <div className="space-y-1">
                 <Label htmlFor="state" className="text-xs font-medium">State</Label>
-                <Select value={data.state || ''} onValueChange={handleStateChange}>
+                <Select value={address.stateId || ''} onValueChange={handleStateChange}>
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue placeholder="Select">
                       {selectedState ? selectedState.name : ''}
@@ -194,9 +207,9 @@ export function DemographicStep({ data, photoUrl, onUpdate, onPhotoChange }: Dem
               <div className="space-y-1">
                 <Label htmlFor="district" className="text-xs font-medium">District</Label>
                 <Select
-                  value={data.district || ''}
+                  value={address.districtId || ''}
                   onValueChange={handleDistrictChange}
-                  disabled={!data.state}
+                  disabled={!address.stateId}
                 >
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue placeholder="Select">
@@ -213,9 +226,9 @@ export function DemographicStep({ data, photoUrl, onUpdate, onPhotoChange }: Dem
               <div className="space-y-1">
                 <Label htmlFor="mandal" className="text-xs font-medium">Mandal</Label>
                 <Select 
-                  value={data.mandal || ''}
-                  onValueChange={(v) => onUpdate('mandal', v)}
-                  disabled={!data.district}
+                  value={address.mandalId || ''}
+                  onValueChange={(v) => handleAddressUpdate('mandalId', v)}
+                  disabled={!address.districtId}
                 >
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue placeholder="Select">
@@ -237,8 +250,8 @@ export function DemographicStep({ data, photoUrl, onUpdate, onPhotoChange }: Dem
                 <Label htmlFor="village" className="text-xs font-medium">City / Village</Label>
                 <Input
                   id="village"
-                  value={data.village}
-                  onChange={(e) => onUpdate('village', e.target.value)}
+                  value={address.village}
+                  onChange={(e) => handleAddressUpdate('village', e.target.value)}
                   className="h-9 text-sm"
                   placeholder="Enter city/village"
                 />
@@ -249,8 +262,8 @@ export function DemographicStep({ data, photoUrl, onUpdate, onPhotoChange }: Dem
               <Label htmlFor="street" className="text-xs font-medium">Street Address</Label>
               <Input
                 id="street"
-                value={data.street}
-                onChange={(e) => onUpdate('street', e.target.value)}
+                value={address.street}
+                onChange={(e) => handleAddressUpdate('street', e.target.value)}
                 className="h-9 text-sm"
                 placeholder="Street address"
               />
