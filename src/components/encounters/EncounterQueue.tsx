@@ -16,16 +16,16 @@ interface EncounterQueueProps {
 
 const statusConfig: Record<EncounterStatus, { label: string; className: string }> = {
   waiting: {
-    label: 'Waiting',
+    label: 'Pending Consultation',
     className: 'text-[hsl(var(--info))] bg-[hsl(var(--info)/0.1)] border-[hsl(var(--info)/0.2)]',
   },
   in_progress: {
-    label: 'In Progress',
+    label: 'At Doctor',
     className: 'text-[hsl(var(--success))] bg-[hsl(var(--success)/0.1)] border-[hsl(var(--success)/0.2)]',
   },
   completed: {
-    label: 'Completed',
-    className: 'text-muted-foreground bg-muted/50 border-border',
+    label: 'Pharmacy',
+    className: 'text-[hsl(var(--warning))] bg-[hsl(var(--warning)/0.1)] border-[hsl(var(--warning)/0.2)]',
   },
 };
 
@@ -62,31 +62,34 @@ export function EncounterQueue({ queue, selectedId, onSelect, onStartVisit }: En
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {encounter.patient.name}
-                      </p>
+                      <span className="text-[10px] text-muted-foreground font-mono">{encounter.patient.patientId}</span>
+                      <span className="text-[10px] text-muted-foreground">•</span>
+                      <span className="text-[10px] text-muted-foreground">{encounter.patient.age}Y</span>
                       {encounter.isReturning && (
                         <RotateCcw className="h-3 w-3 text-[hsl(var(--warning))] shrink-0" />
                       )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {encounter.patient.age}Y • {encounter.patient.gender} • {encounter.patient.patientId}
+                    <p className="text-sm font-medium text-foreground truncate mt-0.5">
+                      {encounter.patient.name || `${encounter.patient.firstName || ''} ${encounter.patient.lastName || ''}`.trim()}
                     </p>
                   </div>
-                  <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 shrink-0', config.className)}>
-                    {config.label}
-                  </Badge>
                 </div>
 
-                <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center justify-between mt-1.5">
                   <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                     <Clock className="h-3 w-3" />
                     {encounter.arrivalTime}
                   </div>
-                  {encounter.status === 'waiting' && (
+                  <Badge variant="outline" className={cn('text-[9px] px-1.5 py-0 h-4.5 shrink-0', config.className)}>
+                    {config.label}
+                  </Badge>
+                </div>
+
+                {encounter.status === 'waiting' && (
+                  <div className="mt-1.5">
                     <Button
                       size="sm"
-                      className="h-6 text-[10px] px-2 bg-primary hover:bg-primary/90"
+                      className="h-6 text-[10px] px-2 bg-primary hover:bg-primary/90 w-full"
                       onClick={(e) => {
                         e.stopPropagation();
                         onStartVisit(encounter.patient.id);
@@ -95,13 +98,13 @@ export function EncounterQueue({ queue, selectedId, onSelect, onStartVisit }: En
                       <Play className="h-3 w-3 mr-1" />
                       Start
                     </Button>
-                  )}
-                  {encounter.assignedDoctor && (
-                    <p className="text-[10px] text-muted-foreground truncate max-w-[100px]">
-                      {encounter.assignedDoctor}
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
+                {encounter.assignedDoctor && (
+                  <p className="text-[10px] text-muted-foreground truncate mt-1">
+                    Dr. {encounter.assignedDoctor}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -111,7 +114,7 @@ export function EncounterQueue({ queue, selectedId, onSelect, onStartVisit }: En
         {completedQueue.length > 0 && (
           <Collapsible open={showCompleted} onOpenChange={setShowCompleted}>
             <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 border-t text-xs text-muted-foreground hover:text-foreground transition-colors">
-              <span>Completed ({completedQueue.length})</span>
+              <span>At Pharmacy ({completedQueue.length})</span>
               <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', showCompleted && 'rotate-180')} />
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -128,14 +131,14 @@ export function EncounterQueue({ queue, selectedId, onSelect, onStartVisit }: En
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-foreground truncate">{encounter.patient.name}</p>
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 text-muted-foreground bg-muted/50 border-border">
-                        Done
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-muted-foreground font-mono">{encounter.patient.patientId}</span>
+                        <p className="text-sm font-medium text-foreground truncate">{encounter.patient.name}</p>
+                      </div>
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4.5 text-[hsl(var(--warning))] bg-[hsl(var(--warning)/0.1)] border-[hsl(var(--warning)/0.2)]">
+                        Pharmacy
                       </Badge>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {encounter.patient.age}Y • {encounter.patient.gender}
-                    </p>
                   </div>
                 ))}
               </div>

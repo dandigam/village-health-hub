@@ -10,11 +10,11 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  
   Activity,
   Truck,
   ShoppingCart,
   ArrowRightLeft,
+  Warehouse as WarehouseIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -34,6 +34,7 @@ const allNavItems = [
   { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders' },
   { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors' },
   { icon: FileText, label: 'Reports', href: '/reports', routeKey: 'reports' },
+  { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses' },
 ];
 
 interface SidebarProps {
