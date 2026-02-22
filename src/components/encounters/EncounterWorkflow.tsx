@@ -6,15 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { EncounterPatient } from '@/pages/encounters/Encounters';
 import { useMedicines, useStockItems } from '@/hooks/useApiData';
 import {
-  MessageSquare, Activity, Stethoscope, Pill, Check, ChevronRight,
+  MessageSquare, Activity, Stethoscope, Pill, ChevronRight,
   Save, RotateCcw, ClipboardList, Search, Trash2, Send, AlertTriangle,
   Thermometer, Heart, Scale, Wind, Droplets, FlaskConical, ImageIcon,
 } from 'lucide-react';
@@ -23,6 +21,10 @@ interface EncounterWorkflowProps {
   encounter: EncounterPatient;
   onStepChange: (step: number) => void;
   onComplete: () => void;
+  diagnoses?: string[];
+  vitals?: { weight: string; bp: string; pulse: string; temp: string; spo2: string };
+  onDiagnosesChange?: (d: string[]) => void;
+  onVitalsChange?: (v: { weight: string; bp: string; pulse: string; temp: string; spo2: string }) => void;
 }
 
 const steps = [
@@ -89,23 +91,17 @@ interface PlanData {
   imaging: string;
 }
 
-export function EncounterWorkflow({ encounter, onStepChange, onComplete }: EncounterWorkflowProps) {
+export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagnosesChange, onVitalsChange }: EncounterWorkflowProps) {
   const [activeStep, setActiveStep] = useState(encounter.currentStep || 1);
 
   const [subject, setSubject] = useState<SubjectData>({
-    conditions: [],
-    presentingComplaints: [],
-    reasonForVisit: [],
-    recentSymptoms: [],
-    isTakingMedicines: false,
-    isSmoking: false,
-    isDrinking: false,
-    additionalNotes: '',
+    conditions: [], presentingComplaints: [], reasonForVisit: [], recentSymptoms: [],
+    isTakingMedicines: false, isSmoking: false, isDrinking: false, additionalNotes: '',
   });
   const [object, setObject] = useState<ObjectData>({
     weight: '', bp: '', pulse: '', temp: '', spo2: '',
     labs: [
-      { name: 'BP', date: '', withMedicine: true, result: '' },
+      { name: 'BP', date: '', withMedicine: false, result: '' },
       { name: 'FBS', date: '', withMedicine: true, result: '' },
       { name: 'PPBS', date: '', withMedicine: false, result: '' },
       { name: 'HBA1C', date: '', withMedicine: true, result: '' },
@@ -116,8 +112,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
     ],
   });
   const [assessment, setAssessment] = useState<AssessmentData>({
-    diagnoses: [],
-    followUpRequired: false, referralNeeded: false,
+    diagnoses: [], followUpRequired: false, referralNeeded: false,
     chronicCondition: false, acuteCondition: false, needsLabWork: false,
     doctorNotes: '', comments: '',
   });
@@ -126,9 +121,19 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
       { id: 'rx-1', name: 'PARACETAMOL 500 MG', m: 1, a: 1, n: 1, days: 5, qty: 15, stockAvailable: 1000 },
       { id: 'rx-2', name: 'OMEPRAZOLE 20 MG', m: 1, a: 0, n: 0, days: 10, qty: 10, stockAvailable: 350 },
     ],
-    outsideRx: '',
-    imaging: '',
+    outsideRx: '', imaging: '',
   });
+
+  // Sync vitals and diagnoses up to parent
+  const handleObjectChange = (d: ObjectData) => {
+    setObject(d);
+    onVitalsChange?.({ weight: d.weight, bp: d.bp, pulse: d.pulse, temp: d.temp, spo2: d.spo2 });
+  };
+
+  const handleAssessmentChange = (d: AssessmentData) => {
+    setAssessment(d);
+    onDiagnosesChange?.(d.diagnoses);
+  };
 
   const handleStep = (step: number) => {
     setActiveStep(step);
@@ -139,44 +144,80 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
 
   return (
     <div className="h-full flex flex-col bg-card rounded-lg border">
-      {/* Patient Header */}
-      <div className="px-3 sm:px-4 py-2 border-b flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          {encounter.patient.photoUrl ? (
-            <img src={encounter.patient.photoUrl} alt="" className="h-8 w-8 rounded-full object-cover border shrink-0" />
-          ) : (
-            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground shrink-0">
-              {(encounter.patient.name || encounter.patient.firstName || '').charAt(0)}
-            </div>
-          )}
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
-                {encounter.patient.patientId} | {encounter.patient.name || encounter.patient.firstName || ''} {encounter.patient.surname || encounter.patient.lastName || ''} | {encounter.patient.gender} | {encounter.patient.age}
+      {/* Patient Header with vitals + diagnosis badges */}
+      <div className="px-3 sm:px-4 py-2 border-b">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {encounter.patient.photoUrl ? (
+              <img src={encounter.patient.photoUrl} alt="" className="h-8 w-8 rounded-full object-cover border shrink-0" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground shrink-0">
+                {(encounter.patient.name || encounter.patient.firstName || '').charAt(0)}
+              </div>
+            )}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                  {encounter.patient.patientId} | {encounter.patient.name || encounter.patient.firstName || ''} {encounter.patient.surname || encounter.patient.lastName || ''} | {encounter.patient.gender} | {encounter.patient.age}
+                </p>
+                {encounter.isReturning && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.3)] bg-[hsl(var(--warning)/0.08)] shrink-0">
+                    <RotateCcw className="h-2.5 w-2.5 mr-0.5" />Returning
+                  </Badge>
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {encounter.patient.fatherSpouseName && `S/o ${encounter.patient.fatherSpouseName}`}
+                {encounter.patient.village && `, ${encounter.patient.village}`}
               </p>
-              {encounter.isReturning && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.3)] bg-[hsl(var(--warning)/0.08)] shrink-0">
-                  <RotateCcw className="h-2.5 w-2.5 mr-0.5" />Returning
-                </Badge>
-              )}
             </div>
-            <p className="text-[10px] text-muted-foreground truncate">
-              {encounter.patient.fatherSpouseName && `S/o ${encounter.patient.fatherSpouseName}`}
-              {encounter.patient.village && `, ${encounter.patient.village}`}
-            </p>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button variant="outline" size="sm" className="h-7 text-[10px] px-2">
+              <Save className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">Save</span>
+            </Button>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <Button variant="outline" size="sm" className="h-7 text-[10px] px-2">
-            <Save className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">Save</span>
-          </Button>
-        </div>
+
+        {/* Vitals + Diagnosis summary bar */}
+        {(object.weight || object.bp || object.pulse || assessment.diagnoses.length > 0) && (
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            {object.weight && (
+              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
+                <Scale className="h-2.5 w-2.5 text-muted-foreground" />{object.weight} kg
+              </span>
+            )}
+            {object.bp && (
+              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
+                <Droplets className="h-2.5 w-2.5 text-muted-foreground" />{object.bp}
+              </span>
+            )}
+            {object.pulse && (
+              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
+                <Heart className="h-2.5 w-2.5 text-muted-foreground" />{object.pulse}
+              </span>
+            )}
+            {object.temp && (
+              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
+                <Thermometer className="h-2.5 w-2.5 text-muted-foreground" />{object.temp}°F
+              </span>
+            )}
+            {object.spo2 && (
+              <span className="inline-flex items-center gap-1 text-[10px] bg-muted/50 rounded px-1.5 py-0.5">
+                <Wind className="h-2.5 w-2.5 text-muted-foreground" />{object.spo2}%
+              </span>
+            )}
+            {assessment.diagnoses.map(d => (
+              <Badge key={d} variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-primary/30">{d}</Badge>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Stepper - matching reference layout */}
+      {/* Stepper */}
       <div className="border-b bg-muted/20">
         <div className="flex">
-          {steps.map((step, i) => {
+          {steps.map((step) => {
             const isActive = activeStep === step.id;
             const isDone = activeStep > step.id || isCompleted;
             return (
@@ -185,11 +226,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
                 onClick={() => handleStep(step.id)}
                 className={cn(
                   'flex-1 py-2 px-2 text-center border-b-2 transition-all',
-                  isActive
-                    ? 'border-primary bg-primary/5'
-                    : isDone
-                      ? 'border-[hsl(var(--success))] bg-[hsl(var(--success)/0.03)]'
-                      : 'border-transparent hover:bg-muted/30'
+                  isActive ? 'border-primary bg-primary/5' : isDone ? 'border-[hsl(var(--success))] bg-[hsl(var(--success)/0.03)]' : 'border-transparent hover:bg-muted/30'
                 )}
               >
                 <p className={cn('text-[11px] font-semibold', isActive ? 'text-primary' : isDone ? 'text-[hsl(var(--success))]' : 'text-muted-foreground')}>
@@ -206,8 +243,8 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete }: Encou
       <ScrollArea className="flex-1">
         <div className="p-3 sm:p-4">
           {activeStep === 1 && <SubjectStep data={subject} onChange={setSubject} />}
-          {activeStep === 2 && <ObjectStep data={object} onChange={setObject} />}
-          {activeStep === 3 && <AssessmentStep data={assessment} onChange={setAssessment} />}
+          {activeStep === 2 && <ObjectStep data={object} onChange={handleObjectChange} />}
+          {activeStep === 3 && <AssessmentStep data={assessment} onChange={handleAssessmentChange} />}
           {activeStep === 4 && <PlanStep plan={plan} setPlan={setPlan} />}
           {activeStep === 5 && <ReviewStep subject={subject} object={object} assessment={assessment} plan={plan} />}
         </div>
@@ -248,7 +285,6 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
 
   return (
     <div className="space-y-4">
-      {/* Conditions checkboxes */}
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Conditions</Label>
         <div className="flex flex-wrap gap-3">
@@ -261,11 +297,8 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
         </div>
       </div>
 
-      {/* Presenting Complaints */}
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
-          Presenting Complaints
-        </Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Presenting Complaints</Label>
         <div className="flex flex-wrap gap-3 ml-1">
           {COMPLAINTS.map(c => (
             <label key={c} className="flex items-center gap-1.5 cursor-pointer text-xs">
@@ -276,11 +309,8 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
         </div>
       </div>
 
-      {/* Reason for visit */}
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
-          What is the reason for today's visit?
-        </Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">What is the reason for today's visit?</Label>
         <div className="flex flex-wrap gap-3 ml-1">
           {VISIT_REASONS.map(r => (
             <label key={r} className="flex items-center gap-1.5 cursor-pointer text-xs">
@@ -291,11 +321,8 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
         </div>
       </div>
 
-      {/* Recent symptoms */}
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">
-          Have you experienced any of the following recently?
-        </Label>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Have you experienced any of the following recently?</Label>
         <div className="flex flex-wrap gap-3 ml-1">
           {SYMPTOMS.map(s => (
             <label key={s} className="flex items-center gap-1.5 cursor-pointer text-xs">
@@ -306,7 +333,6 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
         </div>
       </div>
 
-      {/* Yes/No questions */}
       <div className="space-y-2">
         {([
           { key: 'isTakingMedicines' as const, label: 'Are you taking medicines?' },
@@ -323,7 +349,6 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
         ))}
       </div>
 
-      {/* Notes */}
       <div>
         <Label className="text-[11px] text-muted-foreground">Additional Notes</Label>
         <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Any other observations..." value={data.additionalNotes} onChange={(e) => onChange({ ...data, additionalNotes: e.target.value })} />
@@ -333,7 +358,7 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
 }
 
 // ═══════════════════════════════════════════════════════════
-// Step 2: Objective (Vitals / Labs)
+// Step 2: Objective (Vitals / Labs) — Matching reference image
 // ═══════════════════════════════════════════════════════════
 function ObjectStep({ data, onChange }: { data: ObjectData; onChange: (d: ObjectData) => void }) {
   const updateVital = (field: keyof ObjectData, value: string) => onChange({ ...data, [field]: value });
@@ -345,42 +370,41 @@ function ObjectStep({ data, onChange }: { data: ObjectData; onChange: (d: Object
   };
 
   const vitals = [
-    { field: 'weight' as const, icon: Scale, label: 'Weight', unit: "Kg's", placeholder: '' },
-    { field: 'bp' as const, icon: Droplets, label: 'BP', unit: 'mmHg', placeholder: '' },
-    { field: 'pulse' as const, icon: Heart, label: 'Pulse', unit: '/min', placeholder: '' },
-    { field: 'temp' as const, icon: Thermometer, label: 'Temp', unit: '°F', placeholder: '' },
-    { field: 'spo2' as const, icon: Wind, label: 'SpO2', unit: '%', placeholder: '' },
+    { field: 'weight' as const, icon: Scale, label: 'Weight', unit: "Kg's" },
+    { field: 'bp' as const, icon: Droplets, label: 'BP', unit: 'mmHg' },
+    { field: 'pulse' as const, icon: Heart, label: 'Pulse', unit: '/min' },
+    { field: 'temp' as const, icon: Thermometer, label: 'Temp', unit: '°F' },
+    { field: 'spo2' as const, icon: Wind, label: 'SpO2', unit: '%' },
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Vitals row with icons */}
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-5">
+      {/* Vitals - card style matching reference */}
+      <div className="flex flex-wrap gap-3">
         {vitals.map(v => (
-          <div key={v.field} className="flex items-center gap-1.5 border rounded-lg px-2.5 py-2 bg-background min-w-[120px]">
-            <v.icon className="h-4 w-4 text-accent shrink-0" />
-            <div className="flex-1">
-              <Input
-                className="h-6 text-sm border-0 p-0 focus-visible:ring-0 bg-transparent"
-                placeholder={v.label}
-                value={data[v.field] as string}
-                onChange={(e) => updateVital(v.field, e.target.value)}
-              />
-            </div>
+          <div key={v.field} className="flex items-center gap-2 border rounded-lg px-3 py-2.5 bg-background min-w-[150px] flex-1">
+            <v.icon className="h-4 w-4 text-primary shrink-0" />
+            <span className="text-xs text-muted-foreground shrink-0">{v.label}</span>
+            <Input
+              className="h-7 text-sm border-0 p-0 focus-visible:ring-0 bg-transparent flex-1 min-w-[40px]"
+              placeholder=""
+              value={data[v.field] as string}
+              onChange={(e) => updateVital(v.field, e.target.value)}
+            />
             <span className="text-[10px] text-muted-foreground shrink-0">{v.unit}</span>
           </div>
         ))}
       </div>
 
-      {/* Lab Tests Table */}
+      {/* Lab Tests */}
       <div>
         <div className="flex items-center gap-1.5 mb-2">
-          <FlaskConical className="h-3.5 w-3.5 text-accent" />
+          <FlaskConical className="h-3.5 w-3.5 text-primary" />
           <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Lab Tests</Label>
         </div>
         <div className="border rounded-lg overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-[80px_100px_120px_1fr] gap-0 bg-muted/50 px-3 py-1.5 text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="grid grid-cols-[70px_120px_140px_1fr] gap-0 bg-muted/50 px-3 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
             <span>Name</span>
             <span>Date</span>
             <span>Test With Medicine</span>
@@ -388,26 +412,39 @@ function ObjectStep({ data, onChange }: { data: ObjectData; onChange: (d: Object
           </div>
           {/* Rows */}
           {data.labs.map((lab, i) => (
-            <div key={lab.name} className="grid grid-cols-[80px_100px_120px_1fr] gap-0 px-3 py-1.5 border-t items-center">
+            <div key={lab.name} className="grid grid-cols-[70px_120px_140px_1fr] gap-0 px-3 py-2 border-t items-center">
               <span className="text-xs font-medium">{lab.name}</span>
               <Input
-                type="date"
-                className="h-6 text-[10px] w-[90px] px-1"
+                type="text"
+                placeholder="dd-mm-yyyy"
+                className="h-7 text-xs w-[110px] px-2"
                 value={lab.date}
                 onChange={(e) => updateLab(i, 'date', e.target.value)}
               />
-              <div className="flex items-center gap-2">
-                <label className="flex items-center gap-1 text-[10px] cursor-pointer">
-                  <input type="radio" name={`med-${i}`} checked={lab.withMedicine} onChange={() => updateLab(i, 'withMedicine', true)} className="w-3 h-3" />
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-1 text-xs cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`med-${i}`}
+                    checked={lab.withMedicine}
+                    onChange={() => updateLab(i, 'withMedicine', true)}
+                    className="w-3.5 h-3.5 accent-primary"
+                  />
                   Yes
                 </label>
-                <label className="flex items-center gap-1 text-[10px] cursor-pointer">
-                  <input type="radio" name={`med-${i}`} checked={!lab.withMedicine} onChange={() => updateLab(i, 'withMedicine', false)} className="w-3 h-3" />
+                <label className="flex items-center gap-1 text-xs cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`med-${i}`}
+                    checked={!lab.withMedicine}
+                    onChange={() => updateLab(i, 'withMedicine', false)}
+                    className="w-3.5 h-3.5 accent-primary"
+                  />
                   No
                 </label>
               </div>
               <Input
-                className="h-6 text-xs"
+                className="h-7 text-xs"
                 placeholder="Enter result"
                 value={lab.result}
                 onChange={(e) => updateLab(i, 'result', e.target.value)}
@@ -441,20 +478,15 @@ function AssessmentStep({ data, onChange }: { data: AssessmentData; onChange: (d
 
   return (
     <div className="space-y-4">
-      {/* Diagnosis selection */}
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Diagnosis</Label>
         <div className="flex flex-wrap gap-2">
           {DIAGNOSES.map(d => (
             <button
-              key={d}
-              type="button"
-              onClick={() => toggleDiag(d)}
+              key={d} type="button" onClick={() => toggleDiag(d)}
               className={cn(
                 'px-3 py-1 rounded-full text-xs font-medium border transition-colors',
-                data.diagnoses.includes(d)
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                data.diagnoses.includes(d) ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:border-primary/50'
               )}
             >
               {d}
@@ -470,7 +502,6 @@ function AssessmentStep({ data, onChange }: { data: AssessmentData; onChange: (d
         )}
       </div>
 
-      {/* Clinical checkboxes */}
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Clinical Assessment</Label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -483,13 +514,11 @@ function AssessmentStep({ data, onChange }: { data: AssessmentData; onChange: (d
         </div>
       </div>
 
-      {/* Doctor Notes */}
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Doctor Notes</Label>
         <Textarea className="mt-1 min-h-[70px] text-sm" placeholder="Clinical findings, diagnosis details..." value={data.doctorNotes} onChange={(e) => onChange({ ...data, doctorNotes: e.target.value })} />
       </div>
 
-      {/* Comments */}
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Comments</Label>
         <Textarea className="mt-1 min-h-[50px] text-sm" placeholder="Additional comments or recommendations..." value={data.comments} onChange={(e) => onChange({ ...data, comments: e.target.value })} />
@@ -504,7 +533,6 @@ function AssessmentStep({ data, onChange }: { data: AssessmentData; onChange: (d
 function PlanStep({ plan, setPlan }: { plan: PlanData; setPlan: (p: PlanData) => void }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
   const { data: medicines = [] } = useMedicines();
   const { data: stockItems = [] } = useStockItems();
   const meds = plan.insideRx;
@@ -545,7 +573,7 @@ function PlanStep({ plan, setPlan }: { plan: PlanData; setPlan: (p: PlanData) =>
 
   return (
     <div className="space-y-5">
-      {/* Inside Rx Table */}
+      {/* Inside Rx */}
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Inside RX (In-House Pharmacy)</Label>
         <Popover open={searchOpen} onOpenChange={setSearchOpen}>
@@ -554,7 +582,7 @@ function PlanStep({ plan, setPlan }: { plan: PlanData; setPlan: (p: PlanData) =>
               <Search className="mr-2 h-3.5 w-3.5" /> Search medicine by name...
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[400px] p-0" align="start">
+          <PopoverContent className="w-[400px] p-0 bg-popover" align="start">
             <Command>
               <CommandInput placeholder="Search medicine..." value={searchQuery} onValueChange={setSearchQuery} className="h-9 text-sm" />
               <CommandList className="max-h-[250px]">
@@ -624,7 +652,7 @@ function PlanStep({ plan, setPlan }: { plan: PlanData; setPlan: (p: PlanData) =>
       {/* Imaging */}
       <div>
         <div className="flex items-center gap-1.5 mb-1">
-          <ImageIcon className="h-3.5 w-3.5 text-accent" />
+          <ImageIcon className="h-3.5 w-3.5 text-primary" />
           <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Imaging</Label>
         </div>
         <Textarea className="min-h-[50px] text-sm" placeholder="X-Ray, MRI, CT Scan orders..." value={plan.imaging} onChange={(e) => setPlan({ ...plan, imaging: e.target.value })} />
@@ -668,9 +696,7 @@ function ReviewStep({ subject, object, assessment, plan }: {
         </div>
       </div>
 
-      {/* Two columns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Conditions */}
         <div className="border rounded-lg p-3">
           <p className="text-[10px] font-semibold uppercase text-muted-foreground mb-1.5">Conditions</p>
           <div className="flex flex-wrap gap-1">
@@ -679,8 +705,6 @@ function ReviewStep({ subject, object, assessment, plan }: {
             )) : <span className="text-xs text-muted-foreground italic">None selected</span>}
           </div>
         </div>
-
-        {/* Diagnosis */}
         <div className="border rounded-lg p-3">
           <p className="text-[10px] font-semibold uppercase text-muted-foreground mb-1.5">Diagnosis</p>
           <div className="flex flex-wrap gap-1">
@@ -689,21 +713,16 @@ function ReviewStep({ subject, object, assessment, plan }: {
             )) : <span className="text-xs text-muted-foreground italic">None selected</span>}
           </div>
         </div>
-
-        {/* Complaints */}
         <div className="border rounded-lg p-3">
           <p className="text-[10px] font-semibold uppercase text-muted-foreground mb-1.5">Complaints</p>
           <p className="text-xs">{subject.presentingComplaints.join(', ') || <span className="text-muted-foreground italic">None</span>}</p>
         </div>
-
-        {/* Doctor Notes */}
         <div className="border rounded-lg p-3">
           <p className="text-[10px] font-semibold uppercase text-muted-foreground mb-1.5">Doctor Notes</p>
           <p className="text-xs">{assessment.doctorNotes || <span className="text-muted-foreground italic">No notes</span>}</p>
         </div>
       </div>
 
-      {/* Prescription */}
       {plan.insideRx.length > 0 && (
         <div className="border rounded-lg p-3">
           <p className="text-[10px] font-semibold uppercase text-muted-foreground mb-1.5">Medication (Inside RX)</p>
