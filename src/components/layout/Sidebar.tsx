@@ -10,7 +10,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Heart,
+  
   Activity,
   Truck,
   ShoppingCart,
@@ -64,28 +64,11 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
           !mobile && (collapsed ? "w-[68px]" : "w-48"),
         )}
       >
-        {/* Header with Logo */}
-        <div className={cn(
-          "flex items-center h-14 sm:h-16 border-b border-white/10 transition-all duration-300",
-          collapsed ? "justify-center px-2" : "px-4 gap-3"
-        )}>
-          <div className="h-9 w-9 rounded-xl bg-[hsl(340,70%,50%)]/20 flex items-center justify-center shadow-lg shadow-[hsl(340,70%,50%)]/20 shrink-0 border border-[hsl(340,70%,60%)]/30">
-            <Heart className="h-5 w-5 text-[hsl(340,75%,60%)]" fill="currentColor" />
-          </div>
-          <div className={cn(
-            "overflow-hidden transition-all duration-300",
-            collapsed ? "w-0 opacity-0" : "w-auto opacity-100"
-          )}>
-            <p className="font-bold text-white text-sm whitespace-nowrap">Medical Camp</p>
-            <p className="text-[10px] text-white/60 whitespace-nowrap">Management System</p>
-          </div>
-        </div>
-
         {/* Collapse Toggle Button - desktop only */}
         {!mobile && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="absolute -right-3 top-20 h-6 w-6 rounded-full bg-white shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:scale-110 transition-all duration-200 z-10"
+            className="absolute -right-3 top-6 h-6 w-6 rounded-full bg-white shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:scale-110 transition-all duration-200 z-10"
           >
             {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
           </button>
