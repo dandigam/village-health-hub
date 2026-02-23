@@ -12,6 +12,8 @@ export type AppRole = "ADMIN" | "DOCTOR" | "NURSE" | "PHARMACIST" | "WARE_HOUSE"
 export const routeAccess: Record<string, AppRole[]> = {
   dashboard: ["ADMIN", "DOCTOR", "NURSE", "PHARMACIST", "WARE_HOUSE", "FRONT_DESK"],
   camps: ["ADMIN"],
+  'camp-templates': ["ADMIN"],
+  'camp-events': ["ADMIN"],
   patients: ["ADMIN", "DOCTOR", "NURSE", "FRONT_DESK"],
   encounters: ["DOCTOR", "NURSE","ADMIN"],
   pharmacy: ["PHARMACIST", "ADMIN"],

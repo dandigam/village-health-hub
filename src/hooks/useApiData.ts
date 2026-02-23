@@ -26,6 +26,8 @@ import api from '@/services/api';
 import {
   mockUser,
   mockCamps,
+  mockCampTemplates,
+  mockCampEvents,
   mockDoctors,
   mockPatients,
   mockMedicines,
@@ -44,6 +46,8 @@ import {
 import type {
   User,
   Camp,
+  CampTemplate,
+  CampEvent,
   Doctor,
   Patient,
   Medicine,
@@ -79,6 +83,58 @@ export function useCamps() {
     queryFn: () => fetchWithFallback<Camp[]>('/camps', mockCamps),
     staleTime: STALE_TIME,
     select: (res) => res.data,
+  });
+}
+
+export function useCampTemplates() {
+  return useQuery({
+    queryKey: ['campTemplates'],
+    queryFn: () => fetchWithFallback<CampTemplate[]>('/camp-templates', mockCampTemplates),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+  });
+}
+
+export function useCampEvents() {
+  return useQuery({
+    queryKey: ['campEvents'],
+    queryFn: () => fetchWithFallback<CampEvent[]>('/camp-events', mockCampEvents),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+  });
+}
+
+export function useSaveCampTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (template: any) => {
+      if (template.id) {
+        return await api.put(`/camp-templates/${template.id}`, template);
+      } else {
+        const { id, ...data } = template;
+        return await api.post('/camp-templates', data);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campTemplates'] });
+    },
+  });
+}
+
+export function useSaveCampEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (event: any) => {
+      if (event.id) {
+        return await api.put(`/camp-events/${event.id}`, event);
+      } else {
+        const { id, ...data } = event;
+        return await api.post('/camp-events', data);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campEvents'] });
+    },
   });
 }
 

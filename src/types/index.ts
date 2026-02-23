@@ -21,7 +21,7 @@ export interface User extends BaseEntity {
   status: 'active' | 'inactive';
 }
 
-// ── Camp ─────────────────────────────────────────────────────
+// ── Camp (legacy) ────────────────────────────────────────────
 export type CampStatus = 'draft' | 'active' | 'closed';
 
 export interface Camp extends BaseEntity {
@@ -38,6 +38,47 @@ export interface Camp extends BaseEntity {
   doctorIds: string[];
   pharmacyIds: string[];
   staffIds: string[];
+}
+
+// ── Camp Template (Reusable Master Data) ─────────────────────
+export type CampTemplateStatus = 'active' | 'inactive';
+
+export interface CampTemplate extends BaseEntity {
+  name: string;
+  organizerName: string;
+  organizerPhone: string;
+  organizerEmail?: string;
+  state: string;
+  stateId?: number;
+  district: string;
+  districtId?: number;
+  mandal: string;
+  mandalId?: number;
+  city?: string;
+  address: string;
+  pinCode?: string;
+  defaultDoctorIds: string[];
+  defaultStaffIds: string[];
+  status: CampTemplateStatus;
+}
+
+// ── Camp Event (Actual Running Camp) ─────────────────────────
+export type CampEventStatus = 'planned' | 'started' | 'closed';
+
+export interface CampEvent extends BaseEntity {
+  templateId: string;
+  templateName?: string;
+  location?: string;
+  state?: string;
+  district?: string;
+  mandal?: string;
+  city?: string;
+  address?: string;
+  startDate: string;
+  endDate: string;
+  doctorIds: string[];
+  staffIds: string[];
+  status: CampEventStatus;
 }
 
 // ── Doctor ───────────────────────────────────────────────────

@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Tent,
+  CalendarDays,
   Users,
   Pill,
   ClipboardList,
@@ -24,7 +25,8 @@ import { hasAccess } from '@/config/routeAccess';
 
 const allNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', routeKey: 'dashboard' },
-  { icon: Tent, label: 'Camps', href: '/camps', routeKey: 'camps' },
+  { icon: Tent, label: 'Camp Templates', href: '/camp-templates', routeKey: 'camp-templates' },
+  { icon: CalendarDays, label: 'Camp Events', href: '/camp-events', routeKey: 'camp-events' },
   { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients' },
   { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters' },
   { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy' },
