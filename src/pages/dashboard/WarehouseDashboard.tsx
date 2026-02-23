@@ -5,27 +5,22 @@ import {
   Truck,
   ShoppingCart,
   ArrowRightLeft,
-  TrendingUp,
   TrendingDown,
   AlertTriangle,
   Clock,
   CheckCircle2,
   ArrowRight,
   Boxes,
-  BarChart3,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  useStockItems,
-  useSuppliers,
-  useSupplierOrders,
   useDistributions,
   useRequestOrders,
-  useWarehouses,
   useWarehouseInventory,
+  useWarehouseDashboardStats,
 } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
@@ -44,20 +39,22 @@ export default function WarehouseDashboard() {
   const { user } = useAuth();
   const warehouseId = user?.wareHouse?.id ? Number(user.wareHouse.id) : undefined;
 
-  const { data: stockItems = [] } = useStockItems();
-  const { data: suppliers = [] } = useSuppliers();
-  const { data: supplierOrders = [] } = useSupplierOrders(warehouseId);
+  const { data: dashStats } = useWarehouseDashboardStats(warehouseId);
   const { data: distributions = [] } = useDistributions();
   const { data: requestOrders = [] } = useRequestOrders();
-  const { data: warehouses = [] } = useWarehouses();
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
 
-  const pendingOrders = supplierOrders.filter(o => o.status === 'pending' || o.status === 'sent').length;
-  const receivedOrders = supplierOrders.filter(o => o.status === 'received').length;
+  // API-driven stats for supplier-related cards
+  const totalMedicines = dashStats?.totalMedicines ?? 0;
+  const lowStockCount = dashStats?.lowStock ?? 0;
+  const suppliersCount = dashStats?.suppliers ?? 0;
+  const pendingOrders = dashStats?.supplierOrders?.pendingOrders ?? 0;
+  const receivedOrders = dashStats?.supplierOrders?.received ?? 0;
+  const totalOrders = dashStats?.supplierOrders?.totalOrders ?? 0;
+
+  // Distribution stats remain client-side (untouched)
   const pendingRequests = requestOrders.filter(o => o.status === 'pending' || o.status === 'draft').length;
   const completedDistributions = distributions.filter(d => d.status === 'confirmed' || d.status === 'sent').length;
-  const lowStockItems = inventory.filter(item => item.totalQty <= item.minimumQty).length;
-  const totalMedicines = inventory.length;
 
   const quickLinks = [
     { label: 'Inventory', icon: Package, href: '/stock', color: 'text-stat-blue-text', bg: 'bg-stat-blue' },
@@ -103,8 +100,8 @@ export default function WarehouseDashboard() {
           ))}
         </motion.div>
 
-        {/* Stats Grid */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Stats Grid — 3 cards: Total Medicines, Low Stock, Suppliers */}
+        <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card className="border-0 shadow-sm bg-gradient-to-br from-stat-blue to-stat-blue/50">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -124,13 +121,13 @@ export default function WarehouseDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-medium text-stat-orange-text/70 uppercase tracking-wide">Low Stock</p>
-                  <p className="text-2xl font-bold text-stat-orange-text mt-0.5">{lowStockItems}</p>
+                  <p className="text-2xl font-bold text-stat-orange-text mt-0.5">{lowStockCount}</p>
                 </div>
                 <div className="p-2 rounded-lg bg-stat-orange-text/10">
                   <AlertTriangle className="h-5 w-5 text-stat-orange-text" />
                 </div>
               </div>
-              {lowStockItems > 0 && (
+              {lowStockCount > 0 && (
                 <p className="text-[10px] text-stat-orange-text/60 mt-2 flex items-center gap-1">
                   <TrendingDown className="h-3 w-3" /> Needs reorder
                 </p>
@@ -143,27 +140,10 @@ export default function WarehouseDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-medium text-stat-green-text/70 uppercase tracking-wide">Suppliers</p>
-                  <p className="text-2xl font-bold text-stat-green-text mt-0.5">{suppliers.length}</p>
+                  <p className="text-2xl font-bold text-stat-green-text mt-0.5">{suppliersCount}</p>
                 </div>
                 <div className="p-2 rounded-lg bg-stat-green-text/10">
                   <Truck className="h-5 w-5 text-stat-green-text" />
-                </div>
-              </div>
-              <p className="text-[10px] text-stat-green-text/60 mt-2 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" /> Active partners
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm bg-gradient-to-br from-stat-purple to-stat-purple/50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] font-medium text-stat-purple-text/70 uppercase tracking-wide">Warehouses</p>
-                  <p className="text-2xl font-bold text-stat-purple-text mt-0.5">{warehouses.length}</p>
-                </div>
-                <div className="p-2 rounded-lg bg-stat-purple-text/10">
-                  <BarChart3 className="h-5 w-5 text-stat-purple-text" />
                 </div>
               </div>
             </CardContent>
@@ -172,7 +152,7 @@ export default function WarehouseDashboard() {
 
         {/* Orders & Distribution Row */}
         <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Supplier Orders Summary */}
+          {/* Supplier Orders Summary — from API */}
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-4">
@@ -212,14 +192,14 @@ export default function WarehouseDashboard() {
                     <span className="text-sm text-foreground">Total Orders</span>
                   </div>
                   <Badge variant="secondary" className="bg-stat-blue text-stat-blue-text font-bold text-xs">
-                    {supplierOrders.length}
+                    {totalOrders}
                   </Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Distribution Summary */}
+          {/* Distribution Summary — untouched, still client-side */}
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-4">
@@ -268,14 +248,14 @@ export default function WarehouseDashboard() {
         </motion.div>
 
         {/* Low Stock Alert Table */}
-        {lowStockItems > 0 && (
+        {lowStockCount > 0 && (
           <motion.div variants={fadeUp}>
             <Card className="border-destructive/20">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <AlertTriangle className="h-4 w-4 text-destructive" />
                   <h3 className="text-sm font-semibold text-foreground">Low Stock Alerts</h3>
-                  <Badge variant="destructive" className="text-[10px] ml-auto">{lowStockItems} items</Badge>
+                  <Badge variant="destructive" className="text-[10px] ml-auto">{lowStockCount} items</Badge>
                 </div>
                 <div className="space-y-1.5">
                   {inventory
