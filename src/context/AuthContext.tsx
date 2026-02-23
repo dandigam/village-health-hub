@@ -58,11 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [initialized, setInitialized] = useState(false);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('expiresAt');
+    localStorage.clear();
+    sessionStorage.clear();
     setUser(null);
     setToken(null);
+    // Force redirect to login
+    window.location.href = '/login';
   }, []);
 
   // Initialize from localStorage

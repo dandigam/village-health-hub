@@ -31,7 +31,6 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
   };
 
   return (
