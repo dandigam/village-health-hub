@@ -1,3 +1,6 @@
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useStatesHierarchy } from '@/hooks/useApiData';
+  const { data: statesHierarchy = [] } = useStatesHierarchy();
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { X, Save, MapPin, Calendar, Users } from 'lucide-react';
@@ -30,21 +33,41 @@ export default function EditCamp() {
   const { id } = useParams();
   const { data: allCamps = [] } = useCamps();
   const { data: allDoctors = [] } = useDoctors();
-  const camp = allCamps.find((c) => c.id === id);
+  const camp = allCamps.find((c) => String(c.id) === String(id));
 
   const [formData, setFormData] = useState({
-    name: '', village: '', district: '', location: '', startDate: '', endDate: '', description: '',
+    id: '',
+    name: '',
+    location: '',
+    village: '',
+    city: '',
+    district: '',
+    startDate: '',
+    endDate: '',
     status: 'draft' as 'draft' | 'active' | 'closed',
-    selectedDoctors: [] as string[],
+    description: '',
+    doctorIds: [] as string[],
+    pharmacyIds: [] as string[],
+    staffIds: [] as string[],
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     if (camp) {
       setFormData({
-        name: camp.name, village: camp.village, district: camp.district, location: camp.location,
-        startDate: camp.startDate, endDate: camp.endDate, description: camp.description || '',
-        status: camp.status, selectedDoctors: camp.doctorIds,
+        id: camp.id,
+        name: camp.name || camp.campName || '',
+        location: camp.location || '',
+        village: camp.village || camp.city || '',
+        city: camp.city || '',
+        district: camp.district || '',
+        startDate: camp.startDate || '',
+        endDate: camp.endDate || '',
+        status: camp.status,
+        description: camp.description || '',
+        doctorIds: camp.doctorIds ? [...camp.doctorIds] : [],
+        pharmacyIds: camp.pharmacyIds || [],
+        staffIds: camp.staffIds || [],
       });
     }
   }, [camp]);
@@ -53,16 +76,16 @@ export default function EditCamp() {
     return (<DashboardLayout><div className="text-center py-12"><p className="text-muted-foreground">Camp not found</p><Button className="mt-4" onClick={() => navigate('/camps')}>Back to Camps</Button></div></DashboardLayout>);
   }
 
-  const updateFormData = (field: string, value: any) => {
+  const updateFormData = <T extends keyof typeof formData>(field: T, value: typeof formData[T]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof FormErrors]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const toggleDoctor = (doctorId: string) => {
-    if (formData.selectedDoctors.includes(doctorId)) {
-      updateFormData('selectedDoctors', formData.selectedDoctors.filter((id) => id !== doctorId));
+    if (formData.doctorIds && formData.doctorIds.includes(doctorId)) {
+      updateFormData('doctorIds', formData.doctorIds.filter((id) => id !== doctorId));
     } else {
-      updateFormData('selectedDoctors', [...formData.selectedDoctors, doctorId]);
+      updateFormData('doctorIds', [...(formData.doctorIds || []), doctorId]);
     }
   };
 
@@ -80,6 +103,8 @@ export default function EditCamp() {
 
   const handleSubmit = () => {
     if (!validateForm()) { toast({ title: 'Validation Error', description: 'Please fix the errors in the form.', variant: 'destructive' }); return; }
+    // Call update API with id
+    // Example: updateCamp.mutateAsync(formData)
     toast({ title: 'Camp Updated Successfully!', description: `${formData.name} has been updated.` });
     navigate('/camps');
   };
@@ -105,9 +130,86 @@ export default function EditCamp() {
                 {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
               </div>
               <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-1"><Label htmlFor="village" className="text-xs font-medium">Village <span className="text-destructive">*</span></Label><Input id="village" placeholder="Enter village" value={formData.village} onChange={(e) => updateFormData('village', e.target.value)} className={`h-9 text-sm ${errors.village ? 'border-destructive' : ''}`} />{errors.village && <p className="text-xs text-destructive">{errors.village}</p>}</div>
-                <div className="space-y-1"><Label htmlFor="district" className="text-xs font-medium">District <span className="text-destructive">*</span></Label><Input id="district" placeholder="Enter district" value={formData.district} onChange={(e) => updateFormData('district', e.target.value)} className={`h-9 text-sm ${errors.district ? 'border-destructive' : ''}`} />{errors.district && <p className="text-xs text-destructive">{errors.district}</p>}</div>
-                <div className="space-y-1"><Label htmlFor="location" className="text-xs font-medium">Address</Label><Input id="location" placeholder="Enter full address" value={formData.location} onChange={(e) => updateFormData('location', e.target.value)} className="h-9 text-sm" /></div>
+                <div className="space-y-1">
+                  <Label htmlFor="stateId" className="text-xs font-medium">State <span className="text-destructive">*</span></Label>
+                  <Select
+                    value={formData.stateId ? String(formData.stateId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => String(s.id) === v);
+                      updateFormData('stateId', stateObj?.id || 0);
+                      updateFormData('state', stateObj?.name || '');
+                      updateFormData('districtId', 0);
+                      updateFormData('district', '');
+                      updateFormData('mandalId', 0);
+                      updateFormData('mandal', '');
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statesHierarchy.map((state) => (
+                        <SelectItem key={state.id} value={String(state.id)}>
+                          {state.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="districtId" className="text-xs font-medium">District <span className="text-destructive">*</span></Label>
+                  <Select
+                    value={formData.districtId ? String(formData.districtId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => s.id === formData.stateId);
+                      const districtObj = stateObj?.districts.find(d => String(d.id) === v);
+                      updateFormData('districtId', districtObj?.id || 0);
+                      updateFormData('district', districtObj?.name || '');
+                      updateFormData('mandalId', 0);
+                      updateFormData('mandal', '');
+                    }}
+                    disabled={!formData.stateId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select district" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statesHierarchy
+                        .find(s => s.id === formData.stateId)?.districts.map((district) => (
+                          <SelectItem key={district.id} value={String(district.id)}>
+                            {district.name}
+                          </SelectItem>
+                        )) || []}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="mandalId" className="text-xs font-medium">Mandal <span className="text-destructive">*</span></Label>
+                  <Select
+                    value={formData.mandalId ? String(formData.mandalId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => s.id === formData.stateId);
+                      const districtObj = stateObj?.districts.find(d => d.id === formData.districtId);
+                      const mandalObj = districtObj?.mandals.find(m => String(m.id) === v);
+                      updateFormData('mandalId', mandalObj?.id || 0);
+                      updateFormData('mandal', mandalObj?.name || '');
+                    }}
+                    disabled={!formData.districtId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select mandal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statesHierarchy
+                        .find(s => s.id === formData.stateId)?.districts
+                        .find(d => d.id === formData.districtId)?.mandals.map((mandal) => (
+                          <SelectItem key={mandal.id} value={String(mandal.id)}>
+                            {mandal.name}
+                          </SelectItem>
+                        )) || []}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1"><Label htmlFor="startDate" className="text-xs font-medium">Start Date <span className="text-destructive">*</span></Label><Input id="startDate" type="date" value={formData.startDate} onChange={(e) => updateFormData('startDate', e.target.value)} className={`h-9 text-sm ${errors.startDate ? 'border-destructive' : ''}`} />{errors.startDate && <p className="text-xs text-destructive">{errors.startDate}</p>}</div>
@@ -122,7 +224,7 @@ export default function EditCamp() {
             <CardContent className="p-4">
               <div className="space-y-2">
                 {statusOptions.map((option) => (
-                  <button key={option.value} onClick={() => updateFormData('status', option.value)} className={`w-full px-3 py-2 rounded-lg border text-sm font-medium transition-all ${formData.status === option.value ? `${option.color} ring-2 ring-offset-1 ring-accent` : 'bg-white border-border hover:bg-muted'}`}>{option.label}</button>
+                  <button key={option.value} onClick={() => updateFormData('status', option.value as typeof formData.status)} className={`w-full px-3 py-2 rounded-lg border text-sm font-medium transition-all ${formData.status === option.value ? `${option.color} ring-2 ring-offset-1 ring-accent` : 'bg-white border-border hover:bg-muted'}`}>{option.label}</button>
                 ))}
               </div>
             </CardContent>
@@ -133,13 +235,13 @@ export default function EditCamp() {
             <CardContent className="p-4">
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {allDoctors.map((doctor) => (
-                  <div key={doctor.id} className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${formData.selectedDoctors.includes(doctor.id) ? 'bg-accent/20 border border-accent' : 'hover:bg-muted border border-transparent'}`} onClick={() => toggleDoctor(doctor.id)}>
+                  <div key={doctor.id} className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${formData.doctorIds && formData.doctorIds.includes(String(doctor.id)) ? 'bg-accent/20 border border-accent' : 'hover:bg-muted border border-transparent'}`} onClick={() => toggleDoctor(String(doctor.id))}>
                     <div><p className="font-medium text-sm">{doctor.name}</p><p className="text-xs text-muted-foreground">{doctor.specialization}</p></div>
-                    {formData.selectedDoctors.includes(doctor.id) && <Badge className="bg-accent text-accent-foreground text-xs">✓</Badge>}
+                    {formData.doctorIds && formData.doctorIds.includes(String(doctor.id)) && <Badge className="bg-accent text-accent-foreground text-xs">✓</Badge>}
                   </div>
                 ))}
               </div>
-              {formData.selectedDoctors.length > 0 && <div className="mt-3 pt-3 border-t"><p className="text-xs text-muted-foreground">{formData.selectedDoctors.length} doctor(s) assigned</p></div>}
+              {formData.doctorIds && formData.doctorIds.length > 0 && <div className="mt-3 pt-3 border-t"><p className="text-xs text-muted-foreground">{formData.doctorIds.length} doctor(s) assigned</p></div>}
             </CardContent>
           </Card>
         </div>

@@ -43,6 +43,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useDoctors, useSaveCamp } from '@/hooks/useApiData';
+import { useStatesHierarchy } from '@/hooks/useApiData';
 
 // Mock data for dropdowns
 const mockStates = ['Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu'];
@@ -82,6 +83,8 @@ interface FormData {
 }
 
 export default function NewCamp() {
+    // Location hierarchy
+    const { data: statesHierarchy = [] } = useStatesHierarchy();
   const navigate = useNavigate();
   const { data: allDoctors = [] } = useDoctors();
   const [currentStep, setCurrentStep] = useState(1);
@@ -93,8 +96,11 @@ export default function NewCamp() {
     organizerPhone: '',
     organizerEmail: '',
     planDate: undefined,
+    stateId: 0,
     state: '',
+    districtId: 0,
     district: '',
+    mandalId: 0,
     mandal: '',
     city: '',
     address: '',
@@ -127,16 +133,16 @@ export default function NewCamp() {
   const handleSubmit = async () => {
     // Prepare payload
     const payload = {
-      // id: 0, // Remove id for save
+      id: 0,
       campName: formData.campName,
       organizerName: formData.organizerName,
       organizerPhone: formData.organizerPhone,
       organizerEmail: formData.organizerEmail,
-      stateId: 0, // Replace with actual stateId if available
+      stateId: formData.stateId,
       state: formData.state,
-      districtId: 0, // Replace with actual districtId if available
+      districtId: formData.districtId,
       district: formData.district,
-      mandalId: 0, // Replace with actual mandalId if available
+      mandalId: formData.mandalId,
       mandal: formData.mandal,
       city: formData.city,
       address: formData.address,
@@ -362,15 +368,26 @@ export default function NewCamp() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>State</Label>
-                  <Select value={formData.state} onValueChange={(v) => updateFormData('state', v)}>
+                  <Label>State *</Label>
+                  <Select
+                    value={formData.stateId ? String(formData.stateId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => String(s.id) === v);
+                      updateFormData('stateId', stateObj?.id || 0);
+                      updateFormData('state', stateObj?.name || '');
+                      updateFormData('districtId', 0);
+                      updateFormData('district', '');
+                      updateFormData('mandalId', 0);
+                      updateFormData('mandal', '');
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockStates.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
+                      {statesHierarchy.map((state) => (
+                        <SelectItem key={state.id} value={String(state.id)}>
+                          {state.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -379,53 +396,64 @@ export default function NewCamp() {
                 <div className="space-y-2">
                   <Label>District *</Label>
                   <Select
-                    value={formData.district}
-                    onValueChange={(v) => updateFormData('district', v)}
+                    value={formData.districtId ? String(formData.districtId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => s.id === formData.stateId);
+                      const districtObj = stateObj?.districts.find(d => String(d.id) === v);
+                      updateFormData('districtId', districtObj?.id || 0);
+                      updateFormData('district', districtObj?.name || '');
+                      updateFormData('mandalId', 0);
+                      updateFormData('mandal', '');
+                    }}
+                    disabled={!formData.stateId}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select district" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockDistricts.map((district) => (
-                        <SelectItem key={district} value={district}>
-                          {district}
-                        </SelectItem>
-                      ))}
+                      {statesHierarchy
+                        .find(s => s.id === formData.stateId)?.districts.map((district) => (
+                          <SelectItem key={district.id} value={String(district.id)}>
+                            {district.name}
+                          </SelectItem>
+                        )) || []}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Mandal *</Label>
                   <Select
-                    value={formData.mandal}
-                    onValueChange={(v) => updateFormData('mandal', v)}
+                    value={formData.mandalId ? String(formData.mandalId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => s.id === formData.stateId);
+                      const districtObj = stateObj?.districts.find(d => d.id === formData.districtId);
+                      const mandalObj = districtObj?.mandals.find(m => String(m.id) === v);
+                      updateFormData('mandalId', mandalObj?.id || 0);
+                      updateFormData('mandal', mandalObj?.name || '');
+                    }}
+                    disabled={!formData.districtId}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select mandal" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockMandals.map((mandal) => (
-                        <SelectItem key={mandal} value={mandal}>
-                          {mandal}
-                        </SelectItem>
-                      ))}
+                      {statesHierarchy
+                        .find(s => s.id === formData.stateId)?.districts
+                        .find(d => d.id === formData.districtId)?.mandals.map((mandal) => (
+                          <SelectItem key={mandal.id} value={String(mandal.id)}>
+                            {mandal.name}
+                          </SelectItem>
+                        )) || []}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>City *</Label>
-                  <Select value={formData.city} onValueChange={(v) => updateFormData('city', v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockCities.map((city) => (
-                        <SelectItem key={city} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    value={formData.city}
+                    onChange={(e) => updateFormData('city', e.target.value)}
+                    placeholder="Enter city"
+                  />
                 </div>
                 <div className="space-y-1.5 col-span-2">
                   <Label htmlFor="address">Address *</Label>

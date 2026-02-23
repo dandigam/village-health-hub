@@ -16,6 +16,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
 import {
   useDistributions,
   useRequestOrders,
@@ -24,6 +25,7 @@ import {
 } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { useEffect } from 'react';
 
 const stagger = {
   animate: { transition: { staggerChildren: 0.06 } },
@@ -39,7 +41,13 @@ export default function WarehouseDashboard() {
   const { user } = useAuth();
   const warehouseId = user?.wareHouse?.id ? Number(user.wareHouse.id) : undefined;
 
-  const { data: dashStats } = useWarehouseDashboardStats(warehouseId);
+  const { data: dashStats, refetch } = useWarehouseDashboardStats(warehouseId);
+
+  // Refetch dashboard stats when component mounts or warehouseId changes
+
+  useEffect(() => {
+    refetch();
+  }, [warehouseId]);
   const { data: distributions = [] } = useDistributions();
   const { data: requestOrders = [] } = useRequestOrders();
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
@@ -162,6 +170,17 @@ export default function WarehouseDashboard() {
                 </Button>
               </div>
               <div className="space-y-2.5">
+                                <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-md bg-stat-orange-text/10">
+                      <Clock className="h-3.5 w-3.5 text-stat-orange-text" />
+                    </div>
+                    <span className="text-sm text-foreground">Draft Orders</span>
+                  </div>
+                  <Badge variant="secondary" className="bg-stat-orange text-stat-orange-text font-bold text-xs">
+                    {pendingOrders}
+                  </Badge>
+                </div>
                 <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
                   <div className="flex items-center gap-2.5">
                     <div className="p-1.5 rounded-md bg-stat-orange-text/10">

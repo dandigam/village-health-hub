@@ -87,15 +87,15 @@ export default function Camps() {
                 <TableRow key={camp.id} className="hover:bg-muted/30">
                   <TableCell>
                     <div>
-                      <p className="font-medium text-sm">{camp.name}</p>
+                      <p className="font-medium text-sm">{camp.campName}</p>
                       <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {camp.village}, {camp.district}
+                        <MapPin className="h-3 w-3" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" /> {camp.village}, {camp.district}
+                      <MapPin className="h-3.5 w-3.5" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
