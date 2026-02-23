@@ -81,7 +81,7 @@ export default function Dashboard() {
   ];
 
   const setupSteps = [
-    { id: 'camp', label: 'Create Camp', href: '/camps/new', icon: Tent, completed: hasActiveCamp },
+    { id: 'camp', label: 'Create Camp', href: '/camp-templates/new', icon: Tent, completed: hasActiveCamp },
     { id: 'doctor', label: 'Add Doctor', href: '/doctors/new', icon: Users, completed: hasDoctors },
     { id: 'pharmacy', label: 'Add Pharmacy', href: '/pharmacy', icon: Pill, completed: hasPharmacy },
     { id: 'stock', label: 'Add Stock', href: '/stock', icon: Package, completed: hasStock },
