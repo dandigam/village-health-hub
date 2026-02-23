@@ -11,6 +11,8 @@
 export {
   mockUser,
   mockCamps,
+  mockCampTemplates,
+  mockCampEvents,
   mockDoctors,
   mockPatients,
   mockMedicines,

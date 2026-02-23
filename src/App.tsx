@@ -17,6 +17,12 @@ import EditDoctor from "./pages/doctors/EditDoctor";
 import NewCamp from "./pages/camps/NewCamp";
 import EditCamp from "./pages/camps/EditCamp";
 import ViewCamp from "./pages/camps/ViewCamp";
+import CampTemplates from "./pages/camp-templates/CampTemplates";
+import NewCampTemplate from "./pages/camp-templates/NewCampTemplate";
+import ViewCampTemplate from "./pages/camp-templates/ViewCampTemplate";
+import CampEvents from "./pages/camp-events/CampEvents";
+import NewCampEvent from "./pages/camp-events/NewCampEvent";
+import ViewCampEvent from "./pages/camp-events/ViewCampEvent";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
@@ -76,11 +82,23 @@ const App = () => (
               
               <Route path="/dashboard" element={<ProtectedRoute routeKey="dashboard"><DashboardRouter /></ProtectedRoute>} />
               
-              {/* Camps */}
+              {/* Camps (legacy) */}
               <Route path="/camps" element={<ProtectedRoute routeKey="camps"><Camps /></ProtectedRoute>} />
               <Route path="/camps/new" element={<ProtectedRoute routeKey="camps"><NewCamp /></ProtectedRoute>} />
               <Route path="/camps/:id" element={<ProtectedRoute routeKey="camps"><ViewCamp /></ProtectedRoute>} />
               <Route path="/camps/:id/edit" element={<ProtectedRoute routeKey="camps"><EditCamp /></ProtectedRoute>} />
+              
+              {/* Camp Templates */}
+              <Route path="/camp-templates" element={<ProtectedRoute routeKey="camp-templates"><CampTemplates /></ProtectedRoute>} />
+              <Route path="/camp-templates/new" element={<ProtectedRoute routeKey="camp-templates"><NewCampTemplate /></ProtectedRoute>} />
+              <Route path="/camp-templates/:id" element={<ProtectedRoute routeKey="camp-templates"><ViewCampTemplate /></ProtectedRoute>} />
+              <Route path="/camp-templates/:id/edit" element={<ProtectedRoute routeKey="camp-templates"><NewCampTemplate /></ProtectedRoute>} />
+              
+              {/* Camp Events */}
+              <Route path="/camp-events" element={<ProtectedRoute routeKey="camp-events"><CampEvents /></ProtectedRoute>} />
+              <Route path="/camp-events/new" element={<ProtectedRoute routeKey="camp-events"><NewCampEvent /></ProtectedRoute>} />
+              <Route path="/camp-events/:id" element={<ProtectedRoute routeKey="camp-events"><ViewCampEvent /></ProtectedRoute>} />
+              <Route path="/camp-events/:id/edit" element={<ProtectedRoute routeKey="camp-events"><NewCampEvent /></ProtectedRoute>} />
               
               {/* Patients */}
               <Route path="/patients" element={<ProtectedRoute routeKey="patients"><Patients /></ProtectedRoute>} />

@@ -1,4 +1,4 @@
-import { Camp, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment, Discount, Warehouse, SupplierMedicine, SupplierOrder, StockDistribution, RequestOrder } from '@/types';
+import { Camp, CampTemplate, CampEvent, Doctor, Patient, CampStats, User, SOAPNote, Consultation, Medicine, Prescription, StockItem, Supplier, Payment, Discount, Warehouse, SupplierMedicine, SupplierOrder, StockDistribution, RequestOrder } from '@/types';
 
 const ts = '2025-01-15T10:00:00Z';
 
@@ -121,4 +121,17 @@ export const mockRequestOrders: RequestOrder[] = [
   { id: '2', requestedBy: 'Nurse Priya', clientName: 'Vijayawada Camp', warehouseId: '1', items: [{ medicineId: '1', requestedQty: 50, sendQty: 0 }, { medicineId: '6', requestedQty: 100, sendQty: 0 }, { medicineId: '8', requestedQty: 75, sendQty: 0 }], status: 'pending', createdAt: '2025-02-11T14:30:00Z', updatedAt: '2025-02-11T14:30:00Z' },
   { id: '3', requestedBy: 'Staff Ravi', clientName: 'Mangalagiri Camp', warehouseId: '2', items: [{ medicineId: '2', requestedQty: 60, sendQty: 60 }, { medicineId: '5', requestedQty: 40, sendQty: 30 }], status: 'draft', createdAt: '2025-02-10T11:00:00Z', updatedAt: '2025-02-10T11:00:00Z', notes: 'Awaiting stock confirmation' },
   { id: '4', requestedBy: 'Dr. Ramesh Kumar', clientName: 'Bapatla Camp', warehouseId: '1', items: [{ medicineId: '1', requestedQty: 50, sendQty: 50 }, { medicineId: '7', requestedQty: 100, sendQty: 100 }], status: 'sent', createdAt: '2025-01-15T00:00:00Z', updatedAt: '2025-01-15T00:00:00Z' },
+];
+
+export const mockCampTemplates: CampTemplate[] = [
+  { id: '1', name: 'Bapatla Health Camp', organizerName: 'Venkatesh Dandigam', organizerPhone: '9234644748', organizerEmail: 'venkatesh@gbrfoundation.org', state: 'Andhra Pradesh', stateId: 1, district: 'Guntur', districtId: 1, mandal: 'Bapatla', mandalId: 1, city: 'Bapatla', address: 'Main Road, Near Bus Stand', pinCode: '522101', defaultDoctorIds: ['1', '2'], defaultStaffIds: ['1', '2'], status: 'active', createdAt: ts, updatedAt: ts },
+  { id: '2', name: 'Mangalagiri Eye Camp', organizerName: 'Suresh Kumar', organizerPhone: '9876543210', organizerEmail: 'suresh@gbrfoundation.org', state: 'Andhra Pradesh', stateId: 1, district: 'Guntur', districtId: 1, mandal: 'Mangalagiri', mandalId: 2, city: 'Mangalagiri', address: 'Temple Road, Near Post Office', pinCode: '522503', defaultDoctorIds: ['1'], defaultStaffIds: ['2'], status: 'active', createdAt: ts, updatedAt: ts },
+  { id: '3', name: 'Vijayawada Dental Camp', organizerName: 'Ravi Teja', organizerPhone: '9876543211', organizerEmail: 'ravi@gbrfoundation.org', state: 'Andhra Pradesh', stateId: 1, district: 'Krishna', districtId: 2, mandal: 'Vijayawada', mandalId: 3, city: 'Vijayawada', address: 'Gandhi Nagar, MG Road', pinCode: '520001', defaultDoctorIds: ['2', '3'], defaultStaffIds: ['1'], status: 'inactive', createdAt: ts, updatedAt: ts },
+];
+
+export const mockCampEvents: CampEvent[] = [
+  { id: '1', templateId: '1', templateName: 'Bapatla Health Camp', location: 'Bapatla', state: 'Andhra Pradesh', district: 'Guntur', mandal: 'Bapatla', city: 'Bapatla', address: 'Main Road, Near Bus Stand', startDate: '2026-02-20', endDate: '2026-02-25', doctorIds: ['1', '2'], staffIds: ['1', '2'], status: 'started', createdAt: '2026-02-18T10:00:00Z', updatedAt: '2026-02-20T08:00:00Z' },
+  { id: '2', templateId: '2', templateName: 'Mangalagiri Eye Camp', location: 'Mangalagiri', state: 'Andhra Pradesh', district: 'Guntur', mandal: 'Mangalagiri', city: 'Mangalagiri', address: 'Temple Road', startDate: '2026-03-01', endDate: '2026-03-05', doctorIds: ['1'], staffIds: ['2'], status: 'planned', createdAt: '2026-02-22T10:00:00Z', updatedAt: '2026-02-22T10:00:00Z' },
+  { id: '3', templateId: '1', templateName: 'Bapatla Health Camp', location: 'Bapatla', state: 'Andhra Pradesh', district: 'Guntur', mandal: 'Bapatla', city: 'Bapatla', address: 'Main Road, Near Bus Stand', startDate: '2026-01-10', endDate: '2026-01-15', doctorIds: ['1', '2'], staffIds: ['1'], status: 'closed', createdAt: '2026-01-08T10:00:00Z', updatedAt: '2026-01-15T18:00:00Z' },
+  { id: '4', templateId: '3', templateName: 'Vijayawada Dental Camp', location: 'Vijayawada', state: 'Andhra Pradesh', district: 'Krishna', mandal: 'Vijayawada', city: 'Vijayawada', address: 'Gandhi Nagar, MG Road', startDate: '2025-12-01', endDate: '2025-12-05', doctorIds: ['2', '3'], staffIds: ['1'], status: 'closed', createdAt: '2025-11-28T10:00:00Z', updatedAt: '2025-12-05T18:00:00Z' },
 ];
