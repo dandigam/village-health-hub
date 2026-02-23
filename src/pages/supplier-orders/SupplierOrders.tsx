@@ -578,13 +578,34 @@ export default function SupplierOrders() {
                       <tr key={item.id || i} className="border-b last:border-b-0">
                         <td className="p-3 font-medium">{item.medicineName}</td>
                         <td className="p-3 text-center">{item.requestedQuantity}</td>
-                        <td className="p-3 text-center">{item.receivedQuantity ?? '-'}</td>
+                        <td className="p-3 text-center">
+                          {selectedOrder.status?.toUpperCase() === 'PENDING' ? (
+                            <Input
+                              type="number"
+                              min="0"
+                              className="w-24 h-8 mx-auto text-center"
+                              value={receivedQtys[item.id] ?? ''}
+                              onChange={e => setReceivedQtys({ ...receivedQtys, [item.id]: Number(e.target.value) })}
+                            />
+                          ) : (
+                            item.receivedQuantity ?? '-'
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
+          )}
+          {selectedOrder && selectedOrder.status?.toUpperCase() === 'PENDING' && (
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setSelectedOrder(null); setReceivedQtys({}); }}>Cancel</Button>
+              <Button onClick={handleReceiveStock}>
+                <Save className="mr-2 h-4 w-4" />
+                Update
+              </Button>
+            </DialogFooter>
           )}
         </DialogContent>
       </Dialog>
