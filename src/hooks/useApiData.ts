@@ -336,6 +336,34 @@ export function useDashboardStats() {
   });
 }
 
+// ── Warehouse Dashboard Stats ────────────────────────────────
+
+export interface WarehouseDashboardStats {
+  lowStock: number;
+  supplierOrders: {
+    cancelled: number;
+    received: number;
+    pendingOrders: number;
+    totalOrders: number;
+  };
+  suppliers: number;
+  totalMedicines: number;
+}
+
+export function useWarehouseDashboardStats(warehouseId?: number) {
+  return useQuery<WarehouseDashboardStats>({
+    queryKey: ['warehouse-dashboard-stats', warehouseId],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/dashboard/warehouse/${warehouseId}`);
+      if (!res.ok) throw new Error('Failed to fetch warehouse dashboard stats');
+      return res.json();
+    },
+    enabled: !!warehouseId,
+    staleTime: STALE_TIME,
+    refetchOnWindowFocus: false,
+  });
+}
+
 // ── Mutation Hooks ───────────────────────────────────────────
 
 export function useSaveCamp() {
