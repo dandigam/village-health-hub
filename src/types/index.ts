@@ -30,7 +30,17 @@ export interface Camp extends BaseEntity {
   location: string;
   village: string;
   city?: string; // API alias for village
+  state?: string;
+  stateId?: number;
   district: string;
+  districtId?: number;
+  mandal?: string;
+  mandalId?: number;
+  address?: string;
+  pinCode?: string;
+  organizerName?: string;
+  organizerPhone?: string;
+  organizerEmail?: string;
   startDate: string;
   endDate: string;
   status: CampStatus;
