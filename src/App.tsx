@@ -8,15 +8,11 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import Login from "./pages/Login";
 import DashboardRouter from "./pages/dashboard/DashboardRouter";
-import Camps from "./pages/Camps";
 import Patients from "./pages/Patients";
 import NewPatient from "./pages/NewPatient";
 import Doctors from "./pages/Doctors";
 import NewDoctor from "./pages/doctors/NewDoctor";
 import EditDoctor from "./pages/doctors/EditDoctor";
-import NewCamp from "./pages/camps/NewCamp";
-import EditCamp from "./pages/camps/EditCamp";
-import ViewCamp from "./pages/camps/ViewCamp";
 import CampTemplates from "./pages/camp-templates/CampTemplates";
 import NewCampTemplate from "./pages/camp-templates/NewCampTemplate";
 import ViewCampTemplate from "./pages/camp-templates/ViewCampTemplate";
@@ -82,11 +78,7 @@ const App = () => (
               
               <Route path="/dashboard" element={<ProtectedRoute routeKey="dashboard"><DashboardRouter /></ProtectedRoute>} />
               
-              {/* Camps (legacy) */}
-              <Route path="/camps" element={<ProtectedRoute routeKey="camps"><Camps /></ProtectedRoute>} />
-              <Route path="/camps/new" element={<ProtectedRoute routeKey="camps"><NewCamp /></ProtectedRoute>} />
-              <Route path="/camps/:id" element={<ProtectedRoute routeKey="camps"><ViewCamp /></ProtectedRoute>} />
-              <Route path="/camps/:id/edit" element={<ProtectedRoute routeKey="camps"><EditCamp /></ProtectedRoute>} />
+              
               
               {/* Camp Templates */}
               <Route path="/camp-templates" element={<ProtectedRoute routeKey="camp-templates"><CampTemplates /></ProtectedRoute>} />
