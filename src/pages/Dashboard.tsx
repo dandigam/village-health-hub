@@ -23,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { usePatients, useCamps, useDashboardStats } from '@/hooks/useApiData';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
+import { PageLoader } from '@/components/shared/PageLoader';
 
 const variantStyles = {
   blue: 'stat-card-blue text-stat-blue-text',
@@ -45,8 +46,8 @@ const iconBgStyles = {
 export default function Dashboard() {
   const navigate = useNavigate();
   // Fetch dashboard stats from custom hook
-  const { data: dashboardStats = {} } = useDashboardStats();
-  const { data: patientsRaw = [], refetch: refetchPatients } = usePatients();
+  const { data: dashboardStats = {}, isLoading: loadingStats } = useDashboardStats();
+  const { data: patientsRaw = [], refetch: refetchPatients, isLoading: loadingPatients } = usePatients();
   // Handle paginated API response (with 'content' array)
   const patientList = Array.isArray((patientsRaw as any).content)
     ? (patientsRaw as any).content
@@ -115,6 +116,10 @@ export default function Dashboard() {
   const handleCardClick = (filterStatus: string) => {
     navigate(`/patients?status=${filterStatus}`);
   };
+
+  if (loadingStats && loadingPatients) {
+    return <DashboardLayout><PageLoader type="cards" /></DashboardLayout>;
+  }
 
   return (
     <DashboardLayout>
