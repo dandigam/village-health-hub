@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Truck, Pill } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Truck, Pill, Search } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { DeleteConfirmDialog } from '@/components/stock/DeleteConfirmDialog';
 import { toast } from '@/hooks/use-toast';
 import { api } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
-import { useStatesHierarchy } from '@/hooks/useApiData';
+import { useStatesHierarchy, useWarehouseInventory } from '@/hooks/useApiData';
 
 const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Powder', 'Inhaler', 'Ointment'];
 
@@ -35,6 +35,8 @@ export default function NewSupplier() {
   const isEditMode = Boolean(supplierId);
   const supplierFromState = location.state?.supplier;
   const { data: statesHierarchy = [] } = useStatesHierarchy();
+  const warehouseId = authUser?.wareHouse?.id;
+  const { data: inventoryItems = [] } = useWarehouseInventory(warehouseId ? Number(warehouseId) : undefined);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,6 +53,27 @@ export default function NewSupplier() {
   const [medicineType, setMedicineType] = useState('');
   const [medicinesList, setMedicinesList] = useState<MedicineEntry[]>([]);
   const [deleteMedicineIndex, setDeleteMedicineIndex] = useState<number | null>(null);
+
+  // Search existing medicines
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return inventoryItems
+      .filter(item =>
+        (item.medicineName?.toLowerCase().includes(q) || item.medicineType?.toLowerCase().includes(q)) &&
+        !medicinesList.some(m => m.name.toLowerCase() === item.medicineName?.toLowerCase() && m.type.toLowerCase() === (item.medicineType?.toLowerCase() || ''))
+      )
+      .slice(0, 10);
+  }, [searchQuery, inventoryItems, medicinesList]);
+
+  const addFromSearch = (item: typeof inventoryItems[0]) => {
+    setMedicinesList(prev => [...prev, { name: item.medicineName, type: item.medicineType || '' }]);
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
 
   // Validation helpers
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -336,6 +359,55 @@ export default function NewSupplier() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
+            {/* Search existing medicines */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                Search Existing Medicines
+              </Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by medicine name or type..."
+                  className="pl-9"
+                  value={searchQuery}
+                  onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
+                  onFocus={() => setShowSearchResults(true)}
+                />
+                {showSearchResults && searchQuery.trim() && (
+                  <div className="absolute z-10 top-full left-0 right-0 mt-1 border rounded-lg bg-popover shadow-lg max-h-52 overflow-auto">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors text-left border-b last:border-b-0"
+                          onClick={() => addFromSearch(item)}
+                        >
+                          <div>
+                            <p className="text-sm font-medium">{item.medicineName}</p>
+                            <p className="text-xs text-muted-foreground">{item.medicineType}</p>
+                          </div>
+                          <Plus className="h-4 w-4 text-primary shrink-0" />
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+                        No matching medicines found in inventory
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="relative flex items-center gap-3">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground px-2">or add manually</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            {/* Manual medicine entry */}
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-2">
                 <Label>Medicine Name</Label>
