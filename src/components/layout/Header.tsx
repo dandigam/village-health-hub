@@ -1,4 +1,4 @@
-import { Bell, Search, User, LogOut, Settings, MapPin, ChevronDown, Check, Menu, ShoppingCart, Heart } from 'lucide-react';
+import { Bell, Search, User, LogOut, Settings, MapPin, Menu, ShoppingCart, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useCamps, useSupplierOrders } from '@/hooks/useApiData';
-import { useCamp } from '@/context/CampContext';
+import { useSupplierOrders } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { hasAccess } from '@/config/routeAccess';
 
@@ -22,13 +21,12 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle }: HeaderProps) {
   const navigate = useNavigate();
-  const { selectedCamp, setSelectedCamp } = useCamp();
   const { user: authUser, logout } = useAuth();
-  const { data: camps = [] } = useCamps();
   const { data: supplierOrders = [] } = useSupplierOrders();
   const pendingOrdersCount = supplierOrders.filter(o => o.status === 'sent' || o.status === 'pending').length;
 
   const currentUser = { name: authUser?.name || '', role: authUser?.roleDisplayName || authUser?.role || '', avatar: authUser?.avatar || undefined as string | undefined };
+  const campName = authUser?.context?.campName;
 
   const handleLogout = () => {
     logout();
@@ -57,33 +55,15 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <span className="text-[10px] text-white/60 block -mt-0.5 font-medium">Management System</span>
           </div>
         </div>
-        <div className="hidden md:block border-l border-white/15 pl-4 ml-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-auto p-2 text-white hover:bg-white/[0.08] flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-white/60" />
-                <div className="text-left">
-                  <p className="text-sm font-medium text-white">{selectedCamp || authUser?.context?.campName || currentUser.name || 'Select Camp'}</p>
-                  {currentUser.role !== "WAREHOUSE" ? <p className="text-[10px] text-white/50">Current Camp</p> : null}
-                </div>
-                {currentUser.role !== "WAREHOUSE" ? <ChevronDown className="h-4 w-4 text-white/50" /> : null}
-              </Button>
-            </DropdownMenuTrigger>
-            {currentUser.role !== "WAREHOUSE" ? <DropdownMenuContent align="start" className="w-56 z-50 bg-card">
-              <DropdownMenuLabel>Select Camp Location</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {camps.map((camp) => (
-                <DropdownMenuItem key={camp.id} onClick={() => setSelectedCamp(camp.name)} className="flex items-center justify-between cursor-pointer">
-                  <div>
-                    <p className="font-medium">{camp.name}</p>
-                    <p className="text-xs text-muted-foreground">{camp.location}</p>
-                  </div>
-                  {selectedCamp === camp.name && <Check className="h-4 w-4 text-primary" />}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent> : null}
-          </DropdownMenu>
-        </div>
+        {campName && (
+          <div className="hidden md:flex items-center gap-2 border-l border-white/15 pl-4 ml-2">
+            <MapPin className="h-4 w-4 text-white/60" />
+            <div>
+              <p className="text-sm font-medium text-white">{campName}</p>
+              <p className="text-[10px] text-white/50">Current Camp</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="hidden lg:flex items-center max-w-md flex-1 mx-8">
