@@ -62,8 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.clear();
     setUser(null);
     setToken(null);
-    // Force redirect to login
-    window.location.href = '/login';
+    // Navigate without full page reload for smooth transition
   }, []);
 
   // Initialize from localStorage
