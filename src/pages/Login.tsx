@@ -27,6 +27,7 @@ export default function Login() {
   const [role, setRole] = useState('');
   const registerUser = useRegisterUser();
 
+  // Redirect authenticated users immediately without animation
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }

@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SearchFilter } from '@/components/shared/SearchFilter';
 import { usePatients } from '@/hooks/useApiData';
+import { PageLoader } from '@/components/shared/PageLoader';
 
 export default function Patients() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: patientsRaw = [] } = usePatients();
+  const { data: patientsRaw = [], isLoading } = usePatients();
   // Handle paginated response with 'content' array
   const patients = Array.isArray(patientsRaw)
     ? patientsRaw
@@ -23,6 +24,10 @@ export default function Patients() {
       p.patientId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.lastName?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  if (isLoading) {
+    return <DashboardLayout><PageLoader type="table" /></DashboardLayout>;
+  }
 
   return (
     <DashboardLayout>

@@ -13,6 +13,7 @@ import { usePatients, useDoctors } from '@/hooks/useApiData';
 import { Patient } from '@/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { PageLoader } from '@/components/shared/PageLoader';
 
 export type EncounterStatus = 'WAITING' | 'WITH_DOCTOR' | 'PHARMACY' | 'COMPLETED';
 
@@ -59,11 +60,11 @@ export const statusConfig: Record<EncounterStatus, { label: string; icon: any; c
 };
 
 export default function Encounters() {
-  const { data: patientsRaw = [] } = usePatients();
+  const { data: patientsRaw = [], isLoading: loadingPatients } = usePatients();
   const patientList = Array.isArray((patientsRaw as any).content)
     ? (patientsRaw as any).content
     : Array.isArray(patientsRaw) ? patientsRaw : [];
-  const { data: doctors = [] } = useDoctors();
+  const { data: doctors = [], isLoading: loadingDoctors } = useDoctors();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [patientSearch, setPatientSearch] = useState('');
@@ -193,6 +194,10 @@ export default function Encounters() {
     { label: 'At Pharmacy', count: pharmacyCount, icon: Pill, color: 'text-[hsl(var(--success))]', bg: 'bg-[hsl(var(--success)/0.08)]' },
     { label: 'Completed Today', count: completedCount, icon: CheckCircle2, color: 'text-muted-foreground', bg: 'bg-muted/30' },
   ];
+
+  if (loadingPatients && loadingDoctors) {
+    return <DashboardLayout><PageLoader type="full" message="Loading encounters..." /></DashboardLayout>;
+  }
 
   return (
     <DashboardLayout>
