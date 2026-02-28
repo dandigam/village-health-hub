@@ -7,23 +7,23 @@
  * 3. Sidebar and route guard handle the rest automatically
  */
 
-export type AppRole = "ADMIN" | "DOCTOR" | "NURSE" | "PHARMACIST" | "WAREHOUSE" | "FRONT_DESK" | "CAMP_ADMIN";
+export type AppRole = "SUPER_ADMIN" | "ADMIN" | "DOCTOR" | "NURSE" | "PHARMACIST" | "WAREHOUSE" | "FRONT_DESK" | "CAMP_ADMIN";
 
 export const routeAccess: Record<string, AppRole[]> = {
-  dashboard: ["ADMIN", "DOCTOR", "NURSE", "PHARMACIST", "WAREHOUSE", "FRONT_DESK","CAMP_ADMIN"],
-  camps: ["ADMIN"],
-  'camp-templates': ["ADMIN","CAMP_ADMIN"],
-  'camp-events': ["ADMIN","CAMP_ADMIN"],
-  patients: ["ADMIN", "DOCTOR", "NURSE", "FRONT_DESK"],
-  encounters: ["DOCTOR", "NURSE","ADMIN"],
-  pharmacy: ["PHARMACIST", "ADMIN"],
-  stock: ["WAREHOUSE", "ADMIN"],
-  suppliers: ["WAREHOUSE", "ADMIN"],
-  'supplier-orders': ["WAREHOUSE", "ADMIN"],
-  'distribution-orders': ["WAREHOUSE", "ADMIN"],
-  doctors: ["ADMIN"],
-  reports: ["ADMIN"],
-  warehouses: ["ADMIN"],
+  dashboard: ["SUPER_ADMIN", "ADMIN", "DOCTOR", "NURSE", "PHARMACIST", "WAREHOUSE", "FRONT_DESK", "CAMP_ADMIN"],
+  camps: ["SUPER_ADMIN", "ADMIN"],
+  'camp-templates': ["SUPER_ADMIN", "ADMIN", "CAMP_ADMIN"],
+  'camp-events': ["SUPER_ADMIN", "ADMIN", "CAMP_ADMIN"],
+  patients: ["SUPER_ADMIN", "ADMIN", "DOCTOR", "NURSE", "FRONT_DESK"],
+  encounters: ["SUPER_ADMIN", "DOCTOR", "NURSE", "ADMIN"],
+  pharmacy: ["SUPER_ADMIN", "PHARMACIST", "ADMIN"],
+  stock: ["SUPER_ADMIN", "WAREHOUSE", "ADMIN"],
+  suppliers: ["SUPER_ADMIN", "WAREHOUSE", "ADMIN"],
+  'supplier-orders': ["SUPER_ADMIN", "WAREHOUSE", "ADMIN"],
+  'distribution-orders': ["SUPER_ADMIN", "WAREHOUSE", "ADMIN"],
+  doctors: ["SUPER_ADMIN", "ADMIN"],
+  reports: ["SUPER_ADMIN", "ADMIN"],
+  warehouses: ["SUPER_ADMIN", "ADMIN"],
 };
 
 /**

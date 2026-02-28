@@ -17,7 +17,7 @@ import { api } from '@/services/api';
 export default function Suppliers() {
   const navigate = useNavigate();
   const {user: authUser} = useAuth();
-  const warehouseId = authUser?.wareHouse?.id ? Number(authUser.wareHouse.id) : undefined;
+  const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: suppliers = [], refetch: refetchSuppliers } = useSupplierList(warehouseId);
 
   // Helper to reload suppliers after add/edit/delete

@@ -8,7 +8,7 @@ const MIN_STOCK_LEVEL = 50;
 
 export default function StockManagement() {
   const { user: authUser } = useAuth();
-  const warehouseId = authUser?.wareHouse?.id ? Number(authUser.wareHouse.id) : undefined;
+  const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: inventoryItems = [], refetch } = useWarehouseInventory(warehouseId);
 
   // Refetch data when page loads
