@@ -179,6 +179,8 @@ export default function NewPatient() {
         } : null,
         paymentType: payment.paymentType,
         paymentPercentage: payment.paymentPercentage ? Number(payment.paymentPercentage) : null,
+        encounterCreate: false,
+        campEventId: null,
         draft: true,
       };
       await api.post('/patients', payload);
@@ -221,6 +223,8 @@ export default function NewPatient() {
         } : null,
         paymentType: payment.paymentType,
         paymentPercentage: payment.paymentPercentage ? Number(payment.paymentPercentage) : null,
+        encounterCreate: true,
+        campEventId: user?.context?.campEventId ?? null,
       };
       await api.post('/patients', payload);
       toast.success('Patient registered and sent to Encounters');
