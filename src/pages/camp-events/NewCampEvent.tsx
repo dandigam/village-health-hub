@@ -51,7 +51,6 @@ export default function NewCampEvent() {
     endDate: undefined as Date | undefined,
     selectedDoctors: [] as any[],
     selectedStaff: [] as typeof mockStaff,
-    // Auto-filled from template
     location: '',
     state: '',
     district: '',
@@ -60,7 +59,20 @@ export default function NewCampEvent() {
     address: '',
   });
 
-  // Load event data for edit mode
+  useEffect(() => {
+    if (preselectedCampId) {
+      update('campId', preselectedCampId);
+    }
+  }, [preselectedCampId]);
+
+  useEffect(() => {
+    if (templates.length > 0 && !preselectedCampId) {
+      const firstActiveTemplate = templates.find((t) => t.active === true);
+      if (firstActiveTemplate) {
+        update('campId', firstActiveTemplate.id);
+      }
+    }
+  }, [templates, preselectedCampId]);
   useEffect(() => {
     if (eventId && allEvents.length > 0) {
       const event = allEvents.find((e) => String(e.id) === String(eventId));
@@ -85,15 +97,13 @@ export default function NewCampEvent() {
 
   const update = (field: string, value: any) => setForm((prev) => ({ ...prev, [field]: value }));
 
-  // Auto-fill when template selected
   useEffect(() => {
     if (form.campId) {
       const tpl = templates.find((t) => t.id === form.campId);
       if (tpl) {
-        // Prefer doctorsList (new structure), fallback to doctorIds/defaultDoctorIds for backward compatibility
-        const doctorsList = tpl.doctorList  || [];
+        const doctorsList = tpl.doctorList || [];
         const defaultDoctors = allDoctors.filter((d) => doctorsList.includes(d.id));
-        const staffList = tpl.staffList || tpl.staffList || [];
+        const staffList = tpl.staffList || [];
         const defaultStaff = mockStaff.filter((s) => staffList.includes(s.id));
         setForm((prev) => ({
           ...prev,
@@ -149,10 +159,6 @@ export default function NewCampEvent() {
       toast({ title: 'Validation Error', description: 'Start date cannot be after end date.', variant: 'destructive' });
       return;
     }
-    if (form.endDate < form.startDate) {
-      toast({ title: 'Validation Error', description: 'End date must be after or equal to start date.', variant: 'destructive' });
-      return;
-    }
 
     const payload = {
       id: eventId,
@@ -183,36 +189,36 @@ export default function NewCampEvent() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border/60 -mx-3 sm:-mx-4 lg:-mx-6 -mt-3 sm:-mt-4 lg:-mt-6 px-4 sm:px-6 lg:px-8 py-3 mb-6" style={{ boxShadow: '0 1px 8px hsl(var(--shadow-color) / 0.04)' }}>
+      <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border/60 -mx-3 sm:-mx-4 lg:-mx-6 -mt-3 sm:-mt-4 lg:-mt-6 px-4 sm:px-6 lg:px-8 py-2.5 mb-4" style={{ boxShadow: '0 1px 8px hsl(var(--shadow-color) / 0.04)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/camp-events')}>
               <X className="h-4 w-4" />
             </Button>
-            <h1 className="text-lg font-bold text-foreground tracking-tight">{eventId ? 'Edit Camp Event' : 'Create Camp Event'}</h1>
+            <h1 className="text-base font-bold text-foreground tracking-tight">{eventId ? 'Edit Camp Event' : 'Create Camp Event'}</h1>
           </div>
-          <Button onClick={handleSubmit} className="h-9 px-5">
+          <Button onClick={handleSubmit} className="h-8 px-4 text-xs">
             <Save className="mr-1.5 h-3.5 w-3.5" /> {eventId ? 'Save Changes' : 'Create Event'}
           </Button>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Template Selection (only in create mode) */}
+      <div className="max-w-3xl mx-auto space-y-3">
+        {/* Template Selection */}
         {!eventId ? (
           <Card className="border-border/50 shadow-sm">
-            <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
-              <CardTitle className="flex items-center gap-2.5 text-base">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Tent className="h-4 w-4 text-primary" />
+            <CardHeader className="pb-2.5 pt-3.5 px-5 border-b border-border/40">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Tent className="h-3.5 w-3.5 text-primary" />
                 </div>
                 Select Camp Template
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-6 py-5">
+            <CardContent className="px-5 py-3.5">
               <Command className="rounded-lg border">
-                <CommandInput placeholder="Search templates..." value={templateSearch} onValueChange={setTemplateSearch} />
-                <CommandList className="max-h-40">
+                <CommandInput placeholder="Search templates..." value={templateSearch} onValueChange={setTemplateSearch} className="h-8" />
+                <CommandList className="max-h-36">
                   <CommandEmpty>No templates found.</CommandEmpty>
                   <CommandGroup>
                     {activeTemplates
@@ -225,10 +231,10 @@ export default function NewCampEvent() {
                         >
                           <div className="flex items-center justify-between w-full">
                             <div>
-                              <p className="font-medium">{tpl.campName}</p>
-                              <p className="text-xs text-muted-foreground">{tpl.mandal}, {tpl.district}</p>
+                              <p className="text-sm font-medium">{tpl.campName}</p>
+                              <p className="text-[10px] text-muted-foreground">{tpl.mandal}, {tpl.district}</p>
                             </div>
-                            {form.campId === tpl.id && <Badge className="bg-primary/10 text-primary text-xs">Selected</Badge>}
+                            {form.campId === tpl.id && <Badge className="bg-primary/10 text-primary text-[10px]">Selected</Badge>}
                           </div>
                         </CommandItem>
                       ))}
@@ -236,9 +242,9 @@ export default function NewCampEvent() {
                 </CommandList>
               </Command>
               {selectedTemplate && (
-                <div className="mt-4 p-3 rounded-lg bg-muted/40 border border-border/40">
-                  <p className="text-sm font-medium text-foreground">{selectedTemplate.campName}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                <div className="mt-3 p-2.5 rounded-lg bg-muted/40 border border-border/40">
+                  <p className="text-xs font-medium text-foreground">{selectedTemplate.campName}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
                     {selectedTemplate.mandal}, {selectedTemplate.district}, {selectedTemplate.state} · Organizer: {selectedTemplate.organizerName}
                   </p>
                 </div>
@@ -248,18 +254,18 @@ export default function NewCampEvent() {
         ) : (
           selectedTemplate && (
             <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
-                <CardTitle className="flex items-center gap-2.5 text-base">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Tent className="h-4 w-4 text-primary" />
+              <CardHeader className="pb-2.5 pt-3.5 px-5 border-b border-border/40">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Tent className="h-3.5 w-3.5 text-primary" />
                   </div>
                   Camp Template
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-6 py-5">
-                <div className="p-3 rounded-lg bg-muted/40 border border-border/40">
-                  <p className="text-base font-bold text-foreground mb-1">{selectedTemplate.campName || selectedTemplate.campName}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+              <CardContent className="px-5 py-3.5">
+                <div className="p-2.5 rounded-lg bg-muted/40 border border-border/40">
+                  <p className="text-sm font-bold text-foreground">{selectedTemplate.campName}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
                     {selectedTemplate.mandal}, {selectedTemplate.district}, {selectedTemplate.state} · Organizer: {selectedTemplate.organizerName}
                   </p>
                 </div>
@@ -270,22 +276,22 @@ export default function NewCampEvent() {
 
         {/* Dates */}
         <Card className="border-border/50 shadow-sm">
-          <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
-            <CardTitle className="flex items-center gap-2.5 text-base">
-              <div className="h-8 w-8 rounded-lg bg-[hsl(var(--stat-blue))]/20 flex items-center justify-center">
-                <CalendarIcon className="h-4 w-4 text-[hsl(var(--stat-blue-text))]" />
+          <CardHeader className="pb-2.5 pt-3.5 px-5 border-b border-border/40">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <div className="h-7 w-7 rounded-lg bg-[hsl(var(--stat-blue))]/20 flex items-center justify-center">
+                <CalendarIcon className="h-3.5 w-3.5 text-[hsl(var(--stat-blue-text))]" />
               </div>
               Event Dates
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-6 py-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Start Date *</Label>
+          <CardContent className="px-5 py-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Start Date *</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn('w-full justify-start text-left font-normal', !form.startDate && 'text-muted-foreground')}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
+                    <Button variant="outline" className={cn('w-full justify-start text-left font-normal h-8 text-sm', !form.startDate && 'text-muted-foreground')}>
+                      <CalendarIcon className="mr-2 h-3.5 w-3.5" />
                       {form.startDate ? format(form.startDate, 'PPP') : 'Select start date'}
                     </Button>
                   </PopoverTrigger>
@@ -294,12 +300,12 @@ export default function NewCampEvent() {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="space-y-2">
-                <Label>End Date *</Label>
+              <div className="space-y-1">
+                <Label className="text-xs">End Date *</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn('w-full justify-start text-left font-normal', !form.endDate && 'text-muted-foreground')}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
+                    <Button variant="outline" className={cn('w-full justify-start text-left font-normal h-8 text-sm', !form.endDate && 'text-muted-foreground')}>
+                      <CalendarIcon className="mr-2 h-3.5 w-3.5" />
                       {form.endDate ? format(form.endDate, 'PPP') : 'Select end date'}
                     </Button>
                   </PopoverTrigger>
@@ -313,40 +319,28 @@ export default function NewCampEvent() {
         </Card>
 
         {/* Doctors & Staff */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Doctors */}
           <Card className="border-border/50 shadow-sm">
-            <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
-              <CardTitle className="flex items-center gap-2.5 text-sm">
-                <Stethoscope className="h-4 w-4 text-[hsl(var(--stat-orange-text))]" />
+            <CardHeader className="pb-2.5 pt-3.5 px-5 border-b border-border/40">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Stethoscope className="h-3.5 w-3.5 text-[hsl(var(--stat-orange-text))]" />
                 Doctors ({form.selectedDoctors.length})
-                {selectedTemplate && <span className="text-xs text-muted-foreground font-normal ml-auto">Pre-filled from template</span>}
+                {selectedTemplate && <span className="text-[10px] text-muted-foreground font-normal ml-auto">Pre-filled</span>}
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-6 py-5">
-              <div className="relative mb-3">
+            <CardContent className="px-5 py-3">
+              <div className="relative mb-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Search doctors..."
-                  className="pl-9 h-9"
-                  value={doctorSearch}
-                  onChange={(e) => setDoctorSearch(e.target.value)}
-                />
+                <Input placeholder="Search doctors..." className="pl-9 h-8 text-xs" value={doctorSearch} onChange={(e) => setDoctorSearch(e.target.value)} />
               </div>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto premium-scroll">
+              <div className="space-y-0.5 max-h-40 overflow-y-auto premium-scroll">
                 {filteredDoctors.map((doctor) => {
                   const selected = form.selectedDoctors.some((d) => d.id === doctor.id);
                   return (
-                    <div
-                      key={doctor.id}
-                      onClick={() => toggleDoctor(doctor)}
-                      className={cn(
-                        'flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all border text-sm',
-                        selected ? 'bg-primary/5 border-primary/30' : 'border-transparent hover:bg-muted/50'
-                      )}
-                    >
+                    <div key={doctor.id} onClick={() => toggleDoctor(doctor)} className={cn('flex items-center justify-between p-1.5 rounded-lg cursor-pointer transition-all border text-xs', selected ? 'bg-primary/5 border-primary/30' : 'border-transparent hover:bg-muted/50')}>
                       <span className="font-medium">{doctor.name}</span>
-                      {selected && <Badge className="bg-primary/10 text-primary text-[10px]">✓</Badge>}
+                      {selected && <Badge className="bg-primary/10 text-primary text-[9px] px-1.5 py-0">✓</Badge>}
                     </div>
                   );
                 })}
@@ -356,43 +350,43 @@ export default function NewCampEvent() {
 
           {/* Staff */}
           <Card className="border-border/50 shadow-sm">
-            <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
-              <CardTitle className="flex items-center gap-2.5 text-sm">
-                <Users className="h-4 w-4 text-[hsl(var(--stat-teal-text))]" />
+            <CardHeader className="pb-2.5 pt-3.5 px-5 border-b border-border/40">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Users className="h-3.5 w-3.5 text-[hsl(var(--stat-teal-text))]" />
                 Staff ({form.selectedStaff.length})
-                {selectedTemplate && <span className="text-xs text-muted-foreground font-normal ml-auto">Pre-filled</span>}
+                {selectedTemplate && <span className="text-[10px] text-muted-foreground font-normal ml-auto">Pre-filled</span>}
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-6 py-5">
+            <CardContent className="px-5 py-3">
               {form.selectedStaff.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-3">
+                <div className="flex flex-wrap gap-1 mb-2">
                   {form.selectedStaff.map((s) => (
-                    <Badge key={s.id} variant="secondary" className="px-2 py-1 text-xs flex items-center gap-1">
+                    <Badge key={s.id} variant="secondary" className="px-1.5 py-0.5 text-[10px] flex items-center gap-1">
                       {s.name}
-                      <button onClick={() => toggleStaff(s)} className="hover:text-destructive"><X className="h-3 w-3" /></button>
+                      <button onClick={() => toggleStaff(s)} className="hover:text-destructive"><X className="h-2.5 w-2.5" /></button>
                     </Badge>
                   ))}
                 </div>
               )}
               <Dialog open={staffModalOpen} onOpenChange={setStaffModalOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Users className="mr-2 h-3.5 w-3.5" /> Add/Remove Staff
+                  <Button variant="outline" size="sm" className="w-full h-8 text-xs">
+                    <Users className="mr-1.5 h-3 w-3" /> Add/Remove Staff
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> Select Staff</DialogTitle>
                   </DialogHeader>
-                  <div className="relative mb-3">
+                  <div className="relative mb-2">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input placeholder="Search..." className="pl-9 h-9" value={staffSearch} onChange={(e) => setStaffSearch(e.target.value)} />
+                    <Input placeholder="Search..." className="pl-9 h-8" value={staffSearch} onChange={(e) => setStaffSearch(e.target.value)} />
                   </div>
-                  <div className="space-y-1.5 max-h-64 overflow-y-auto premium-scroll">
+                  <div className="space-y-1 max-h-64 overflow-y-auto premium-scroll">
                     {filteredStaff.map((staff) => {
                       const selected = form.selectedStaff.some((s) => s.id === staff.id);
                       return (
-                        <div key={staff.id} onClick={() => toggleStaff(staff)} className={cn('flex items-center justify-between p-3 rounded-lg cursor-pointer border', selected ? 'bg-primary/5 border-primary/30' : 'border-transparent hover:bg-muted/50')}>
+                        <div key={staff.id} onClick={() => toggleStaff(staff)} className={cn('flex items-center justify-between p-2 rounded-lg cursor-pointer border', selected ? 'bg-primary/5 border-primary/30' : 'border-transparent hover:bg-muted/50')}>
                           <div><p className="text-sm font-medium">{staff.name}</p><p className="text-xs text-muted-foreground">{staff.role}</p></div>
                           {selected && <Badge className="bg-primary/10 text-primary text-xs">✓</Badge>}
                         </div>
