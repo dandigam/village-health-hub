@@ -195,69 +195,6 @@ export default function Encounters() {
 
   return (
     <DashboardLayout>
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        {statCards.map(s => (
-          <Card key={s.label} className="p-3 flex items-center gap-3 border-border/50">
-            <div className={cn('h-10 w-10 rounded-xl flex items-center justify-center', s.bg)}>
-              <s.icon className={cn('h-5 w-5', s.color)} />
-            </div>
-            <div>
-              <p className="text-xl font-bold text-foreground">{s.count}</p>
-              <p className="text-[10px] text-muted-foreground font-medium">{s.label}</p>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Search Patient & Start Encounter */}
-      <Card className="p-3 mb-4 border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search Patient (Name / Phone / Patient ID)..."
-              className="pl-9 h-10"
-              value={patientSearch}
-              onChange={e => setPatientSearch(e.target.value)}
-            />
-            {patientSearch.trim() && searchResults.length > 0 && (
-              <div className="absolute z-20 top-full left-0 right-0 mt-1 border rounded-lg bg-popover shadow-lg max-h-60 overflow-auto">
-                {searchResults.map((p: Patient) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 cursor-pointer border-b last:border-b-0 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      {p.photoUrl ? (
-                        <img src={p.photoUrl} alt="" className="h-8 w-8 rounded-full object-cover border" />
-                      ) : (
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
-                          {(p.name || '').charAt(0)}
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-sm font-medium">{p.name} {p.surname || ''}</p>
-                        <p className="text-xs text-muted-foreground">{p.patientId} · Age {p.age} · {p.gender}</p>
-                      </div>
-                    </div>
-                    <Button size="sm" className="h-8 text-xs gap-1.5" onClick={() => handleStartEncounter(p)}>
-                      <UserPlus className="h-3.5 w-3.5" />
-                      Start Encounter
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-            {patientSearch.trim() && searchResults.length === 0 && (
-              <div className="absolute z-20 top-full left-0 right-0 mt-1 border rounded-lg bg-popover shadow-lg p-4 text-center text-sm text-muted-foreground">
-                No patients found matching "{patientSearch}"
-              </div>
-            )}
-          </div>
-        </div>
-      </Card>
-
       {/* Top bar with queue search & controls */}
       <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
         <div className="flex items-center gap-2 flex-1 min-w-0">
