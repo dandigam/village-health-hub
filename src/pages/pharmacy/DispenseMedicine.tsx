@@ -24,8 +24,8 @@ export default function DispenseMedicine() {
   // Support both array and paginated object for patients
   const patients = Array.isArray(patientsRaw)
     ? patientsRaw
-    : Array.isArray(patientsRaw?.content)
-      ? patientsRaw.content
+    : Array.isArray((patientsRaw as any)?.content)
+      ? (patientsRaw as any).content
       : [];
 
   const prescription = prescriptions.find(p => p.id === id);
