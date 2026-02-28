@@ -11,6 +11,7 @@ import { PaymentStep } from '@/components/patients/PaymentStep';
 import { ReviewStep } from '@/components/patients/ReviewStep';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import { hasAccess } from '@/config/routeAccess';
 import { api } from '@/services/api';
 
 const STEPS = [
@@ -228,7 +229,7 @@ export default function NewPatient() {
       };
       await api.post('/patients', payload);
       toast.success('Patient registered and sent to Encounters');
-      navigate('/encounters');
+      navigate(hasAccess('encounters', user?.role) ? '/encounters' : '/patients');
     } catch (e) {
       toast.error('Failed to register patient');
     } finally {

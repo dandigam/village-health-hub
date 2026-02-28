@@ -10,6 +10,7 @@ import { PaymentStep } from '@/components/patients/PaymentStep';
 import { ReviewStep } from '@/components/patients/ReviewStep';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import { hasAccess } from '@/config/routeAccess';
 import { usePatient } from '@/hooks/useApiData';
 
 const STEPS = [
@@ -189,7 +190,7 @@ export default function EditPatient() {
 				campEventId: user?.context?.campEventId ?? null,
 			};
 			toast.success('Patient updated and sent to Encounters');
-			navigate('/encounters');
+			navigate(hasAccess('encounters', user?.role) ? '/encounters' : '/patients');
 		} catch (e) {
 			toast.error('Failed to update patient');
 		} finally {
