@@ -102,7 +102,9 @@ function mapQueueItemToEncounter(item: EncounterQueueItem, index: number): Encou
 export default function Encounters() {
   const { user } = useAuth();
   const campEventId = user?.context?.campEventId ?? null;
-  const { data: queueData = [], isLoading: loadingQueue } = useEncounterQueue(campEventId);
+  const { data: queueData = [], isLoading: loadingQueue, isFetching, refetch } = useEncounterQueue(campEventId);
+
+  const handleRefreshQueue = () => { refetch(); };
 
   const [searchTerm, setSearchTerm] = useState('');
   const [patientSearch, setPatientSearch] = useState('');
@@ -264,6 +266,8 @@ export default function Encounters() {
                 selectedId={selectedPatientId}
                 onSelect={handleSelectPatient}
                 onStartVisit={handleStartVisit}
+                onRefresh={handleRefreshQueue}
+                isRefreshing={isFetching}
               />
             </div>
           </SheetContent>
@@ -280,6 +284,8 @@ export default function Encounters() {
               selectedId={selectedPatientId}
               onSelect={setSelectedPatientId}
               onStartVisit={handleStartVisit}
+              onRefresh={handleRefreshQueue}
+              isRefreshing={isFetching}
             />
           </div>
         )}
