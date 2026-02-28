@@ -80,9 +80,9 @@ export default function Encounters() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       queue = queue.filter(e =>
-        e.patient.name.toLowerCase().includes(term) ||
-        e.patient.patientId.toLowerCase().includes(term) ||
-        e.patient.phone.includes(term)
+        (e.patient.name?.toLowerCase?.() || '').includes(term) ||
+        (e.patient.patientId?.toLowerCase?.() || '').includes(term) ||
+        (e.patient.phone?.toLowerCase?.() || '').includes(term)
       );
     }
     return queue;

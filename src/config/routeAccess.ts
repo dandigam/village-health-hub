@@ -7,20 +7,20 @@
  * 3. Sidebar and route guard handle the rest automatically
  */
 
-export type AppRole = "ADMIN" | "DOCTOR" | "NURSE" | "PHARMACIST" | "WARE_HOUSE" | "FRONT_DESK";
+export type AppRole = "ADMIN" | "DOCTOR" | "NURSE" | "PHARMACIST" | "WAREHOUSE" | "FRONT_DESK" | "CAMP_ADMIN";
 
 export const routeAccess: Record<string, AppRole[]> = {
-  dashboard: ["ADMIN", "DOCTOR", "NURSE", "PHARMACIST", "WARE_HOUSE", "FRONT_DESK"],
+  dashboard: ["ADMIN", "DOCTOR", "NURSE", "PHARMACIST", "WAREHOUSE", "FRONT_DESK","CAMP_ADMIN"],
   camps: ["ADMIN"],
-  'camp-templates': ["ADMIN"],
-  'camp-events': ["ADMIN"],
+  'camp-templates': ["ADMIN","CAMP_ADMIN"],
+  'camp-events': ["ADMIN","CAMP_ADMIN"],
   patients: ["ADMIN", "DOCTOR", "NURSE", "FRONT_DESK"],
   encounters: ["DOCTOR", "NURSE","ADMIN"],
   pharmacy: ["PHARMACIST", "ADMIN"],
-  stock: ["WARE_HOUSE", "ADMIN"],
-  suppliers: ["WARE_HOUSE", "ADMIN"],
-  'supplier-orders': ["WARE_HOUSE", "ADMIN"],
-  'distribution-orders': ["WARE_HOUSE", "ADMIN"],
+  stock: ["WAREHOUSE", "ADMIN"],
+  suppliers: ["WAREHOUSE", "ADMIN"],
+  'supplier-orders': ["WAREHOUSE", "ADMIN"],
+  'distribution-orders': ["WAREHOUSE", "ADMIN"],
   doctors: ["ADMIN"],
   reports: ["ADMIN"],
   warehouses: ["ADMIN"],

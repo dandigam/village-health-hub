@@ -16,13 +16,20 @@ export default function DispenseMedicine() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: prescriptions = [] } = usePrescriptions();
-  const { data: patients = [] } = usePatients();
+  const { data: patientsRaw = [] } = usePatients();
   const { data: doctors = [] } = useDoctors();
   const { data: medicines = [] } = useMedicines();
   const { data: stockItems = [] } = useStockItems();
-  
+
+  // Support both array and paginated object for patients
+  const patients = Array.isArray(patientsRaw)
+    ? patientsRaw
+    : Array.isArray(patientsRaw?.content)
+      ? patientsRaw.content
+      : [];
+
   const prescription = prescriptions.find(p => p.id === id);
-  const patient = prescription ? patients.find(p => p.id === prescription.patientId) : null;
+  const patient = prescription ? patients.find((p: any) => p.id === prescription.patientId || p.patientId === prescription.patientId) : null;
   const doctor = prescription ? doctors.find(d => d.id === prescription.doctorId) : null;
 
   const [dispensedQty, setDispensedQty] = useState<Record<string, number>>({});

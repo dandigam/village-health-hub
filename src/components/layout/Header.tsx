@@ -63,12 +63,12 @@ export function Header({ onMenuToggle }: HeaderProps) {
                 <MapPin className="h-4 w-4 text-white/60" />
                 <div className="text-left">
                   <p className="text-sm font-medium text-white">{currentUser.name ? currentUser.name : selectedCamp || 'Select Camp'}</p>
-                  {currentUser.role !== "WARE_HOUSE" ? <p className="text-[10px] text-white/50">Current Camp</p> : null}
+                  {currentUser.role !== "WAREHOUSE" ? <p className="text-[10px] text-white/50">Current Camp</p> : null}
                 </div>
-                {currentUser.role !== "WARE_HOUSE" ? <ChevronDown className="h-4 w-4 text-white/50" /> : null}
+                {currentUser.role !== "WAREHOUSE" ? <ChevronDown className="h-4 w-4 text-white/50" /> : null}
               </Button>
             </DropdownMenuTrigger>
-            {currentUser.role !== "WARE_HOUSE" ? <DropdownMenuContent align="start" className="w-56 z-50 bg-card">
+            {currentUser.role !== "WAREHOUSE" ? <DropdownMenuContent align="start" className="w-56 z-50 bg-card">
               <DropdownMenuLabel>Select Camp Location</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {camps.map((camp) => (
@@ -89,7 +89,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
           <Input 
-            placeholder={currentUser.role === "WARE_HOUSE" ? "Search Supplier Medicines..." : "Search Patient by MR Number / First Name / Surname"} 
+            placeholder={currentUser.role === "WAREHOUSE" ? "Search Supplier Medicines..." : "Search Patient by MR Number / First Name / Surname"} 
             className="pl-10 bg-white/95 border-0 shadow-sm text-foreground placeholder:text-muted-foreground/60 h-9 rounded-lg" 
           />
         </div>

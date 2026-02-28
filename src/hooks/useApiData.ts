@@ -1,3 +1,11 @@
+export function useCamps() {
+  return useQuery({
+    queryKey: ['camps'],
+    queryFn: () => fetchWithFallback('/camps', mockCamps),
+    staleTime: STALE_TIME,
+    select: (res) => res.data,
+  });
+}
 // User registration mutation hook
 export function useRegisterUser() {
   return useMutation({
@@ -25,7 +33,6 @@ import { fetchWithFallback, request, API_BASE_URL } from '@/services/api';
 import api from '@/services/api';
 import {
   mockUser,
-  mockCamps,
   mockCampTemplates,
   mockCampEvents,
   mockDoctors,
@@ -45,7 +52,6 @@ import {
 } from '@/mock';
 import type {
   User,
-  Camp,
   CampTemplate,
   CampEvent,
   Doctor,
@@ -77,15 +83,6 @@ export function useCurrentUser() {
   });
 }
 
-export function useCamps() {
-  return useQuery({
-    queryKey: ['camps'],
-    queryFn: () => fetchWithFallback<Camp[]>('/camps', mockCamps),
-    staleTime: STALE_TIME,
-    select: (res) => res.data,
-  });
-}
-
 export function useCampTemplates() {
   return useQuery({
     queryKey: ['campTemplates'],
@@ -108,12 +105,8 @@ export function useSaveCampTemplate() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (template: any) => {
-      if (template.id) {
-        return await api.put(`/camp-templates/${template.id}`, template);
-      } else {
-        const { id, ...data } = template;
-        return await api.post('/camp-templates', data);
-      }
+      // Always use POST, even for update, and always send id for edit
+      return await api.post('/camp-templates', template);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campTemplates'] });

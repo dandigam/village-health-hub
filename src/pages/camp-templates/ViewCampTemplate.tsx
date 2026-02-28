@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useCampTemplates, useDoctors, useCampEvents } from '@/hooks/useApiData';
+import { useCampTemplate } from '@/hooks/useCampTemplate';
 import { ArrowLeft, Edit, MapPin, Stethoscope, Users, Calendar, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,11 +24,19 @@ export default function ViewCampTemplate() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: templates = [] } = useCampTemplates();
+  const { data: template, isLoading } = useCampTemplate(id);
   const { data: doctors = [] } = useDoctors();
   const { data: events = [] } = useCampEvents();
 
-  const template = templates.find((t) => t.id === id);
-  
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
   if (!template) {
     return (
       <DashboardLayout>
@@ -39,8 +48,11 @@ export default function ViewCampTemplate() {
     );
   }
 
-  const assignedDoctors = doctors.filter((d) => template.defaultDoctorIds?.includes(d.id));
-  const templateEvents = events.filter((e) => e.templateId === template.id);
+  const assignedDoctors = doctors.filter((d) => {
+    if (!template.doctorList) return false;
+    return template.doctorList.map(String).includes(String(d.id));
+  });
+  const templateEvents = events.filter((e) => e.id === template.id);
 
   return (
     <DashboardLayout>
@@ -52,12 +64,14 @@ export default function ViewCampTemplate() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">{template.name}</h1>
+              <h1 className="text-xl font-semibold text-foreground">{template.campName}</h1>
               <p className="text-sm text-muted-foreground">Camp Template</p>
             </div>
           </div>
           <div className="flex gap-2">
-            <Badge className={cn('capitalize text-xs', statusColors[template.status] || '')}>{template.status}</Badge>
+            <Badge className={cn('capitalize text-xs', statusColors[template.status] || (template.active === true ? statusColors['active'] : statusColors['inactive']) || '')}>
+              {template.status || (template.active === true ? 'active' : 'inactive')}
+            </Badge>
             <Button size="sm" variant="outline" onClick={() => navigate(`/camp-templates/${template.id}/edit`)}>
               <Edit className="h-4 w-4 mr-1.5" /> Edit
             </Button>
@@ -86,7 +100,7 @@ export default function ViewCampTemplate() {
                 <Users className="h-5 w-5 text-[hsl(var(--stat-teal-text))]" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{template.defaultStaffIds?.length || 0}</p>
+                <p className="text-2xl font-bold text-foreground">{template.doctorList?.length || 0}</p>
                 <p className="text-xs text-muted-foreground">Default Staff</p>
               </div>
             </CardContent>
@@ -178,9 +192,11 @@ export default function ViewCampTemplate() {
                   <div key={event.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => navigate(`/camp-events/${event.id}`)}>
                     <div>
                       <p className="font-medium text-sm">{event.startDate} – {event.endDate}</p>
-                      <p className="text-xs text-muted-foreground">{event.doctorIds?.length || 0} doctors · {event.staffIds?.length || 0} staff</p>
+                      <p className="text-xs text-muted-foreground">{event.doctorsList?.length || 0} doctors · {event.staffList?.length || 0} staff</p>
                     </div>
-                    <Badge className={cn('capitalize text-xs', eventStatusColors[event.status] || '')}>{event.status}</Badge>
+                    <Badge className={cn('capitalize text-xs', eventStatusColors[event.status] || (event.active === true ? eventStatusColors['started'] : eventStatusColors['closed']) || '')}>
+                      {event.status || (event.active === true ? 'started' : 'closed')}
+                    </Badge>
                   </div>
                 ))}
               </div>

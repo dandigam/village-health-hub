@@ -156,7 +156,7 @@ export default function NewCamp() {
         title: 'Camp Created Successfully!',
         description: `${formData.campName} has been created and is ready for activation.`,
       });
-      navigate('/camps');
+      navigate('/');
     } catch (e) {
       toast({ title: 'API Error', description: 'Failed to create camp.', variant: 'destructive' });
     }

@@ -12,10 +12,17 @@ export default function PharmacyDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('pending');
   const { data: prescriptions = [] } = usePrescriptions();
-  const { data: patients = [] } = usePatients();
+  const { data: patientsRaw = [] } = usePatients();
   const { data: doctors = [] } = useDoctors();
 
-  const getPatientInfo = (patientId: string) => patients.find(p => p.id === patientId);
+  // Support both array and paginated object for patients
+  const patients = Array.isArray(patientsRaw)
+    ? patientsRaw
+    : Array.isArray(patientsRaw?.content)
+      ? patientsRaw.content
+      : [];
+
+  const getPatientInfo = (patientId: string) => patients.find((p: any) => p.id === patientId || p.patientId === patientId);
   const getDoctorInfo = (doctorId: string) => doctors.find(d => d.id === doctorId);
 
   const pendingPrescriptions = prescriptions.filter(p => p.status === 'pending');

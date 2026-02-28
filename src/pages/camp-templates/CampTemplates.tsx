@@ -25,13 +25,23 @@ export default function CampTemplates() {
   const { data: doctors = [] } = useDoctors();
 
   const filtered = templates
-    .filter((t) => statusFilter === 'all' || t.status === statusFilter)
-    .filter(
-      (t) =>
-        t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.organizerName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    .filter((t) => {
+      if (statusFilter === 'all') return true;
+      if (statusFilter === 'active') return t.active === true;
+      if (statusFilter === 'inactive') return t.active === false;
+      return true;
+    })
+    .filter((t) => {
+      const campName = t.campName ? t.campName.toLowerCase() : '';
+      const district = t.district ? t.district.toLowerCase() : '';
+      const organizerName = t.organizerName ? t.organizerName.toLowerCase() : '';
+      const search = searchTerm.toLowerCase();
+      return (
+        campName.includes(search) ||
+        district.includes(search) ||
+        organizerName.includes(search)
+      );
+    });
 
   const handleToggleStatus = (e: React.MouseEvent, templateId: string, currentStatus: string) => {
     e.stopPropagation();
@@ -76,7 +86,7 @@ export default function CampTemplates() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/30">
-              <TableHead>Template Name</TableHead>
+              <TableHead>Camp Name</TableHead>
               <TableHead className="hidden sm:table-cell">Location</TableHead>
               <TableHead className="hidden md:table-cell">Organizer</TableHead>
               <TableHead className="hidden lg:table-cell">Doctors</TableHead>
@@ -87,11 +97,15 @@ export default function CampTemplates() {
           </TableHeader>
           <TableBody>
             {filtered.map((template) => {
-              const assignedDoctors = doctors.filter((d) => template.defaultDoctorIds?.includes(d.id));
+              const assignedDoctors = doctors.filter((d) => {
+                // doctorIds may be number[] or string[]; ensure type match
+                if (!template.doctorList) return false;
+                return template.doctorList.map(String).includes(String(d.id));
+              });
               return (
                 <TableRow key={template.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => navigate(`/camp-templates/${template.id}`)}>
                   <TableCell>
-                    <p className="font-medium text-sm">{template.name}</p>
+                    <p className="font-medium text-sm">{template.campName}</p>
                     <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
                       <MapPin className="h-3 w-3" /> {template.district}
                     </p>
@@ -112,7 +126,7 @@ export default function CampTemplates() {
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Users className="h-3.5 w-3.5" /> {template.defaultStaffIds?.length || 0}
+                      <Users className="h-3.5 w-3.5" /> {template.staffList?.length || 0}
                     </div>
                   </TableCell>
                   <TableCell>

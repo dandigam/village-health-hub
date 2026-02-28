@@ -21,7 +21,7 @@ export default function ViewCampEvent() {
   const { data: doctors = [] } = useDoctors();
   const { data: templates = [] } = useCampTemplates();
 
-  const event = events.find((e) => e.id === id);
+  const event = events.find((e) => String(e.id) === String(id));
 
   if (!event) {
     return (
@@ -34,8 +34,8 @@ export default function ViewCampEvent() {
     );
   }
 
-  const template = templates.find((t) => t.id === event.templateId);
-  const assignedDoctors = doctors.filter((d) => event.doctorIds?.includes(d.id));
+  const template = templates.find((t) => String(t.id) === String(event.campId));
+  const assignedDoctors = doctors.filter((d) => event.doctorsList?.includes(d.id));
   const isLocked = event.status === 'started' || event.status === 'closed';
 
   return (
@@ -48,7 +48,7 @@ export default function ViewCampEvent() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">{event.templateName}</h1>
+              <h1 className="text-xl font-semibold text-foreground">{event.campName || template?.campName || 'Camp Event'}</h1>
               <p className="text-sm text-muted-foreground">Camp Event</p>
             </div>
           </div>
@@ -103,7 +103,7 @@ export default function ViewCampEvent() {
                 <Users className="h-5 w-5 text-[hsl(var(--stat-teal-text))]" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{event.staffIds?.length || 0}</p>
+                <p className="text-2xl font-bold">{event.staffList?.length || 0}</p>
                 <p className="text-xs text-muted-foreground">Staff</p>
               </div>
             </CardContent>
@@ -123,7 +123,7 @@ export default function ViewCampEvent() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-sm">{template.name}</p>
+                      <p className="font-medium text-sm">{template.campName}</p>
                       <p className="text-xs text-muted-foreground">{template.organizerName} · {template.organizerPhone}</p>
                     </div>
                     <Button size="sm" variant="ghost" onClick={() => navigate(`/camp-templates/${template.id}`)}>View Template</Button>

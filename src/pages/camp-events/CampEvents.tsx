@@ -13,7 +13,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useCampEvents, useDoctors } from '@/hooks/useApiData';
+import { useCampEvents, useDoctors, useSaveCampEvent } from '@/hooks/useApiData';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 
@@ -30,21 +30,34 @@ export default function CampEvents() {
   const [confirmAction, setConfirmAction] = useState<{ type: 'start' | 'close'; eventId: string; name: string } | null>(null);
   const { data: events = [] } = useCampEvents();
   const { data: doctors = [] } = useDoctors();
+  const saveMutation = useSaveCampEvent();
 
   const tabFiltered = activeTab === 'all' ? events : events.filter((e) => e.status === activeTab);
   const filtered = tabFiltered.filter(
     (e) =>
-      (e.templateName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (e.campName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (e.district || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (e.city || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
     if (!confirmAction) return;
     if (confirmAction.type === 'start') {
-      toast({ title: 'Camp Started', description: `${confirmAction.name} is now active.` });
-    } else {
-      toast({ title: 'Camp Closed', description: `${confirmAction.name} has been closed.` });
+      // Find the event to update
+      const event = events.find((e) => String(e.id) === String(confirmAction.eventId));
+      if (event) {
+        const payload = { ...event, status: 'started' };
+        await saveMutation.mutateAsync(payload);
+        toast({ title: 'Camp Started', description: `${confirmAction.name} is now active.` });
+      }
+    } else if (confirmAction.type === 'close') {
+      // Stop (close) the event
+      const event = events.find((e) => String(e.id) === String(confirmAction.eventId));
+      if (event) {
+        const payload = { ...event, status: 'closed' };
+        await saveMutation.mutateAsync(payload);
+        toast({ title: 'Camp Closed', description: `${confirmAction.name} has been closed.` });
+      }
     }
     setConfirmAction(null);
   };
@@ -97,12 +110,12 @@ export default function CampEvents() {
           </TableHeader>
           <TableBody>
             {filtered.map((event) => {
-              const assignedDoctors = doctors.filter((d) => event.doctorIds?.includes(d.id));
+              const assignedDoctors = doctors.filter((d) => event.doctorsList?.includes(d.id));
               return (
                 <TableRow key={event.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => navigate(`/camp-events/${event.id}`)}>
                   <TableCell>
                     <div>
-                      <p className="font-medium text-sm">{event.templateName}</p>
+                      <p className="font-medium text-sm">{event.campName}</p>
                       <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
                         <MapPin className="h-3 w-3" /> {event.district}
                       </p>
@@ -128,7 +141,7 @@ export default function CampEvents() {
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Users className="h-3.5 w-3.5" /> {event.staffIds?.length || 0}
+                      <Users className="h-3.5 w-3.5" /> {event.staffList?.length || 0}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -136,9 +149,11 @@ export default function CampEvents() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                      {/* Always show View */}
                       <Button variant="ghost" size="icon" className="h-8 w-8" title="View" onClick={() => navigate(`/camp-events/${event.id}`)}>
                         <Eye className="h-4 w-4 text-muted-foreground" />
                       </Button>
+                      {/* Planned: Edit, Start */}
                       {event.status === 'planned' && (
                         <>
                           <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit" onClick={() => navigate(`/camp-events/${event.id}/edit`)}>
@@ -146,20 +161,22 @@ export default function CampEvents() {
                           </Button>
                           <Button
                             variant="ghost" size="icon" className="h-8 w-8" title="Start Camp"
-                            onClick={() => setConfirmAction({ type: 'start', eventId: event.id, name: event.templateName || 'Camp' })}
+                            onClick={() => setConfirmAction({ type: 'start', eventId: event.id, name: event.campName || 'Camp' })}
                           >
                             <Play className="h-4 w-4 text-[hsl(var(--stat-green-text))]" />
                           </Button>
                         </>
                       )}
+                      {/* Active: Stop */}
                       {event.status === 'started' && (
                         <Button
-                          variant="ghost" size="icon" className="h-8 w-8" title="Close Camp"
-                          onClick={() => setConfirmAction({ type: 'close', eventId: event.id, name: event.templateName || 'Camp' })}
+                          variant="ghost" size="icon" className="h-8 w-8" title="Stop Camp"
+                          onClick={() => setConfirmAction({ type: 'close', eventId: event.id, name: event.campName || 'Camp' })}
                         >
                           <Square className="h-4 w-4 text-destructive" />
                         </Button>
                       )}
+                      {/* Closed: Only View (already shown above) */}
                     </div>
                   </TableCell>
                 </TableRow>
