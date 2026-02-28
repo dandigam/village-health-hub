@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { hasAccess } from '@/config/routeAccess';
 import { 
   ClipboardList, 
   Pill, 
@@ -45,7 +47,8 @@ const iconBgStyles = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  // Fetch dashboard stats from custom hook
+  const { user } = useAuth();
+  const role = user?.role;
   const { data: dashboardStats = {}, isLoading: loadingStats } = useDashboardStats();
   const { data: patientsRaw = [], refetch: refetchPatients, isLoading: loadingPatients } = usePatients();
   // Handle paginated API response (with 'content' array)
@@ -82,12 +85,12 @@ export default function Dashboard() {
   ];
 
   const setupSteps = [
-    { id: 'camp', label: 'Create Camp', href: '/camp-templates/new', icon: Tent, completed: hasActiveCamp },
-    { id: 'doctor', label: 'Add Doctor', href: '/doctors/new', icon: Users, completed: hasDoctors },
-    { id: 'pharmacy', label: 'Add Pharmacy', href: '/pharmacy', icon: Pill, completed: hasPharmacy },
-    { id: 'stock', label: 'Add Stock', href: '/stock', icon: Package, completed: hasStock },
-    { id: 'patient', label: 'Register First Patient', href: '/patients/new', icon: UserPlus, completed: hasPatients },
-  ];
+    { id: 'camp', label: 'Create Camp', href: '/camp-templates/new', icon: Tent, completed: hasActiveCamp, routeKey: 'camp-templates' },
+    { id: 'doctor', label: 'Add Doctor', href: '/doctors/new', icon: Users, completed: hasDoctors, routeKey: 'doctors' },
+    { id: 'pharmacy', label: 'Add Pharmacy', href: '/pharmacy', icon: Pill, completed: hasPharmacy, routeKey: 'pharmacy' },
+    { id: 'stock', label: 'Add Stock', href: '/stock', icon: Package, completed: hasStock, routeKey: 'stock' },
+    { id: 'patient', label: 'Register First Patient', href: '/patients/new', icon: UserPlus, completed: hasPatients, routeKey: 'patients' },
+  ].filter(step => hasAccess(step.routeKey, role));
 
   // Hardcode patient status for dashboard display based on index
   // Map new API patient fields for dashboard display
@@ -114,7 +117,9 @@ export default function Dashboard() {
   const [isZeroState] = useState(!hasActiveCamp || !hasPatients);
 
   const handleCardClick = (filterStatus: string) => {
-    navigate(`/patients?status=${filterStatus}`);
+    if (hasAccess('patients', role)) {
+      navigate(`/patients?status=${filterStatus}`);
+    }
   };
 
   if (loadingStats && loadingPatients) {
@@ -191,18 +196,26 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={() => navigate('/patients/new')} disabled={!hasActiveCamp} className="flex items-center gap-2">
-              <UserPlus className="w-4 h-4" /> Add New Patient
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/patients')} className="flex items-center gap-2">
-              <Search className="w-4 h-4" /> Find Patient
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/encounters')} disabled={!hasPatients} className="flex items-center gap-2">
-              <Stethoscope className="w-4 h-4" /> Start Encounter
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/pharmacy')} className="flex items-center gap-2">
-              <Pill className="w-4 h-4" /> Open Pharmacy
-            </Button>
+            {hasAccess('patients', role) && (
+              <Button onClick={() => navigate('/patients/new')} disabled={!hasActiveCamp} className="flex items-center gap-2">
+                <UserPlus className="w-4 h-4" /> Add New Patient
+              </Button>
+            )}
+            {hasAccess('patients', role) && (
+              <Button variant="outline" onClick={() => navigate('/patients')} className="flex items-center gap-2">
+                <Search className="w-4 h-4" /> Find Patient
+              </Button>
+            )}
+            {hasAccess('encounters', role) && (
+              <Button variant="outline" onClick={() => navigate('/encounters')} disabled={!hasPatients} className="flex items-center gap-2">
+                <Stethoscope className="w-4 h-4" /> Start Encounter
+              </Button>
+            )}
+            {hasAccess('pharmacy', role) && (
+              <Button variant="outline" onClick={() => navigate('/pharmacy')} className="flex items-center gap-2">
+                <Pill className="w-4 h-4" /> Open Pharmacy
+              </Button>
+            )}
           </div>
           {!hasActiveCamp && (
             <p className="text-sm text-muted-foreground mt-3">
@@ -233,7 +246,7 @@ export default function Dashboard() {
                   <TableRow 
                     key={patient.id}
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => navigate(`/patients/${patient.id}/history`)}
+                    onClick={() => hasAccess('patients', role) && navigate(`/patients/${patient.id}`)}
                   >
                     <TableCell className="font-mono text-sm">{patient.patientId}</TableCell>
                     <TableCell className="font-medium">
@@ -268,9 +281,11 @@ export default function Dashboard() {
             <div className="text-center py-8 text-muted-foreground">
               <ClipboardList className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>No patients registered yet</p>
-              <Button variant="link" onClick={() => navigate('/patients/new')} className="mt-2">
-                Register your first patient
-              </Button>
+              {hasAccess('patients', role) && (
+                <Button variant="link" onClick={() => navigate('/patients/new')} className="mt-2">
+                  Register your first patient
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
