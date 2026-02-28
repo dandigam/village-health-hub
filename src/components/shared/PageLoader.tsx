@@ -1,5 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
+// PageLoader - reusable loading states
 
 interface PageLoaderProps {
   type?: 'table' | 'cards' | 'full';
