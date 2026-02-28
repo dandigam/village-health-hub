@@ -68,6 +68,7 @@ export default function Encounters() {
   const [searchTerm, setSearchTerm] = useState('');
   const [patientSearch, setPatientSearch] = useState('');
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [mobileQueueOpen, setMobileQueueOpen] = useState(false);
   const isMobile = useIsMobile();
 
@@ -216,10 +217,16 @@ export default function Encounters() {
         </div>
         <div className="flex items-center gap-1.5">
           {selectedEncounter && !isMobile && (
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => setIsFullScreen(!isFullScreen)}>
-              {isFullScreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-              <span className="hidden sm:inline">{isFullScreen ? 'Show Queue' : 'Focus Mode'}</span>
-            </Button>
+            <>
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => setHistoryOpen(!historyOpen)}>
+                <Stethoscope className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{historyOpen ? 'Hide History' : 'History'}</span>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => setIsFullScreen(!isFullScreen)}>
+                {isFullScreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                <span className="hidden sm:inline">{isFullScreen ? 'Show Queue' : 'Focus Mode'}</span>
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -278,7 +285,7 @@ export default function Encounters() {
         </div>
 
         {/* Right: Medical History */}
-        {selectedEncounter && !isMobile && (
+        {selectedEncounter && !isMobile && historyOpen && (
           <div className="w-[280px] lg:w-[300px] shrink-0 flex flex-col">
             <MedicalHistoryPanel patientId={selectedEncounter.patient.id} currentDiagnoses={currentDiagnoses} />
           </div>
