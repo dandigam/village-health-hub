@@ -28,7 +28,7 @@ const statusColors: Record<string, string> = {
 export default function SupplierOrders() {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
-  const warehouseId = authUser?.wareHouse?.id ? Number(authUser.wareHouse.id) : undefined;
+  const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: supplierOrders = [], refetch: refetchOrders } = useSupplierOrders(warehouseId);
   const { data: suppliers = [], refetch: refetchSuppliers } = useSupplierList(warehouseId);
   const { data: warehouseInventory = [], refetch: refetchInventory } = useWarehouseInventory(warehouseId);

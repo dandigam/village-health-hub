@@ -27,7 +27,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const { data: supplierOrders = [] } = useSupplierOrders();
   const pendingOrdersCount = supplierOrders.filter(o => o.status === 'sent' || o.status === 'pending').length;
 
-  const currentUser = { name: authUser?.name || '', role: authUser?.role || '', avatar: undefined as string | undefined };
+  const currentUser = { name: authUser?.name || '', role: authUser?.roleDisplayName || authUser?.role || '', avatar: authUser?.avatar || undefined as string | undefined };
 
   const handleLogout = () => {
     logout();
@@ -62,7 +62,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
               <Button variant="ghost" className="h-auto p-2 text-white hover:bg-white/[0.08] flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-white/60" />
                 <div className="text-left">
-                  <p className="text-sm font-medium text-white">{currentUser.name ? currentUser.name : selectedCamp || 'Select Camp'}</p>
+                  <p className="text-sm font-medium text-white">{selectedCamp || authUser?.context?.campName || currentUser.name || 'Select Camp'}</p>
                   {currentUser.role !== "WAREHOUSE" ? <p className="text-[10px] text-white/50">Current Camp</p> : null}
                 </div>
                 {currentUser.role !== "WAREHOUSE" ? <ChevronDown className="h-4 w-4 text-white/50" /> : null}
