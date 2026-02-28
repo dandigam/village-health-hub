@@ -18,8 +18,8 @@ export default function PharmacyDashboard() {
   // Support both array and paginated object for patients
   const patients = Array.isArray(patientsRaw)
     ? patientsRaw
-    : Array.isArray(patientsRaw?.content)
-      ? patientsRaw.content
+    : Array.isArray((patientsRaw as any)?.content)
+      ? (patientsRaw as any).content
       : [];
 
   const getPatientInfo = (patientId: string) => patients.find((p: any) => p.id === patientId || p.patientId === patientId);

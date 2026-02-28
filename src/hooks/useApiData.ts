@@ -1,7 +1,11 @@
+// useCamps: legacy compatibility — returns Camp[] from mock data
+import { mockCamps } from '@/data/mockData';
+import type { Camp } from '@/types';
+
 export function useCamps() {
   return useQuery({
     queryKey: ['camps'],
-    queryFn: () => fetchWithFallback('/camps', mockCamps),
+    queryFn: () => fetchWithFallback<Camp[]>('/camps', mockCamps),
     staleTime: STALE_TIME,
     select: (res) => res.data,
   });
