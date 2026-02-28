@@ -241,7 +241,7 @@ export default function Encounters() {
       )}
 
       {/* Main 3-Column Layout */}
-      <div className="flex gap-3 h-[calc(100vh-22rem)] sm:h-[calc(100vh-21rem)]">
+      <div className="flex gap-3 h-[calc(100vh-10rem)] sm:h-[calc(100vh-9rem)]">
         {/* Left: Queue */}
         {!isMobile && !isFullScreen && (
           <div className="w-[260px] lg:w-[280px] shrink-0 flex flex-col">
