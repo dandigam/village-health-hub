@@ -54,7 +54,7 @@ export interface Camp extends BaseEntity {
 export type CampTemplateStatus = 'active' | 'inactive';
 
 export interface CampTemplate extends BaseEntity {
-  name: string;
+  campName: string;
   organizerName: string;
   organizerPhone: string;
   organizerEmail?: string;
@@ -67,17 +67,19 @@ export interface CampTemplate extends BaseEntity {
   city?: string;
   address: string;
   pinCode?: string;
-  defaultDoctorIds: string[];
-  defaultStaffIds: string[];
+  doctorList: string[];
+  staffList: string[];
   status: CampTemplateStatus;
+  active: boolean
 }
 
 // ── Camp Event (Actual Running Camp) ─────────────────────────
 export type CampEventStatus = 'planned' | 'started' | 'closed';
 
 export interface CampEvent extends BaseEntity {
-  templateId: string;
-  templateName?: string;
+  id: string;
+  campId: string;
+  campName?: string;
   location?: string;
   state?: string;
   district?: string;
@@ -86,8 +88,8 @@ export interface CampEvent extends BaseEntity {
   address?: string;
   startDate: string;
   endDate: string;
-  doctorIds: string[];
-  staffIds: string[];
+  doctorsList: string[];
+  staffList: string[];
   status: CampEventStatus;
 }
 

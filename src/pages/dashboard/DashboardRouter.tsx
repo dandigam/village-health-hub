@@ -7,7 +7,7 @@ export default function DashboardRouter() {
   const { user } = useAuth();
 
   switch (user?.role) {
-    case 'WARE_HOUSE':
+    case 'WAREHOUSE':
       return <WarehouseDashboard />;
     case 'PHARMACIST':
       return <PharmacyDashboardOverview />;

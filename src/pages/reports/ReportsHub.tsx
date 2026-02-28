@@ -25,18 +25,6 @@ export default function ReportsHub() {
 
   const reportModules = [
     {
-      title: 'Camp-Based Reports',
-      description: 'Patients, medicines, discounts, doctors & expenses by camp',
-      icon: Building2,
-      color: 'bg-blue-500',
-      bgLight: 'bg-blue-50',
-      stats: [
-        { label: 'Total Camps', value: allCamps.length },
-        { label: 'Active', value: allCamps.filter(c => c.status === 'active').length },
-      ],
-      path: '/reports/camps',
-    },
-    {
       title: 'Patient-Based Reports',
       description: 'Camps attended, medicines, consultations & visit history',
       icon: Users,

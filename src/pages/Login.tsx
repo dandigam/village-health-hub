@@ -307,8 +307,9 @@ export default function Login() {
                           <SelectItem value="DOCTOR">Doctor</SelectItem>
                           <SelectItem value="NURSE">Nurse</SelectItem>
                           <SelectItem value="PHARMACIST">Pharmacy</SelectItem>
-                          <SelectItem value="WARE_HOUSE">Warehouse</SelectItem>
+                          <SelectItem value="WAREHOUSE">Warehouse</SelectItem>
                           <SelectItem value="FRONT_DESK">Front Desk</SelectItem>
+                          <SelectItem value="CAMP_ADMIN">Camp Admin</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

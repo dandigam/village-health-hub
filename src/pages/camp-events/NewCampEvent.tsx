@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Save, X, CalendarIcon, Search, Stethoscope, Users, Tent } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { useCampTemplates, useDoctors, useSaveCampEvent } from '@/hooks/useApiData';
+import { useCampTemplates, useDoctors, useCampEvents, useSaveCampEvent } from '@/hooks/useApiData';
 
 const mockStaff = [
   { id: '1', name: 'Alice Johnson', role: 'Nurse' },
@@ -29,21 +29,24 @@ const mockStaff = [
 ];
 
 export default function NewCampEvent() {
+  const { id: eventId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const preselectedTemplateId = searchParams.get('templateId');
+  const preselectedCampId = searchParams.get('campId');
   const { data: templates = [] } = useCampTemplates();
   const { data: allDoctors = [] } = useDoctors();
+  const { data: allEvents = [] } = useCampEvents();
   const saveMutation = useSaveCampEvent();
 
-  const activeTemplates = templates.filter((t) => t.status === 'active');
+  const activeTemplates = templates.filter((t) => t.active === true);
 
   const [templateSearch, setTemplateSearch] = useState('');
   const [staffModalOpen, setStaffModalOpen] = useState(false);
+  const [doctorSearch, setDoctorSearch] = useState('');
   const [staffSearch, setStaffSearch] = useState('');
 
   const [form, setForm] = useState({
-    templateId: preselectedTemplateId || '',
+    campId: preselectedCampId || '',
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
     selectedDoctors: [] as any[],
@@ -57,15 +60,41 @@ export default function NewCampEvent() {
     address: '',
   });
 
+  // Load event data for edit mode
+  useEffect(() => {
+    if (eventId && allEvents.length > 0) {
+      const event = allEvents.find((e) => String(e.id) === String(eventId));
+      if (event) {
+        setForm({
+          campId: event.campId || '',
+          startDate: event.startDate ? new Date(event.startDate) : undefined,
+          endDate: event.endDate ? new Date(event.endDate) : undefined,
+          selectedDoctors: allDoctors.filter((d) => event.doctorsList?.includes(d.id)),
+          selectedStaff: mockStaff.filter((s) => event.staffList?.includes(s.id)),
+          location: event.location || '',
+          state: event.state || '',
+          district: event.district || '',
+          mandal: event.mandal || '',
+          city: event.city || '',
+          address: event.address || '',
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventId, allEvents, allDoctors]);
+
   const update = (field: string, value: any) => setForm((prev) => ({ ...prev, [field]: value }));
 
   // Auto-fill when template selected
   useEffect(() => {
-    if (form.templateId) {
-      const tpl = templates.find((t) => t.id === form.templateId);
+    if (form.campId) {
+      const tpl = templates.find((t) => t.id === form.campId);
       if (tpl) {
-        const defaultDoctors = allDoctors.filter((d) => tpl.defaultDoctorIds?.includes(d.id));
-        const defaultStaff = mockStaff.filter((s) => tpl.defaultStaffIds?.includes(s.id));
+        // Prefer doctorsList (new structure), fallback to doctorIds/defaultDoctorIds for backward compatibility
+        const doctorsList = tpl.doctorList  || [];
+        const defaultDoctors = allDoctors.filter((d) => doctorsList.includes(d.id));
+        const staffList = tpl.staffList || tpl.staffList || [];
+        const defaultStaff = mockStaff.filter((s) => staffList.includes(s.id));
         setForm((prev) => ({
           ...prev,
           state: tpl.state,
@@ -79,9 +108,9 @@ export default function NewCampEvent() {
         }));
       }
     }
-  }, [form.templateId, templates, allDoctors]);
+  }, [form.campId, templates, allDoctors]);
 
-  const selectedTemplate = templates.find((t) => t.id === form.templateId);
+  const selectedTemplate = templates.find((t) => t.id === form.campId);
 
   const toggleDoctor = (doctor: any) => {
     if (form.selectedDoctors.find((d) => d.id === doctor.id)) {
@@ -99,12 +128,16 @@ export default function NewCampEvent() {
     }
   };
 
+  const filteredDoctors = allDoctors.filter((d) =>
+    d.name.toLowerCase().includes(doctorSearch.toLowerCase())
+  );
+
   const filteredStaff = mockStaff.filter((s) =>
     s.name.toLowerCase().includes(staffSearch.toLowerCase())
   );
 
   const handleSubmit = async () => {
-    if (!form.templateId) {
+    if (!form.campId) {
       toast({ title: 'Validation Error', description: 'Please select a camp template.', variant: 'destructive' });
       return;
     }
@@ -112,14 +145,19 @@ export default function NewCampEvent() {
       toast({ title: 'Validation Error', description: 'Start and End dates are required.', variant: 'destructive' });
       return;
     }
+    if (form.startDate > form.endDate) {
+      toast({ title: 'Validation Error', description: 'Start date cannot be after end date.', variant: 'destructive' });
+      return;
+    }
     if (form.endDate < form.startDate) {
-      toast({ title: 'Validation Error', description: 'End date must be after start date.', variant: 'destructive' });
+      toast({ title: 'Validation Error', description: 'End date must be after or equal to start date.', variant: 'destructive' });
       return;
     }
 
     const payload = {
-      templateId: form.templateId,
-      templateName: selectedTemplate?.name,
+      id: eventId,
+      campId: form.campId,
+      campName: selectedTemplate?.campName,
       location: form.location,
       state: form.state,
       district: form.district,
@@ -128,17 +166,17 @@ export default function NewCampEvent() {
       address: form.address,
       startDate: format(form.startDate, 'yyyy-MM-dd'),
       endDate: format(form.endDate, 'yyyy-MM-dd'),
-      doctorIds: form.selectedDoctors.map((d) => d.id),
-      staffIds: form.selectedStaff.map((s) => s.id),
+      doctorsList: form.selectedDoctors.map((d) => d.id),
+      staffList: form.selectedStaff.map((s) => s.id),
       status: 'planned',
     };
 
     try {
       await saveMutation.mutateAsync(payload);
-      toast({ title: 'Camp Event Created', description: `Event for ${selectedTemplate?.name} created successfully.` });
+      toast({ title: eventId ? 'Camp Event Updated' : 'Camp Event Created', description: `Event for ${selectedTemplate?.campName} ${eventId ? 'updated' : 'created'} successfully.` });
       navigate('/camp-events');
     } catch {
-      toast({ title: 'Error', description: 'Failed to create camp event.', variant: 'destructive' });
+      toast({ title: 'Error', description: `Failed to ${eventId ? 'update' : 'create'} camp event.`, variant: 'destructive' });
     }
   };
 
@@ -151,62 +189,84 @@ export default function NewCampEvent() {
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/camp-events')}>
               <X className="h-4 w-4" />
             </Button>
-            <h1 className="text-lg font-bold text-foreground tracking-tight">Create Camp Event</h1>
+            <h1 className="text-lg font-bold text-foreground tracking-tight">{eventId ? 'Edit Camp Event' : 'Create Camp Event'}</h1>
           </div>
           <Button onClick={handleSubmit} className="h-9 px-5">
-            <Save className="mr-1.5 h-3.5 w-3.5" /> Create Event
+            <Save className="mr-1.5 h-3.5 w-3.5" /> {eventId ? 'Save Changes' : 'Create Event'}
           </Button>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto space-y-6">
-        {/* Template Selection */}
-        <Card className="border-border/50 shadow-sm">
-          <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
-            <CardTitle className="flex items-center gap-2.5 text-base">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Tent className="h-4 w-4 text-primary" />
-              </div>
-              Select Camp Template
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 py-5">
-            <Command className="rounded-lg border">
-              <CommandInput placeholder="Search templates..." value={templateSearch} onValueChange={setTemplateSearch} />
-              <CommandList className="max-h-40">
-                <CommandEmpty>No templates found.</CommandEmpty>
-                <CommandGroup>
-                  {activeTemplates
-                    .filter((t) => t.name.toLowerCase().includes(templateSearch.toLowerCase()))
-                    .map((tpl) => (
-                      <CommandItem
-                        key={tpl.id}
-                        onSelect={() => { update('templateId', tpl.id); setTemplateSearch(''); }}
-                        className={cn('cursor-pointer', form.templateId === tpl.id && 'bg-primary/5')}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <div>
-                            <p className="font-medium">{tpl.name}</p>
-                            <p className="text-xs text-muted-foreground">{tpl.mandal}, {tpl.district}</p>
+        {/* Template Selection (only in create mode) */}
+        {!eventId ? (
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
+              <CardTitle className="flex items-center gap-2.5 text-base">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Tent className="h-4 w-4 text-primary" />
+                </div>
+                Select Camp Template
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-6 py-5">
+              <Command className="rounded-lg border">
+                <CommandInput placeholder="Search templates..." value={templateSearch} onValueChange={setTemplateSearch} />
+                <CommandList className="max-h-40">
+                  <CommandEmpty>No templates found.</CommandEmpty>
+                  <CommandGroup>
+                    {activeTemplates
+                      .filter((t) => (t.campName || '').toLowerCase().includes(templateSearch.toLowerCase()))
+                      .map((tpl) => (
+                        <CommandItem
+                          key={tpl.id}
+                          onSelect={() => { update('campId', tpl.id); setTemplateSearch(''); }}
+                          className={cn('cursor-pointer', form.campId === tpl.id && 'bg-primary/5')}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <div>
+                              <p className="font-medium">{tpl.campName}</p>
+                              <p className="text-xs text-muted-foreground">{tpl.mandal}, {tpl.district}</p>
+                            </div>
+                            {form.campId === tpl.id && <Badge className="bg-primary/10 text-primary text-xs">Selected</Badge>}
                           </div>
-                          {form.templateId === tpl.id && <Badge className="bg-primary/10 text-primary text-xs">Selected</Badge>}
-                        </div>
-                      </CommandItem>
-                    ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-
-            {selectedTemplate && (
-              <div className="mt-4 p-3 rounded-lg bg-muted/40 border border-border/40">
-                <p className="text-sm font-medium text-foreground">{selectedTemplate.name}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {selectedTemplate.mandal}, {selectedTemplate.district}, {selectedTemplate.state} · Organizer: {selectedTemplate.organizerName}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+              {selectedTemplate && (
+                <div className="mt-4 p-3 rounded-lg bg-muted/40 border border-border/40">
+                  <p className="text-sm font-medium text-foreground">{selectedTemplate.campName}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selectedTemplate.mandal}, {selectedTemplate.district}, {selectedTemplate.state} · Organizer: {selectedTemplate.organizerName}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          selectedTemplate && (
+            <Card className="border-border/50 shadow-sm">
+              <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
+                <CardTitle className="flex items-center gap-2.5 text-base">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Tent className="h-4 w-4 text-primary" />
+                  </div>
+                  Camp Template
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 py-5">
+                <div className="p-3 rounded-lg bg-muted/40 border border-border/40">
+                  <p className="text-base font-bold text-foreground mb-1">{selectedTemplate.campName || selectedTemplate.campName}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selectedTemplate.mandal}, {selectedTemplate.district}, {selectedTemplate.state} · Organizer: {selectedTemplate.organizerName}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        )}
 
         {/* Dates */}
         <Card className="border-border/50 shadow-sm">
@@ -264,8 +324,17 @@ export default function NewCampEvent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="px-6 py-5">
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Search doctors..."
+                  className="pl-9 h-9"
+                  value={doctorSearch}
+                  onChange={(e) => setDoctorSearch(e.target.value)}
+                />
+              </div>
               <div className="space-y-1.5 max-h-48 overflow-y-auto premium-scroll">
-                {allDoctors.map((doctor) => {
+                {filteredDoctors.map((doctor) => {
                   const selected = form.selectedDoctors.some((d) => d.id === doctor.id);
                   return (
                     <div

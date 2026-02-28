@@ -18,6 +18,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useDoctors, useCampTemplates, useSaveCampTemplate, useStatesHierarchy } from '@/hooks/useApiData';
+import { useCampTemplate } from '@/hooks/useCampTemplate';
 
 const mockStaff = [
   { id: '1', name: 'Alice Johnson', role: 'Nurse' },
@@ -32,8 +33,8 @@ export default function NewCampTemplate() {
   const { id } = useParams();
   const isEdit = !!id;
   const { data: allDoctors = [] } = useDoctors();
-  const { data: templates = [] } = useCampTemplates();
   const { data: statesHierarchy = [] } = useStatesHierarchy();
+  const { data: editTemplate, isLoading } = useCampTemplate(isEdit ? id : undefined);
   const saveMutation = useSaveCampTemplate();
 
   const [staffModalOpen, setStaffModalOpen] = useState(false);
@@ -41,7 +42,8 @@ export default function NewCampTemplate() {
   const [doctorSearch, setDoctorSearch] = useState('');
 
   const [form, setForm] = useState({
-    name: '',
+    campId: '',
+    campName: '',
     organizerName: '',
     organizerPhone: '',
     organizerEmail: '',
@@ -53,32 +55,29 @@ export default function NewCampTemplate() {
     pinCode: '',
     selectedDoctors: [] as any[],
     selectedStaff: [] as typeof mockStaff,
-    isActive: true,
+    active: true,
   });
 
   // Load existing template for edit
   useEffect(() => {
-    if (isEdit) {
-      const tpl = templates.find((t) => t.id === id);
-      if (tpl) {
-        setForm({
-          name: tpl.name,
-          organizerName: tpl.organizerName,
-          organizerPhone: tpl.organizerPhone,
-          organizerEmail: tpl.organizerEmail || '',
-          state: tpl.state,
-          district: tpl.district,
-          mandal: tpl.mandal,
-          city: tpl.city || '',
-          address: tpl.address,
-          pinCode: tpl.pinCode || '',
-          selectedDoctors: allDoctors.filter((d) => tpl.defaultDoctorIds.includes(d.id)),
-          selectedStaff: mockStaff.filter((s) => tpl.defaultStaffIds.includes(s.id)),
-          isActive: tpl.status === 'active',
-        });
-      }
+    if (isEdit && editTemplate) {
+      setForm({
+        campName: editTemplate.campName || '',
+        organizerName: editTemplate.organizerName || '',
+        organizerPhone: editTemplate.organizerPhone || '',
+        organizerEmail: editTemplate.organizerEmail || '',
+        state: editTemplate.state || '',
+        district: editTemplate.district || '',
+        mandal: editTemplate.mandal || '',
+        city: editTemplate.city || '',
+        address: editTemplate.address || '',
+        pinCode: editTemplate.pinCode || '',
+        selectedDoctors: allDoctors.filter((d) => Array.isArray(editTemplate.doctorsList) && editTemplate.doctorsList.includes(d.id)),
+        selectedStaff: mockStaff.filter((s) => Array.isArray(editTemplate.staffList) && editTemplate.staffList.includes(s.id)),
+        active: typeof editTemplate.active === 'boolean' ? editTemplate.active : (editTemplate.status === 'active'),
+      });
     }
-  }, [isEdit, id, templates, allDoctors]);
+  }, [isEdit, id, editTemplate, allDoctors]);
 
   const update = (field: string, value: any) => setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -113,13 +112,13 @@ export default function NewCampTemplate() {
   );
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) {
+    if (!form.campName.trim()) {
       toast({ title: 'Validation Error', description: 'Camp name is required.', variant: 'destructive' });
       return;
     }
     const payload = {
       ...(isEdit ? { id } : {}),
-      name: form.name,
+      campName: form.campName,
       organizerName: form.organizerName,
       organizerPhone: form.organizerPhone,
       organizerEmail: form.organizerEmail,
@@ -129,13 +128,15 @@ export default function NewCampTemplate() {
       city: form.city,
       address: form.address,
       pinCode: form.pinCode,
-      defaultDoctorIds: form.selectedDoctors.map((d) => d.id),
-      defaultStaffIds: form.selectedStaff.map((s) => s.id),
-      status: form.isActive ? 'active' : 'inactive',
+      campId: form.campId,
+      doctorsList: form.selectedDoctors.map((d) => d.id),
+      staffList: form.selectedStaff.map((s) => s.id),
+      active: form.active,
     };
     try {
+      // Always use POST, even for update, and always send id for edit
       await saveMutation.mutateAsync(payload);
-      toast({ title: isEdit ? 'Template Updated' : 'Template Created', description: `${form.name} saved successfully.` });
+      toast({ title: isEdit ? 'Template Updated' : 'Template Created', description: `${form.campName} saved successfully.` });
       navigate('/camp-templates');
     } catch {
       toast({ title: 'Error', description: 'Failed to save template.', variant: 'destructive' });
@@ -177,7 +178,7 @@ export default function NewCampTemplate() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Camp Name *</Label>
-                <Input placeholder="Enter camp template name" value={form.name} onChange={(e) => update('name', e.target.value)} />
+                <Input placeholder="Enter camp template name" value={form.campName} onChange={(e) => update('campName', e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>Organizer Name</Label>
@@ -385,10 +386,10 @@ export default function NewCampTemplate() {
               <p className="text-xs text-muted-foreground">Active templates can be used to create camp events</p>
             </div>
             <div className="flex items-center gap-3">
-              <span className={cn('text-sm font-medium', form.isActive ? 'text-[hsl(var(--stat-green-text))]' : 'text-muted-foreground')}>
-                {form.isActive ? 'Active' : 'Inactive'}
+              <span className={cn('text-sm font-medium', form.active ? 'text-[hsl(var(--stat-green-text))]' : 'text-muted-foreground')}>
+                {form.active ? 'Active' : 'Inactive'}
               </span>
-              <Switch checked={form.isActive} onCheckedChange={(v) => update('isActive', v)} />
+              <Switch checked={form.active} onCheckedChange={(v) => update('active', v)} />
             </div>
           </CardContent>
         </Card>
