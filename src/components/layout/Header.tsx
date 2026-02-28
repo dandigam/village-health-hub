@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCamps, useSupplierOrders } from '@/hooks/useApiData';
 import { useCamp } from '@/context/CampContext';
 import { useAuth } from '@/context/AuthContext';
+import { hasAccess } from '@/config/routeAccess';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -99,14 +100,16 @@ export function Header({ onMenuToggle }: HeaderProps) {
         <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/[0.08] h-8 w-8 sm:h-9 sm:w-9">
           <Bell className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
         </Button>
-        <Button variant="ghost" size="icon" className="relative text-white/80 hover:text-white hover:bg-white/[0.08] h-8 w-8 sm:h-9 sm:w-9" onClick={() => navigate('/supplier-orders')}>
-          <ShoppingCart className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
-          {pendingOrdersCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center animate-enter">
-              {pendingOrdersCount}
-            </span>
-          )}
-        </Button>
+        {hasAccess('supplier-orders', authUser?.role) && (
+          <Button variant="ghost" size="icon" className="relative text-white/80 hover:text-white hover:bg-white/[0.08] h-8 w-8 sm:h-9 sm:w-9" onClick={() => navigate('/supplier-orders')}>
+            <ShoppingCart className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+            {pendingOrdersCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center animate-enter">
+                {pendingOrdersCount}
+              </span>
+            )}
+          </Button>
+        )}
         <div className="w-px h-6 bg-white/15 mx-1 hidden sm:block" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
