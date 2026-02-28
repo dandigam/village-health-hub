@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { EncounterQueue } from '@/components/encounters/EncounterQueue';
 import { EncounterWorkflow } from '@/components/encounters/EncounterWorkflow';
@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Search, Maximize2, Minimize2, Users, UserPlus, Clock, Stethoscope, Pill, CheckCircle2 } from 'lucide-react';
-import { usePatients, useDoctors } from '@/hooks/useApiData';
+import { useEncounterQueue, EncounterQueueItem } from '@/hooks/useApiData';
+import { useAuth } from '@/context/AuthContext';
 import { Patient } from '@/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -59,12 +60,49 @@ export const statusConfig: Record<EncounterStatus, { label: string; icon: any; c
   },
 };
 
+/** Map API encounterStatus string to local EncounterStatus */
+function mapApiStatus(apiStatus: string): EncounterStatus {
+  const normalized = apiStatus?.toUpperCase?.() || '';
+  if (normalized === 'WITH_DOCTOR' || normalized === 'IN_PROGRESS') return 'WITH_DOCTOR';
+  if (normalized === 'PHARMACY') return 'PHARMACY';
+  if (normalized === 'COMPLETED' || normalized === 'DONE') return 'COMPLETED';
+  return 'WAITING';
+}
+
+/** Convert API response items to EncounterPatient format */
+function mapQueueItemToEncounter(item: EncounterQueueItem, index: number): EncounterPatient {
+  const status = mapApiStatus(item.encounter.encounterStatus);
+  return {
+    patient: {
+      id: String(item.encounter.id),
+      patientId: item.mr,
+      name: item.patientname,
+      firstName: item.patientname.split(' ')[0] || '',
+      lastName: item.patientname.split(' ').slice(1).join(' ') || '',
+      age: item.age,
+      gender: item.gender,
+      phone: '',
+      status: 'registered',
+      campId: '',
+      address: {} as any,
+      village: '',
+      createdAt: '',
+      updatedAt: '',
+    } as Patient,
+    status,
+    token: index + 1,
+    arrivalTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+    waitingMinutes: 0,
+    isReturning: false,
+    assignedDoctor: item.doctor?.name,
+    currentStep: status === 'COMPLETED' ? 5 : status === 'PHARMACY' ? 5 : status === 'WITH_DOCTOR' ? 2 : 0,
+  };
+}
+
 export default function Encounters() {
-  const { data: patientsRaw = [], isLoading: loadingPatients } = usePatients();
-  const patientList = Array.isArray((patientsRaw as any).content)
-    ? (patientsRaw as any).content
-    : Array.isArray(patientsRaw) ? patientsRaw : [];
-  const { data: doctors = [], isLoading: loadingDoctors } = useDoctors();
+  const { user } = useAuth();
+  const campEventId = user?.context?.campEventId ?? null;
+  const { data: queueData = [], isLoading: loadingQueue } = useEncounterQueue(campEventId);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [patientSearch, setPatientSearch] = useState('');
@@ -73,34 +111,25 @@ export default function Encounters() {
   const [mobileQueueOpen, setMobileQueueOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  // Build initial queue from patient data
-  const buildEncounterQueue = useMemo((): EncounterPatient[] => {
-    const sliced = patientList.slice(0, 8);
-    const statuses: EncounterStatus[] = ['WAITING', 'WITH_DOCTOR', 'PHARMACY', 'WAITING', 'WITH_DOCTOR', 'WAITING', 'COMPLETED', 'COMPLETED'];
-    const arrivals = ['08:30 AM', '08:45 AM', '09:00 AM', '09:15 AM', '09:30 AM', '09:45 AM', '07:30 AM', '07:45 AM'];
-    const waits = [45, 30, 15, 25, 10, 5, 0, 0];
-    return sliced.map((p, i) => ({
-      patient: p,
-      status: statuses[i] || 'WAITING',
-      token: i + 1,
-      arrivalTime: arrivals[i] || '08:30 AM',
-      waitingMinutes: waits[i] || 0,
-      isReturning: i === 1 || i === 4,
-      assignedDoctor: (statuses[i] === 'WITH_DOCTOR' || statuses[i] === 'PHARMACY') ? doctors[i % doctors.length]?.name : undefined,
-      currentStep: statuses[i] === 'COMPLETED' ? 5 : statuses[i] === 'PHARMACY' ? 5 : statuses[i] === 'WITH_DOCTOR' ? 2 : 0,
-    }));
-  }, [patientList, doctors]);
+  // Map API data to EncounterPatient[]
+  const apiQueue = useMemo(
+    () => queueData.map((item, i) => mapQueueItemToEncounter(item, i)),
+    [queueData]
+  );
 
   const [encounterQueue, setEncounterQueue] = useState<EncounterPatient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
-  useMemo(() => {
-    if (buildEncounterQueue.length > 0 && encounterQueue.length === 0) {
-      setEncounterQueue(buildEncounterQueue);
-      const firstActive = buildEncounterQueue.find(e => e.status !== 'COMPLETED');
-      setSelectedPatientId(firstActive?.patient.id ?? buildEncounterQueue[0]?.patient.id ?? null);
+  // Sync API data into local state
+  useEffect(() => {
+    if (apiQueue.length > 0) {
+      setEncounterQueue(apiQueue);
+      if (!selectedPatientId) {
+        const firstActive = apiQueue.find(e => e.status !== 'COMPLETED');
+        setSelectedPatientId(firstActive?.patient.id ?? apiQueue[0]?.patient.id ?? null);
+      }
     }
-  }, [buildEncounterQueue]);
+  }, [apiQueue]);
 
   // Queue stats
   const waitingCount = encounterQueue.filter(e => e.status === 'WAITING').length;
@@ -122,19 +151,8 @@ export default function Encounters() {
     return queue;
   }, [encounterQueue, searchTerm]);
 
-  // Patient search for starting new encounter
-  const searchResults = useMemo(() => {
-    if (!patientSearch.trim()) return [];
-    const q = patientSearch.toLowerCase();
-    return patientList
-      .filter((p: Patient) =>
-        !encounterQueue.some(e => e.patient.id === p.id && e.status !== 'COMPLETED') &&
-        ((p.name?.toLowerCase() || '').includes(q) ||
-         (p.patientId?.toLowerCase() || '').includes(q) ||
-         (p.phone?.toLowerCase() || '').includes(q))
-      )
-      .slice(0, 5);
-  }, [patientSearch, patientList, encounterQueue]);
+  // Patient search disabled — queue is now fully API-driven
+  const searchResults: Patient[] = [];
 
   const selectedEncounter = encounterQueue.find(e => e.patient.id === selectedPatientId);
   const [currentDiagnoses, setCurrentDiagnoses] = useState<string[]>([]);
@@ -195,7 +213,7 @@ export default function Encounters() {
     { label: 'Completed Today', count: completedCount, icon: CheckCircle2, color: 'text-muted-foreground', bg: 'bg-muted/30' },
   ];
 
-  if (loadingPatients && loadingDoctors) {
+  if (loadingQueue) {
     return <DashboardLayout><PageLoader type="full" message="Loading encounters..." /></DashboardLayout>;
   }
 
