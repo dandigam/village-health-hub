@@ -146,8 +146,50 @@ export default function EditPatient() {
 	const handleUpdatePatient = async () => {
 		setIsSubmitting(true);
 		try {
+			// Update without creating encounter
 			toast.success('Patient updated successfully');
 			navigate('/patients');
+		} catch (e) {
+			toast.error('Failed to update patient');
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	const handleSendToEncounter = async () => {
+		setIsSubmitting(true);
+		try {
+			const payload = {
+				id,
+				firstName: demographic.firstName,
+				lastName: demographic.lastName,
+				fatherSpouseName: demographic.fatherSpouseName,
+				gender: demographic.gender,
+				age: Number(demographic.age),
+				maritalStatus: demographic.maritalStatus,
+				phoneNumber: demographic.phone,
+				photoUrl,
+				address: {
+					stateId: demographic.address.stateId ? Number(demographic.address.stateId) : undefined,
+					districtId: demographic.address.districtId ? Number(demographic.address.districtId) : undefined,
+					mandalId: demographic.address.mandalId ? Number(demographic.address.mandalId) : undefined,
+					cityVillage: demographic.address.village,
+					streetAddress: demographic.address.street,
+				},
+				hasMedicalHistory: history.hasPreviousTreatment === 'yes',
+				medicalHistory: history.hasPreviousTreatment === 'yes' ? {
+					conditions: history.conditions,
+					previousHospital: history.previousHospital,
+					currentMedications: history.currentMedications,
+					pastSurgery: history.pastSurgery,
+				} : null,
+				paymentType: payment.paymentType,
+				paymentPercentage: payment.paymentPercentage ? Number(payment.paymentPercentage) : null,
+				encounterCreate: true,
+				campEventId: user?.context?.campEventId ?? null,
+			};
+			toast.success('Patient updated and sent to Encounters');
+			navigate('/encounters');
 		} catch (e) {
 			toast.error('Failed to update patient');
 		} finally {
@@ -246,8 +288,12 @@ export default function EditPatient() {
 									Save (Draft)
 								</Button>
 								<Button onClick={handleUpdatePatient} className="bg-accent hover:bg-accent/90" disabled={isSubmitting}>
-									<FileText className="h-4 w-4 mr-1" />
+									<Save className="h-4 w-4 mr-1" />
 									Update Patient
+								</Button>
+								<Button onClick={handleSendToEncounter} className="bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+									<FileText className="h-4 w-4 mr-1" />
+									Send to Encounters
 								</Button>
 								<Button variant="secondary" onClick={handleSendToAdmin} disabled={isSubmitting}>
 									<ShieldCheck className="h-4 w-4 mr-1" />
