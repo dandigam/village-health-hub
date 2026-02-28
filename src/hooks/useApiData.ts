@@ -468,3 +468,38 @@ export function useDeleteSupplier(warehouseId?: number) {
     },
   });
 }
+
+// ─── Encounter Queue ───────────────────────────────────────────────
+export interface EncounterQueueItem {
+  age: number;
+  camp: unknown | null;
+  doctor: {
+    id: number;
+    name: string;
+    specialization: string;
+    phoneNumber: string;
+    email: string;
+  } | null;
+  encounter: {
+    id: number;
+    encounterStatus: string;
+  };
+  gender: string;
+  mr: string;
+  patientname: string;
+}
+
+export function useEncounterQueue(campEventId: number | null) {
+  return useQuery({
+    queryKey: ['encounter-queue', campEventId],
+    queryFn: async () => {
+      const data = await request<EncounterQueueItem[]>(
+        `/encounters/camp-event/${campEventId}/patients`
+      );
+      return data;
+    },
+    enabled: !!campEventId,
+    staleTime: 10_000,
+    refetchInterval: 15_000, // Auto-refresh every 15s
+  });
+}
