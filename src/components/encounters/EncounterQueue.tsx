@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Play, Clock, RotateCcw } from 'lucide-react';
+import { Play, Clock, RotateCcw, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EncounterPatient, EncounterStatus, statusConfig } from '@/pages/encounters/Encounters';
 
@@ -10,9 +10,11 @@ interface EncounterQueueProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onStartVisit: (id: string) => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
-export function EncounterQueue({ queue, selectedId, onSelect, onStartVisit }: EncounterQueueProps) {
+export function EncounterQueue({ queue, selectedId, onSelect, onStartVisit, onRefresh, isRefreshing }: EncounterQueueProps) {
   // Sort: WAITING first, then WITH_DOCTOR, then PHARMACY
   const statusOrder: Record<EncounterStatus, number> = { WAITING: 0, WITH_DOCTOR: 1, PHARMACY: 2, COMPLETED: 3 };
   const sorted = [...queue].sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || a.token - b.token);
@@ -22,9 +24,16 @@ export function EncounterQueue({ queue, selectedId, onSelect, onStartVisit }: En
       <div className="px-3 py-2.5 border-b border-border/40">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Queue</p>
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4.5">
-            {queue.length} patients
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            {onRefresh && (
+              <Button variant="ghost" size="icon" className="h-5 w-5" onClick={onRefresh} disabled={isRefreshing}>
+                <RefreshCw className={cn('h-3 w-3', isRefreshing && 'animate-spin')} />
+              </Button>
+            )}
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4.5">
+              {queue.length} patients
+            </Badge>
+          </div>
         </div>
       </div>
 
