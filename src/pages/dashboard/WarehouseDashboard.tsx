@@ -39,7 +39,7 @@ const fadeUp = {
 export default function WarehouseDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const warehouseId = user?.wareHouse?.id ? Number(user.wareHouse.id) : undefined;
+  const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
 
   const { data: dashStats, refetch } = useWarehouseDashboardStats(warehouseId);
 
@@ -79,7 +79,7 @@ export default function WarehouseDashboard() {
           <div>
             <h1 className="text-xl font-bold text-foreground tracking-tight">Warehouse Dashboard</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {user?.wareHouse?.name || 'Warehouse'} • Real-time inventory overview
+              Warehouse • Real-time inventory overview
             </p>
           </div>
           <Button size="sm" onClick={() => navigate('/supplier-orders')}>

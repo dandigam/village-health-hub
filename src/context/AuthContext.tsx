@@ -1,16 +1,24 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { AppRole } from '@/config/routeAccess';
 import { mockUser } from '@/mock';
 
-interface AuthUser {
+export interface UserContext {
+  campEventId: number | null;
+  campId: number | null;
+  campName: string | null;
+  warehouseId: number | null;
+}
+
+export interface AuthUser {
   id: number;
   name: string;
+  email: string;
+  phone: string;
   role: AppRole;
-  wareHouse?: {
-    id: number | string;
-    name?: string;
-  };
+  avatar: string | null;
+  roleDisplayName: string;
+  permissions: string[];
+  context: UserContext;
 }
 
 interface AuthState {
@@ -62,7 +70,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.clear();
     setUser(null);
     setToken(null);
-    // Navigate without full page reload for smooth transition
   }, []);
 
   // Initialize from localStorage
@@ -72,7 +79,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(stored.token);
       setUser(stored.user);
     } else if (stored.token) {
-      // Token expired — clear
       logout();
     }
     setInitialized(true);
@@ -113,21 +119,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       const { token: newToken, expiresAt, user: apiUser } = data;
 
+      // Map API response to AuthUser shape
+      const authUser: AuthUser = {
+        id: apiUser.id,
+        name: apiUser.name,
+        email: apiUser.email || '',
+        phone: apiUser.phone || '',
+        role: apiUser.role as AppRole,
+        avatar: apiUser.avatar || null,
+        roleDisplayName: apiUser.roleDisplayName || apiUser.role,
+        permissions: apiUser.permissions || [],
+        context: {
+          campEventId: apiUser.context?.campEventId ?? null,
+          campId: apiUser.context?.campId ?? null,
+          campName: apiUser.context?.campName ?? null,
+          warehouseId: apiUser.context?.warehouseId ?? null,
+        },
+      };
+
       localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(apiUser));
+      localStorage.setItem('user', JSON.stringify(authUser));
       localStorage.setItem('expiresAt', expiresAt);
 
       setToken(newToken);
-      setUser(apiUser);
+      setUser(authUser);
       console.log('✅ [Auth] Logged in via API');
     } catch (err) {
       console.warn('🔄 [Auth Fallback] API login failed, using mock user:', (err as Error).message);
 
-      // Fallback: use mock user with a dummy token
       const mockAuthUser: AuthUser = {
         id: Number(mockUser.id),
         name: mockUser.name,
+        email: '',
+        phone: '',
         role: 'ADMIN' as AppRole,
+        avatar: null,
+        roleDisplayName: 'Admin',
+        permissions: [],
+        context: {
+          campEventId: null,
+          campId: null,
+          campName: null,
+          warehouseId: null,
+        },
       };
       const mockToken = 'mock-token-fallback';
       const mockExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();

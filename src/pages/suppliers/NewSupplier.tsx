@@ -35,7 +35,7 @@ export default function NewSupplier() {
   const isEditMode = Boolean(supplierId);
   const supplierFromState = location.state?.supplier;
   const { data: statesHierarchy = [] } = useStatesHierarchy();
-  const warehouseId = authUser?.wareHouse?.id;
+  const warehouseId = authUser?.context?.warehouseId;
   const { data: inventoryItems = [] } = useWarehouseInventory(warehouseId ? Number(warehouseId) : undefined);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -104,7 +104,7 @@ export default function NewSupplier() {
     
     // If in edit mode and medicine has an ID, call delete API
     if (isEditMode && medicine.id && supplierId) {
-      const warehouseId = authUser?.wareHouse?.id;
+      const warehouseId = authUser?.context?.warehouseId;
       if (!warehouseId) {
         toast({ title: 'Error', description: 'Warehouse not found', variant: 'destructive' });
         return;
@@ -171,7 +171,7 @@ export default function NewSupplier() {
 
   const handleSubmit = async () => {
     try {
-      const warehouseId = authUser?.wareHouse?.id;
+      const warehouseId = authUser?.context?.warehouseId;
 
       if (!warehouseId) {
         toast({

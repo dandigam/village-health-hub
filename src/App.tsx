@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { CampProvider } from "@/context/CampContext";
+import { CampProvider, CampAuthSync } from "@/context/CampContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import Login from "./pages/Login";
@@ -71,6 +71,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <CampAuthSync />
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
