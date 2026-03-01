@@ -350,19 +350,6 @@ function SubjectStep({ data, onChange, encounterId }: { data: SubjectData; onCha
         </div>
       </div>
 
-      {/* Chief Complaint */}
-      <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Chief Complaint</Label>
-        <Textarea
-          className="min-h-[70px] text-sm border-border/50 focus:border-primary/40"
-          placeholder="Describe the patient's main complaint..."
-          value={data.chiefComplaint}
-          onChange={(e) => onChange({ ...data, chiefComplaint: e.target.value })}
-        />
-      </div>
-
-      {/* Additional Notes */}
-
       {/* Lifestyle */}
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Lifestyle</Label>
@@ -384,6 +371,17 @@ function SubjectStep({ data, onChange, encounterId }: { data: SubjectData; onCha
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Chief Complaint */}
+      <div>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Chief Complaint</Label>
+        <Textarea
+          className="min-h-[70px] text-sm border-border/50 focus:border-primary/40"
+          placeholder="Describe the patient's main complaint..."
+          value={data.chiefComplaint}
+          onChange={(e) => onChange({ ...data, chiefComplaint: e.target.value })}
+        />
       </div>
 
       {/* Additional Notes */}
