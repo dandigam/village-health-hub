@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -19,9 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Stethoscope } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Stethoscope, CalendarIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import type { Patient } from '@/types';
 
 interface PatientQuickViewModalProps {
@@ -43,7 +48,6 @@ export function PatientQuickViewModal({ patient, open, onOpenChange }: PatientQu
   const [chiefComplaint, setChiefComplaint] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Vitals
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
   const [bp, setBp] = useState('');
@@ -95,31 +99,20 @@ export function PatientQuickViewModal({ patient, open, onOpenChange }: PatientQu
           </div>
         </div>
 
-        {/* Body — 3 Equal Columns */}
+        {/* Body — 3 Equal Columns: Visit Details | Provider & Schedule | Initial Assessment */}
         <div className="grid grid-cols-3 divide-x divide-border">
           {/* Col 1: Visit Details */}
           <div className="p-4 space-y-3">
             <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Visit Details</h3>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label className="text-[11px] text-muted-foreground">Visit Type</Label>
-                <Select value={visitType} onValueChange={setVisitType}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {visitTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[11px] text-muted-foreground">Provider</Label>
-                <Select value={assignedDoctor} onValueChange={setAssignedDoctor}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {mockDoctors.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-1">
+              <Label className="text-[11px] text-muted-foreground">Visit Type</Label>
+              <Select value={visitType} onValueChange={setVisitType}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {visitTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1">
@@ -143,8 +136,50 @@ export function PatientQuickViewModal({ patient, open, onOpenChange }: PatientQu
             </div>
           </div>
 
-          {/* Col 2: Vitals — compact */}
-          <div className="p-4 space-y-2.5">
+          {/* Col 2: Provider & Schedule */}
+          <div className="p-4 space-y-3">
+            <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Provider & Schedule</h3>
+
+            <div className="space-y-1">
+              <Label className="text-[11px] text-muted-foreground">Assigned Provider</Label>
+              <Select value={assignedDoctor} onValueChange={setAssignedDoctor}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {mockDoctors.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[11px] text-muted-foreground">Visit Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full h-8 justify-start text-left text-xs font-normal',
+                      !selectedDate && 'text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                    {selectedDate ? format(selectedDate, 'dd-MM-yyyy') : 'Pick a date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Col 3: Initial Assessment (Vitals) — compact */}
+          <div className="p-4 space-y-2">
             <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Initial Assessment</h3>
 
             <VitalInput label="Weight" value={weight} onChange={setWeight} unit={weightUnit} units={['kg','lbs'] as const} onUnitChange={u => setWeightUnit(u as 'kg'|'lbs')} placeholder="72" />
@@ -153,22 +188,6 @@ export function PatientQuickViewModal({ patient, open, onOpenChange }: PatientQu
             <VitalInput label="Temp" value={temp} onChange={setTemp} unit={tempUnit} units={['C','F'] as const} onUnitChange={u => setTempUnit(u as 'C'|'F')} placeholder="98.6" />
             <VitalInput label="Heart Rate" value={heartRate} onChange={setHeartRate} fixedUnit="bpm" placeholder="72" />
             <VitalInput label="SpO2" value={spo2} onChange={setSpo2} fixedUnit="%" placeholder="98" />
-          </div>
-
-          {/* Col 3: Calendar */}
-          <div className="p-4 flex flex-col items-center">
-            <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide w-full mb-2">Visit Date</h3>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="rounded-lg border border-border shadow-sm"
-            />
-            {selectedDate && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Selected: <span className="font-semibold text-foreground">{selectedDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-              </p>
-            )}
           </div>
         </div>
 
@@ -200,35 +219,32 @@ interface VitalInputProps {
 
 function VitalInput({ label, value, onChange, placeholder, fixedUnit, unit, units, onUnitChange }: VitalInputProps) {
   return (
-    <div className="space-y-0.5">
-      <div className="flex items-center justify-between">
-        <Label className="text-[11px] text-muted-foreground">{label}</Label>
-        {units && units.length > 1 && onUnitChange && (
-          <div className="flex items-center gap-0.5">
-            {units.map(u => (
-              <button
-                key={u}
-                onClick={() => onUnitChange(u)}
-                className={cn(
-                  'px-1.5 py-0.5 rounded text-[10px] transition-colors',
-                  unit === u ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground hover:bg-muted'
-                )}
-              >
-                {u}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-      <div className="flex items-center gap-1.5">
-        <Input
-          placeholder={placeholder || '—'}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-7 text-xs flex-1"
-        />
-        <span className="text-[10px] text-muted-foreground w-8 text-right">{fixedUnit || unit}</span>
-      </div>
+    <div className="flex items-center gap-2">
+      <Label className="text-[11px] text-muted-foreground w-16 shrink-0">{label}</Label>
+      <Input
+        placeholder={placeholder || '—'}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-7 text-xs flex-1"
+      />
+      {units && units.length > 1 && onUnitChange ? (
+        <div className="flex items-center gap-0.5 shrink-0">
+          {units.map(u => (
+            <button
+              key={u}
+              onClick={() => onUnitChange(u)}
+              className={cn(
+                'px-1.5 py-0.5 rounded text-[10px] transition-colors',
+                unit === u ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground hover:bg-muted'
+              )}
+            >
+              {u}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <span className="text-[10px] text-muted-foreground w-8 text-right shrink-0">{fixedUnit}</span>
+      )}
     </div>
   );
 }
