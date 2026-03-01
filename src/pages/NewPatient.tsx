@@ -274,18 +274,18 @@ export default function NewPatient() {
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        {/* Compact header bar with title + stepper + cancel */}
-        <div className="bg-card border rounded-lg px-5 py-3">
-          <div className="flex items-center justify-between mb-3">
+        {/* Premium header bar with title + stepper + cancel */}
+        <div className="bg-gradient-to-r from-medical-navy/[0.03] to-accent/[0.04] border rounded-xl px-6 py-4 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <h1 className="text-lg font-semibold text-foreground">{isEdit ? 'Edit Patient' : 'Add New Patient'}</h1>
+              <h1 className="text-lg font-bold text-foreground tracking-tight">{isEdit ? 'Edit Patient' : 'Add New Patient'}</h1>
               {isEdit && mrNumber && (
-                <span className="text-xs font-medium bg-accent/10 text-accent px-2.5 py-1 rounded-full">
+                <span className="text-[11px] font-semibold bg-accent/15 text-accent px-3 py-1 rounded-full border border-accent/20">
                   MR# {mrNumber}
                 </span>
               )}
             </div>
-            <Button variant="ghost" size="sm" onClick={handleCancel} disabled={isSubmitting} className="text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="sm" onClick={handleCancel} disabled={isSubmitting} className="text-muted-foreground hover:text-destructive transition-colors">
               <X className="h-4 w-4 mr-1" />
               Cancel
             </Button>
