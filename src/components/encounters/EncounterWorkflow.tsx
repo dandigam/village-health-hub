@@ -304,15 +304,21 @@ function SubjectStep({ data, onChange, encounterId }: { data: SubjectData; onCha
 
   return (
     <div className="space-y-5">
-      {/* Chief Complaint */}
+      {/* Known Conditions */}
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Chief Complaint</Label>
-        <Textarea
-          className="min-h-[70px] text-sm border-border/50 focus:border-primary/40"
-          placeholder="Describe the patient's main complaint..."
-          value={data.chiefComplaint}
-          onChange={(e) => onChange({ ...data, chiefComplaint: e.target.value })}
-        />
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Known Conditions</Label>
+        <div className="flex flex-wrap gap-3">
+          {conditionsLoading ? (
+            <span className="text-xs text-muted-foreground">Loading conditions...</span>
+          ) : (
+            conditionsLookup.map(c => (
+              <label key={c.id} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
+                <Checkbox checked={data.conditions.includes(c.name)} onCheckedChange={() => onChange({ ...data, conditions: toggleArray(data.conditions, c.name) })} />
+                {c.name}
+              </label>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Quick Symptom Chips */}
@@ -344,22 +350,18 @@ function SubjectStep({ data, onChange, encounterId }: { data: SubjectData; onCha
         </div>
       </div>
 
-      {/* Conditions */}
+      {/* Chief Complaint */}
       <div>
-        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Known Conditions</Label>
-        <div className="flex flex-wrap gap-3">
-          {conditionsLoading ? (
-            <span className="text-xs text-muted-foreground">Loading conditions...</span>
-          ) : (
-            conditionsLookup.map(c => (
-              <label key={c.id} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
-                <Checkbox checked={data.conditions.includes(c.name)} onCheckedChange={() => onChange({ ...data, conditions: toggleArray(data.conditions, c.name) })} />
-                {c.name}
-              </label>
-            ))
-          )}
-        </div>
+        <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 block">Chief Complaint</Label>
+        <Textarea
+          className="min-h-[70px] text-sm border-border/50 focus:border-primary/40"
+          placeholder="Describe the patient's main complaint..."
+          value={data.chiefComplaint}
+          onChange={(e) => onChange({ ...data, chiefComplaint: e.target.value })}
+        />
       </div>
+
+      {/* Additional Notes */}
 
       {/* Lifestyle */}
       <div>
