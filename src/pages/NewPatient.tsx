@@ -268,20 +268,26 @@ export default function NewPatient() {
   if (isLoading) {
     return <div>Loading...</div>;
   }
+  const isEdit = !!id;
+  const mrNumber = patientData?.patientId || id;
+
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">{id ? 'Edit Patient' : 'Add New Patient'}</h1>
-          <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSubmitting}>
-            <X className="h-4 w-4 mr-1" />
-            Cancel
+        {/* Compact header with inline stepper */}
+        <div className="flex items-center justify-between bg-card border rounded-lg px-4 py-2.5">
+          <div className="flex items-center gap-3 shrink-0">
+            <h1 className="text-base font-bold text-foreground">{isEdit ? 'Edit Patient' : 'Add New Patient'}</h1>
+            {isEdit && mrNumber && (
+              <span className="text-[10px] font-semibold bg-accent/12 text-accent px-2 py-0.5 rounded-full border border-accent/20">MR# {mrNumber}</span>
+            )}
+          </div>
+          <div className="flex-1 max-w-[520px] mx-6">
+            <PatientStepper steps={STEPS} currentStep={currentStep} onStepClick={handleStepClick} />
+          </div>
+          <Button variant="ghost" size="icon" onClick={handleCancel} disabled={isSubmitting} className="text-muted-foreground hover:text-destructive h-8 w-8">
+            <X className="h-4 w-4" />
           </Button>
-        </div>
-        {/* Stepper */}
-        <div className="bg-card border rounded-lg p-4">
-          <PatientStepper steps={STEPS} currentStep={currentStep} onStepClick={handleStepClick} />
         </div>
         {/* Step Content */}
         <div className="min-h-[400px]">
