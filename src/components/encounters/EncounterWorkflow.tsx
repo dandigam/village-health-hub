@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { EncounterPatient } from '@/pages/encounters/Encounters';
-import { useMedicines, useStockItems } from '@/hooks/useApiData';
+import { useMedicines, useStockItems, useSymptoms, useConditionsLookup, useEncounterSubject } from '@/hooks/useApiData';
 import {
   MessageSquare, Activity, Stethoscope, Pill, ChevronRight,
   Save, RotateCcw, ClipboardList, Search, Trash2, Send, AlertTriangle,
@@ -233,7 +233,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
       {/* Step Content */}
       <ScrollArea className="flex-1">
         <div className="p-4 sm:p-5">
-          {activeStep === 1 && <SubjectStep data={subject} onChange={setSubject} />}
+          {activeStep === 1 && <SubjectStep data={subject} onChange={setSubject} encounterId={encounter.encounterId} />}
           {activeStep === 2 && <ObjectStep data={object} onChange={handleObjectChange} />}
           {activeStep === 3 && <AssessmentStep data={assessment} onChange={handleAssessmentChange} />}
           {activeStep === 4 && <PlanStep plan={plan} setPlan={setPlan} />}
@@ -265,14 +265,39 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
 // ═══════════════════════════════════════════════════════════
 // Step 1: Subject — Chief Complaint + Symptom Chips + Lifestyle
 // ═══════════════════════════════════════════════════════════
-function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: SubjectData) => void }) {
-  const SYMPTOM_CHIPS = [
-    'Headache', 'Fever', 'Chest Pain', 'Shortness of Breath', 'Fatigue',
-    'Dizziness', 'Nausea', 'Vomiting', 'Back Pain', 'Joint Pain',
-    'Blurred Vision', 'Tingling/Numbness', 'Cough', 'Sore Throat',
-    'Abdominal Pain', 'Loss of Appetite', 'Insomnia', 'Anxiety',
-  ];
-  const CONDITIONS = ['Diabetes', 'HTN', 'Seizures', 'Stroke', 'Asthma', 'COPD', 'Thyroid'];
+
+const CHIP_COLORS = [
+  { bg: 'bg-[hsl(200,80%,94%)]', border: 'border-[hsl(200,70%,70%)]', text: 'text-[hsl(200,70%,30%)]', activeBg: 'bg-[hsl(200,70%,50%)]', activeText: 'text-white', activeBorder: 'border-[hsl(200,70%,50%)]' },
+  { bg: 'bg-[hsl(150,60%,93%)]', border: 'border-[hsl(150,50%,65%)]', text: 'text-[hsl(150,50%,28%)]', activeBg: 'bg-[hsl(150,50%,42%)]', activeText: 'text-white', activeBorder: 'border-[hsl(150,50%,42%)]' },
+  { bg: 'bg-[hsl(30,80%,93%)]', border: 'border-[hsl(30,70%,65%)]', text: 'text-[hsl(30,60%,30%)]', activeBg: 'bg-[hsl(30,70%,50%)]', activeText: 'text-white', activeBorder: 'border-[hsl(30,70%,50%)]' },
+  { bg: 'bg-[hsl(280,60%,94%)]', border: 'border-[hsl(280,50%,68%)]', text: 'text-[hsl(280,50%,30%)]', activeBg: 'bg-[hsl(280,50%,50%)]', activeText: 'text-white', activeBorder: 'border-[hsl(280,50%,50%)]' },
+  { bg: 'bg-[hsl(350,70%,94%)]', border: 'border-[hsl(350,60%,70%)]', text: 'text-[hsl(350,60%,32%)]', activeBg: 'bg-[hsl(350,60%,50%)]', activeText: 'text-white', activeBorder: 'border-[hsl(350,60%,50%)]' },
+  { bg: 'bg-[hsl(60,60%,92%)]', border: 'border-[hsl(60,50%,60%)]', text: 'text-[hsl(60,40%,28%)]', activeBg: 'bg-[hsl(60,50%,42%)]', activeText: 'text-white', activeBorder: 'border-[hsl(60,50%,42%)]' },
+];
+
+function getChipColor(index: number) {
+  return CHIP_COLORS[index % CHIP_COLORS.length];
+}
+
+function SubjectStep({ data, onChange, encounterId }: { data: SubjectData; onChange: (d: SubjectData) => void; encounterId: number }) {
+  const { data: symptomsLookup = [], isLoading: symptomsLoading } = useSymptoms();
+  const { data: conditionsLookup = [], isLoading: conditionsLoading } = useConditionsLookup();
+  const { data: existingSubject } = useEncounterSubject(encounterId || null);
+  const [initialized, setInitialized] = useState(false);
+
+  // Pre-populate from existing subject data
+  useEffect(() => {
+    if (existingSubject && !initialized) {
+      onChange({
+        ...data,
+        chiefComplaint: existingSubject.chiefComplaintText || data.chiefComplaint,
+        symptoms: existingSubject.symptoms || data.symptoms,
+        conditions: existingSubject.conditions || data.conditions,
+        additionalNotes: existingSubject.additionalNotes || data.additionalNotes,
+      });
+      setInitialized(true);
+    }
+  }, [existingSubject, initialized]);
 
   const toggleArray = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item];
@@ -294,19 +319,28 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Quick Symptoms</Label>
         <div className="flex flex-wrap gap-2">
-          {SYMPTOM_CHIPS.map(s => (
-            <button
-              key={s} type="button" onClick={() => onChange({ ...data, symptoms: toggleArray(data.symptoms, s) })}
-              className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200',
-                data.symptoms.includes(s)
-                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                  : 'bg-card text-muted-foreground border-border/60 hover:border-primary/50 hover:text-foreground'
-              )}
-            >
-              {s}
-            </button>
-          ))}
+          {symptomsLoading ? (
+            <span className="text-xs text-muted-foreground">Loading symptoms...</span>
+          ) : (
+            symptomsLookup.map((s, idx) => {
+              const active = data.symptoms.includes(s.name);
+              const color = getChipColor(idx);
+              return (
+                <button
+                  key={s.id} type="button"
+                  onClick={() => onChange({ ...data, symptoms: toggleArray(data.symptoms, s.name) })}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200',
+                    active
+                      ? `${color.activeBg} ${color.activeText} ${color.activeBorder} shadow-sm`
+                      : `${color.bg} ${color.text} ${color.border} hover:opacity-80`
+                  )}
+                >
+                  {s.name}
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -314,12 +348,16 @@ function SubjectStep({ data, onChange }: { data: SubjectData; onChange: (d: Subj
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Known Conditions</Label>
         <div className="flex flex-wrap gap-3">
-          {CONDITIONS.map(c => (
-            <label key={c} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
-              <Checkbox checked={data.conditions.includes(c)} onCheckedChange={() => onChange({ ...data, conditions: toggleArray(data.conditions, c) })} />
-              {c}
-            </label>
-          ))}
+          {conditionsLoading ? (
+            <span className="text-xs text-muted-foreground">Loading conditions...</span>
+          ) : (
+            conditionsLookup.map(c => (
+              <label key={c.id} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
+                <Checkbox checked={data.conditions.includes(c.name)} onCheckedChange={() => onChange({ ...data, conditions: toggleArray(data.conditions, c.name) })} />
+                {c.name}
+              </label>
+            ))
+          )}
         </div>
       </div>
 
