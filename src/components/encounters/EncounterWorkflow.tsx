@@ -333,7 +333,7 @@ function SubjectStep({ data, onChange, encounterId }: { data: SubjectData; onCha
                     'px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200',
                     active
                       ? `${color.activeBg} ${color.activeText} ${color.activeBorder} shadow-sm`
-                      : `${color.bg} ${color.text} ${color.border} hover:opacity-80`
+                      : 'bg-muted/40 text-muted-foreground border-border/50 hover:bg-muted/60'
                   )}
                 >
                   {s.name}
