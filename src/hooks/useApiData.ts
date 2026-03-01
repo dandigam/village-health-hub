@@ -500,6 +500,52 @@ export function useEncounterQueue(campEventId: number | null) {
     },
     enabled: !!campEventId,
     staleTime: 10_000,
-    refetchInterval: 15_000, // Auto-refresh every 15s
+    refetchInterval: 15_000,
+  });
+}
+
+// ─── Lookup: Symptoms ─────────────────────────────────────────────
+export interface LookupItem {
+  id: number;
+  name: string;
+}
+
+export function useSymptoms() {
+  return useQuery<LookupItem[]>({
+    queryKey: ['lookup-symptoms'],
+    queryFn: () => request<LookupItem[]>('/lookup/symptoms'),
+    staleTime: STALE_TIME,
+    refetchOnWindowFocus: false,
+  });
+}
+
+// ─── Lookup: Conditions ───────────────────────────────────────────
+export function useConditionsLookup() {
+  return useQuery<LookupItem[]>({
+    queryKey: ['lookup-conditions'],
+    queryFn: () => request<LookupItem[]>('/lookup/conditions'),
+    staleTime: STALE_TIME,
+    refetchOnWindowFocus: false,
+  });
+}
+
+// ─── Encounter Subject ────────────────────────────────────────────
+export interface EncounterSubjectData {
+  id: number;
+  chiefComplaintText: string;
+  symptoms: string[];
+  conditions: string[];
+  additionalNotes: string;
+  createdAt: string;
+}
+
+export function useEncounterSubject(encounterId: number | null) {
+  return useQuery<EncounterSubjectData | null>({
+    queryKey: ['encounter-subject', encounterId],
+    queryFn: () => request<EncounterSubjectData>(`/subject/encounter/${encounterId}`),
+    enabled: !!encounterId,
+    staleTime: STALE_TIME,
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 }

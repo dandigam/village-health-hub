@@ -27,6 +27,7 @@ export interface EncounterPatient {
   isReturning: boolean;
   assignedDoctor?: string;
   currentStep: number;
+  encounterId: number;
 }
 
 export const statusConfig: Record<EncounterStatus, { label: string; icon: any; color: string; bgColor: string; borderColor: string }> = {
@@ -96,6 +97,7 @@ function mapQueueItemToEncounter(item: EncounterQueueItem, index: number): Encou
     isReturning: false,
     assignedDoctor: item.doctor?.name,
     currentStep: status === 'COMPLETED' ? 5 : status === 'PHARMACY' ? 5 : status === 'WITH_DOCTOR' ? 2 : 0,
+    encounterId: item.encounter.id,
   };
 }
 
@@ -170,6 +172,7 @@ export default function Encounters() {
       waitingMinutes: 0,
       isReturning: encounterQueue.some(e => e.patient.id === patient.id),
       currentStep: 0,
+      encounterId: 0,
     };
     setEncounterQueue(prev => [...prev, newEncounter]);
     setPatientSearch('');
