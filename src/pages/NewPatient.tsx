@@ -268,19 +268,28 @@ export default function NewPatient() {
   if (isLoading) {
     return <div>Loading...</div>;
   }
+  const isEdit = !!id;
+  const mrNumber = patientData?.patientId || id;
+
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">{id ? 'Edit Patient' : 'Add New Patient'}</h1>
-          <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSubmitting}>
-            <X className="h-4 w-4 mr-1" />
-            Cancel
-          </Button>
-        </div>
-        {/* Stepper */}
-        <div className="bg-card border rounded-lg p-4">
+        {/* Compact header bar with title + stepper + cancel */}
+        <div className="bg-card border rounded-lg px-5 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <h1 className="text-lg font-semibold text-foreground">{isEdit ? 'Edit Patient' : 'Add New Patient'}</h1>
+              {isEdit && mrNumber && (
+                <span className="text-xs font-medium bg-accent/10 text-accent px-2.5 py-1 rounded-full">
+                  MR# {mrNumber}
+                </span>
+              )}
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleCancel} disabled={isSubmitting} className="text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4 mr-1" />
+              Cancel
+            </Button>
+          </div>
           <PatientStepper steps={STEPS} currentStep={currentStep} onStepClick={handleStepClick} />
         </div>
         {/* Step Content */}
