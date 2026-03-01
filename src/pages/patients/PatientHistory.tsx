@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { X, User, Printer, FileText } from 'lucide-react';
+import { X, Printer, FileText } from 'lucide-react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { VisitTimeline, type Visit } from '@/components/patients/VisitTimeline';
@@ -32,12 +33,12 @@ export default function PatientHistory() {
 
   if (!patient) {
     return (
-      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
-        <div className="text-center">
+      <DashboardLayout>
+        <div className="text-center py-12">
           <p className="text-muted-foreground">Patient not found</p>
           <Button className="mt-4" onClick={() => navigate('/patients')}>Back to Patients</Button>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -83,9 +84,9 @@ export default function PatientHistory() {
   const initials = patientName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      {/* Compact header bar */}
-      <div className="border-b bg-muted/30 px-5 py-3 flex items-center justify-between shrink-0">
+    <DashboardLayout>
+      {/* Compact patient header bar */}
+      <div className="border-b bg-muted/30 -mx-6 -mt-6 px-5 py-3 flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
             <AvatarFallback className="bg-accent/15 text-accent text-xs font-semibold">{initials}</AvatarFallback>
@@ -111,42 +112,22 @@ export default function PatientHistory() {
       </div>
 
       {/* Print header */}
-      <div className="hidden print:block mb-6 px-5 pt-4">
+      <div className="hidden print:block mb-6">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold">HealthCamp PRO</h1>
           <p className="text-sm text-muted-foreground">Patient History Report</p>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 overflow-auto p-5">
-        {/* Patient summary card */}
-        <Card className="mb-5">
-          <CardContent className="py-4">
-            <div className="flex items-center gap-5">
-              <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
-                <User className="h-6 w-6 text-accent" />
-              </div>
-              <div className="flex-1 grid grid-cols-4 gap-4">
-                <div><p className="text-[10px] text-muted-foreground uppercase tracking-wider">Full Name</p><p className="text-sm font-semibold">{patientName}</p></div>
-                <div><p className="text-[10px] text-muted-foreground uppercase tracking-wider">Age / Gender</p><p className="text-sm font-semibold">{patient.age} yrs / {patient.gender}</p></div>
-                <div><p className="text-[10px] text-muted-foreground uppercase tracking-wider">Phone</p><p className="text-sm font-semibold">{patient.phone || patient.phoneNumber || ''}</p></div>
-                <div><p className="text-[10px] text-muted-foreground uppercase tracking-wider">Village</p><p className="text-sm font-semibold">{patient.village || patient.address?.cityVillage || ''}, {patient.district || patient.address?.district || ''}</p></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Timeline + Detail */}
-        <div className="flex gap-5">
-          <div className="w-[28%] flex-shrink-0">
-            <Card><CardContent className="py-4"><VisitTimeline visits={visits} selectedId={selectedVisit?.id || null} onSelect={setSelectedVisit} /></CardContent></Card>
-          </div>
-          <div className="flex-1">
-            <Card className="sticky top-4"><CardContent className="py-5"><VisitDetailPanel visit={selectedVisit} /></CardContent></Card>
-          </div>
+      {/* Timeline + Detail */}
+      <div className="flex gap-5">
+        <div className="w-[28%] flex-shrink-0">
+          <Card><CardContent className="py-4"><VisitTimeline visits={visits} selectedId={selectedVisit?.id || null} onSelect={setSelectedVisit} /></CardContent></Card>
+        </div>
+        <div className="flex-1">
+          <Card className="sticky top-4"><CardContent className="py-5"><VisitDetailPanel visit={selectedVisit} /></CardContent></Card>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
