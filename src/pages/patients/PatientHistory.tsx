@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, FileText, Printer } from 'lucide-react';
+import { X, Printer, FileText } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { VisitTimeline, type Visit } from '@/components/patients/VisitTimeline';
 import { VisitDetailPanel } from '@/components/patients/VisitDetailPanel';
 import { usePatients, usePrescriptions, usePayments, useDoctors, useCamps } from '@/hooks/useApiData';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export default function PatientHistory() {
   const { id } = useParams();
@@ -15,18 +16,14 @@ export default function PatientHistory() {
   const [initialized, setInitialized] = useState(false);
 
   const { data: patientsRaw = [] } = usePatients();
-  // Handle paginated API response (with 'content' array)
   const allPatients = Array.isArray((patientsRaw as any).content)
     ? (patientsRaw as any).content
-    : Array.isArray(patientsRaw)
-      ? patientsRaw
-      : [];
+    : Array.isArray(patientsRaw) ? patientsRaw : [];
   const { data: allPrescriptions = [] } = usePrescriptions();
   const { data: allPayments = [] } = usePayments();
   const { data: allDoctors = [] } = useDoctors();
   const { data: allCamps = [] } = useCamps();
 
-  // Ensure id types match (string vs number)
   const patient = allPatients.find(p => String(p.id) === String(id));
   const patientPrescriptions = allPrescriptions.filter(p => p.patientId === id);
   const patientPayments = allPayments.filter(p => p.patientId === id);
@@ -55,9 +52,7 @@ export default function PatientHistory() {
       campName: camp?.name || 'Unknown Camp',
       amount: { paid: payment?.paidAmount || 0, pending: payment?.pendingAmount || 0 },
       chiefComplaint: `Visit with ${doctorName}`,
-      vitals: 'No vitals',
-      assessment: '',
-      plan: '',
+      vitals: 'No vitals', assessment: '', plan: '',
       fullDetails: {
         campId: prescription.campId, campName: camp?.name || 'Unknown Camp', campLocation: camp?.location || 'Unknown',
         visitDate: prescription.createdAt,
@@ -85,34 +80,46 @@ export default function PatientHistory() {
     setInitialized(true);
   }
 
+  const patientName = `${patient.name || patient.firstName || ''} ${patient.surname || patient.lastName || ''}`.trim();
+  const initials = patientName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
   return (
     <DashboardLayout>
-      <div className="page-header no-print">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/patients')}><ArrowLeft className="h-5 w-5" /></Button>
-          <div><h1 className="page-title">Patient History</h1><p className="text-muted-foreground text-sm">{patient.patientId}</p></div>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Print</Button>
-          <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => navigate('/encounters')}><FileText className="mr-2 h-4 w-4" />New Encounter</Button>
-        </div>
-      </div>
-      <div className="hidden print:block mb-6">
-        <div className="text-center mb-4"><h1 className="text-2xl font-bold">HealthCamp PRO</h1><p className="text-sm text-muted-foreground">Medical Camp - Patient History Report</p></div>
-      </div>
-      <Card className="mb-6">
-        <CardContent className="py-5">
-          <div className="flex items-center gap-5">
-            <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0"><User className="h-7 w-7 text-accent" /></div>
-            <div className="flex-1 grid grid-cols-4 gap-4">
-              <div><p className="text-xs text-muted-foreground">Full Name</p><p className="text-sm font-semibold">{patient.name || patient.firstName || ''} {patient.surname || patient.lastName || ''}</p></div>
-              <div><p className="text-xs text-muted-foreground">Age / Gender</p><p className="text-sm font-semibold">{patient.age} yrs / {patient.gender}</p></div>
-              <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm font-semibold">{patient.phone || patient.phoneNumber || ''}</p></div>
-              <div><p className="text-xs text-muted-foreground">Village</p><p className="text-sm font-semibold">{patient.village || patient.address?.cityVillage || ''}, {patient.district || patient.address?.district || ''}</p></div>
-            </div>
+      {/* Compact patient header bar */}
+      <div className="border-b bg-muted/30 -mx-6 -mt-6 px-5 py-3 flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9">
+            <AvatarFallback className="bg-accent/15 text-accent text-xs font-semibold">{initials}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-semibold text-foreground leading-tight">{patientName}</p>
+            <p className="text-[11px] text-muted-foreground">
+              MR#: {patient.patientId}, DOB: {patient.dob || 'N/A'} ({patient.gender?.[0] || 'U'}).
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="mr-2 h-4 w-4" />Print
+          </Button>
+          <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => navigate('/encounters')}>
+            <FileText className="mr-2 h-4 w-4" />New Encounter
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 ml-1" onClick={() => navigate('/patients')}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Print header */}
+      <div className="hidden print:block mb-6">
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold">HealthCamp PRO</h1>
+          <p className="text-sm text-muted-foreground">Patient History Report</p>
+        </div>
+      </div>
+
+      {/* Timeline + Detail */}
       <div className="flex gap-5">
         <div className="w-[28%] flex-shrink-0">
           <Card><CardContent className="py-4"><VisitTimeline visits={visits} selectedId={selectedVisit?.id || null} onSelect={setSelectedVisit} /></CardContent></Card>

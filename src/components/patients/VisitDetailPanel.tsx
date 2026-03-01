@@ -1,4 +1,4 @@
-import { FileText, Pill, Printer } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -37,14 +37,6 @@ export function VisitDetailPanel({ visit }: VisitDetailPanelProps) {
           </p>
         </div>
         <div className="flex gap-1.5">
-          <Button variant="outline" size="sm" className="h-8 text-xs">
-            <FileText className="h-3.5 w-3.5 mr-1" />
-            SOAP
-          </Button>
-          <Button variant="outline" size="sm" className="h-8 text-xs">
-            <Pill className="h-3.5 w-3.5 mr-1" />
-            Rx
-          </Button>
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => window.print()}>
             <Printer className="h-3.5 w-3.5 mr-1" />
             Print
