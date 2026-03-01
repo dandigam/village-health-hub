@@ -20,22 +20,22 @@ export function SearchFilter({
   action
 }: SearchFilterProps) {
   return (
-    <div className="flex items-center justify-between gap-4 mb-6">
-      <div className="flex items-center gap-4">
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3">
         {title && (
-          <h1 className="text-xl font-semibold text-foreground whitespace-nowrap">
+          <h1 className="text-base font-semibold text-foreground whitespace-nowrap">
             {title} {count !== undefined && (
-              <span className="text-muted-foreground font-normal">({count})</span>
+              <span className="text-muted-foreground font-normal text-sm">({count})</span>
             )}
           </h1>
         )}
-        <div className="relative w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative w-64">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder={placeholder}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="pl-10 h-10 bg-background border-border"
+            className="pl-8 h-8 text-sm bg-background border-border"
           />
         </div>
       </div>

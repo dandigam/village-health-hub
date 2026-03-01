@@ -82,7 +82,7 @@ export default function Patients() {
   return (
     <DashboardLayout>
       {/* Header with search + filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
         <SearchFilter
           title="Patients List"
           count={filteredPatients.length}
@@ -90,10 +90,10 @@ export default function Patients() {
           value={searchTerm}
           onChange={handleSearchChange}
         />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-[160px] h-10">
-              <Filter className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+            <SelectTrigger className="w-[140px] h-8 text-sm">
+              <Filter className="h-3 w-3 mr-1 text-muted-foreground" />
               <SelectValue placeholder="Filter Status" />
             </SelectTrigger>
             <SelectContent>
@@ -102,8 +102,8 @@ export default function Patients() {
               ))}
             </SelectContent>
           </Select>
-          <Button className="bg-accent hover:bg-accent/90" onClick={() => navigate('/patients/new')}>
-            <UserPlus className="mr-2 h-4 w-4" />
+          <Button className="bg-accent hover:bg-accent/90 h-8 text-sm px-3" onClick={() => navigate('/patients/new')}>
+            <UserPlus className="mr-1.5 h-3.5 w-3.5" />
             Add New Patient
           </Button>
         </div>
