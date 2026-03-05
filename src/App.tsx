@@ -39,6 +39,10 @@ import SupplierOrders from "./pages/supplier-orders/SupplierOrders";
 // Distribution Orders
 import DistributionOrders from "./pages/distribution/DistributionOrders";
 
+// Invoices
+import Invoices from "./pages/invoices/Invoices";
+import NewInvoice from "./pages/invoices/NewInvoice";
+
 // Warehouses
 import WarehouseManagement from "./pages/warehouses/WarehouseManagement";
 
