@@ -235,6 +235,10 @@ export default function Invoices() {
           open={!!selectedOrder}
           onOpenChange={(open) => !open && setSelectedOrder(null)}
           order={selectedOrder}
+          onEdit={(invoice) => {
+            setSelectedOrder(null);
+            navigate('/invoices/new', { state: { invoice } });
+          }}
         />
       </div>
     </DashboardLayout>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,21 +46,41 @@ const emptyItem = (): InvoiceItem => ({
 
 export default function NewInvoice() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser } = useAuth();
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
 
   const { data: suppliers = [] } = useSupplierList(warehouseId);
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
 
-  // Invoice details
-  const [supplierId, setSupplierId] = useState('');
-  const [paymentMode, setPaymentMode] = useState('');
-  const [invoiceId, setInvoiceId] = useState('');
-  const [invoiceAmount, setInvoiceAmount] = useState('0.00');
-  const [invoiceDate, setInvoiceDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  // Check if editing an existing invoice
+  const editingInvoice = (location.state as any)?.invoice || null;
+  const isEditMode = !!editingInvoice;
 
-  // Items
-  const [items, setItems] = useState<InvoiceItem[]>([]);
+  // Invoice details
+  const [supplierId, setSupplierId] = useState(editingInvoice?.supplierId ? String(editingInvoice.supplierId) : '');
+  const [paymentMode, setPaymentMode] = useState(editingInvoice?.paymentMode || '');
+  const [invoiceId, setInvoiceId] = useState(editingInvoice?.invoiceNumber || '');
+  const [invoiceAmount, setInvoiceAmount] = useState(editingInvoice?.invoiceAmount ? String(editingInvoice.invoiceAmount) : '0.00');
+  const [invoiceDate, setInvoiceDate] = useState(editingInvoice?.invoiceDate || format(new Date(), 'yyyy-MM-dd'));
+
+  // Items - pre-fill from editing invoice
+  const [items, setItems] = useState<InvoiceItem[]>(() => {
+    if (editingInvoice?.items?.length) {
+      return editingInvoice.items.map((item: any) => ({
+        tempId: nextTempId++,
+        medicineId: item.medicineId || '',
+        medicineName: item.medicineName || '',
+        medicineType: item.medicineType || '',
+        isAlreadyExist: item.isAlreadyExist !== false,
+        hsnNo: item.hsnNo || '',
+        batchNo: item.batchNo || '',
+        expDate: item.expDate || '',
+        quantity: item.quantity || 0,
+      }));
+    }
+    return [];
+  });
   const [currentItem, setCurrentItem] = useState<InvoiceItem>(emptyItem());
   const [editingTempId, setEditingTempId] = useState<number | null>(null);
   const [medicineSearch, setMedicineSearch] = useState('');
@@ -193,20 +213,32 @@ export default function NewInvoice() {
         invoiceNumber: invoiceId || undefined,
         invoiceAmount: parseFloat(invoiceAmount) || 0,
         invoiceDate,
-        items: items.map(item => ({
-          medicineId: item.isAlreadyExist ? Number(item.medicineId) : undefined,
-          medicineName: item.medicineName,
-          medicineType: item.medicineType,
-          isAlreadyExist: item.isAlreadyExist,
-          hsnNo: item.hsnNo || undefined,
-          batchNo: item.batchNo || undefined,
-          expDate: item.expDate || undefined,
-          quantity: Number(item.quantity),
-          warehouseId,
-        })),
+        items: items.map(item => {
+          const base: any = {
+            isAlreadyExist: item.isAlreadyExist,
+            hsnNo: item.hsnNo || undefined,
+            batchNo: item.batchNo || undefined,
+            expDate: item.expDate || undefined,
+            quantity: Number(item.quantity),
+            warehouseId,
+          };
+          if (item.isAlreadyExist) {
+            base.medicineId = Number(item.medicineId);
+          } else {
+            base.medicineName = item.medicineName;
+            base.medicineType = item.medicineType;
+          }
+          return base;
+        }),
       };
-      await api.post('/invoices', payload);
-      toast.success('Stock entry saved successfully');
+
+      if (isEditMode && editingInvoice?.id) {
+        await api.put(`/invoices/${editingInvoice.id}`, payload);
+        toast.success('Stock entry updated successfully');
+      } else {
+        await api.post('/invoices', payload);
+        toast.success('Stock entry saved successfully');
+      }
       navigate('/invoices');
     } catch (e) {
       toast.error('Failed to save stock entry');
@@ -225,9 +257,9 @@ export default function NewInvoice() {
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => navigate('/invoices')}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-lg font-bold tracking-tight">New Stock Entry</h1>
-            <p className="text-xs text-muted-foreground">Record incoming stock from suppliers</p>
+           <div className="flex-1">
+            <h1 className="text-lg font-bold tracking-tight">{isEditMode ? 'Edit Stock Entry' : 'New Stock Entry'}</h1>
+            <p className="text-xs text-muted-foreground">{isEditMode ? 'Update existing stock entry' : 'Record incoming stock from suppliers'}</p>
           </div>
         </div>
 
@@ -494,7 +526,7 @@ export default function NewInvoice() {
           <Button variant="outline" className="h-9 text-sm" onClick={() => navigate('/invoices')}>Cancel</Button>
           <Button className="h-9 text-sm px-6 shadow-md" onClick={handleSave} disabled={saving}>
             <Check className="w-4 h-4 mr-1.5" />
-            {saving ? 'Saving...' : 'Save Stock'}
+            {saving ? 'Saving...' : isEditMode ? 'Update Stock' : 'Save Stock'}
           </Button>
         </div>
       </div>
