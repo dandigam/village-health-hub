@@ -154,55 +154,140 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
   const exportPDF = useCallback(() => {
     const doc = new jsPDF({ orientation: 'landscape' });
     const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 14;
 
-    // Title
-    doc.setFontSize(16);
+    // ─── HEADER ───────────────────────────────────────────
+    // Header background
+    doc.setFillColor(20, 40, 80);
+    doc.rect(0, 0, pageW, 38, 'F');
+
+    // Warehouse name centered
+    const wName = warehouseInfo?.name || 'Medicine Inventory';
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Medicine Inventory Report', 14, 18);
-    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.text(wName, pageW / 2, 15, { align: 'center' });
+
+    // Address line
+    if (warehouseInfo) {
+      const addressParts = [warehouseInfo.village, warehouseInfo.mandal, warehouseInfo.district, warehouseInfo.state, warehouseInfo.pinCode].filter(Boolean);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(200, 210, 230);
+      doc.text(addressParts.join(', '), pageW / 2, 22, { align: 'center' });
+
+      // Contact line
+      const contactParts: string[] = [];
+      if (warehouseInfo.phoneNumber) contactParts.push(`Phone: ${warehouseInfo.phoneNumber}`);
+      if (warehouseInfo.email) contactParts.push(`Email: ${warehouseInfo.email}`);
+      if (warehouseInfo.licenceNumber) contactParts.push(`Licence: ${warehouseInfo.licenceNumber}`);
+      if (contactParts.length) {
+        doc.setFontSize(8);
+        doc.text(contactParts.join('  |  '), pageW / 2, 28, { align: 'center' });
+      }
+
+      if (warehouseInfo.authorizedPerson) {
+        doc.setFontSize(8);
+        doc.setTextColor(180, 195, 220);
+        doc.text(`Authorized Person: ${warehouseInfo.authorizedPerson}`, pageW / 2, 34, { align: 'center' });
+      }
+    }
+
+    // ─── REPORT TITLE & SUMMARY ──────────────────────────
+    let y = 48;
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 40, 60);
+    doc.text('Medicine Inventory Report', margin, y);
+
+    doc.setFontSize(8.5);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(120);
-    doc.text(`Generated: ${new Date().toLocaleDateString()} | Total: ${processed.length} items | Critical: ${criticalCount} | Warning: ${warningCount}`, 14, 25);
+    doc.setTextColor(100, 110, 130);
+    doc.text(
+      `Generated: ${new Date().toLocaleDateString()}  |  Total: ${processed.length} items  |  Critical: ${criticalCount}  |  Warning: ${warningCount}  |  In Stock: ${processed.length - criticalCount - warningCount}`,
+      margin, y + 7
+    );
+
+    // Divider
+    y += 14;
+    doc.setDrawColor(200, 210, 225);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageW - margin, y);
+
+    // ─── TABLE ────────────────────────────────────────────
+    y += 8;
+    const colX = [margin, 120, 165, 200, 240];
+    const colLabels = ['Medicine Name', 'Type', 'Current Qty', 'Min Qty', 'Status'];
 
     // Table header
-    const colX = [14, 110, 155, 195, 235];
-    const colLabels = ['Medicine Name', 'Type', 'Current Qty', 'Min Qty', 'Status'];
-    let y = 35;
-    doc.setFillColor(241, 243, 248);
-    doc.rect(10, y - 5, pageW - 20, 8, 'F');
+    doc.setFillColor(235, 240, 250);
+    doc.roundedRect(margin - 2, y - 5, pageW - (margin * 2) + 4, 9, 1, 1, 'F');
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(60);
+    doc.setTextColor(40, 50, 80);
     colLabels.forEach((label, i) => doc.text(label, colX[i], y));
     y += 10;
 
-    // Rows
+    // Table rows
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
-    processed.forEach((item) => {
-      if (y > doc.internal.pageSize.getHeight() - 15) {
+    processed.forEach((item, idx) => {
+      if (y > pageH - 30) {
+        // Footer before page break
+        addFooter(doc, pageW, pageH, margin, warehouseInfo);
         doc.addPage();
         y = 20;
       }
-      const statusLabel = statusConfig[item.status].label;
-      doc.setTextColor(30);
+
+      // Alternate row bg
+      if (idx % 2 === 0) {
+        doc.setFillColor(248, 250, 255);
+        doc.rect(margin - 2, y - 4, pageW - (margin * 2) + 4, 7, 'F');
+      }
+
+      doc.setTextColor(30, 35, 50);
       doc.text(item.medicineName, colX[0], y);
       doc.text(item.medicineType || '-', colX[1], y);
       doc.text(String(item.quantity), colX[2], y);
       doc.text(String(item.minQty), colX[3], y);
 
       // Status colored
-      if (item.status === 'critical') doc.setTextColor(220, 38, 38);
-      else if (item.status === 'warning') doc.setTextColor(202, 138, 4);
-      else doc.setTextColor(22, 163, 74);
+      const statusLabel = statusConfig[item.status].label;
+      if (item.status === 'critical') doc.setTextColor(200, 30, 30);
+      else if (item.status === 'warning') doc.setTextColor(180, 120, 0);
+      else doc.setTextColor(20, 140, 60);
+      doc.setFont('helvetica', 'bold');
       doc.text(statusLabel, colX[4], y);
-      doc.setTextColor(30);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(30, 35, 50);
       y += 7;
     });
 
+    // ─── FOOTER ───────────────────────────────────────────
+    addFooter(doc, pageW, pageH, margin, warehouseInfo);
+
     doc.save(`inventory-${new Date().toISOString().slice(0, 10)}.pdf`);
     toast.success('PDF exported successfully');
-  }, [processed, criticalCount, warningCount]);
+  }, [processed, criticalCount, warningCount, warehouseInfo]);
+
+  function addFooter(doc: jsPDF, pageW: number, pageH: number, margin: number, wInfo?: WarehouseInfo) {
+    const footerY = pageH - 15;
+    // Divider
+    doc.setDrawColor(200, 210, 225);
+    doc.setLineWidth(0.4);
+    doc.line(margin, footerY - 4, pageW - margin, footerY - 4);
+
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(130, 140, 160);
+    doc.text('Medical Camp Management System', margin, footerY);
+    doc.text('Support: support@medicalcamp.com', margin, footerY + 4);
+
+    const rightText = wInfo?.name ? `${wInfo.name} — Confidential` : 'Confidential';
+    doc.text(rightText, pageW - margin, footerY, { align: 'right' });
+    doc.text(`Printed: ${new Date().toLocaleString()}`, pageW - margin, footerY + 4, { align: 'right' });
+  }
 
   return (
     <div className="space-y-4">
