@@ -84,7 +84,7 @@ export default function Invoices() {
         <TableHeader>
           <TableRow className="bg-muted/30">
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Order ID</TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Camp</TableHead>
+            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Supplier</TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Supplier</TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Requested At</TableHead>
