@@ -213,20 +213,32 @@ export default function NewInvoice() {
         invoiceNumber: invoiceId || undefined,
         invoiceAmount: parseFloat(invoiceAmount) || 0,
         invoiceDate,
-        items: items.map(item => ({
-          medicineId: item.isAlreadyExist ? Number(item.medicineId) : undefined,
-          medicineName: item.medicineName,
-          medicineType: item.medicineType,
-          isAlreadyExist: item.isAlreadyExist,
-          hsnNo: item.hsnNo || undefined,
-          batchNo: item.batchNo || undefined,
-          expDate: item.expDate || undefined,
-          quantity: Number(item.quantity),
-          warehouseId,
-        })),
+        items: items.map(item => {
+          const base: any = {
+            isAlreadyExist: item.isAlreadyExist,
+            hsnNo: item.hsnNo || undefined,
+            batchNo: item.batchNo || undefined,
+            expDate: item.expDate || undefined,
+            quantity: Number(item.quantity),
+            warehouseId,
+          };
+          if (item.isAlreadyExist) {
+            base.medicineId = Number(item.medicineId);
+          } else {
+            base.medicineName = item.medicineName;
+            base.medicineType = item.medicineType;
+          }
+          return base;
+        }),
       };
-      await api.post('/invoices', payload);
-      toast.success('Stock entry saved successfully');
+
+      if (isEditMode && editingInvoice?.id) {
+        await api.put(`/invoices/${editingInvoice.id}`, payload);
+        toast.success('Stock entry updated successfully');
+      } else {
+        await api.post('/invoices', payload);
+        toast.success('Stock entry saved successfully');
+      }
       navigate('/invoices');
     } catch (e) {
       toast.error('Failed to save stock entry');
