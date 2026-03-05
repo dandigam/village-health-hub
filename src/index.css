@@ -37,11 +37,19 @@
     --radius: 0.625rem;
 
     /* Semantic Status Colors */
-    --navy: 222 75% 18%;
-    --navy-light: 222 60% 35%;
-    --success: 158 60% 42%;
-    --warning: 38 88% 50%;
-    --info: 218 75% 52%;
+    --navy: 222 78% 18%;
+    --navy-light: 222 65% 35%;
+    --success: 152 65% 40%;
+    --warning: 40 92% 50%;
+    --info: 218 80% 52%;
+    
+    /* Stock status tokens */
+    --stock-ok: 152 65% 40%;
+    --stock-ok-bg: 152 55% 94%;
+    --stock-warning: 40 92% 50%;
+    --stock-warning-bg: 40 80% 94%;
+    --stock-critical: 0 78% 52%;
+    --stock-critical-bg: 0 65% 95%;
     
     /* Stat Card Colors — refined pastels */
     --stat-blue: 218 75% 94%;
