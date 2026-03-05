@@ -62,6 +62,7 @@ export default function NewCampTemplate() {
   useEffect(() => {
     if (isEdit && editTemplate) {
       setForm({
+        campId: editTemplate.id || '',
         campName: editTemplate.campName || '',
         organizerName: editTemplate.organizerName || '',
         organizerPhone: editTemplate.organizerPhone || '',
