@@ -41,6 +41,7 @@ export default function Invoices() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('stock-entry');
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   const filtered = useMemo(() => {
     let result = orders;
