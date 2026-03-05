@@ -1,11 +1,9 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-import { FileText, Package, Calendar, CreditCard, Building2, Truck, Pencil, Share2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { FileText, Package, Calendar, CreditCard, Building2, Truck } from 'lucide-react';
 import type { Invoice, InvoiceItem } from '@/hooks/useApiData';
 
 interface InvoiceDetailDrawerProps {
