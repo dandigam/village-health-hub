@@ -181,9 +181,9 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
       doc.text(addressParts.join(', '), pageW / 2, 23, { align: 'center' });
 
       const contactParts: string[] = [];
-      if (warehouseInfo.phoneNumber) contactParts.push(`📞 ${warehouseInfo.phoneNumber}`);
-      if (warehouseInfo.email) contactParts.push(`✉ ${warehouseInfo.email}`);
-      if (warehouseInfo.licenceNumber) contactParts.push(`🔖 Licence: ${warehouseInfo.licenceNumber}`);
+      if (warehouseInfo.phoneNumber) contactParts.push(`Ph: ${warehouseInfo.phoneNumber}`);
+      if (warehouseInfo.email) contactParts.push(`Email: ${warehouseInfo.email}`);
+      if (warehouseInfo.licenceNumber) contactParts.push(`Licence: ${warehouseInfo.licenceNumber}`);
       if (contactParts.length) {
         doc.setFontSize(8);
         doc.setTextColor(160, 185, 230);
