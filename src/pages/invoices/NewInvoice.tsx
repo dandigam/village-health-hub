@@ -149,19 +149,6 @@ export default function NewInvoice() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs font-medium">Select Camp</Label>
-              <Select value={campId} onValueChange={setCampId}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="Select Camp" />
-                </SelectTrigger>
-                <SelectContent>
-                  {campEvents.map((c: any) => (
-                    <SelectItem key={c.id} value={String(c.id)}>{c.campName || c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
               <Label className="text-xs font-medium">Supplier *</Label>
               <Select value={supplierId} onValueChange={setSupplierId}>
                 <SelectTrigger className="h-9 text-sm">
