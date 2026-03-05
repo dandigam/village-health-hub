@@ -45,7 +45,7 @@ export default function NewInvoice() {
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
 
   // Invoice details
-  const [campId, setCampId] = useState('');
+  
   const [supplierId, setSupplierId] = useState('');
   const [paymentMode, setPaymentMode] = useState('');
   const [invoiceId, setInvoiceId] = useState('');
