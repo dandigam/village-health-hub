@@ -109,7 +109,7 @@ export function SupplierOrdersTab() {
   };
 
   // Derived data
-  const currentOrders = orders.filter(o => o.status === 'sent' || o.status === 'pending' || o.status === 'partial' || o.status === 'draft');
+  const currentOrders = orders.filter(o => ['sent', 'pending', 'partial', 'draft'].includes(o.status));
   const pendingOrders = orders.filter(o => o.status === 'sent' || o.status === 'pending');
 
   const ordersByMonth: Record<string, SupplierOrder[]> = {};
