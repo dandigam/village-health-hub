@@ -270,7 +270,7 @@ export default function WarehouseDashboard() {
                     .map((item) => {
                       const pct = item.minimumQty > 0 ? Math.round((item.totalQty / item.minimumQty) * 100) : 0;
                       return (
-                        <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-destructive/5 hover:bg-destructive/8 transition-colors">
+                        <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-destructive/5 hover:bg-destructive/10 transition-colors cursor-pointer" onClick={() => navigate('/stock')}>
                           <div className="flex items-center gap-2.5">
                             <div className="p-1.5 rounded-lg bg-destructive/10">
                               <Package className="h-3.5 w-3.5 text-destructive" />
