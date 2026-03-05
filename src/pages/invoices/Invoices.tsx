@@ -121,7 +121,7 @@ export default function Invoices() {
                 onClick={() => setSelectedOrder(order)}
               >
                 <TableCell className="font-mono text-xs font-semibold text-primary">#{order.id}</TableCell>
-                <TableCell className="text-sm">{order.supplierName || '—'}</TableCell>
+                <TableCell><StatusChip status={order.status} /></TableCell>
                 <TableCell className="text-sm">{order.supplierName || '—'}</TableCell>
                 <TableCell><StatusChip status={order.status} /></TableCell>
                 <TableCell className="text-xs text-muted-foreground">
