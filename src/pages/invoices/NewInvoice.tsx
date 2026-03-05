@@ -232,13 +232,8 @@ export default function NewInvoice() {
         }),
       };
 
-      if (isEditMode && editingInvoice?.id) {
-        await api.put(`/invoices/${editingInvoice.id}`, payload);
-        toast.success('Stock entry updated successfully');
-      } else {
-        await api.post('/invoices', payload);
-        toast.success('Stock entry saved successfully');
-      }
+      await api.post('/invoices', payload);
+      toast.success(isEditMode ? 'Stock entry updated successfully' : 'Stock entry saved successfully');
       navigate('/invoices');
     } catch (e) {
       toast.error('Failed to save stock entry');
