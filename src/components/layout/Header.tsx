@@ -11,9 +11,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useSupplierOrders } from '@/hooks/useApiData';
+import { useSupplierOrders, useWarehouseDetail } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { hasAccess } from '@/config/routeAccess';
+import { Warehouse } from 'lucide-react';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
