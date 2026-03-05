@@ -11,9 +11,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useSupplierOrders } from '@/hooks/useApiData';
+import { useSupplierOrders, useWarehouseDetail } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { hasAccess } from '@/config/routeAccess';
+import { Warehouse } from 'lucide-react';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -27,6 +28,9 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
   const currentUser = { name: authUser?.name || '', role: authUser?.roleDisplayName || authUser?.role || '', avatar: authUser?.avatar || undefined as string | undefined };
   const campName = authUser?.context?.campName;
+  const isWarehouse = authUser?.role === 'WAREHOUSE';
+  const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
+  const { data: warehouseDetail } = useWarehouseDetail(isWarehouse ? warehouseId : undefined);
 
   const handleLogout = () => {
     logout();
@@ -55,7 +59,17 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <span className="text-[10px] text-white/60 block -mt-0.5 font-medium">Management System</span>
           </div>
         </div>
-        {campName && (
+        {isWarehouse && warehouseDetail ? (
+          <div className="hidden md:flex items-center gap-2.5 border-l border-white/15 pl-4 ml-2">
+            <div className="p-1.5 rounded-lg bg-white/10">
+              <Warehouse className="h-4 w-4 text-white/80" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">{warehouseDetail.name}</p>
+              <p className="text-[10px] text-white/50">{warehouseDetail.village}, {warehouseDetail.district}</p>
+            </div>
+          </div>
+        ) : campName ? (
           <div className="hidden md:flex items-center gap-2 border-l border-white/15 pl-4 ml-2">
             <MapPin className="h-4 w-4 text-white/60" />
             <div>
@@ -63,18 +77,20 @@ export function Header({ onMenuToggle }: HeaderProps) {
               <p className="text-[10px] text-white/50">Current Camp</p>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
-      <div className="hidden lg:flex items-center max-w-md flex-1 mx-8">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
-          <Input 
-            placeholder={currentUser.role === "WAREHOUSE" ? "Search Supplier Medicines..." : "Search Patient by MR Number / First Name / Surname"} 
-            className="pl-10 bg-white/95 border-0 shadow-sm text-foreground placeholder:text-muted-foreground/60 h-9 rounded-lg" 
-          />
+      {!isWarehouse && (
+        <div className="hidden lg:flex items-center max-w-md flex-1 mx-8">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
+            <Input 
+              placeholder="Search Patient by MR Number / First Name / Surname" 
+              className="pl-10 bg-white/95 border-0 shadow-sm text-foreground placeholder:text-muted-foreground/60 h-9 rounded-lg" 
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex items-center gap-1 sm:gap-2">
         <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/[0.08] h-8 w-8 sm:h-9 sm:w-9">

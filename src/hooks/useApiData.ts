@@ -466,6 +466,39 @@ export function useWarehouseDashboardStats(warehouseId?: number) {
   });
 }
 
+export interface WarehouseDetail {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  authorizedPerson: string;
+  licenceNumber: string;
+  state: string;
+  district: string;
+  mandal: string;
+  village: string;
+  pinCode: string;
+  userId: number;
+}
+
+export function useWarehouseDetail(warehouseId?: number) {
+  return useQuery<WarehouseDetail>({
+    queryKey: ['warehouse-detail', warehouseId],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/warehouse/${warehouseId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('token') ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}),
+        },
+      });
+      if (!res.ok) throw new Error('Failed to fetch warehouse detail');
+      return res.json();
+    },
+    enabled: !!warehouseId,
+    staleTime: STALE_TIME,
+  });
+}
+
 // ── Mutation Hooks ───────────────────────────────────────────
 
 export function useSaveCamp() {

@@ -14,7 +14,8 @@ import {
 } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 
 const stagger = { animate: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
@@ -25,6 +26,7 @@ export default function WarehouseDashboard() {
   const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
 
   const { data: dashStats, refetch } = useWarehouseDashboardStats(warehouseId);
+  const alertShownRef = useRef(false);
   useEffect(() => { refetch(); }, [warehouseId]);
 
   const { data: distributions = [] } = useDistributions();
@@ -47,6 +49,22 @@ export default function WarehouseDashboard() {
     { label: 'Orders', icon: ShoppingCart, href: '/supplier-orders', color: 'text-stat-orange-text', bg: 'bg-stat-orange', borderColor: 'border-[hsl(var(--stat-orange-text)/0.12)]' },
     { label: 'Distribution', icon: ArrowRightLeft, href: '/distribution-orders', color: 'text-stat-purple-text', bg: 'bg-stat-purple', borderColor: 'border-[hsl(var(--stat-purple-text)/0.12)]' },
   ];
+
+  // Show low stock alert toast on first load
+  const lowStockItems = inventory.filter(item => item.totalQty <= item.minimumQty);
+  useEffect(() => {
+    if (!alertShownRef.current && lowStockItems.length > 0) {
+      alertShownRef.current = true;
+      toast.warning(`⚠️ ${lowStockItems.length} medicine(s) are running low on stock!`, {
+        description: 'Click to view low stock items',
+        duration: 8000,
+        action: {
+          label: 'View Stock',
+          onClick: () => navigate('/stock'),
+        },
+      });
+    }
+  }, [lowStockItems.length, navigate]);
 
   // Calculate stock health percentage
   const stockHealthPct = totalMedicines > 0 ? Math.round(((totalMedicines - lowStockCount) / totalMedicines) * 100) : 100;
@@ -109,7 +127,7 @@ export default function WarehouseDashboard() {
           </Card>
 
           {/* Low Stock */}
-          <Card className={cn("border-0 shadow-sm overflow-hidden relative", lowStockCount > 0 ? "bg-gradient-to-br from-stat-orange to-stat-orange/40" : "bg-gradient-to-br from-stat-green to-stat-green/40")}>
+          <Card className={cn("border-0 shadow-sm overflow-hidden relative cursor-pointer hover:shadow-md transition-shadow", lowStockCount > 0 ? "bg-gradient-to-br from-stat-orange to-stat-orange/40" : "bg-gradient-to-br from-stat-green to-stat-green/40")} onClick={() => lowStockCount > 0 && navigate('/stock')}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -252,7 +270,7 @@ export default function WarehouseDashboard() {
                     .map((item) => {
                       const pct = item.minimumQty > 0 ? Math.round((item.totalQty / item.minimumQty) * 100) : 0;
                       return (
-                        <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-destructive/5 hover:bg-destructive/8 transition-colors">
+                        <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-destructive/5 hover:bg-destructive/10 transition-colors cursor-pointer" onClick={() => navigate('/stock')}>
                           <div className="flex items-center gap-2.5">
                             <div className="p-1.5 rounded-lg bg-destructive/10">
                               <Package className="h-3.5 w-3.5 text-destructive" />
