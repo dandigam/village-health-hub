@@ -18,6 +18,20 @@ import { PageLoader } from '@/components/shared/PageLoader';
 
 export type EncounterStatus = 'WAITING' | 'WITH_DOCTOR' | 'PHARMACY' | 'COMPLETED';
 
+export interface EncounterSubject {
+  id: number;
+  encounterId: number;
+  chiefComplaintText: string;
+  additionalNotes: string;
+  symptomIds: number[];
+  symptoms: string[];
+  conditionIds: number[];
+  conditions: string[];
+  lifestyleIds: number[];
+  lifestyles: string[];
+  createdAt: string;
+}
+
 export interface EncounterPatient {
   patient: Patient;
   status: EncounterStatus;
@@ -28,6 +42,7 @@ export interface EncounterPatient {
   assignedDoctor?: string;
   currentStep: number;
   encounterId: number;
+  encounterSubject: EncounterSubject | null;
 }
 
 export const statusConfig: Record<EncounterStatus, { label: string; icon: any; color: string; bgColor: string; borderColor: string }> = {
@@ -98,6 +113,7 @@ function mapQueueItemToEncounter(item: EncounterQueueItem, index: number): Encou
     assignedDoctor: item.doctor?.name,
     currentStep: status === 'COMPLETED' ? 5 : status === 'PHARMACY' ? 5 : status === 'WITH_DOCTOR' ? 2 : 0,
     encounterId: item.encounter.id,
+    encounterSubject: item.encounter.encounterSubject || null,
   };
 }
 
@@ -173,6 +189,7 @@ export default function Encounters() {
       isReturning: encounterQueue.some(e => e.patient.id === patient.id),
       currentStep: 0,
       encounterId: 0,
+      encounterSubject: null,
     };
     setEncounterQueue(prev => [...prev, newEncounter]);
     setPatientSearch('');

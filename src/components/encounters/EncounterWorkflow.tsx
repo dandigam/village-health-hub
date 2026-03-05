@@ -10,12 +10,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { EncounterPatient } from '@/pages/encounters/Encounters';
-import { useMedicines, useStockItems, useSymptoms, useConditionsLookup, useEncounterSubject } from '@/hooks/useApiData';
+import { useMedicines, useStockItems, useSymptoms, useConditionsLookup, useLifestyles, useSaveEncounterClinical, useEncounter, EncounterSubjectResponse } from '@/hooks/useApiData';
+import { toast } from 'sonner';
 import {
   MessageSquare, Activity, Stethoscope, Pill, ChevronRight,
   Save, RotateCcw, ClipboardList, Search, Trash2, Send, AlertTriangle,
   Thermometer, Heart, Scale, Wind, Droplets, FlaskConical, ImageIcon,
-  Cigarette, Wine,
 } from 'lucide-react';
 
 interface EncounterWorkflowProps {
@@ -41,9 +41,7 @@ interface SubjectData {
   chiefComplaint: string;
   symptoms: string[];
   conditions: string[];
-  isSmoking: boolean;
-  isDrinking: boolean;
-  isTakingMedicines: boolean;
+  lifestyles: string[];
   additionalNotes: string;
 }
 
@@ -93,9 +91,17 @@ interface PlanData {
 export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagnosesChange, onVitalsChange }: EncounterWorkflowProps) {
   const [activeStep, setActiveStep] = useState(encounter.currentStep || 1);
 
+  // Fetch encounter data including encounterSubject from /encounters/{encounterId}
+  const { data: encounterData } = useEncounter(encounter.encounterId);
+
+  // Lookup data for ID conversion
+  const { data: symptomsLookup = [] } = useSymptoms();
+  const { data: conditionsLookup = [] } = useConditionsLookup();
+  const { data: lifestylesLookup = [] } = useLifestyles();
+  const saveClinicalMutation = useSaveEncounterClinical();
+
   const [subject, setSubject] = useState<SubjectData>({
-    chiefComplaint: '', symptoms: [], conditions: [],
-    isSmoking: false, isDrinking: false, isTakingMedicines: false, additionalNotes: '',
+    chiefComplaint: '', symptoms: [], conditions: [], lifestyles: [], additionalNotes: '',
   });
   const [object, setObject] = useState<ObjectData>({
     weight: '', bp: '', pulse: '', temp: '', spo2: '',
@@ -133,6 +139,37 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
     onStepChange(step);
   };
 
+  // Convert names to IDs and save subject via /encounters/clinical
+  const handleSaveSubject = async () => {
+    const symptomIds = subject.symptoms
+      .map(name => symptomsLookup.find(s => s.name === name)?.id)
+      .filter((id): id is number => id !== undefined);
+    const conditionIds = subject.conditions
+      .map(name => conditionsLookup.find(c => c.name === name)?.id)
+      .filter((id): id is number => id !== undefined);
+    const lifestyleIds = subject.lifestyles
+      .map(name => lifestylesLookup.find(l => l.name === name)?.id)
+      .filter((id): id is number => id !== undefined);
+
+    try {
+      await saveClinicalMutation.mutateAsync({
+        encounterId: encounter.encounterId,
+        subject: {
+          id: encounterData?.encounterSubject?.id || 0,
+          encounterId: encounter.encounterId,
+          chiefComplaintText: subject.chiefComplaint,
+          additionalNotes: subject.additionalNotes,
+          symptomIds,
+          conditionIds,
+          lifestyleIds,
+        },
+      });
+      toast.success('Subject saved successfully');
+    } catch (error) {
+      toast.error('Failed to save subject');
+    }
+  };
+
   const isCompleted = encounter.status === 'COMPLETED' || encounter.status === 'PHARMACY';
 
   return (
@@ -165,8 +202,8 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
               </p>
             </div>
           </div>
-          <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 border-border/50">
-            <Save className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">Save</span>
+          <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5 border-border/50" onClick={handleSaveSubject} disabled={saveClinicalMutation.isPending}>
+            <Save className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">{saveClinicalMutation.isPending ? 'Saving...' : 'Save'}</span>
           </Button>
         </div>
 
@@ -233,7 +270,7 @@ export function EncounterWorkflow({ encounter, onStepChange, onComplete, onDiagn
       {/* Step Content */}
       <ScrollArea className="flex-1">
         <div className="p-4 sm:p-5">
-          {activeStep === 1 && <SubjectStep data={subject} onChange={setSubject} encounterId={encounter.encounterId} />}
+          {activeStep === 1 && <SubjectStep data={subject} onChange={setSubject} encounterId={encounter.encounterId} encounterSubject={encounterData?.encounterSubject || null} />}
           {activeStep === 2 && <ObjectStep data={object} onChange={handleObjectChange} />}
           {activeStep === 3 && <AssessmentStep data={assessment} onChange={handleAssessmentChange} />}
           {activeStep === 4 && <PlanStep plan={plan} setPlan={setPlan} />}
@@ -279,25 +316,26 @@ function getChipColor(index: number) {
   return CHIP_COLORS[index % CHIP_COLORS.length];
 }
 
-function SubjectStep({ data, onChange, encounterId }: { data: SubjectData; onChange: (d: SubjectData) => void; encounterId: number }) {
+function SubjectStep({ data, onChange, encounterId, encounterSubject }: { data: SubjectData; onChange: (d: SubjectData) => void; encounterId: number; encounterSubject: EncounterSubjectResponse | null }) {
   const { data: symptomsLookup = [], isLoading: symptomsLoading } = useSymptoms();
   const { data: conditionsLookup = [], isLoading: conditionsLoading } = useConditionsLookup();
-  const { data: existingSubject } = useEncounterSubject(encounterId || null);
+  const { data: lifestylesLookup = [], isLoading: lifestylesLoading } = useLifestyles();
   const [initialized, setInitialized] = useState(false);
 
-  // Pre-populate from existing subject data
+  // Pre-populate from existing subject data (from encounter.encounterSubject)
   useEffect(() => {
-    if (existingSubject && !initialized) {
+    if (encounterSubject && !initialized) {
       onChange({
         ...data,
-        chiefComplaint: existingSubject.chiefComplaintText || data.chiefComplaint,
-        symptoms: existingSubject.symptoms || data.symptoms,
-        conditions: existingSubject.conditions || data.conditions,
-        additionalNotes: existingSubject.additionalNotes || data.additionalNotes,
+        chiefComplaint: encounterSubject.chiefComplaintText || data.chiefComplaint,
+        symptoms: encounterSubject.symptoms || data.symptoms,
+        conditions: encounterSubject.conditions || data.conditions,
+        lifestyles: encounterSubject.lifestyles || data.lifestyles,
+        additionalNotes: encounterSubject.additionalNotes || data.additionalNotes,
       });
       setInitialized(true);
     }
-  }, [existingSubject, initialized]);
+  }, [encounterSubject, initialized]);
 
   const toggleArray = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item];
@@ -353,23 +391,17 @@ function SubjectStep({ data, onChange, encounterId }: { data: SubjectData; onCha
       {/* Lifestyle */}
       <div>
         <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Lifestyle</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {([
-            { key: 'isSmoking' as const, label: 'Smoking', icon: Cigarette },
-            { key: 'isDrinking' as const, label: 'Alcohol', icon: Wine },
-            { key: 'isTakingMedicines' as const, label: 'Current Medicines', icon: Pill },
-          ]).map(q => (
-            <div key={q.key} className="flex items-center justify-between p-2.5 rounded-lg border border-border/50 bg-card hover:bg-muted/20 transition-colors">
-              <span className="text-xs font-medium flex items-center gap-1.5">
-                <q.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                {q.label}
-              </span>
-              <div className="flex gap-1">
-                <button type="button" className={cn('px-3 py-1 rounded-md text-[10px] font-semibold border transition-all', data[q.key] ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'border-border/60 text-muted-foreground hover:bg-muted/50')} onClick={() => onChange({ ...data, [q.key]: true })}>Yes</button>
-                <button type="button" className={cn('px-3 py-1 rounded-md text-[10px] font-semibold border transition-all', !data[q.key] ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'border-border/60 text-muted-foreground hover:bg-muted/50')} onClick={() => onChange({ ...data, [q.key]: false })}>No</button>
-              </div>
-            </div>
-          ))}
+        <div className="flex flex-wrap gap-3">
+          {lifestylesLoading ? (
+            <span className="text-xs text-muted-foreground">Loading lifestyles...</span>
+          ) : (
+            lifestylesLookup.map(l => (
+              <label key={l.id} className="flex items-center gap-1.5 cursor-pointer text-xs hover:text-foreground transition-colors">
+                <Checkbox checked={data.lifestyles.includes(l.name)} onCheckedChange={() => onChange({ ...data, lifestyles: toggleArray(data.lifestyles, l.name) })} />
+                {l.name}
+              </label>
+            ))
+          )}
         </div>
       </div>
 
@@ -782,9 +814,10 @@ function ReviewStep({ subject, object, assessment, plan }: {
         </div>
         <div className="border rounded-lg p-3">
           <p className="text-[10px] font-semibold uppercase text-muted-foreground mb-1.5">Lifestyle</p>
-          <div className="flex gap-3 text-xs">
-            <span>Smoking: <strong>{subject.isSmoking ? 'Yes' : 'No'}</strong></span>
-            <span>Alcohol: <strong>{subject.isDrinking ? 'Yes' : 'No'}</strong></span>
+          <div className="flex flex-wrap gap-1">
+            {subject.lifestyles.length > 0 ? subject.lifestyles.map(l => (
+              <Badge key={l} variant="outline" className="text-[10px] bg-orange-100 text-orange-700 border-orange-300">{l}</Badge>
+            )) : <span className="text-xs text-muted-foreground italic">None selected</span>}
           </div>
         </div>
         <div className="border rounded-lg p-3">

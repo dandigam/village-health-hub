@@ -91,7 +91,8 @@ export function useCampTemplates() {
   return useQuery({
     queryKey: ['campTemplates'],
     queryFn: () => fetchWithFallback<CampTemplate[]>('/camp-templates', mockCampTemplates),
-    staleTime: STALE_TIME,
+    staleTime: 0,
+    refetchOnMount: 'always',
     select: (res) => res.data,
   });
 }
@@ -100,7 +101,8 @@ export function useCampEvents() {
   return useQuery({
     queryKey: ['campEvents'],
     queryFn: () => fetchWithFallback<CampEvent[]>('/camp-events', mockCampEvents),
-    staleTime: STALE_TIME,
+    staleTime: 0,
+    refetchOnMount: 'always',
     select: (res) => res.data,
   });
 }
@@ -344,7 +346,54 @@ export function useWarehouseInventory(warehouseId?: number) {
       `/warehouse-inventory/warehouse/${warehouseId}`,
       []
     ),
-    staleTime: STALE_TIME,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    select: (res) => res.data,
+    enabled: !!warehouseId,
+  });
+}
+
+// ── Invoices ─────────────────────────────────────────────────
+
+export interface InvoiceItem {
+  id: number;
+  invoiceId: number;
+  medicineId: number;
+  medicineName: string;
+  medicineType: string | null;
+  isAlreadyExist: boolean;
+  hsnNo: string;
+  batchNo: string;
+  expDate: string;
+  quantity: number;
+  warehouseId: number;
+  warehouseName: string;
+}
+
+export interface Invoice {
+  id: number;
+  supplierId: number;
+  supplierName: string;
+  paymentMode: string;
+  invoiceNumber: string;
+  invoiceAmount: number;
+  invoiceDate: string;
+  warehouseId: number;
+  warehouseName: string;
+  items: InvoiceItem[];
+  createdBy: string | null;
+  createdAt: string;
+}
+
+export function useInvoices(warehouseId?: number) {
+  return useQuery({
+    queryKey: ['invoices', warehouseId],
+    queryFn: () => fetchWithFallback<Invoice[]>(
+      `/invoices/warehouse/${warehouseId}`,
+      []
+    ),
+    staleTime: 0,
+    refetchOnMount: 'always',
     select: (res) => res.data,
     enabled: !!warehouseId,
   });
@@ -469,6 +518,21 @@ export function useDeleteSupplier(warehouseId?: number) {
   });
 }
 
+// ─── Encounter Subject (embedded in encounter) ────────────────────
+export interface EncounterSubjectResponse {
+  id: number;
+  encounterId: number;
+  chiefComplaintText: string;
+  additionalNotes: string;
+  symptomIds: number[];
+  symptoms: string[];
+  conditionIds: number[];
+  conditions: string[];
+  lifestyleIds: number[];
+  lifestyles: string[];
+  createdAt: string;
+}
+
 // ─── Encounter Queue ───────────────────────────────────────────────
 export interface EncounterQueueItem {
   age: number;
@@ -483,6 +547,7 @@ export interface EncounterQueueItem {
   encounter: {
     id: number;
     encounterStatus: string;
+    encounterSubject: EncounterSubjectResponse | null;
   };
   gender: string;
   mr: string;
@@ -501,6 +566,29 @@ export function useEncounterQueue(campEventId: number | null) {
     enabled: !!campEventId,
     staleTime: 10_000,
     refetchInterval: 15_000,
+  });
+}
+
+// ─── Single Encounter ─────────────────────────────────────────────
+export interface EncounterResponse {
+  id: number;
+  campEventId: number;
+  patientId: number;
+  doctorId: number;
+  status: string;
+  tokenNumber: number;
+  subjectId: number | null;
+  createdAt: string;
+  encounterSubject: EncounterSubjectResponse | null;
+}
+
+export function useEncounter(encounterId: number | null) {
+  return useQuery<EncounterResponse | null>({
+    queryKey: ['encounter', encounterId],
+    queryFn: () => request<EncounterResponse>(`/encounters/${encounterId}`),
+    enabled: !!encounterId,
+    staleTime: STALE_TIME,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -529,23 +617,41 @@ export function useConditionsLookup() {
   });
 }
 
-// ─── Encounter Subject ────────────────────────────────────────────
-export interface EncounterSubjectData {
-  id: number;
-  chiefComplaintText: string;
-  symptoms: string[];
-  conditions: string[];
-  additionalNotes: string;
-  createdAt: string;
-}
-
-export function useEncounterSubject(encounterId: number | null) {
-  return useQuery<EncounterSubjectData | null>({
-    queryKey: ['encounter-subject', encounterId],
-    queryFn: () => request<EncounterSubjectData>(`/subject/encounter/${encounterId}`),
-    enabled: !!encounterId,
+// ─── Lookup: Lifestyles ───────────────────────────────────────────
+export function useLifestyles() {
+  return useQuery<LookupItem[]>({
+    queryKey: ['lookup-lifestyles'],
+    queryFn: () => request<LookupItem[]>('/lookup/lifestyles'),
     staleTime: STALE_TIME,
     refetchOnWindowFocus: false,
-    retry: false,
+  });
+}
+
+// ─── Encounter Subject ────────────────────────────────────────────
+// Note: EncounterSubjectData is now fetched as part of the encounter response (encounterSubject)
+// The separate useEncounterSubject hook has been removed - use encounter.encounterSubject instead
+
+// ─── Save Encounter Clinical Data (Subject) ────────────────────────────────────────
+export interface SaveEncounterClinicalPayload {
+  encounterId: number;
+  subject: {
+    id: number;
+    encounterId: number;
+    chiefComplaintText: string;
+    additionalNotes: string;
+    symptomIds: number[];
+    conditionIds: number[];
+    lifestyleIds: number[];
+  };
+}
+
+export function useSaveEncounterClinical() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: SaveEncounterClinicalPayload) =>
+      api.post('/encounters/clinical', payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['encounter', variables.encounterId] });
+    },
   });
 }

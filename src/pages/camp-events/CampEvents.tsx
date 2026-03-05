@@ -25,7 +25,7 @@ const statusColors: Record<string, string> = {
 
 export default function CampEvents() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('started');
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmAction, setConfirmAction] = useState<{ type: 'start' | 'close'; eventId: string; name: string } | null>(null);
   const { data: events = [] } = useCampEvents();
@@ -79,19 +79,19 @@ export default function CampEvents() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
         <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="planned">
-            <span className="w-2 h-2 rounded-full bg-[hsl(var(--stat-orange-text))] mr-1.5" />
-            Planned
-          </TabsTrigger>
           <TabsTrigger value="started">
             <span className="w-2 h-2 rounded-full bg-[hsl(var(--stat-green-text))] mr-1.5" />
             Active
+          </TabsTrigger>
+          <TabsTrigger value="planned">
+            <span className="w-2 h-2 rounded-full bg-[hsl(var(--stat-orange-text))] mr-1.5" />
+            Planned
           </TabsTrigger>
           <TabsTrigger value="closed">
             <span className="w-2 h-2 rounded-full bg-muted-foreground mr-1.5" />
             Closed
           </TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
         </TabsList>
       </Tabs>
 
