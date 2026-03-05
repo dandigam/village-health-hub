@@ -118,7 +118,7 @@ export default function Invoices() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 className="border-b border-border/40 hover:bg-muted/20 transition-colors cursor-pointer"
-                onClick={() => {}}
+                onClick={() => setSelectedOrder(order)}
               >
                 <TableCell className="font-mono text-xs font-semibold text-primary">#{order.id}</TableCell>
                 <TableCell className="text-sm">{order.campName || '—'}</TableCell>
