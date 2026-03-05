@@ -232,11 +232,11 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
     // Table rows
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
+    let pageCount = 1;
     processed.forEach((item, idx) => {
-      if (y > pageH - 30) {
-        // Footer before page break
-        addFooter(doc, pageW, pageH, margin, warehouseInfo);
+      if (y > pageH - 35) {
         doc.addPage();
+        pageCount++;
         y = 20;
       }
 
@@ -264,29 +264,95 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
       y += 7;
     });
 
-    // ─── FOOTER ───────────────────────────────────────────
-    addFooter(doc, pageW, pageH, margin, warehouseInfo);
+    // ─── ADD FOOTERS TO ALL PAGES ─────────────────────────
+    const totalPages = pageCount;
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      addFooter(doc, pageW, pageH, margin, warehouseInfo, p, totalPages);
+    }
 
     doc.save(`inventory-${new Date().toISOString().slice(0, 10)}.pdf`);
     toast.success('PDF exported successfully');
   }, [processed, criticalCount, warningCount, warehouseInfo]);
 
-  function addFooter(doc: jsPDF, pageW: number, pageH: number, margin: number, wInfo?: WarehouseInfo) {
-    const footerY = pageH - 15;
-    // Divider
-    doc.setDrawColor(200, 210, 225);
-    doc.setLineWidth(0.4);
-    doc.line(margin, footerY - 4, pageW - margin, footerY - 4);
+  function formatPrintDate(): string {
+    const now = new Date();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const day = String(now.getDate()).padStart(2, '0');
+    const mon = months[now.getMonth()];
+    const year = now.getFullYear();
+    const h = now.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const sec = String(now.getSeconds()).padStart(2, '0');
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    return `${day}-${mon}-${year} | ${String(h12).padStart(2,'0')}:${min}:${sec} ${ampm} ${tz}`;
+  }
 
-    doc.setFontSize(7);
+  function addFooter(doc: jsPDF, pageW: number, pageH: number, margin: number, wInfo?: WarehouseInfo, pageNum?: number, totalPages?: number) {
+    const footerH = 28;
+    const footerTop = pageH - footerH;
+
+    // Footer background — subtle off-white surface
+    doc.setFillColor(243, 244, 246); // #F3F4F6
+    doc.rect(0, footerTop, pageW, footerH, 'F');
+
+    // Top border — slate blue, 2pt
+    doc.setDrawColor(100, 116, 139); // #64748B
+    doc.setLineWidth(0.8);
+    doc.line(margin, footerTop, pageW - margin, footerTop);
+
+    const row1Y = footerTop + 7;
+    const row2Y = footerTop + 12;
+    const row3Y = footerTop + 17;
+
+    // ── Left column ──────────────────────────────────
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(55, 65, 81); // Charcoal #374151
+    doc.text('Medical Camp Management System (v2.4)', margin, row1Y);
+
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(130, 140, 160);
-    doc.text('Medical Camp Management System', margin, footerY);
-    doc.text('Support: support@medicalcamp.com', margin, footerY + 4);
+    doc.setFontSize(7);
+    doc.setTextColor(75, 85, 99); // #4B5563
+    doc.text('Support: support@medicalcamp.com  |  Help Center', margin, row2Y);
 
-    const rightText = wInfo?.name ? `${wInfo.name} — Confidential` : 'Confidential';
-    doc.text(rightText, pageW - margin, footerY, { align: 'right' });
-    doc.text(`Printed: ${new Date().toLocaleString()}`, pageW - margin, footerY + 4, { align: 'right' });
+    // Links row
+    doc.setTextColor(100, 116, 139); // #64748B
+    doc.setFontSize(6.5);
+    doc.text('Privacy Policy  |  Terms of Service  |  System Status', margin, row3Y);
+
+    // ── Right column ─────────────────────────────────
+    // Warehouse name + CONFIDENTIAL badge
+    const wName = wInfo?.name || 'Inventory Report';
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(55, 65, 81);
+    doc.text(wName, pageW - margin, row1Y, { align: 'right' });
+
+    // CONFIDENTIAL in deep red
+    const confText = 'CONFIDENTIAL';
+    const confWidth = doc.getTextWidth(confText) + 4;
+    doc.setFillColor(153, 27, 27); // #991B1B
+    doc.roundedRect(pageW - margin - confWidth - 1, row1Y - 3.5, confWidth + 2, 5, 1, 1, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(5.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text(confText, pageW - margin - confWidth / 2, row1Y + 0.2, { align: 'center' });
+
+    // Printed timestamp — precise format
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(75, 85, 99);
+    doc.text(`Printed: ${formatPrintDate()}`, pageW - margin, row2Y, { align: 'right' });
+
+    // Page number
+    if (pageNum && totalPages) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Page ${pageNum} of ${totalPages}`, pageW / 2, row3Y, { align: 'center' });
+    }
   }
 
   return (
