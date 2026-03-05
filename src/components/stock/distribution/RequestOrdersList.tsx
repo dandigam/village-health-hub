@@ -1,17 +1,24 @@
 import { useState } from 'react';
-import { FileText, Clock, User, MapPin } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileText, Clock, User, MapPin, Package, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useRequestOrders, useWarehouses } from '@/hooks/useApiData';
 import type { RequestOrder } from '@/types';
 import { OrderFulfillmentModal } from './OrderFulfillmentModal';
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-  draft: { label: 'Draft', className: 'bg-muted text-muted-foreground border-border' },
-  partial: { label: 'Partial', className: 'bg-orange-100 text-orange-700 border-orange-200' },
-  sent: { label: 'Sent', className: 'bg-green-100 text-green-700 border-green-200' },
-  cancelled: { label: 'Cancelled', className: 'bg-red-100 text-red-700 border-red-200' },
+const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string }> = {
+  pending: { label: 'Pending', dot: 'bg-amber-500 animate-pulse', bg: 'bg-amber-50', text: 'text-amber-700' },
+  draft: { label: 'Draft', dot: 'bg-muted-foreground', bg: 'bg-muted/60', text: 'text-muted-foreground' },
+  partial: { label: 'Partial', dot: 'bg-orange-500 animate-pulse', bg: 'bg-orange-50', text: 'text-orange-700' },
+  sent: { label: 'Sent', dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  cancelled: { label: 'Cancelled', dot: 'bg-red-500', bg: 'bg-red-50', text: 'text-red-700' },
+};
+
+const fadeUp = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.25 } },
 };
 
 export function RequestOrdersList() {
@@ -29,35 +36,75 @@ export function RequestOrdersList() {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg"><FileText className="h-5 w-5 text-primary" />Request Orders</CardTitle>
-          <p className="text-sm text-muted-foreground">Click on an order to review and fulfill medicines.</p>
-        </CardHeader>
-        <CardContent>
-          {activeOrders.length === 0 ? (<p className="text-center py-8 text-muted-foreground">No pending request orders.</p>) : (
-            <div className="space-y-3">
-              {activeOrders.map(order => {
-                const wh = warehouses.find(w => w.id === order.warehouseId);
-                const cfg = statusConfig[order.status];
-                return (
-                  <div key={order.id} onClick={() => setSelectedOrder(order)} className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors group">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2"><span className="font-semibold">{order.clientName}</span><Badge className={cfg.className}>{cfg.label}</Badge></div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{order.requestedBy}</span>
-                        <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{new Date(order.createdAt).toLocaleDateString()}</span>
-                        <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{wh?.name || '-'}</span>
+      <div className="space-y-3">
+        {/* Summary stats */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-muted/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            {activeOrders.filter(o => o.status === 'pending').length} pending
+          </span>
+          <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-muted/50">
+            {activeOrders.filter(o => o.status === 'draft').length} draft
+          </span>
+          <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-muted/50">
+            {activeOrders.length} active
+          </span>
+        </div>
+
+        {activeOrders.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-12 text-center">
+              <div className="mx-auto w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                <Package className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium text-foreground mb-1">No pending requests</p>
+              <p className="text-xs text-muted-foreground">All distribution orders have been fulfilled</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <motion.div initial="initial" animate="animate" variants={{ animate: { transition: { staggerChildren: 0.04 } } }} className="space-y-2">
+            {activeOrders.map(order => {
+              const wh = warehouses.find(w => w.id === order.warehouseId);
+              const cfg = statusConfig[order.status];
+              return (
+                <motion.div
+                  key={order.id}
+                  variants={fadeUp}
+                  onClick={() => setSelectedOrder(order)}
+                  className="flex items-center justify-between p-3 border rounded-xl cursor-pointer hover:shadow-md hover:border-primary/20 transition-all duration-200 group bg-card"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="p-2 rounded-lg bg-primary/5 group-hover:bg-primary/10 transition-colors shrink-0">
+                      <FileText className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold truncate">{order.clientName}</span>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${cfg.bg} ${cfg.text}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                          {cfg.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><User className="h-3 w-3" />{order.requestedBy}</span>
+                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{new Date(order.createdAt).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{wh?.name || '-'}</span>
                       </div>
                     </div>
-                    <div className="text-right"><p className="text-sm font-medium">{order.items.length} medicines</p><p className="text-xs text-muted-foreground">{totalItems(order)} units requested</p></div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">{order.items.length} medicines</p>
+                      <p className="text-[11px] text-muted-foreground">{totalItems(order)} units</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
+      </div>
       {selectedOrder && <OrderFulfillmentModal order={selectedOrder} open={!!selectedOrder} onOpenChange={(open) => { if (!open) setSelectedOrder(null); }} onUpdate={handleOrderUpdate} />}
     </>
   );
