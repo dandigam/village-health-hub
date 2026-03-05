@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { useWarehouseInventory } from '@/hooks/useApiData';
+import { useWarehouseInventory, useWarehouseDetail } from '@/hooks/useApiData';
 import { InventoryTab } from '@/components/stock/InventoryTab';
 import { useAuth } from '@/context/AuthContext';
 
@@ -10,6 +10,7 @@ export default function StockManagement() {
   const { user: authUser } = useAuth();
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: inventoryItems = [], refetch } = useWarehouseInventory(warehouseId);
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
 
   // Refetch data when page loads
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function StockManagement() {
       <div className="page-header">
         <h1 className="page-title">Medicine Inventory</h1>
       </div>
-      <InventoryTab stockItems={stockItemDetails} />
+      <InventoryTab stockItems={stockItemDetails} warehouseInfo={warehouseDetail} />
     </DashboardLayout>
   );
 }
