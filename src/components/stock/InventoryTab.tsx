@@ -80,7 +80,7 @@ const statusConfig = {
 
 const MIN_STOCK_DEFAULT = 50;
 
-export function InventoryTab({ stockItems }: InventoryTabProps) {
+export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
   const [sortKey, setSortKey] = useState<SortKey>('medicineName');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [search, setSearch] = useState('');
