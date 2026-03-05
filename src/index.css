@@ -51,19 +51,19 @@
     --stock-critical: 0 78% 52%;
     --stock-critical-bg: 0 65% 95%;
     
-    /* Stat Card Colors — refined pastels */
-    --stat-blue: 218 75% 94%;
-    --stat-blue-text: 218 80% 35%;
-    --stat-green: 158 55% 90%;
-    --stat-green-text: 158 60% 26%;
-    --stat-orange: 30 80% 92%;
-    --stat-orange-text: 30 75% 36%;
-    --stat-pink: 340 65% 93%;
-    --stat-pink-text: 340 65% 38%;
-    --stat-purple: 265 55% 93%;
-    --stat-purple-text: 265 50% 40%;
-    --stat-teal: 178 55% 90%;
-    --stat-teal-text: 178 55% 26%;
+    /* Stat Card Colors — vibrant pastels */
+    --stat-blue: 218 80% 93%;
+    --stat-blue-text: 218 85% 38%;
+    --stat-green: 152 60% 89%;
+    --stat-green-text: 152 65% 28%;
+    --stat-orange: 32 85% 91%;
+    --stat-orange-text: 32 80% 38%;
+    --stat-pink: 340 72% 92%;
+    --stat-pink-text: 340 70% 40%;
+    --stat-purple: 265 62% 92%;
+    --stat-purple-text: 265 58% 42%;
+    --stat-teal: 178 60% 89%;
+    --stat-teal-text: 178 60% 28%;
 
     /* Sidebar - Deep navy with sophistication */
     --sidebar-background: 224 60% 14%;
