@@ -521,7 +521,7 @@ export default function NewInvoice() {
           <Button variant="outline" className="h-9 text-sm" onClick={() => navigate('/invoices')}>Cancel</Button>
           <Button className="h-9 text-sm px-6 shadow-md" onClick={handleSave} disabled={saving}>
             <Check className="w-4 h-4 mr-1.5" />
-            {saving ? 'Saving...' : 'Save Stock'}
+            {saving ? 'Saving...' : isEditMode ? 'Update Stock' : 'Save Stock'}
           </Button>
         </div>
       </div>
