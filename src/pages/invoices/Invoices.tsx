@@ -15,10 +15,10 @@ import { format } from 'date-fns';
 import { InvoiceDetailDrawer } from '@/components/invoices/InvoiceDetailDrawer';
 
 const statConfig = [
-  { label: 'Total Invoices', key: 'total', icon: Layers, gradient: 'from-primary/90 to-accent/80', iconBg: 'bg-white/20' },
-  { label: 'Total Amount', key: 'totalAmount', icon: IndianRupee, gradient: 'from-emerald-500 to-teal-600', iconBg: 'bg-white/20' },
-  { label: 'Total Items', key: 'totalItems', icon: Package, gradient: 'from-amber-500 to-orange-600', iconBg: 'bg-white/20' },
-  { label: 'This Month', key: 'thisMonth', icon: TrendingUp, gradient: 'from-violet-500 to-purple-600', iconBg: 'bg-white/20' },
+  { label: 'Total Invoices', key: 'total', icon: Layers, variant: 'blue' as const },
+  { label: 'Total Amount', key: 'totalAmount', icon: IndianRupee, variant: 'green' as const },
+  { label: 'Total Items', key: 'totalItems', icon: Package, variant: 'orange' as const },
+  { label: 'This Month', key: 'thisMonth', icon: TrendingUp, variant: 'purple' as const },
 ] as const;
 
 export default function Invoices() {
