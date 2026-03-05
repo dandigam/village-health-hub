@@ -59,7 +59,17 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <span className="text-[10px] text-white/60 block -mt-0.5 font-medium">Management System</span>
           </div>
         </div>
-        {campName && (
+        {isWarehouse && warehouseDetail ? (
+          <div className="hidden md:flex items-center gap-2.5 border-l border-white/15 pl-4 ml-2">
+            <div className="p-1.5 rounded-lg bg-white/10">
+              <Warehouse className="h-4 w-4 text-white/80" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">{warehouseDetail.name}</p>
+              <p className="text-[10px] text-white/50">{warehouseDetail.village}, {warehouseDetail.district}</p>
+            </div>
+          </div>
+        ) : campName ? (
           <div className="hidden md:flex items-center gap-2 border-l border-white/15 pl-4 ml-2">
             <MapPin className="h-4 w-4 text-white/60" />
             <div>
@@ -67,7 +77,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
               <p className="text-[10px] text-white/50">Current Camp</p>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="hidden lg:flex items-center max-w-md flex-1 mx-8">
