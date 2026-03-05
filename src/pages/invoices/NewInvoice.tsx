@@ -257,9 +257,9 @@ export default function NewInvoice() {
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => navigate('/invoices')}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-lg font-bold tracking-tight">New Stock Entry</h1>
-            <p className="text-xs text-muted-foreground">Record incoming stock from suppliers</p>
+           <div className="flex-1">
+            <h1 className="text-lg font-bold tracking-tight">{isEditMode ? 'Edit Stock Entry' : 'New Stock Entry'}</h1>
+            <p className="text-xs text-muted-foreground">{isEditMode ? 'Update existing stock entry' : 'Record incoming stock from suppliers'}</p>
           </div>
         </div>
 
