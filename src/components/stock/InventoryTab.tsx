@@ -158,110 +158,166 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
     const margin = 14;
 
     // ─── HEADER ───────────────────────────────────────────
-    // Header background
-    doc.setFillColor(20, 40, 80);
-    doc.rect(0, 0, pageW, 38, 'F');
+    // Gradient-like header with two-tone
+    doc.setFillColor(15, 32, 75); // Deep navy
+    doc.rect(0, 0, pageW, 40, 'F');
+    // Accent strip
+    doc.setFillColor(37, 99, 235); // Vivid blue
+    doc.rect(0, 40, pageW, 3, 'F');
 
-    // Warehouse name centered
+    // Warehouse name
     const wName = warehouseInfo?.name || 'Medicine Inventory';
-    doc.setFontSize(18);
+    doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 255, 255);
-    doc.text(wName, pageW / 2, 15, { align: 'center' });
+    doc.text(wName, pageW / 2, 16, { align: 'center' });
 
-    // Address line
+    // Address
     if (warehouseInfo) {
       const addressParts = [warehouseInfo.village, warehouseInfo.mandal, warehouseInfo.district, warehouseInfo.state, warehouseInfo.pinCode].filter(Boolean);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(200, 210, 230);
-      doc.text(addressParts.join(', '), pageW / 2, 22, { align: 'center' });
+      doc.setTextColor(180, 200, 240);
+      doc.text(addressParts.join(', '), pageW / 2, 23, { align: 'center' });
 
-      // Contact line
       const contactParts: string[] = [];
-      if (warehouseInfo.phoneNumber) contactParts.push(`Phone: ${warehouseInfo.phoneNumber}`);
-      if (warehouseInfo.email) contactParts.push(`Email: ${warehouseInfo.email}`);
-      if (warehouseInfo.licenceNumber) contactParts.push(`Licence: ${warehouseInfo.licenceNumber}`);
+      if (warehouseInfo.phoneNumber) contactParts.push(`📞 ${warehouseInfo.phoneNumber}`);
+      if (warehouseInfo.email) contactParts.push(`✉ ${warehouseInfo.email}`);
+      if (warehouseInfo.licenceNumber) contactParts.push(`🔖 Licence: ${warehouseInfo.licenceNumber}`);
       if (contactParts.length) {
         doc.setFontSize(8);
-        doc.text(contactParts.join('  |  '), pageW / 2, 28, { align: 'center' });
+        doc.setTextColor(160, 185, 230);
+        doc.text(contactParts.join('   |   '), pageW / 2, 30, { align: 'center' });
       }
 
       if (warehouseInfo.authorizedPerson) {
         doc.setFontSize(8);
-        doc.setTextColor(180, 195, 220);
-        doc.text(`Authorized Person: ${warehouseInfo.authorizedPerson}`, pageW / 2, 34, { align: 'center' });
+        doc.setTextColor(140, 170, 220);
+        doc.text(`Authorized Person: ${warehouseInfo.authorizedPerson}`, pageW / 2, 36, { align: 'center' });
       }
     }
 
     // ─── REPORT TITLE & SUMMARY ──────────────────────────
-    let y = 48;
-    doc.setFontSize(13);
+    let y = 54;
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(30, 40, 60);
+    doc.setTextColor(15, 32, 75);
     doc.text('Medicine Inventory Report', margin, y);
 
-    doc.setFontSize(8.5);
+    // Summary badges
+    const okCount = processed.length - criticalCount - warningCount;
+    const summaryY = y - 2;
+    const badgeH = 7;
+    
+    // Total badge
+    doc.setFillColor(37, 99, 235);
+    doc.roundedRect(pageW - margin - 160, summaryY - 4, 38, badgeH, 2, 2, 'F');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Total: ${processed.length}`, pageW - margin - 141, summaryY + 1, { align: 'center' });
+
+    // Critical badge
+    doc.setFillColor(220, 38, 38);
+    doc.roundedRect(pageW - margin - 118, summaryY - 4, 38, badgeH, 2, 2, 'F');
+    doc.text(`Critical: ${criticalCount}`, pageW - margin - 99, summaryY + 1, { align: 'center' });
+
+    // Warning badge
+    doc.setFillColor(217, 119, 6);
+    doc.roundedRect(pageW - margin - 76, summaryY - 4, 38, badgeH, 2, 2, 'F');
+    doc.text(`Warning: ${warningCount}`, pageW - margin - 57, summaryY + 1, { align: 'center' });
+
+    // OK badge
+    doc.setFillColor(22, 163, 74);
+    doc.roundedRect(pageW - margin - 34, summaryY - 4, 38, badgeH, 2, 2, 'F');
+    doc.text(`OK: ${okCount}`, pageW - margin - 15, summaryY + 1, { align: 'center' });
+
+    // Generated line
+    doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 110, 130);
-    doc.text(
-      `Generated: ${new Date().toLocaleDateString()}  |  Total: ${processed.length} items  |  Critical: ${criticalCount}  |  Warning: ${warningCount}  |  In Stock: ${processed.length - criticalCount - warningCount}`,
-      margin, y + 7
-    );
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Generated: ${formatPrintDate()}`, margin, y + 7);
 
     // Divider
     y += 14;
-    doc.setDrawColor(200, 210, 225);
-    doc.setLineWidth(0.5);
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.6);
     doc.line(margin, y, pageW - margin, y);
 
     // ─── TABLE ────────────────────────────────────────────
-    y += 8;
-    const colX = [margin, 120, 165, 200, 240];
+    y += 10;
+    const colX = [margin, 130, 175, 215, 250];
     const colLabels = ['Medicine Name', 'Type', 'Current Qty', 'Min Qty', 'Status'];
 
     // Table header
-    doc.setFillColor(235, 240, 250);
-    doc.roundedRect(margin - 2, y - 5, pageW - (margin * 2) + 4, 9, 1, 1, 'F');
+    doc.setFillColor(37, 99, 235);
+    doc.roundedRect(margin - 2, y - 5.5, pageW - (margin * 2) + 4, 10, 2, 2, 'F');
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(40, 50, 80);
-    colLabels.forEach((label, i) => doc.text(label, colX[i], y));
-    y += 10;
+    doc.setTextColor(255, 255, 255);
+    colLabels.forEach((label, i) => doc.text(label, colX[i], y + 1));
+    y += 12;
 
     // Table rows
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
+    doc.setFontSize(9);
     let pageCount = 1;
     processed.forEach((item, idx) => {
-      if (y > pageH - 35) {
+      if (y > pageH - 38) {
         doc.addPage();
         pageCount++;
         y = 20;
       }
 
-      // Alternate row bg
+      // Alternate rows with subtle coloring
       if (idx % 2 === 0) {
-        doc.setFillColor(248, 250, 255);
-        doc.rect(margin - 2, y - 4, pageW - (margin * 2) + 4, 7, 'F');
+        doc.setFillColor(245, 247, 255);
+        doc.rect(margin - 2, y - 4.5, pageW - (margin * 2) + 4, 8, 'F');
+      }
+
+      // Critical/warning row tinting
+      if (item.status === 'critical') {
+        doc.setFillColor(254, 242, 242);
+        doc.rect(margin - 2, y - 4.5, pageW - (margin * 2) + 4, 8, 'F');
+      } else if (item.status === 'warning') {
+        doc.setFillColor(255, 251, 235);
+        doc.rect(margin - 2, y - 4.5, pageW - (margin * 2) + 4, 8, 'F');
       }
 
       doc.setTextColor(30, 35, 50);
+      doc.setFont('helvetica', 'normal');
       doc.text(item.medicineName, colX[0], y);
       doc.text(item.medicineType || '-', colX[1], y);
+      
+      // Quantity - bold with status color
+      doc.setFont('helvetica', 'bold');
+      if (item.status === 'critical') doc.setTextColor(220, 38, 38);
+      else if (item.status === 'warning') doc.setTextColor(180, 120, 0);
+      else doc.setTextColor(22, 163, 74);
       doc.text(String(item.quantity), colX[2], y);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
       doc.text(String(item.minQty), colX[3], y);
 
-      // Status colored
+      // Status pill
       const statusLabel = statusConfig[item.status].label;
-      if (item.status === 'critical') doc.setTextColor(200, 30, 30);
-      else if (item.status === 'warning') doc.setTextColor(180, 120, 0);
-      else doc.setTextColor(20, 140, 60);
+      const pillW = doc.getTextWidth(statusLabel) + 8;
+      if (item.status === 'critical') doc.setFillColor(254, 226, 226);
+      else if (item.status === 'warning') doc.setFillColor(254, 243, 199);
+      else doc.setFillColor(220, 252, 231);
+      doc.roundedRect(colX[4] - 2, y - 4, pillW, 6, 1.5, 1.5, 'F');
+
+      if (item.status === 'critical') doc.setTextColor(185, 28, 28);
+      else if (item.status === 'warning') doc.setTextColor(146, 64, 14);
+      else doc.setTextColor(21, 128, 61);
+      doc.setFontSize(7.5);
       doc.setFont('helvetica', 'bold');
-      doc.text(statusLabel, colX[4], y);
+      doc.text(statusLabel, colX[4] + 2, y);
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(30, 35, 50);
-      y += 7;
+      
+      y += 8;
     });
 
     // ─── ADD FOOTERS TO ALL PAGES ─────────────────────────
