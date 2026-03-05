@@ -15,47 +15,55 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 40% 8%;
 
-    --primary: 222 80% 48%;
+    --primary: 222 85% 52%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 18% 93%;
-    --secondary-foreground: 222 40% 8%;
+    --secondary: 220 20% 94%;
+    --secondary-foreground: 222 45% 12%;
 
-    --muted: 220 16% 91%;
-    --muted-foreground: 222 12% 46%;
+    --muted: 220 18% 92%;
+    --muted-foreground: 222 14% 42%;
 
-    --accent: 230 70% 55%;
+    --accent: 230 75% 58%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 55%;
+    --destructive: 0 78% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 18% 88%;
-    --input: 220 18% 88%;
-    --ring: 222 80% 48%;
+    --border: 220 20% 90%;
+    --input: 220 20% 90%;
+    --ring: 222 85% 52%;
 
     --radius: 0.625rem;
 
     /* Semantic Status Colors */
-    --navy: 222 75% 18%;
-    --navy-light: 222 60% 35%;
-    --success: 158 60% 42%;
-    --warning: 38 88% 50%;
-    --info: 218 75% 52%;
+    --navy: 222 78% 18%;
+    --navy-light: 222 65% 35%;
+    --success: 152 65% 40%;
+    --warning: 40 92% 50%;
+    --info: 218 80% 52%;
     
-    /* Stat Card Colors — refined pastels */
-    --stat-blue: 218 75% 94%;
-    --stat-blue-text: 218 80% 35%;
-    --stat-green: 158 55% 90%;
-    --stat-green-text: 158 60% 26%;
-    --stat-orange: 30 80% 92%;
-    --stat-orange-text: 30 75% 36%;
-    --stat-pink: 340 65% 93%;
-    --stat-pink-text: 340 65% 38%;
-    --stat-purple: 265 55% 93%;
-    --stat-purple-text: 265 50% 40%;
-    --stat-teal: 178 55% 90%;
-    --stat-teal-text: 178 55% 26%;
+    /* Stock status tokens */
+    --stock-ok: 152 65% 40%;
+    --stock-ok-bg: 152 55% 94%;
+    --stock-warning: 40 92% 50%;
+    --stock-warning-bg: 40 80% 94%;
+    --stock-critical: 0 78% 52%;
+    --stock-critical-bg: 0 65% 95%;
+    
+    /* Stat Card Colors — vibrant pastels */
+    --stat-blue: 218 80% 93%;
+    --stat-blue-text: 218 85% 38%;
+    --stat-green: 152 60% 89%;
+    --stat-green-text: 152 65% 28%;
+    --stat-orange: 32 85% 91%;
+    --stat-orange-text: 32 80% 38%;
+    --stat-pink: 340 72% 92%;
+    --stat-pink-text: 340 70% 40%;
+    --stat-purple: 265 62% 92%;
+    --stat-purple-text: 265 58% 42%;
+    --stat-teal: 178 60% 89%;
+    --stat-teal-text: 178 60% 28%;
 
     /* Sidebar - Deep navy with sophistication */
     --sidebar-background: 224 60% 14%;
