@@ -50,6 +50,22 @@ export default function WarehouseDashboard() {
     { label: 'Distribution', icon: ArrowRightLeft, href: '/distribution-orders', color: 'text-stat-purple-text', bg: 'bg-stat-purple', borderColor: 'border-[hsl(var(--stat-purple-text)/0.12)]' },
   ];
 
+  // Show low stock alert toast on first load
+  const lowStockItems = inventory.filter(item => item.totalQty <= item.minimumQty);
+  useEffect(() => {
+    if (!alertShownRef.current && lowStockItems.length > 0) {
+      alertShownRef.current = true;
+      toast.warning(`⚠️ ${lowStockItems.length} medicine(s) are running low on stock!`, {
+        description: 'Click to view low stock items',
+        duration: 8000,
+        action: {
+          label: 'View Stock',
+          onClick: () => navigate('/stock'),
+        },
+      });
+    }
+  }, [lowStockItems.length, navigate]);
+
   // Calculate stock health percentage
   const stockHealthPct = totalMedicines > 0 ? Math.round(((totalMedicines - lowStockCount) / totalMedicines) * 100) : 100;
   const orderFulfillmentPct = totalOrders > 0 ? Math.round((receivedOrders / totalOrders) * 100) : 0;
