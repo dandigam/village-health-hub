@@ -18,8 +18,22 @@ interface StockItemDetail {
   isLowStock: boolean;
 }
 
+interface WarehouseInfo {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  authorizedPerson: string;
+  licenceNumber: string;
+  state: string;
+  district: string;
+  mandal: string;
+  village: string;
+  pinCode: string;
+}
+
 interface InventoryTabProps {
   stockItems: StockItemDetail[];
+  warehouseInfo?: WarehouseInfo;
 }
 
 type SortKey = 'medicineName' | 'quantity' | 'status';
