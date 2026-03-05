@@ -200,7 +200,7 @@ export default function NewInvoice() {
 
     setSaving(true);
     try {
-      const payload = {
+      const payload: any = {
         supplierId: Number(supplierId),
         warehouseId,
         paymentMode: paymentMode || undefined,
@@ -225,6 +225,11 @@ export default function NewInvoice() {
           return base;
         }),
       };
+
+      // Include invoice id for updates so backend treats it as an update
+      if (isEditMode && editingInvoice?.id) {
+        payload.id = editingInvoice.id;
+      }
 
       await api.post('/invoices', payload);
       toast.success(isEditMode ? 'Stock entry updated successfully' : 'Stock entry saved successfully');
