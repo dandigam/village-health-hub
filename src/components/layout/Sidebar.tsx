@@ -34,6 +34,7 @@ const allNavItems = [
   { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers' },
   { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders' },
   { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders' },
+  { icon: FileText, label: 'Invoices', href: '/invoices', routeKey: 'invoices' },
   { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors' },
   { icon: FileText, label: 'Reports', href: '/reports', routeKey: 'reports' },
   { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses' },
