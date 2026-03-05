@@ -98,7 +98,7 @@ export default function NewInvoice() {
     setSaving(true);
     try {
       const payload = {
-        campId: campId || undefined,
+        supplierId: Number(supplierId),
         supplierId: Number(supplierId),
         warehouseId,
         paymentMode: paymentMode || undefined,
