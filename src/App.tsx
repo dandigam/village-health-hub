@@ -39,6 +39,10 @@ import SupplierOrders from "./pages/supplier-orders/SupplierOrders";
 // Distribution Orders
 import DistributionOrders from "./pages/distribution/DistributionOrders";
 
+// Invoices
+import Invoices from "./pages/invoices/Invoices";
+import NewInvoice from "./pages/invoices/NewInvoice";
+
 // Warehouses
 import WarehouseManagement from "./pages/warehouses/WarehouseManagement";
 
@@ -120,6 +124,10 @@ const App = () => (
               
               {/* Distribution Orders */}
               <Route path="/distribution-orders" element={<ProtectedRoute routeKey="distribution-orders"><DistributionOrders /></ProtectedRoute>} />
+              
+              {/* Invoices */}
+              <Route path="/invoices" element={<ProtectedRoute routeKey="invoices"><Invoices /></ProtectedRoute>} />
+              <Route path="/invoices/new" element={<ProtectedRoute routeKey="invoices"><NewInvoice /></ProtectedRoute>} />
               
               {/* Warehouses */}
               <Route path="/warehouses" element={<ProtectedRoute routeKey="warehouses"><WarehouseManagement /></ProtectedRoute>} />
