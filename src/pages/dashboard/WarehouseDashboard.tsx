@@ -14,7 +14,8 @@ import {
 } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 
 const stagger = { animate: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
