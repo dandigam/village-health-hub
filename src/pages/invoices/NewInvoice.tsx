@@ -456,7 +456,7 @@ export default function NewInvoice() {
                       <TableCell className="text-sm">
                         <div className="font-medium">{item.medicineName}</div>
                         {!item.isAlreadyExist && (
-                          <Badge variant="outline" className="text-[9px] h-4 mt-0.5 text-amber-600 border-amber-300">New</Badge>
+                          <Badge variant="outline" className="text-[9px] h-4 mt-0.5 text-primary border-primary/30">New</Badge>
                         )}
                       </TableCell>
                       <TableCell>
