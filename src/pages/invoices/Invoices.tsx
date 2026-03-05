@@ -52,8 +52,7 @@ export default function Invoices() {
       const q = searchQuery.toLowerCase();
       result = result.filter((o: any) =>
         String(o.id).includes(q) ||
-        o.supplierName?.toLowerCase().includes(q) ||
-        o.campName?.toLowerCase().includes(q)
+        o.supplierName?.toLowerCase().includes(q)
       );
     }
     return result;
