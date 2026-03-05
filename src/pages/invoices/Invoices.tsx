@@ -239,6 +239,12 @@ export default function Invoices() {
             {renderTable(filtered)}
           </TabsContent>
         </Tabs>
+
+        <InvoiceDetailDrawer
+          open={!!selectedOrder}
+          onOpenChange={(open) => !open && setSelectedOrder(null)}
+          order={selectedOrder}
+        />
       </div>
     </DashboardLayout>
   );
