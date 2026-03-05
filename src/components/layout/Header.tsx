@@ -28,6 +28,9 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
   const currentUser = { name: authUser?.name || '', role: authUser?.roleDisplayName || authUser?.role || '', avatar: authUser?.avatar || undefined as string | undefined };
   const campName = authUser?.context?.campName;
+  const isWarehouse = authUser?.role === 'WAREHOUSE';
+  const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
+  const { data: warehouseDetail } = useWarehouseDetail(isWarehouse ? warehouseId : undefined);
 
   const handleLogout = () => {
     logout();
