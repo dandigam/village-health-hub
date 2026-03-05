@@ -49,7 +49,7 @@ export function InvoiceDetailDrawer({ open, onOpenChange, order }: InvoiceDetail
           {/* Summary Cards */}
           <div className="grid grid-cols-2 gap-2.5">
             {[
-              { icon: Building2, label: 'Camp', value: order.campName || '—' },
+              { icon: Truck, label: 'Supplier', value: order.supplierName || '—' },
               { icon: Truck, label: 'Supplier', value: order.supplierName || '—' },
               { icon: Calendar, label: 'Date', value: order.createdAt ? format(new Date(order.createdAt), 'dd MMM yyyy') : '—' },
               { icon: CreditCard, label: 'Amount', value: `₹${order.totalAmount?.toLocaleString() || '0'}` },

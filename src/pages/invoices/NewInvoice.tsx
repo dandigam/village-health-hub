@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
-import { useCampEvents, useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
+import { useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
 import api from '@/services/api';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -40,12 +40,12 @@ export default function NewInvoice() {
   const { user } = useAuth();
   const warehouseId = (user as any)?.warehouseId;
 
-  const { data: campEvents = [] } = useCampEvents();
+  
   const { data: suppliers = [] } = useSupplierList(warehouseId);
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
 
   // Invoice details
-  const [campId, setCampId] = useState('');
+  
   const [supplierId, setSupplierId] = useState('');
   const [paymentMode, setPaymentMode] = useState('');
   const [invoiceId, setInvoiceId] = useState('');
@@ -98,7 +98,6 @@ export default function NewInvoice() {
     setSaving(true);
     try {
       const payload = {
-        campId: campId || undefined,
         supplierId: Number(supplierId),
         warehouseId,
         paymentMode: paymentMode || undefined,
@@ -148,19 +147,6 @@ export default function NewInvoice() {
             Invoice Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Select Camp</Label>
-              <Select value={campId} onValueChange={setCampId}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="Select Camp" />
-                </SelectTrigger>
-                <SelectContent>
-                  {campEvents.map((c: any) => (
-                    <SelectItem key={c.id} value={String(c.id)}>{c.campName || c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             <div className="space-y-1">
               <Label className="text-xs font-medium">Supplier *</Label>
               <Select value={supplierId} onValueChange={setSupplierId}>

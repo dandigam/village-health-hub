@@ -52,8 +52,7 @@ export default function Invoices() {
       const q = searchQuery.toLowerCase();
       result = result.filter((o: any) =>
         String(o.id).includes(q) ||
-        o.supplierName?.toLowerCase().includes(q) ||
-        o.campName?.toLowerCase().includes(q)
+        o.supplierName?.toLowerCase().includes(q)
       );
     }
     return result;
@@ -84,7 +83,7 @@ export default function Invoices() {
         <TableHeader>
           <TableRow className="bg-muted/30">
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Order ID</TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Camp</TableHead>
+            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Supplier</TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Requested At</TableHead>
@@ -95,7 +94,7 @@ export default function Invoices() {
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-40">
+               <TableCell colSpan={6} className="h-40">
                 <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
                   <div className="w-16 h-16 rounded-2xl bg-muted/40 flex items-center justify-center">
                     <FileText className="w-8 h-8 text-muted-foreground/40" />
@@ -121,7 +120,7 @@ export default function Invoices() {
                 onClick={() => setSelectedOrder(order)}
               >
                 <TableCell className="font-mono text-xs font-semibold text-primary">#{order.id}</TableCell>
-                <TableCell className="text-sm">{order.campName || '—'}</TableCell>
+                <TableCell><StatusChip status={order.status} /></TableCell>
                 <TableCell className="text-sm">{order.supplierName || '—'}</TableCell>
                 <TableCell><StatusChip status={order.status} /></TableCell>
                 <TableCell className="text-xs text-muted-foreground">
