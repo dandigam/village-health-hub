@@ -21,19 +21,6 @@ export function InvoiceDetailDrawer({ open, onOpenChange, order, onEdit }: Invoi
   const items = order.items || [];
   const totalQty = items.reduce((sum: number, i) => sum + (i.quantity || 0), 0);
 
-  const handleShare = async () => {
-    const text = `Invoice: ${order.invoiceNumber || `#${order.id}`}\nSupplier: ${order.supplierName || '—'}\nAmount: ₹${order.invoiceAmount?.toLocaleString() || '0'}\nDate: ${order.invoiceDate ? format(new Date(order.invoiceDate), 'dd MMM yyyy') : '—'}\nItems: ${items.length} (${totalQty} units)`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: `Invoice ${order.invoiceNumber || order.id}`, text });
-      } catch { /* user cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(text);
-      toast.success('Invoice details copied to clipboard');
-    }
-  };
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-0">
@@ -45,17 +32,7 @@ export function InvoiceDetailDrawer({ open, onOpenChange, order, onEdit }: Invoi
                 <FileText className="w-4 h-4 text-primary" />
                 {order.invoiceNumber || `Invoice #${order.id}`}
               </SheetTitle>
-              <div className="flex items-center gap-1.5">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
-                  <Share2 className="w-4 h-4" />
-                </Button>
-                {onEdit && (
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(order)}>
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                )}
-                <Badge variant="outline" className="text-[10px] capitalize">{order.paymentMode || 'N/A'}</Badge>
-              </div>
+              <Badge variant="outline" className="text-[10px] capitalize">{order.paymentMode || 'N/A'}</Badge>
             </div>
           </SheetHeader>
         </div>

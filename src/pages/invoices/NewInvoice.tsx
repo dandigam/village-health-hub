@@ -366,6 +366,11 @@ export default function NewInvoice() {
                   )}
                 </div>
               )}
+              {showMedicineDropdown && medicineSearch.trim() && filteredMedicines.length === 0 && (
+                <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-card border border-border rounded-lg shadow-xl p-3 text-center text-sm text-muted-foreground">
+                  No medicines found
+                </div>
+              )}
             </div>
 
             {/* Medicine Type - shown for new medicines */}
