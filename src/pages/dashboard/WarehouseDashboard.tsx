@@ -127,7 +127,7 @@ export default function WarehouseDashboard() {
           </Card>
 
           {/* Low Stock */}
-          <Card className={cn("border-0 shadow-sm overflow-hidden relative", lowStockCount > 0 ? "bg-gradient-to-br from-stat-orange to-stat-orange/40" : "bg-gradient-to-br from-stat-green to-stat-green/40")}>
+          <Card className={cn("border-0 shadow-sm overflow-hidden relative cursor-pointer hover:shadow-md transition-shadow", lowStockCount > 0 ? "bg-gradient-to-br from-stat-orange to-stat-orange/40" : "bg-gradient-to-br from-stat-green to-stat-green/40")} onClick={() => lowStockCount > 0 && navigate('/stock')}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
