@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { Plus, Search, Filter, RefreshCw, X, FileText, Package, Clock, Archive } from 'lucide-react';
 import { format } from 'date-fns';
+import { InvoiceDetailDrawer } from '@/components/invoices/InvoiceDetailDrawer';
 
 const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string }> = {
   pending: { label: 'Pending', dot: 'bg-amber-500 animate-pulse', bg: 'bg-amber-50', text: 'text-amber-700' },
