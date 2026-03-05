@@ -99,7 +99,6 @@ export default function NewInvoice() {
     try {
       const payload = {
         supplierId: Number(supplierId),
-        supplierId: Number(supplierId),
         warehouseId,
         paymentMode: paymentMode || undefined,
         invoiceId: invoiceId || undefined,
