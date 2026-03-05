@@ -232,11 +232,11 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
     // Table rows
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
+    let pageCount = 1;
     processed.forEach((item, idx) => {
-      if (y > pageH - 30) {
-        // Footer before page break
-        addFooter(doc, pageW, pageH, margin, warehouseInfo);
+      if (y > pageH - 35) {
         doc.addPage();
+        pageCount++;
         y = 20;
       }
 
@@ -264,8 +264,12 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
       y += 7;
     });
 
-    // ─── FOOTER ───────────────────────────────────────────
-    addFooter(doc, pageW, pageH, margin, warehouseInfo);
+    // ─── ADD FOOTERS TO ALL PAGES ─────────────────────────
+    const totalPages = pageCount;
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      addFooter(doc, pageW, pageH, margin, warehouseInfo, p, totalPages);
+    }
 
     doc.save(`inventory-${new Date().toISOString().slice(0, 10)}.pdf`);
     toast.success('PDF exported successfully');
