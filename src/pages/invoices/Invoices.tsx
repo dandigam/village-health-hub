@@ -95,7 +95,7 @@ export default function Invoices() {
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-40">
+               <TableCell colSpan={6} className="h-40">
                 <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
                   <div className="w-16 h-16 rounded-2xl bg-muted/40 flex items-center justify-center">
                     <FileText className="w-8 h-8 text-muted-foreground/40" />
