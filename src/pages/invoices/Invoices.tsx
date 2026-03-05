@@ -159,8 +159,8 @@ export default function Invoices() {
           className="flex items-center justify-between"
         >
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Stock Entry (Invoice)</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Record incoming stock from suppliers</p>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Purchase & Stock Entries</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Track supplier invoices and incoming inventory</p>
           </div>
           <Button
             className="h-10 text-sm px-5 shadow-lg bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
