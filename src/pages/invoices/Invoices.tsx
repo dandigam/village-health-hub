@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { Plus, Search, Filter, RefreshCw, X, FileText, Package, Clock, Archive } from 'lucide-react';
 import { format } from 'date-fns';
+import { InvoiceDetailDrawer } from '@/components/invoices/InvoiceDetailDrawer';
 
 const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string }> = {
   pending: { label: 'Pending', dot: 'bg-amber-500 animate-pulse', bg: 'bg-amber-50', text: 'text-amber-700' },
@@ -40,6 +41,7 @@ export default function Invoices() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('stock-entry');
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   const filtered = useMemo(() => {
     let result = orders;
@@ -116,7 +118,7 @@ export default function Invoices() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 className="border-b border-border/40 hover:bg-muted/20 transition-colors cursor-pointer"
-                onClick={() => {}}
+                onClick={() => setSelectedOrder(order)}
               >
                 <TableCell className="font-mono text-xs font-semibold text-primary">#{order.id}</TableCell>
                 <TableCell className="text-sm">{order.campName || '—'}</TableCell>
@@ -237,6 +239,12 @@ export default function Invoices() {
             {renderTable(filtered)}
           </TabsContent>
         </Tabs>
+
+        <InvoiceDetailDrawer
+          open={!!selectedOrder}
+          onOpenChange={(open) => !open && setSelectedOrder(null)}
+          order={selectedOrder}
+        />
       </div>
     </DashboardLayout>
   );
