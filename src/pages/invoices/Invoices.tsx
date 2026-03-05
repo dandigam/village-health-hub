@@ -7,100 +7,87 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { useSupplierOrders } from '@/hooks/useApiData';
+import { useInvoices, Invoice } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { Plus, Search, Filter, RefreshCw, X, FileText, Package, Clock, Archive } from 'lucide-react';
 import { format } from 'date-fns';
 import { InvoiceDetailDrawer } from '@/components/invoices/InvoiceDetailDrawer';
 
-const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string }> = {
-  pending: { label: 'Pending', dot: 'bg-amber-500 animate-pulse', bg: 'bg-amber-50', text: 'text-amber-700' },
-  received: { label: 'Received', dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  cancelled: { label: 'Cancelled', dot: 'bg-red-400', bg: 'bg-red-50', text: 'text-red-700' },
-  partial: { label: 'Partial', dot: 'bg-blue-500 animate-pulse', bg: 'bg-blue-50', text: 'text-blue-700' },
-  draft: { label: 'Draft', dot: 'bg-muted-foreground/50', bg: 'bg-muted/50', text: 'text-muted-foreground' },
-};
-
-function StatusChip({ status }: { status: string }) {
-  const cfg = statusConfig[status?.toLowerCase()] || statusConfig.draft;
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${cfg.bg} ${cfg.text}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-      {cfg.label}
-    </span>
-  );
-}
-
 export default function Invoices() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const warehouseId = (user as any)?.warehouseId;
-  const { data: orders = [], isLoading, refetch } = useSupplierOrders(warehouseId);
+  const warehouseId = (user as any)?.context?.warehouseId ? Number((user as any).context.warehouseId) : undefined;
+  const { data: invoices = [], isLoading, refetch } = useInvoices(warehouseId);
 
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('stock-entry');
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Invoice | null>(null);
 
   const filtered = useMemo(() => {
-    let result = orders;
+    let result = invoices;
     if (statusFilter !== 'all') {
-      result = result.filter((o: any) => o.status?.toLowerCase() === statusFilter);
+      result = result.filter((o: Invoice) => o.paymentMode?.toLowerCase() === statusFilter);
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter((o: any) =>
+      result = result.filter((o: Invoice) =>
         String(o.id).includes(q) ||
-        o.supplierName?.toLowerCase().includes(q)
+        o.supplierName?.toLowerCase().includes(q) ||
+        o.invoiceNumber?.toLowerCase().includes(q)
       );
     }
     return result;
-  }, [orders, statusFilter, searchQuery]);
+  }, [invoices, statusFilter, searchQuery]);
 
   const currentMonth = new Date().getMonth();
   const monthlyOrders = useMemo(() =>
-    orders.filter((o: any) => {
+    invoices.filter((o: Invoice) => {
       const d = new Date(o.createdAt);
       return d.getMonth() === currentMonth;
-    }), [orders, currentMonth]);
+    }), [invoices, currentMonth]);
 
-  const stats = useMemo(() => ({
-    total: orders.length,
-    pending: orders.filter((o: any) => o.status?.toLowerCase() === 'pending').length,
-    received: orders.filter((o: any) => o.status?.toLowerCase() === 'received').length,
-    thisMonth: monthlyOrders.length,
-  }), [orders, monthlyOrders]);
+  const stats = useMemo(() => {
+    const totalAmount = invoices.reduce((sum, inv) => sum + (inv.invoiceAmount || 0), 0);
+    const totalItems = invoices.reduce((sum, inv) => sum + (inv.items?.length || 0), 0);
+    return {
+      total: invoices.length,
+      totalAmount,
+      totalItems,
+      thisMonth: monthlyOrders.length,
+    };
+  }, [invoices, monthlyOrders]);
 
   const clearFilters = () => {
     setStatusFilter('all');
     setSearchQuery('');
   };
 
-  const renderTable = (data: any[]) => (
+  const renderTable = (data: Invoice[]) => (
     <div className="rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/30">
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Order ID</TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
+            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Invoice No</TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Supplier</TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Requested At</TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Total</TableHead>
-            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Remarks</TableHead>
+            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Payment Mode</TableHead>
+            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Invoice Date</TableHead>
+            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Created At</TableHead>
+            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Amount</TableHead>
+            <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Items</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-               <TableCell colSpan={6} className="h-40">
+               <TableCell colSpan={7} className="h-40">
                 <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
                   <div className="w-16 h-16 rounded-2xl bg-muted/40 flex items-center justify-center">
                     <FileText className="w-8 h-8 text-muted-foreground/40" />
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-sm">No invoice orders found</p>
+                    <p className="font-medium text-sm">No invoices found</p>
                     <p className="text-xs mt-0.5">Create your first stock entry to get started</p>
                   </div>
                   <Button size="sm" className="mt-1 h-8 text-xs" onClick={() => navigate('/invoices/new')}>
@@ -110,27 +97,31 @@ export default function Invoices() {
               </TableCell>
             </TableRow>
           ) : (
-            data.map((order: any, i: number) => (
+            data.map((invoice: Invoice, i: number) => (
               <motion.tr
-                key={order.id}
+                key={invoice.id}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 className="border-b border-border/40 hover:bg-muted/20 transition-colors cursor-pointer"
-                onClick={() => setSelectedOrder(order)}
+                onClick={() => setSelectedOrder(invoice)}
               >
-                <TableCell className="font-mono text-xs font-semibold text-primary">#{order.id}</TableCell>
-                <TableCell><StatusChip status={order.status} /></TableCell>
-                <TableCell className="text-sm">{order.supplierName || '—'}</TableCell>
-                <TableCell><StatusChip status={order.status} /></TableCell>
+                <TableCell className="font-mono text-xs font-semibold text-primary">{invoice.invoiceNumber || `#${invoice.id}`}</TableCell>
+                <TableCell className="text-sm">{invoice.supplierName || '—'}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="text-[10px] capitalize">{invoice.paymentMode || '—'}</Badge>
+                </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {order.createdAt ? format(new Date(order.createdAt), 'dd MMM yyyy') : '—'}
+                  {invoice.invoiceDate ? format(new Date(invoice.invoiceDate), 'dd MMM yyyy') : '—'}
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {invoice.createdAt ? format(new Date(invoice.createdAt), 'dd MMM yyyy HH:mm') : '—'}
                 </TableCell>
                 <TableCell className="text-right font-semibold text-sm">
-                  ₹{order.totalAmount?.toLocaleString() || '0'}
+                  ₹{invoice.invoiceAmount?.toLocaleString() || '0'}
                 </TableCell>
-                <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate">
-                  {order.remarks || '—'}
+                <TableCell className="text-right text-xs text-muted-foreground">
+                  {invoice.items?.length || 0}
                 </TableCell>
               </motion.tr>
             ))
@@ -158,9 +149,9 @@ export default function Invoices() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: 'Total Invoices', value: stats.total, icon: Archive, color: 'text-primary' },
-            { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-amber-600' },
-            { label: 'Received', value: stats.received, icon: Package, color: 'text-emerald-600' },
-            { label: 'This Month', value: stats.thisMonth, icon: FileText, color: 'text-blue-600' },
+            { label: 'Total Amount', value: `₹${stats.totalAmount.toLocaleString()}`, icon: FileText, color: 'text-emerald-600' },
+            { label: 'Total Items', value: stats.totalItems, icon: Package, color: 'text-amber-600' },
+            { label: 'This Month', value: stats.thisMonth, icon: Clock, color: 'text-blue-600' },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -197,16 +188,17 @@ export default function Invoices() {
           {/* Filter Bar */}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[120px] h-8 text-xs">
+              <SelectTrigger className="w-[140px] h-8 text-xs">
                 <Filter className="w-3 h-3 mr-1" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="Payment Mode" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="received">Received</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="upi">UPI</SelectItem>
+                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                <SelectItem value="cheque">Cheque</SelectItem>
+                <SelectItem value="credit">Credit</SelectItem>
               </SelectContent>
             </Select>
             <div className="relative flex-1 max-w-xs">
@@ -229,7 +221,7 @@ export default function Invoices() {
           </div>
 
           <TabsContent value="stock-entry" className="mt-3">
-            {renderTable(filtered.filter((o: any) => ['pending', 'draft', 'partial'].includes(o.status?.toLowerCase())))}
+            {renderTable(filtered)}
           </TabsContent>
           <TabsContent value="monthly" className="mt-3">
             {renderTable(monthlyOrders)}

@@ -194,9 +194,7 @@ export default function ViewCampTemplate() {
                       <p className="font-medium text-sm">{event.startDate} – {event.endDate}</p>
                       <p className="text-xs text-muted-foreground">{event.doctorsList?.length || 0} doctors · {event.staffList?.length || 0} staff</p>
                     </div>
-                    <Badge className={cn('capitalize text-xs', eventStatusColors[event.status] || '')}>
-                      {event.status}
-                    </Badge>
+                    <Badge className={cn('capitalize text-xs', eventStatusColors[event.status] || '')}>{event.status}</Badge>
                   </div>
                 ))}
               </div>

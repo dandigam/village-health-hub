@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
-import { useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
+import { useSupplierList, useWarehouseInventory, WarehouseInventoryItem } from '@/hooks/useApiData';
 import api from '@/services/api';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -37,8 +37,9 @@ const emptyItem: InvoiceItem = {
 
 export default function NewInvoice() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const warehouseId = (user as any)?.warehouseId;
+ const { user: authUser } = useAuth();
+   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
+   
 
   
   const { data: suppliers = [] } = useSupplierList(warehouseId);
@@ -58,19 +59,31 @@ export default function NewInvoice() {
   const [medicineSearch, setMedicineSearch] = useState('');
   const [showMedicineDropdown, setShowMedicineDropdown] = useState(false);
   const [saving, setSaving] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Click outside handler to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowMedicineDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const filteredMedicines = useMemo(() => {
     if (!medicineSearch.trim()) return [];
     const q = medicineSearch.toLowerCase();
-    return inventory.filter((m: any) =>
+    return inventory.filter((m: WarehouseInventoryItem) =>
       m.medicineName?.toLowerCase().includes(q)
-    ).slice(0, 8);
+    ).slice(0, 10);
   }, [inventory, medicineSearch]);
 
-  const selectMedicine = (med: any) => {
+  const selectMedicine = (med: WarehouseInventoryItem) => {
     setCurrentItem(prev => ({
       ...prev,
-      medicineId: med.medicineId || med.id,
+      medicineId: med.medicineId,
       medicineName: med.medicineName,
       medicineType: med.medicineType || '',
     }));
@@ -101,7 +114,7 @@ export default function NewInvoice() {
         supplierId: Number(supplierId),
         warehouseId,
         paymentMode: paymentMode || undefined,
-        invoiceId: invoiceId || undefined,
+        invoiceNumber: invoiceId || undefined,
         invoiceAmount: parseFloat(invoiceAmount) || 0,
         invoiceDate,
         items: items.map(item => ({
@@ -110,9 +123,10 @@ export default function NewInvoice() {
           batchNo: item.batchNo || undefined,
           expDate: item.expDate || undefined,
           quantity: Number(item.quantity),
+          warehouseId,
         })),
       };
-      await api.post('/supplier-orders', payload);
+      await api.post('/invoices', payload);
       toast.success('Stock entry saved successfully');
       navigate('/invoices');
     } catch (e) {
@@ -204,7 +218,7 @@ export default function NewInvoice() {
 
           {/* Add row form */}
           <div className="grid grid-cols-[1.5fr_0.7fr_0.7fr_0.8fr_0.6fr_auto] gap-2 items-end p-3 rounded-lg border border-dashed border-border/60 bg-muted/20 mb-3">
-            <div className="space-y-1 relative">
+            <div className="space-y-1 relative" ref={dropdownRef}>
               <Label className="text-[11px] font-medium">Medicine *</Label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
@@ -213,18 +227,24 @@ export default function NewInvoice() {
                   placeholder="Search Medicine"
                   value={currentItem.medicineName || medicineSearch}
                   onChange={e => {
-                    setMedicineSearch(e.target.value);
-                    setCurrentItem(prev => ({ ...prev, medicineName: '', medicineId: '' }));
-                    setShowMedicineDropdown(true);
+                    const val = e.target.value;
+                    setMedicineSearch(val);
+                    if (currentItem.medicineName) {
+                      setCurrentItem(prev => ({ ...prev, medicineName: '', medicineId: '' }));
+                    }
+                    setShowMedicineDropdown(val.trim().length > 0);
                   }}
-                  onFocus={() => medicineSearch && setShowMedicineDropdown(true)}
+                  onFocus={() => {
+                    if (medicineSearch.trim()) setShowMedicineDropdown(true);
+                  }}
                 />
               </div>
               {showMedicineDropdown && filteredMedicines.length > 0 && (
                 <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-card border border-border rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                  {filteredMedicines.map((med: any) => (
+                  {filteredMedicines.map((med: WarehouseInventoryItem) => (
                     <button
-                      key={med.medicineId || med.id}
+                      key={med.medicineId}
+                      type="button"
                       className="w-full text-left px-3 py-2 text-sm hover:bg-muted/50 transition-colors flex items-center justify-between"
                       onClick={() => selectMedicine(med)}
                     >
@@ -232,6 +252,11 @@ export default function NewInvoice() {
                       <Badge variant="secondary" className="text-[10px] h-5">{med.medicineType}</Badge>
                     </button>
                   ))}
+                </div>
+              )}
+              {showMedicineDropdown && medicineSearch.trim() && filteredMedicines.length === 0 && (
+                <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-card border border-border rounded-lg shadow-xl p-3 text-center text-sm text-muted-foreground">
+                  No medicines found
                 </div>
               )}
             </div>

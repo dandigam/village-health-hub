@@ -1,0 +1,766 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { 
+  Save, 
+  Send, 
+  X, 
+  ChevronLeft, 
+  ChevronRight, 
+  Check, 
+  CalendarIcon, 
+  Search,
+  User,
+  MapPin,
+  Users,
+  Stethoscope,
+  ClipboardCheck
+} from 'lucide-react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { useDoctors, useSaveCamp } from '@/hooks/useApiData';
+import { useStatesHierarchy } from '@/hooks/useApiData';
+
+// Mock data for dropdowns
+const mockStates = ['Andhra Pradesh', 'Telangana', 'Karnataka', 'Tamil Nadu'];
+const mockDistricts = ['Guntur', 'Krishna', 'Prakasam', 'Nellore'];
+const mockMandals = ['Bapatla', 'Mangalagiri', 'Tenali', 'Narasaraopet'];
+const mockCities = ['Bapatla', 'Mangalagiri', 'Vijayawada', 'Guntur'];
+const mockVolunteers = [
+  { id: '1', name: 'Alice Johnson' },
+  { id: '2', name: 'Bob Smith' },
+  { id: '3', name: 'Charlie Brown' },
+  { id: '4', name: 'David Wilson' },
+  { id: '5', name: 'Eva Martinez' },
+];
+
+const steps = [
+  { id: 1, title: 'Camp Details', icon: User },
+  { id: 2, title: 'Location', icon: MapPin },
+  { id: 3, title: 'Assign Doctors', icon: Stethoscope },
+  { id: 4, title: 'Assign Volunteers', icon: Users },
+  { id: 5, title: 'Summary', icon: ClipboardCheck },
+];
+
+interface FormData {
+  campName: string;
+  organizerName: string;
+  organizerPhone: string;
+  organizerEmail: string;
+  planDate: Date | undefined;
+  state: string;
+  district: string;
+  mandal: string;
+  city: string;
+  address: string;
+  pinCode: string;
+  selectedDoctors: any[];
+  selectedVolunteers: typeof mockVolunteers;
+}
+
+export default function NewCamp() {
+    // Location hierarchy
+    const { data: statesHierarchy = [] } = useStatesHierarchy();
+  const navigate = useNavigate();
+  const { data: allDoctors = [] } = useDoctors();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [doctorSearch, setDoctorSearch] = useState('');
+  const [volunteerSearch, setVolunteerSearch] = useState('');
+  const [formData, setFormData] = useState<FormData>({
+    campName: '',
+    organizerName: '',
+    organizerPhone: '',
+    organizerEmail: '',
+    planDate: undefined,
+    stateId: 0,
+    state: '',
+    districtId: 0,
+    district: '',
+    mandalId: 0,
+    mandal: '',
+    city: '',
+    address: '',
+    pinCode: '',
+    selectedDoctors: [],
+    selectedVolunteers: [],
+  });
+
+  const updateFormData = (field: keyof FormData, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleNext = () => {
+    if (currentStep < 5) setCurrentStep(currentStep + 1);
+  };
+
+  const handlePrev = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
+
+  const handleSaveDraft = () => {
+    toast({
+      title: 'Draft Saved',
+      description: 'Your camp draft has been saved successfully.',
+    });
+  };
+
+  const saveCamp = useSaveCamp();
+
+  const handleSubmit = async () => {
+    // Prepare payload
+    const payload = {
+      id: 0,
+      campName: formData.campName,
+      organizerName: formData.organizerName,
+      organizerPhone: formData.organizerPhone,
+      organizerEmail: formData.organizerEmail,
+      stateId: formData.stateId,
+      state: formData.state,
+      districtId: formData.districtId,
+      district: formData.district,
+      mandalId: formData.mandalId,
+      mandal: formData.mandal,
+      city: formData.city,
+      address: formData.address,
+      pinCode: formData.pinCode,
+      doctorIds: formData.selectedDoctors.map(d => d.id),
+      volunteerIds: formData.selectedVolunteers.map(v => v.id),
+    };
+    try {
+      await saveCamp.mutateAsync(payload);
+      toast({
+        title: 'Camp Created Successfully!',
+        description: `${formData.campName} has been created and is ready for activation.`,
+      });
+      navigate('/');
+    } catch (e) {
+      toast({ title: 'API Error', description: 'Failed to create camp.', variant: 'destructive' });
+    }
+  };
+
+  const addDoctor = (doctor: (typeof allDoctors)[0]) => {
+    if (!formData.selectedDoctors.find((d) => d.id === doctor.id)) {
+      updateFormData('selectedDoctors', [...formData.selectedDoctors, doctor]);
+    }
+    setDoctorSearch('');
+  };
+
+  const removeDoctor = (doctorId: string) => {
+    updateFormData(
+      'selectedDoctors',
+      formData.selectedDoctors.filter((d) => d.id !== doctorId)
+    );
+  };
+
+  const addVolunteer = (volunteer: (typeof mockVolunteers)[0]) => {
+    if (!formData.selectedVolunteers.find((v) => v.id === volunteer.id)) {
+      updateFormData('selectedVolunteers', [...formData.selectedVolunteers, volunteer]);
+    }
+    setVolunteerSearch('');
+  };
+
+  const removeVolunteer = (volunteerId: string) => {
+    updateFormData(
+      'selectedVolunteers',
+      formData.selectedVolunteers.filter((v) => v.id !== volunteerId)
+    );
+  };
+
+  const filteredDoctors = allDoctors.filter(
+    (d) =>
+      d.name.toLowerCase().includes(doctorSearch.toLowerCase()) &&
+      !formData.selectedDoctors.find((sd) => sd.id === d.id)
+  );
+
+  const filteredVolunteers = mockVolunteers.filter(
+    (v) =>
+      v.name.toLowerCase().includes(volunteerSearch.toLowerCase()) &&
+      !formData.selectedVolunteers.find((sv) => sv.id === v.id)
+  );
+
+  return (
+    <DashboardLayout>
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border/60 -mx-3 sm:-mx-4 lg:-mx-6 -mt-3 sm:-mt-4 lg:-mt-6 px-4 sm:px-6 lg:px-8 py-3 mb-6" style={{ boxShadow: '0 1px 8px hsl(var(--shadow-color) / 0.04)' }}>
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted" onClick={() => navigate('/camps')}>
+              <X className="h-4 w-4" />
+            </Button>
+            <h1 className="text-lg font-bold text-foreground tracking-tight">Create New Camp</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleSaveDraft} className="h-9 px-4 border-border/60">
+              <Save className="mr-1.5 h-3.5 w-3.5" />
+              Save Draft
+            </Button>
+            <Button size="sm" onClick={handleSubmit} className="h-9 px-5">
+              <Send className="mr-1.5 h-3.5 w-3.5" />
+              Submit
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Premium Progress Steps */}
+      <div className="mb-8 max-w-3xl mx-auto px-4">
+        <div className="flex items-start justify-between">
+          {steps.map((step, index) => (
+            <div key={step.id} className="flex items-center flex-1">
+              <div className="flex flex-col items-center min-w-[80px]">
+                <button
+                  type="button"
+                  className={cn(
+                    'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer border-2',
+                    currentStep === step.id
+                      ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25 scale-110'
+                      : currentStep > step.id
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-card text-muted-foreground border-border hover:border-primary/40 hover:shadow-md'
+                  )}
+                  onClick={() => setCurrentStep(step.id)}
+                  style={currentStep === step.id ? { boxShadow: '0 4px 16px hsl(var(--primary) / 0.3)' } : {}}
+                >
+                  {currentStep > step.id ? (
+                    <Check className="h-5 w-5" />
+                  ) : (
+                    <step.icon className="h-5 w-5" />
+                  )}
+                </button>
+                <span
+                  className={cn(
+                    'text-[11px] mt-2.5 text-center font-semibold whitespace-nowrap transition-colors duration-200',
+                    currentStep === step.id ? 'text-primary' : currentStep > step.id ? 'text-primary/80' : 'text-muted-foreground'
+                  )}
+                >
+                  {step.title}
+                </span>
+              </div>
+              {index < steps.length - 1 && (
+                <div className="flex-1 mx-2 mt-[24px]">
+                  <div className="relative h-[3px] rounded-full bg-border/60 overflow-hidden">
+                    <div
+                      className={cn(
+                        'absolute inset-y-0 left-0 rounded-full bg-primary transition-all duration-500',
+                        currentStep > step.id ? 'w-full' : 'w-0'
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Form Content */}
+      <Card className="max-w-2xl mx-auto border-border/50 shadow-sm">
+        <CardHeader className="pb-4 pt-5 px-6 border-b border-border/40">
+          <CardTitle className="flex items-center gap-2.5 text-base">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              {(() => {
+                const StepIcon = steps[currentStep - 1].icon;
+                return StepIcon ? <StepIcon className="h-4 w-4 text-primary" /> : null;
+              })()}
+            </div>
+            {steps[currentStep - 1].title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-6 py-5">
+          {/* Step 1: Camp Details */}
+          {currentStep === 1 && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="campName">Camp Name *</Label>
+                  <Input
+                    id="campName"
+                    placeholder="Enter camp name"
+                    value={formData.campName}
+                    onChange={(e) => updateFormData('campName', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="organizerName">Organizer Name *</Label>
+                  <Input
+                    id="organizerName"
+                    placeholder="Enter organizer name"
+                    value={formData.organizerName}
+                    onChange={(e) => updateFormData('organizerName', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="organizerPhone">Organizer Phone No *</Label>
+                  <Input
+                    id="organizerPhone"
+                    type="tel"
+                    placeholder="Enter phone number"
+                    value={formData.organizerPhone}
+                    onChange={(e) => updateFormData('organizerPhone', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="organizerEmail">Organizer Email</Label>
+                  <Input
+                    id="organizerEmail"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={formData.organizerEmail}
+                    onChange={(e) => updateFormData('organizerEmail', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Plan Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !formData.planDate && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.planDate ? format(formData.planDate, 'PPP') : 'Select date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.planDate}
+                        onSelect={(date) => updateFormData('planDate', date)}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Location */}
+          {currentStep === 2 && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>State *</Label>
+                  <Select
+                    value={formData.stateId ? String(formData.stateId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => String(s.id) === v);
+                      updateFormData('stateId', stateObj?.id || 0);
+                      updateFormData('state', stateObj?.name || '');
+                      updateFormData('districtId', 0);
+                      updateFormData('district', '');
+                      updateFormData('mandalId', 0);
+                      updateFormData('mandal', '');
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statesHierarchy.map((state) => (
+                        <SelectItem key={state.id} value={String(state.id)}>
+                          {state.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>District *</Label>
+                  <Select
+                    value={formData.districtId ? String(formData.districtId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => s.id === formData.stateId);
+                      const districtObj = stateObj?.districts.find(d => String(d.id) === v);
+                      updateFormData('districtId', districtObj?.id || 0);
+                      updateFormData('district', districtObj?.name || '');
+                      updateFormData('mandalId', 0);
+                      updateFormData('mandal', '');
+                    }}
+                    disabled={!formData.stateId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select district" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statesHierarchy
+                        .find(s => s.id === formData.stateId)?.districts.map((district) => (
+                          <SelectItem key={district.id} value={String(district.id)}>
+                            {district.name}
+                          </SelectItem>
+                        )) || []}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Mandal *</Label>
+                  <Select
+                    value={formData.mandalId ? String(formData.mandalId) : ''}
+                    onValueChange={(v) => {
+                      const stateObj = statesHierarchy.find(s => s.id === formData.stateId);
+                      const districtObj = stateObj?.districts.find(d => d.id === formData.districtId);
+                      const mandalObj = districtObj?.mandals.find(m => String(m.id) === v);
+                      updateFormData('mandalId', mandalObj?.id || 0);
+                      updateFormData('mandal', mandalObj?.name || '');
+                    }}
+                    disabled={!formData.districtId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select mandal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statesHierarchy
+                        .find(s => s.id === formData.stateId)?.districts
+                        .find(d => d.id === formData.districtId)?.mandals.map((mandal) => (
+                          <SelectItem key={mandal.id} value={String(mandal.id)}>
+                            {mandal.name}
+                          </SelectItem>
+                        )) || []}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>City *</Label>
+                  <Input
+                    value={formData.city}
+                    onChange={(e) => updateFormData('city', e.target.value)}
+                    placeholder="Enter city"
+                  />
+                </div>
+                <div className="space-y-1.5 col-span-2">
+                  <Label htmlFor="address">Address *</Label>
+                  <Textarea
+                    id="address"
+                    placeholder="Enter full address"
+                    value={formData.address}
+                    onChange={(e) => updateFormData('address', e.target.value)}
+                    rows={2}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pinCode">PIN Code</Label>
+                  <Input
+                    id="pinCode"
+                    type="text"
+                    placeholder="Enter PIN code"
+                    value={formData.pinCode}
+                    onChange={(e) => updateFormData('pinCode', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Assign Doctors */}
+          {currentStep === 3 && (
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Search and Add Doctors</Label>
+                <Command className="rounded-lg border">
+                  <CommandInput
+                    placeholder="Search doctors..."
+                    value={doctorSearch}
+                    onValueChange={setDoctorSearch}
+                  />
+                  <CommandList>
+                    <CommandEmpty>No doctors found.</CommandEmpty>
+                    <CommandGroup>
+                      {filteredDoctors.map((doctor) => (
+                        <CommandItem
+                          key={doctor.id}
+                          onSelect={() => addDoctor(doctor)}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
+                              {doctor.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
+                            </div>
+                            <div>
+                              <p className="font-medium">{doctor.name}</p>
+                              <p className="text-xs text-muted-foreground">{doctor.specialization}</p>
+                            </div>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </div>
+
+              {formData.selectedDoctors.length > 0 && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Selected Doctors ({formData.selectedDoctors.length})</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.selectedDoctors.map((doctor) => (
+                      <Card key={doctor.id} className="p-2 flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-semibold">
+                          {doctor.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{doctor.name}</p>
+                          <p className="text-xs text-muted-foreground">{doctor.specialization}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 ml-2"
+                          onClick={() => removeDoctor(doctor.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 4: Assign Volunteers */}
+          {currentStep === 4 && (
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Search and Add Volunteers</Label>
+                <Command className="rounded-lg border">
+                  <CommandInput
+                    placeholder="Search volunteers..."
+                    value={volunteerSearch}
+                    onValueChange={setVolunteerSearch}
+                  />
+                  <CommandList>
+                    <CommandEmpty>No volunteers found.</CommandEmpty>
+                    <CommandGroup>
+                      {filteredVolunteers.map((volunteer) => (
+                        <CommandItem
+                          key={volunteer.id}
+                          onSelect={() => addVolunteer(volunteer)}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium">
+                              {volunteer.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
+                            </div>
+                            <p className="font-medium">{volunteer.name}</p>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </div>
+
+              {formData.selectedVolunteers.length > 0 && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Selected Volunteers ({formData.selectedVolunteers.length})</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {formData.selectedVolunteers.map((volunteer) => (
+                      <Badge
+                        key={volunteer.id}
+                        variant="secondary"
+                        className="px-3 py-2 text-sm flex items-center gap-2"
+                      >
+                        {volunteer.name}
+                        <button
+                          className="hover:text-destructive"
+                          onClick={() => removeVolunteer(volunteer.id)}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 5: Summary */}
+          {currentStep === 5 && (
+            <div className="space-y-3">
+              {/* Camp Details Summary */}
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5 text-primary" />
+                    Camp Details
+                  </h3>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setCurrentStep(1)}>
+                    Edit
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">Camp Name:</span>{' '}
+                    <span className="font-medium">{formData.campName || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Organizer:</span>{' '}
+                    <span className="font-medium">{formData.organizerName || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Phone:</span>{' '}
+                    <span className="font-medium">{formData.organizerPhone || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Email:</span>{' '}
+                    <span className="font-medium">{formData.organizerEmail || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Plan Date:</span>{' '}
+                    <span className="font-medium">
+                      {formData.planDate ? format(formData.planDate, 'PPP') : '-'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Location Summary */}
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-primary" />
+                    Location
+                  </h3>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setCurrentStep(2)}>
+                    Edit
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-muted-foreground">State:</span>{' '}
+                    <span className="font-medium">{formData.state || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">District:</span>{' '}
+                    <span className="font-medium">{formData.district || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Mandal:</span>{' '}
+                    <span className="font-medium">{formData.mandal || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">City:</span>{' '}
+                    <span className="font-medium">{formData.city || '-'}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">Address:</span>{' '}
+                    <span className="font-medium">{formData.address || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">PIN Code:</span>{' '}
+                    <span className="font-medium">{formData.pinCode || '-'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Doctors Summary */}
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    <Stethoscope className="h-3.5 w-3.5 text-primary" />
+                    Doctors ({formData.selectedDoctors.length})
+                  </h3>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setCurrentStep(3)}>
+                    Edit
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.selectedDoctors.length > 0 ? (
+                    formData.selectedDoctors.map((doctor) => (
+                      <Badge key={doctor.id} variant="secondary">
+                        {doctor.name}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">No doctors assigned</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Volunteers Summary */}
+              <div className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5 text-primary" />
+                    Volunteers ({formData.selectedVolunteers.length})
+                  </h3>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setCurrentStep(4)}>
+                    Edit
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {formData.selectedVolunteers.length > 0 ? (
+                    formData.selectedVolunteers.map((volunteer) => (
+                      <Badge key={volunteer.id} variant="secondary">
+                        {volunteer.name}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">No volunteers assigned</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center justify-between mt-6 pt-5 border-t border-border/40">
+            <Button variant="outline" size="sm" onClick={handlePrev} disabled={currentStep === 1} className="h-9 px-4">
+              <ChevronLeft className="mr-1.5 h-3.5 w-3.5" />
+              Previous
+            </Button>
+
+            {currentStep < 5 ? (
+              <Button size="sm" onClick={handleNext} className="h-9 px-5">
+                Next
+                <ChevronRight className="ml-1.5 h-3.5 w-3.5" />
+              </Button>
+            ) : (
+              <Button size="sm" onClick={handleSubmit} className="h-9 px-5">
+                <Check className="mr-1.5 h-3.5 w-3.5" />
+                Create Camp
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </DashboardLayout>
+  );
+}
