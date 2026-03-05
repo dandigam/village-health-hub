@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
-import { useCampEvents, useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
+import { useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
 import api from '@/services/api';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
