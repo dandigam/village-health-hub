@@ -40,7 +40,7 @@ export default function NewInvoice() {
   const { user } = useAuth();
   const warehouseId = (user as any)?.warehouseId;
 
-  const { data: campEvents = [] } = useCampEvents();
+  
   const { data: suppliers = [] } = useSupplierList(warehouseId);
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
 
