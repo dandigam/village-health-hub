@@ -1,8 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpDown, ArrowUp, ArrowDown, Search, Package } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { ArrowUpDown, ArrowUp, ArrowDown, Search, Package, Download, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import jsPDF from 'jspdf';
 
 interface StockItemDetail {
   id: string;
@@ -23,9 +27,14 @@ type SortDir = 'asc' | 'desc';
 
 function getStockStatus(qty: number, minQty: number): 'critical' | 'warning' | 'ok' {
   const ratio = qty / minQty;
-  if (ratio < 0.3) return 'critical';   // below 30% of min
-  if (ratio < 0.7) return 'warning';    // 30-70% of min
-  return 'ok';                           // above 70%
+  if (ratio < 0.3) return 'critical';
+  if (ratio < 0.7) return 'warning';
+  return 'ok';
+}
+
+function getStockPct(qty: number, minQty: number): number {
+  if (minQty <= 0) return 100;
+  return Math.min(Math.round((qty / minQty) * 100), 100);
 }
 
 const statusConfig = {
@@ -33,18 +42,24 @@ const statusConfig = {
     label: 'Low Stock',
     className: 'bg-[hsl(var(--stock-critical-bg))] text-[hsl(var(--stock-critical))] border-[hsl(var(--stock-critical)/0.2)]',
     dot: 'bg-[hsl(var(--stock-critical))]',
+    progressBar: '[&>div]:bg-[hsl(var(--stock-critical))]',
+    progressTrack: 'bg-[hsl(var(--stock-critical)/0.15)]',
     pulse: true,
   },
   warning: {
     label: 'Warning',
     className: 'bg-[hsl(var(--stock-warning-bg))] text-[hsl(var(--stock-warning))] border-[hsl(var(--stock-warning)/0.2)]',
     dot: 'bg-[hsl(var(--stock-warning))]',
+    progressBar: '[&>div]:bg-[hsl(var(--stock-warning))]',
+    progressTrack: 'bg-[hsl(var(--stock-warning)/0.15)]',
     pulse: true,
   },
   ok: {
     label: 'In Stock',
     className: 'bg-[hsl(var(--stock-ok-bg))] text-[hsl(var(--stock-ok))] border-[hsl(var(--stock-ok)/0.2)]',
     dot: 'bg-[hsl(var(--stock-ok))]',
+    progressBar: '[&>div]:bg-[hsl(var(--stock-ok))]',
+    progressTrack: 'bg-[hsl(var(--stock-ok)/0.15)]',
     pulse: false,
   },
 };
@@ -75,6 +90,7 @@ export function InventoryTab({ stockItems }: InventoryTabProps) {
   const processed = useMemo(() => {
     let items = stockItems.map(item => ({
       ...item,
+      minQty: item.minimumQty || MIN_STOCK_DEFAULT,
       status: getStockStatus(item.quantity, item.minimumQty || MIN_STOCK_DEFAULT),
     }));
 
@@ -98,11 +114,87 @@ export function InventoryTab({ stockItems }: InventoryTabProps) {
   const criticalCount = processed.filter(i => i.status === 'critical').length;
   const warningCount = processed.filter(i => i.status === 'warning').length;
 
+  // ── Export CSV ─────────────────────────────────────────────
+  const exportCSV = useCallback(() => {
+    const headers = ['Medicine Name', 'Type', 'Current Qty', 'Min Qty', 'Stock %', 'Status'];
+    const rows = processed.map(item => [
+      item.medicineName,
+      item.medicineType || '-',
+      item.quantity,
+      item.minQty,
+      `${getStockPct(item.quantity, item.minQty)}%`,
+      statusConfig[item.status].label,
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventory-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('CSV exported successfully');
+  }, [processed]);
+
+  // ── Export PDF ─────────────────────────────────────────────
+  const exportPDF = useCallback(() => {
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const pageW = doc.internal.pageSize.getWidth();
+
+    // Title
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Medicine Inventory Report', 14, 18);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(120);
+    doc.text(`Generated: ${new Date().toLocaleDateString()} | Total: ${processed.length} items | Critical: ${criticalCount} | Warning: ${warningCount}`, 14, 25);
+
+    // Table header
+    const colX = [14, 110, 155, 195, 235];
+    const colLabels = ['Medicine Name', 'Type', 'Current Qty', 'Min Qty', 'Status'];
+    let y = 35;
+    doc.setFillColor(241, 243, 248);
+    doc.rect(10, y - 5, pageW - 20, 8, 'F');
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(60);
+    colLabels.forEach((label, i) => doc.text(label, colX[i], y));
+    y += 10;
+
+    // Rows
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    processed.forEach((item) => {
+      if (y > doc.internal.pageSize.getHeight() - 15) {
+        doc.addPage();
+        y = 20;
+      }
+      const statusLabel = statusConfig[item.status].label;
+      doc.setTextColor(30);
+      doc.text(item.medicineName, colX[0], y);
+      doc.text(item.medicineType || '-', colX[1], y);
+      doc.text(String(item.quantity), colX[2], y);
+      doc.text(String(item.minQty), colX[3], y);
+
+      // Status colored
+      if (item.status === 'critical') doc.setTextColor(220, 38, 38);
+      else if (item.status === 'warning') doc.setTextColor(202, 138, 4);
+      else doc.setTextColor(22, 163, 74);
+      doc.text(statusLabel, colX[4], y);
+      doc.setTextColor(30);
+      y += 7;
+    });
+
+    doc.save(`inventory-${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success('PDF exported successfully');
+  }, [processed, criticalCount, warningCount]);
+
   return (
     <div className="space-y-4">
-      {/* Summary chips + search */}
+      {/* Summary chips + search + export */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(var(--stock-critical-bg))] text-[hsl(var(--stock-critical))] text-xs font-semibold">
             <span className="w-2 h-2 rounded-full bg-[hsl(var(--stock-critical))] animate-pulse" />
             {criticalCount} Critical
@@ -116,14 +208,22 @@ export function InventoryTab({ stockItems }: InventoryTabProps) {
             {processed.length - criticalCount - warningCount} OK
           </div>
         </div>
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search medicines..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pl-9 h-9"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative w-full sm:w-56">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search medicines..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
+          <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs" onClick={exportCSV}>
+            <Download className="h-3.5 w-3.5" /> CSV
+          </Button>
+          <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs" onClick={exportPDF}>
+            <FileText className="h-3.5 w-3.5" /> PDF
+          </Button>
         </div>
       </div>
 
@@ -139,7 +239,7 @@ export function InventoryTab({ stockItems }: InventoryTabProps) {
               </th>
               <th className="cursor-pointer select-none" onClick={() => toggleSort('quantity')}>
                 <div className="flex items-center gap-1.5">
-                  Current Qty <SortIcon col="quantity" />
+                  Quantity / Stock Level <SortIcon col="quantity" />
                 </div>
               </th>
               <th className="cursor-pointer select-none" onClick={() => toggleSort('status')}>
@@ -162,21 +262,41 @@ export function InventoryTab({ stockItems }: InventoryTabProps) {
             ) : (
               processed.map((item) => {
                 const cfg = statusConfig[item.status];
+                const pct = getStockPct(item.quantity, item.minQty);
                 return (
                   <tr key={item.id} className={cn(
                     item.status === 'critical' && 'bg-[hsl(var(--stock-critical-bg)/0.3)]',
                     item.status === 'warning' && 'bg-[hsl(var(--stock-warning-bg)/0.3)]',
                   )}>
-                    <td className="font-medium">{item.medicineName}</td>
                     <td>
-                      <span className={cn(
-                        'font-semibold tabular-nums',
-                        item.status === 'critical' && 'text-[hsl(var(--stock-critical))]',
-                        item.status === 'warning' && 'text-[hsl(var(--stock-warning))]',
-                        item.status === 'ok' && 'text-foreground',
-                      )}>
-                        {item.quantity}
-                      </span>
+                      <div>
+                        <span className="font-medium">{item.medicineName}</span>
+                        {item.medicineType && (
+                          <span className="text-[10px] text-muted-foreground ml-2">{item.medicineType}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="flex items-center gap-3 min-w-[200px]">
+                        <span className={cn(
+                          'font-semibold tabular-nums text-sm min-w-[40px]',
+                          item.status === 'critical' && 'text-[hsl(var(--stock-critical))]',
+                          item.status === 'warning' && 'text-[hsl(var(--stock-warning))]',
+                          item.status === 'ok' && 'text-foreground',
+                        )}>
+                          {item.quantity}
+                        </span>
+                        <div className="flex-1 flex items-center gap-2">
+                          <Progress
+                            value={pct}
+                            className={cn('h-2 flex-1', cfg.progressTrack, cfg.progressBar)}
+                          />
+                          <span className="text-[10px] text-muted-foreground tabular-nums w-8 text-right">{pct}%</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          min: {item.minQty}
+                        </span>
+                      </div>
                     </td>
                     <td>
                       <Badge className={cn('gap-1.5 border', cfg.className)}>
