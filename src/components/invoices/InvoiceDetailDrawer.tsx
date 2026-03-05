@@ -1,9 +1,10 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-import { FileText, Package, Calendar, CreditCard, Building2, Truck } from 'lucide-react';
+import { FileText, Package, Calendar, CreditCard, Building2, Truck, Pencil } from 'lucide-react';
 import type { Invoice, InvoiceItem } from '@/hooks/useApiData';
 
 interface InvoiceDetailDrawerProps {
@@ -30,7 +31,14 @@ export function InvoiceDetailDrawer({ open, onOpenChange, order, onEdit }: Invoi
                 <FileText className="w-4 h-4 text-primary" />
                 {order.invoiceNumber || `Invoice #${order.id}`}
               </SheetTitle>
-              <Badge variant="outline" className="text-[10px] capitalize">{order.paymentMode || 'N/A'}</Badge>
+              <div className="flex items-center gap-1.5">
+                {onEdit && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(order)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                )}
+                <Badge variant="outline" className="text-[10px] capitalize">{order.paymentMode || 'N/A'}</Badge>
+              </div>
             </div>
           </SheetHeader>
         </div>
