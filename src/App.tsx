@@ -125,6 +125,10 @@ const App = () => (
               {/* Distribution Orders */}
               <Route path="/distribution-orders" element={<ProtectedRoute routeKey="distribution-orders"><DistributionOrders /></ProtectedRoute>} />
               
+              {/* Invoices */}
+              <Route path="/invoices" element={<ProtectedRoute routeKey="invoices"><Invoices /></ProtectedRoute>} />
+              <Route path="/invoices/new" element={<ProtectedRoute routeKey="invoices"><NewInvoice /></ProtectedRoute>} />
+              
               {/* Warehouses */}
               <Route path="/warehouses" element={<ProtectedRoute routeKey="warehouses"><WarehouseManagement /></ProtectedRoute>} />
               
