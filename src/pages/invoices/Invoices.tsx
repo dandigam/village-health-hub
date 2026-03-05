@@ -159,8 +159,8 @@ export default function Invoices() {
           className="flex items-center justify-between"
         >
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Stock Entry (Invoice)</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Record incoming stock from suppliers</p>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Purchase & Stock Entries</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Track supplier invoices and incoming inventory</p>
           </div>
           <Button
             className="h-10 text-sm px-5 shadow-lg bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
@@ -171,24 +171,23 @@ export default function Invoices() {
         </motion.div>
 
         {/* Stats - Vibrant gradient cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
           {statConfig.map((s, i) => (
             <motion.div
               key={s.label}
-              initial={{ opacity: 0, y: 16, scale: 0.95 }}
+              initial={{ opacity: 0, y: 12, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: i * 0.07, type: 'spring', stiffness: 200 }}
-              className={`relative overflow-hidden rounded-xl bg-gradient-to-br ${s.gradient} p-4 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300`}
+              transition={{ delay: i * 0.06, type: 'spring', stiffness: 220 }}
+              className={`relative overflow-hidden rounded-lg bg-gradient-to-br ${s.gradient} p-3 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300`}
             >
-              <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -translate-y-6 translate-x-6" />
-              <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/5 rounded-full translate-y-4 -translate-x-4" />
-              <div className="flex items-center gap-3 relative z-10">
-                <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center backdrop-blur-sm`}>
-                  <s.icon className="w-5 h-5 text-white" />
+              <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full -translate-y-5 translate-x-5" />
+              <div className="flex items-center gap-2.5 relative z-10">
+                <div className={`w-8 h-8 rounded-lg ${s.iconBg} flex items-center justify-center backdrop-blur-sm`}>
+                  <s.icon className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{getStatValue(s.key)}</p>
-                  <p className="text-[11px] text-white/80 font-medium">{s.label}</p>
+                  <p className="text-xl font-extrabold tracking-tight drop-shadow-sm leading-tight">{getStatValue(s.key)}</p>
+                  <p className="text-[10px] text-white/80 font-medium">{s.label}</p>
                 </div>
               </div>
             </motion.div>
