@@ -62,6 +62,7 @@ export default function NewCampTemplate() {
   useEffect(() => {
     if (isEdit && editTemplate) {
       setForm({
+        campId: editTemplate.id || '',
         campName: editTemplate.campName || '',
         organizerName: editTemplate.organizerName || '',
         organizerPhone: editTemplate.organizerPhone || '',
@@ -72,7 +73,7 @@ export default function NewCampTemplate() {
         city: editTemplate.city || '',
         address: editTemplate.address || '',
         pinCode: editTemplate.pinCode || '',
-        selectedDoctors: allDoctors.filter((d) => Array.isArray(editTemplate.doctorsList) && editTemplate.doctorsList.includes(d.id)),
+        selectedDoctors: allDoctors.filter((d) => Array.isArray(editTemplate.doctorList) && editTemplate.doctorList.includes(d.id)),
         selectedStaff: mockStaff.filter((s) => Array.isArray(editTemplate.staffList) && editTemplate.staffList.includes(s.id)),
         active: typeof editTemplate.active === 'boolean' ? editTemplate.active : (editTemplate.status === 'active'),
       });

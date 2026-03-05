@@ -72,8 +72,11 @@ interface FormData {
   organizerPhone: string;
   organizerEmail: string;
   planDate: Date | undefined;
+  stateId: number;
   state: string;
+  districtId: number;
   district: string;
+  mandalId: number;
   mandal: string;
   city: string;
   address: string;
