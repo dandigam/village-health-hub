@@ -46,21 +46,41 @@ const emptyItem = (): InvoiceItem => ({
 
 export default function NewInvoice() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser } = useAuth();
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
 
   const { data: suppliers = [] } = useSupplierList(warehouseId);
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
 
-  // Invoice details
-  const [supplierId, setSupplierId] = useState('');
-  const [paymentMode, setPaymentMode] = useState('');
-  const [invoiceId, setInvoiceId] = useState('');
-  const [invoiceAmount, setInvoiceAmount] = useState('0.00');
-  const [invoiceDate, setInvoiceDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  // Check if editing an existing invoice
+  const editingInvoice = (location.state as any)?.invoice || null;
+  const isEditMode = !!editingInvoice;
 
-  // Items
-  const [items, setItems] = useState<InvoiceItem[]>([]);
+  // Invoice details
+  const [supplierId, setSupplierId] = useState(editingInvoice?.supplierId ? String(editingInvoice.supplierId) : '');
+  const [paymentMode, setPaymentMode] = useState(editingInvoice?.paymentMode || '');
+  const [invoiceId, setInvoiceId] = useState(editingInvoice?.invoiceNumber || '');
+  const [invoiceAmount, setInvoiceAmount] = useState(editingInvoice?.invoiceAmount ? String(editingInvoice.invoiceAmount) : '0.00');
+  const [invoiceDate, setInvoiceDate] = useState(editingInvoice?.invoiceDate || format(new Date(), 'yyyy-MM-dd'));
+
+  // Items - pre-fill from editing invoice
+  const [items, setItems] = useState<InvoiceItem[]>(() => {
+    if (editingInvoice?.items?.length) {
+      return editingInvoice.items.map((item: any) => ({
+        tempId: nextTempId++,
+        medicineId: item.medicineId || '',
+        medicineName: item.medicineName || '',
+        medicineType: item.medicineType || '',
+        isAlreadyExist: item.isAlreadyExist !== false,
+        hsnNo: item.hsnNo || '',
+        batchNo: item.batchNo || '',
+        expDate: item.expDate || '',
+        quantity: item.quantity || 0,
+      }));
+    }
+    return [];
+  });
   const [currentItem, setCurrentItem] = useState<InvoiceItem>(emptyItem());
   const [editingTempId, setEditingTempId] = useState<number | null>(null);
   const [medicineSearch, setMedicineSearch] = useState('');
