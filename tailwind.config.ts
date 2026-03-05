@@ -65,6 +65,14 @@ export default {
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
         info: "hsl(var(--info))",
+        stock: {
+          ok: "hsl(var(--stock-ok))",
+          "ok-bg": "hsl(var(--stock-ok-bg))",
+          warning: "hsl(var(--stock-warning))",
+          "warning-bg": "hsl(var(--stock-warning-bg))",
+          critical: "hsl(var(--stock-critical))",
+          "critical-bg": "hsl(var(--stock-critical-bg))",
+        },
         // Stat card colors
         stat: {
           blue: "hsl(var(--stat-blue))",
