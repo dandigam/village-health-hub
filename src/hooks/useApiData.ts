@@ -485,7 +485,7 @@ export function useWarehouseDetail(warehouseId?: number) {
   return useQuery<WarehouseDetail>({
     queryKey: ['warehouse-detail', warehouseId],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/warehouse/${warehouseId}`, {
+      const res = await fetch(`${API_BASE_URL}/warehouses/${warehouseId}`, {
         headers: {
           'Content-Type': 'application/json',
           ...(localStorage.getItem('token') ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}),
