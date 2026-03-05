@@ -80,15 +80,17 @@ export function Header({ onMenuToggle }: HeaderProps) {
         ) : null}
       </div>
 
-      <div className="hidden lg:flex items-center max-w-md flex-1 mx-8">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
-          <Input 
-            placeholder={currentUser.role === "WAREHOUSE" ? "Search Supplier Medicines..." : "Search Patient by MR Number / First Name / Surname"} 
-            className="pl-10 bg-white/95 border-0 shadow-sm text-foreground placeholder:text-muted-foreground/60 h-9 rounded-lg" 
-          />
+      {!isWarehouse && (
+        <div className="hidden lg:flex items-center max-w-md flex-1 mx-8">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/80" />
+            <Input 
+              placeholder="Search Patient by MR Number / First Name / Surname" 
+              className="pl-10 bg-white/95 border-0 shadow-sm text-foreground placeholder:text-muted-foreground/60 h-9 rounded-lg" 
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex items-center gap-1 sm:gap-2">
         <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/[0.08] h-8 w-8 sm:h-9 sm:w-9">
