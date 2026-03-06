@@ -344,6 +344,7 @@ export default function CreateMedicineRequest() {
               )}
             </div>
           </div>
+          )}
 
           {/* MEDICINE DETAILS section */}
           {!supplierId ? (
