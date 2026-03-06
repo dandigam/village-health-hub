@@ -187,14 +187,15 @@ export default function SupplierOrders() {
                 </tr>
               </thead>
               <tbody>
-                {pagedOrders.map(order => {
+                {pagedOrders.map((order, idx) => {
                   const statusKey = order.status?.toLowerCase() || 'pending';
                   const config = statusConfig[statusKey] || statusConfig.pending;
                   const canCancel = statusKey === 'draft' || statusKey === 'pending';
                   const canEdit = statusKey === 'draft';
                   const canReceive = statusKey === 'pending' || statusKey === 'partial';
+                  const zebra = idx % 2 === 1 ? 'bg-muted/20' : '';
                   return (
-                    <tr key={order.id} className="border-b last:border-b-0 hover:bg-muted/30 transition-colors">
+                    <tr key={order.id} className={`border-b last:border-b-0 hover:bg-accent/40 transition-colors ${zebra}`}>
                       <td className="px-3 py-1.5 font-mono text-xs">#{order.id}</td>
                       <td className="px-3 py-1.5">{new Date(order.createdAt).toLocaleDateString()}</td>
                       <td className="px-3 py-1.5 font-medium">{order.supplierName || '-'}</td>
