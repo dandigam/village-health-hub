@@ -164,7 +164,12 @@ export default function CreateMedicineRequest() {
     setSubmitting(true);
     try {
       await api.put(`/supplier-orders/${id}`, { items, status });
-      toast({ title: status === 'RECEIVED' ? 'Stock Received' : 'Partially Received' });
+      toast({ 
+        title: status === 'RECEIVED' ? '✅ Stock Received Successfully' : '📦 Stock Partially Received', 
+        description: status === 'RECEIVED' 
+          ? `All items for Request #${id} have been received and stock updated.`
+          : `Partial stock received for Request #${id}. ${items.length} items updated with ${totalReceived} units.`
+      });
       navigate('/supplier-orders');
     } catch (error: any) {
       toast({ title: 'Error', description: error.message || 'Failed to update', variant: 'destructive' });
