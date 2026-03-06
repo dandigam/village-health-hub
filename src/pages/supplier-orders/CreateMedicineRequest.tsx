@@ -255,8 +255,26 @@ export default function CreateMedicineRequest() {
                   </div>
                   <div className="min-w-[200px]">
                     <Label className="text-[11px] text-muted-foreground">Address</Label>
-                    <p className="text-sm mt-0.5 h-8 flex items-center truncate max-w-[250px]">{selectedSupplier.address || '-'}</p>
+                    <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.address || '-'}</p>
                   </div>
+                  {(selectedSupplier as any).city && (
+                    <div className="min-w-[100px]">
+                      <Label className="text-[11px] text-muted-foreground">City</Label>
+                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).city}</p>
+                    </div>
+                  )}
+                  {(selectedSupplier as any).phone && (
+                    <div className="min-w-[120px]">
+                      <Label className="text-[11px] text-muted-foreground">Phone</Label>
+                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).phone}</p>
+                    </div>
+                  )}
+                  {(selectedSupplier as any).gstNumber && (
+                    <div className="min-w-[120px]">
+                      <Label className="text-[11px] text-muted-foreground">GST No.</Label>
+                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).gstNumber}</p>
+                    </div>
+                  )}
                 </>
               )}
 
