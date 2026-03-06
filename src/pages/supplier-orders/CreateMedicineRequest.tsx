@@ -56,6 +56,27 @@ export default function CreateMedicineRequest() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
+  const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
+  const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      const url = URL.createObjectURL(file);
+      setInvoiceFiles(prev => [...prev, { name: file.name, url, file }]);
+    });
+    e.target.value = '';
+  };
+
+  const removeFile = (idx: number) => {
+    setInvoiceFiles(prev => {
+      const next = [...prev];
+      if (next[idx].url.startsWith('blob:')) URL.revokeObjectURL(next[idx].url);
+      next.splice(idx, 1);
+      return next;
+    });
+  };
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
 
