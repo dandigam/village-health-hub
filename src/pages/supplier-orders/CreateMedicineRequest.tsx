@@ -223,7 +223,7 @@ export default function CreateMedicineRequest() {
     setMedicines(updated);
   };
 
-  const pageTitle = mode === 'create' ? 'Create Medicine Request' : mode === 'edit' ? (canReceive ? 'Receive Stock' : 'Edit Request') : 'View Request';
+  const pageTitle = mode === 'create' ? 'Medicine Request' : mode === 'edit' ? (canReceive ? 'Receive Stock' : 'Edit Request') : 'View Request';
 
   return (
     <DashboardLayout>
@@ -232,25 +232,22 @@ export default function CreateMedicineRequest() {
         <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigate('/supplier-orders')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-xl font-bold tracking-tight text-foreground whitespace-nowrap">{pageTitle}</h1>
+        <h1 className="text-lg font-bold tracking-tight text-foreground whitespace-nowrap">{pageTitle}</h1>
         {orderStatus && (
           <Badge variant="outline" className={`text-[11px] ${statusConfig[statusLower]?.className || ''}`}>
             {orderStatus}
           </Badge>
         )}
-        {/* Supplier inline in header */}
+        {/* Supplier inline in header — dropdown is prominent */}
         {canEditRequest && mode === 'create' && (
           <>
             <div className="h-5 w-px bg-border" />
-            <div className="flex items-center gap-2">
-              <Label className="text-xs text-muted-foreground whitespace-nowrap">Supplier:</Label>
-              <Select value={supplierId} onValueChange={setSupplierId}>
-                <SelectTrigger className="h-8 text-sm w-[220px]"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={supplierId} onValueChange={setSupplierId}>
+              <SelectTrigger className="h-9 text-sm w-[240px] font-medium"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </>
         )}
       </div>
