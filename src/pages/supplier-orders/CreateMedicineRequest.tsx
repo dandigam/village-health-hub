@@ -428,6 +428,11 @@ export default function CreateMedicineRequest() {
                                   </PopoverContent>
                                 </Popover>
                               </td>
+                              <td className="px-3 py-1.5 text-center">
+                                <Input className="w-16 h-7 mx-auto text-center text-xs" placeholder="HSN" />
+                              </td>
+                            </>
+                          )}
                           <td className="px-3 py-1.5 text-center">
                             {canEditRequest ? (
                               <Input type="number" min="0" className={`w-16 h-7 mx-auto text-center text-xs ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`}
