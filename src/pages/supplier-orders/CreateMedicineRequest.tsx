@@ -268,8 +268,26 @@ export default function CreateMedicineRequest() {
                   </div>
                   <div className="min-w-[200px]">
                     <Label className="text-[11px] text-muted-foreground">Address</Label>
-                    <p className="text-sm mt-0.5 h-8 flex items-center truncate max-w-[250px]">{selectedSupplier.address || '-'}</p>
+                    <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.address || '-'}</p>
                   </div>
+                  {(selectedSupplier as any).city && (
+                    <div className="min-w-[100px]">
+                      <Label className="text-[11px] text-muted-foreground">City</Label>
+                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).city}</p>
+                    </div>
+                  )}
+                  {(selectedSupplier as any).phone && (
+                    <div className="min-w-[120px]">
+                      <Label className="text-[11px] text-muted-foreground">Phone</Label>
+                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).phone}</p>
+                    </div>
+                  )}
+                  {(selectedSupplier as any).gstNumber && (
+                    <div className="min-w-[120px]">
+                      <Label className="text-[11px] text-muted-foreground">GST No.</Label>
+                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).gstNumber}</p>
+                    </div>
+                  )}
                 </>
               )}
 
@@ -362,9 +380,9 @@ export default function CreateMedicineRequest() {
                       <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
                       <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Stock</th>
                       {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>}
-                      {canEditRequest && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>}
-                      {canEditRequest && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>}
-                      {canEditRequest && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">HSN</th>}
+                      {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>}
+                      {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>}
+                      {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">HSN</th>}
                       <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">
                         {canReceive ? 'Recv Qty' : 'Qty'}
                       </th>
@@ -390,7 +408,7 @@ export default function CreateMedicineRequest() {
                           {canReceive && (
                             <td className="px-3 py-1.5 text-center font-medium">{med.requestedQty}</td>
                           )}
-                          {canEditRequest && (
+                          {canReceive && (
                             <>
                               <td className="px-3 py-1.5 text-center">
                                 <Input className="w-20 h-7 mx-auto text-center text-xs" placeholder="Batch" />
