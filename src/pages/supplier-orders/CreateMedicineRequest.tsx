@@ -286,6 +286,27 @@ export default function CreateMedicineRequest() {
                   <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceDate || orderDate ? new Date(invoiceDate || orderDate).toLocaleDateString() : '-'}</p>
                 )}
               </div>
+              {/* Inline Attachments */}
+              <div className="flex items-center gap-1.5 ml-auto pb-0.5">
+                {invoiceFiles.map((f, idx) => (
+                  <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
+                    <FileImage className="w-3 h-3 text-primary shrink-0" />
+                    <span className="max-w-[80px] truncate">{f.name}</span>
+                    {(canReceive || canEditRequest) && (
+                      <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {(canReceive || canEditRequest) && (
+                  <label className="flex items-center gap-1 border border-dashed rounded px-2 py-1 text-[11px] text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
+                    <Upload className="w-3 h-3" />
+                    Attach
+                    <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
+                  </label>
+                )}
+              </div>
             </div>
           </div>
 
