@@ -444,6 +444,24 @@ export default function CreateMedicineRequest() {
           )}
         </div>
       )}
+
+      {/* Image Preview Dialog */}
+      <Dialog open={!!showImagePreview} onOpenChange={() => setShowImagePreview(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] p-2">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Invoice Preview</DialogTitle>
+          </DialogHeader>
+          {showImagePreview && (
+            <div className="flex items-center justify-center overflow-auto max-h-[70vh]">
+              {showImagePreview.endsWith('.pdf') ? (
+                <iframe src={showImagePreview} className="w-full h-[65vh] rounded border" />
+              ) : (
+                <img src={showImagePreview} alt="Invoice" className="max-w-full max-h-[65vh] object-contain rounded" />
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
