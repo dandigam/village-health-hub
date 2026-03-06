@@ -110,10 +110,11 @@ export default function CreateMedicineRequest() {
   const totalQty = medicines.reduce((s, m) => s + m.requestedQty, 0);
   const totalReceived = medicines.reduce((s, m) => s + m.receivedQty, 0);
 
-  const getStock = (medicineId: string) => {
-    const item = warehouseInventory.find(inv => String(inv.medicineId) === medicineId);
-    return item?.totalQty || 0;
-  };
+  const filteredMedicines = useMemo(() => {
+    if (!medSearch.trim()) return medicines;
+    const q = medSearch.toLowerCase();
+    return medicines.filter(m => m.medicineName.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
+  }, [medicines, medSearch]);
 
   const handleSubmit = async (status: 'PENDING' | 'DRAFT') => {
     const validItems = medicines.filter(m => m.requestedQty > 0);
