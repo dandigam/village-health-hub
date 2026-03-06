@@ -210,7 +210,7 @@ export default function CreateMedicineRequest() {
     setMedicines(updated);
   };
 
-  const pageTitle = mode === 'create' ? 'Create Medicine Request' : mode === 'edit' ? (canReceive ? 'Receive Stock' : 'Edit Request') : 'View Request';
+  const pageTitle = mode === 'create' ? 'Medicine Request' : mode === 'edit' ? (canReceive ? 'Receive Stock' : 'Edit Request') : 'View Request';
 
   return (
     <DashboardLayout>
