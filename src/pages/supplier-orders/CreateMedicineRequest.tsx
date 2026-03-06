@@ -249,27 +249,23 @@ export default function CreateMedicineRequest() {
             <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">
               {canReceive ? 'Request & Invoice Information' : 'Supplier Details'}
             </p>
-            <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
+            <div className="grid grid-cols-[auto_1fr_auto] gap-x-6 gap-y-0.5 items-baseline text-sm">
               {/* Supplier details */}
               {selectedSupplier && !canReceive && (
                 <>
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Contact</Label>
-                    <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
-                  </div>
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Address</Label>
-                    <p className="text-sm mt-0.5 h-8 flex items-center">
-                      {[selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ')}
-                      {selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : ''}
-                      {!selectedSupplier.address && !selectedSupplier.district ? '-' : ''}
-                    </p>
-                  </div>
+                  <span className="text-[11px] text-muted-foreground">Contact</span>
+                  <span className="font-medium col-span-2">{selectedSupplier.contact || '-'}</span>
+                  <span className="text-[11px] text-muted-foreground">Address</span>
+                  <span className="col-span-2">
+                    {[selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ')}
+                    {selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : ''}
+                    {!selectedSupplier.address && !selectedSupplier.district ? '-' : ''}
+                  </span>
                   {selectedSupplier.email && (
-                    <div>
-                      <Label className="text-[11px] text-muted-foreground">Email</Label>
-                      <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.email}</p>
-                    </div>
+                    <>
+                      <span className="text-[11px] text-muted-foreground">Email</span>
+                      <span className="col-span-2">{selectedSupplier.email}</span>
+                    </>
                   )}
                 </>
               )}
@@ -355,20 +351,18 @@ export default function CreateMedicineRequest() {
             </div>
           ) : (
             <>
-              {/* Medicine header bar */}
-              <div className="px-4 py-2 border-b flex items-center gap-3">
+              {/* Table header row with search integrated */}
+              <div className="px-3 py-1.5 border-b flex items-center gap-3 bg-muted/30">
                 <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Medicine Details</p>
-                <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5">{medicines.length} medicines</Badge>
-                <div className="ml-auto flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      className="h-8 text-sm pl-8 w-48"
-                      placeholder="Filter medicines..."
-                      value={medSearch}
-                      onChange={e => setMedSearch(e.target.value)}
-                    />
-                  </div>
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">{medicines.length}</Badge>
+                <div className="ml-auto relative">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                  <Input
+                    className="h-7 text-xs pl-7 w-44 bg-background"
+                    placeholder="Filter..."
+                    value={medSearch}
+                    onChange={e => setMedSearch(e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -401,10 +395,10 @@ export default function CreateMedicineRequest() {
                           "transition-colors hover:bg-accent/30",
                           hasQty && "bg-primary/[0.03]"
                         )}>
-                          <td className="px-4 py-2 text-muted-foreground text-xs font-medium">{origIdx + 1}</td>
-                          <td className="px-4 py-2">
-                            <span className="font-semibold text-foreground">{med.medicineName}</span>
-                            {med.category !== '-' && <span className="text-muted-foreground ml-2 text-xs">{med.category}</span>}
+                          <td className="px-3 py-1 text-muted-foreground text-xs font-medium">{origIdx + 1}</td>
+                          <td className="px-3 py-1">
+                            <span className="font-semibold text-foreground text-xs">{med.medicineName}</span>
+                            {med.category !== '-' && <span className="text-muted-foreground ml-2 text-[11px]">{med.category}</span>}
                           </td>
                           {canReceive && (
                             <td className="px-4 py-2 text-center">
@@ -413,13 +407,13 @@ export default function CreateMedicineRequest() {
                           )}
                           {canReceive && (
                             <>
-                              <td className="px-4 py-2 text-center">
-                                <Input className="w-24 h-7 mx-auto text-center text-xs rounded-md" placeholder="Batch No." />
+                              <td className="px-3 py-1 text-center">
+                                <Input className="w-24 h-6 mx-auto text-center text-xs rounded-md" placeholder="Batch No." />
                               </td>
-                              <td className="px-4 py-2 text-center">
+                              <td className="px-3 py-1 text-center">
                                 <Popover>
                                   <PopoverTrigger asChild>
-                                    <Button variant="outline" className={cn("w-32 h-7 text-xs justify-start font-normal mx-auto rounded-md", !rowExpDates[med.medicineId] && "text-muted-foreground")}>
+                                    <Button variant="outline" className={cn("w-32 h-6 text-xs justify-start font-normal mx-auto rounded-md", !rowExpDates[med.medicineId] && "text-muted-foreground")}>
                                       <CalendarIcon className="mr-1 h-3 w-3" />
                                       {rowExpDates[med.medicineId] ? format(rowExpDates[med.medicineId]!, "dd-MM-yyyy") : "Exp date"}
                                     </Button>
@@ -429,27 +423,27 @@ export default function CreateMedicineRequest() {
                                   </PopoverContent>
                                 </Popover>
                               </td>
-                              <td className="px-4 py-2 text-center">
-                                <Input className="w-20 h-7 mx-auto text-center text-xs rounded-md" placeholder="HSN" />
+                              <td className="px-3 py-1 text-center">
+                                <Input className="w-20 h-6 mx-auto text-center text-xs rounded-md" placeholder="HSN" />
                               </td>
                             </>
                           )}
-                          <td className={cn("px-3 py-2 text-right text-sm tabular-nums", stockColor)}>{stock}</td>
-                          <td className="px-4 py-2 text-center">
+                          <td className={cn("px-3 py-1 text-right text-xs tabular-nums", stockColor)}>{stock}</td>
+                          <td className="px-3 py-1 text-center">
                             {canEditRequest ? (
-                              <Input type="number" min="0" className={cn("w-20 h-7 mx-auto text-center text-xs rounded-md", hasQty && "border-primary/40 ring-1 ring-primary/10")}
+                              <Input type="number" min="0" className={cn("w-16 h-6 mx-auto text-center text-xs rounded-md", hasQty && "border-primary/40 ring-1 ring-primary/10")}
                                 value={med.requestedQty || ''} placeholder="0"
                                 onChange={e => updateMedicine(origIdx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : canReceive ? (
-                              <Input type="number" min="0" className={cn("w-20 h-7 mx-auto text-center text-xs rounded-md", hasQty && "border-emerald-500/40 ring-1 ring-emerald-500/10 bg-emerald-50/50")}
+                              <Input type="number" min="0" className={cn("w-16 h-6 mx-auto text-center text-xs rounded-md", hasQty && "border-emerald-500/40 ring-1 ring-emerald-500/10 bg-emerald-50/50")}
                                 value={med.receivedQty || ''} placeholder="0"
                                 onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : (
-                              <span className="font-medium">{med.requestedQty}</span>
+                              <span className="font-medium text-xs">{med.requestedQty}</span>
                             )}
                           </td>
                           {!canEditRequest && !canReceive && (
-                            <td className="px-4 py-2 text-center font-medium">{med.receivedQty}</td>
+                            <td className="px-3 py-1 text-center font-medium text-xs">{med.receivedQty}</td>
                           )}
                         </tr>
                       );
@@ -459,7 +453,7 @@ export default function CreateMedicineRequest() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-4 py-2.5 border-t">
+              <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/20">
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span>Items with qty: <strong className="text-foreground">{totalSelected}</strong></span>
                   <span>Total Qty: <strong className="text-foreground">{canReceive ? totalReceived : totalQty}</strong></span>
