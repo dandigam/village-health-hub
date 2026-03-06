@@ -181,7 +181,7 @@ export default function Invoices() {
                       </td>
                       <td className="px-3 py-1.5 text-center">
                         <div className="flex items-center justify-center gap-0.5">
-                          <Button size="icon" variant="ghost" className="h-7 w-7" title="View" onClick={() => navigate(`/invoices/${invoice.id}`)}>
+                          <Button size="icon" variant="ghost" className="h-7 w-7" title="View" onClick={() => setViewInvoice(invoice)}>
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
                           <Button size="icon" variant="ghost" className="h-7 w-7" title="Edit" onClick={() => navigate(`/invoices/${invoice.id}/edit`)}>
