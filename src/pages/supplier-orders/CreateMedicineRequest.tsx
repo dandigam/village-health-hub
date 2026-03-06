@@ -388,50 +388,54 @@ export default function CreateMedicineRequest() {
 
               {/* Table */}
               <div className="overflow-auto max-h-[calc(100vh-320px)]">
-                <table className="w-full text-sm">
-                  <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur-sm">
-                    <tr className="border-b">
-                      <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-10">#</th>
-                      <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
-                      <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Stock</th>
-                      {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>}
-                      {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>}
-                      {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>}
-                      {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">HSN</th>}
-                      <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">
+                <table className="w-full text-sm border-collapse">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="border-b bg-muted/40">
+                      <th className="px-4 py-2.5 text-left font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-12">#</th>
+                      <th className="px-4 py-2.5 text-left font-medium text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
+                      {canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>}
+                      {canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>}
+                      {canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>}
+                      {canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">HSN</th>}
+                      <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">
+                        Current Stock
+                      </th>
+                      <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">
                         {canReceive ? 'Recv Qty' : 'Request Qty'}
                       </th>
-                      {!canEditRequest && !canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Recv Qty</th>}
+                      {!canEditRequest && !canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Recv Qty</th>}
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-border/50">
                     {filteredMedicines.map((med, idx) => {
                       const origIdx = medicines.findIndex(m => m.medicineId === med.medicineId);
                       const hasQty = canReceive ? med.receivedQty > 0 : med.requestedQty > 0;
                       const stock = getStock(med.medicineId);
-                      const stockColor = stock <= 0 ? 'text-destructive font-bold' : stock < 30 ? 'text-orange-600 font-semibold' : 'text-muted-foreground';
-                      const zebra = idx % 2 === 1 ? 'bg-muted/10' : '';
-                      const rowBg = hasQty ? 'bg-primary/5' : zebra;
+                      const stockColor = stock <= 0 ? 'text-destructive font-semibold' : stock < 30 ? 'text-orange-600 font-medium' : 'text-foreground';
                       return (
-                        <tr key={med.medicineId} className={`border-b last:border-b-0 hover:bg-accent/20 transition-colors ${rowBg}`}>
-                          <td className="px-3 py-1.5 text-muted-foreground text-xs">{origIdx + 1}</td>
-                          <td className="px-3 py-1.5">
-                            <span className="font-medium">{med.medicineName}</span>
-                            <span className="text-muted-foreground ml-2 text-xs">{med.category !== '-' ? med.category : ''}</span>
+                        <tr key={med.medicineId} className={cn(
+                          "transition-colors hover:bg-accent/30",
+                          hasQty && "bg-primary/[0.03]"
+                        )}>
+                          <td className="px-4 py-2 text-muted-foreground text-xs font-medium">{origIdx + 1}</td>
+                          <td className="px-4 py-2">
+                            <span className="font-semibold text-foreground">{med.medicineName}</span>
+                            {med.category !== '-' && <span className="text-muted-foreground ml-2 text-xs">{med.category}</span>}
                           </td>
-                          <td className={`px-3 py-1.5 text-center text-xs ${stockColor}`}>{stock}</td>
                           {canReceive && (
-                            <td className="px-3 py-1.5 text-center font-medium">{med.requestedQty}</td>
+                            <td className="px-4 py-2 text-center">
+                              <span className="font-medium text-foreground">{med.requestedQty}</span>
+                            </td>
                           )}
                           {canReceive && (
                             <>
-                              <td className="px-3 py-1.5 text-center">
-                                <Input className="w-20 h-7 mx-auto text-center text-xs" placeholder="Batch" />
+                              <td className="px-4 py-2 text-center">
+                                <Input className="w-24 h-7 mx-auto text-center text-xs rounded-md" placeholder="Batch No." />
                               </td>
-                              <td className="px-3 py-1.5 text-center">
+                              <td className="px-4 py-2 text-center">
                                 <Popover>
                                   <PopoverTrigger asChild>
-                                    <Button variant="outline" className={cn("w-32 h-7 text-xs justify-start font-normal mx-auto", !rowExpDates[med.medicineId] && "text-muted-foreground")}>
+                                    <Button variant="outline" className={cn("w-32 h-7 text-xs justify-start font-normal mx-auto rounded-md", !rowExpDates[med.medicineId] && "text-muted-foreground")}>
                                       <CalendarIcon className="mr-1 h-3 w-3" />
                                       {rowExpDates[med.medicineId] ? format(rowExpDates[med.medicineId]!, "dd-MM-yyyy") : "Exp date"}
                                     </Button>
@@ -441,26 +445,27 @@ export default function CreateMedicineRequest() {
                                   </PopoverContent>
                                 </Popover>
                               </td>
-                              <td className="px-3 py-1.5 text-center">
-                                <Input className="w-16 h-7 mx-auto text-center text-xs" placeholder="HSN" />
+                              <td className="px-4 py-2 text-center">
+                                <Input className="w-20 h-7 mx-auto text-center text-xs rounded-md" placeholder="HSN" />
                               </td>
                             </>
                           )}
-                          <td className="px-3 py-1.5 text-center">
+                          <td className={cn("px-4 py-2 text-center text-sm tabular-nums", stockColor)}>{stock}</td>
+                          <td className="px-4 py-2 text-center">
                             {canEditRequest ? (
-                              <Input type="number" min="0" className={`w-16 h-7 mx-auto text-center text-xs ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`}
+                              <Input type="number" min="0" className={cn("w-20 h-7 mx-auto text-center text-xs rounded-md", hasQty && "border-primary/40 ring-1 ring-primary/10")}
                                 value={med.requestedQty || ''} placeholder="0"
                                 onChange={e => updateMedicine(origIdx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : canReceive ? (
-                              <Input type="number" min="0" className={`w-16 h-7 mx-auto text-center text-xs ${hasQty ? 'border-emerald-500/50 bg-emerald-50' : ''}`}
+                              <Input type="number" min="0" className={cn("w-20 h-7 mx-auto text-center text-xs rounded-md", hasQty && "border-emerald-500/40 ring-1 ring-emerald-500/10 bg-emerald-50/50")}
                                 value={med.receivedQty || ''} placeholder="0"
                                 onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : (
-                              <span>{med.requestedQty}</span>
+                              <span className="font-medium">{med.requestedQty}</span>
                             )}
                           </td>
                           {!canEditRequest && !canReceive && (
-                            <td className="px-3 py-1.5 text-center">{med.receivedQty}</td>
+                            <td className="px-4 py-2 text-center font-medium">{med.receivedQty}</td>
                           )}
                         </tr>
                       );
