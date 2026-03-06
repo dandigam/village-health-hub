@@ -54,7 +54,6 @@ export default function CreateMedicineRequest() {
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
 
-  // Determine editability
   const statusLower = orderStatus.toLowerCase();
   const canEditRequest = mode === 'create' || (mode === 'edit' && statusLower === 'draft');
   const canReceive = mode === 'edit' && (statusLower === 'pending' || statusLower === 'partial');
@@ -168,78 +167,78 @@ export default function CreateMedicineRequest() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="flex items-center gap-2 mb-2">
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate('/supplier-orders')}>
-          <ArrowLeft className="h-3.5 w-3.5" />
+      <div className="flex items-center gap-2.5 mb-2.5">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/supplier-orders')}>
+          <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-lg font-bold tracking-tight text-foreground">{pageTitle}</h1>
-        {id && <span className="text-xs text-muted-foreground font-mono">#{id}</span>}
+        <h1 className="text-xl font-bold tracking-tight text-foreground">{pageTitle}</h1>
+        {id && <span className="text-sm text-muted-foreground font-mono">#{id}</span>}
         {orderStatus && (
-          <Badge variant="outline" className={`text-[10px] ml-1 ${statusConfig[statusLower]?.className || ''}`}>
+          <Badge variant="outline" className={`text-[11px] ml-1 ${statusConfig[statusLower]?.className || ''}`}>
             {orderStatus}
           </Badge>
         )}
-        {orderDate && <span className="text-xs text-muted-foreground ml-auto">{new Date(orderDate).toLocaleDateString()}</span>}
+        {orderDate && <span className="text-sm text-muted-foreground ml-auto">{new Date(orderDate).toLocaleDateString()}</span>}
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-8"><p className="text-sm text-muted-foreground">Loading...</p></div>
+        <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
         <>
           {/* Supplier Info */}
-          <div className="border rounded bg-card px-2.5 py-2 mb-2">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <div className="border rounded-md bg-card px-3 py-2.5 mb-2.5">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
-                <Label className="text-[11px] text-muted-foreground">Supplier</Label>
+                <Label className="text-xs text-muted-foreground">Supplier</Label>
                 {canEditRequest && mode === 'create' ? (
                   <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-7 text-xs mt-0.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-sm mt-1"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
                     <SelectContent className="bg-popover z-50">
                       {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-xs font-medium mt-0.5">{selectedSupplier?.name || '-'}</p>
+                  <p className="text-sm font-medium mt-1">{selectedSupplier?.name || '-'}</p>
                 )}
               </div>
               <div>
-                <Label className="text-[11px] text-muted-foreground">Contact</Label>
-                <p className="text-xs mt-0.5">{selectedSupplier?.contact || '-'}</p>
+                <Label className="text-xs text-muted-foreground">Contact</Label>
+                <p className="text-sm mt-1">{selectedSupplier?.contact || '-'}</p>
               </div>
               <div>
-                <Label className="text-[11px] text-muted-foreground">Address</Label>
-                <p className="text-xs mt-0.5">{selectedSupplier?.address || '-'}</p>
+                <Label className="text-xs text-muted-foreground">Address</Label>
+                <p className="text-sm mt-1">{selectedSupplier?.address || '-'}</p>
               </div>
               <div>
-                <Label className="text-[11px] text-muted-foreground">Email</Label>
-                <p className="text-xs mt-0.5">{(selectedSupplier as any)?.email || '-'}</p>
+                <Label className="text-xs text-muted-foreground">Email</Label>
+                <p className="text-sm mt-1">{(selectedSupplier as any)?.email || '-'}</p>
               </div>
             </div>
           </div>
 
           {/* Medicine Grid */}
           {!supplierId ? (
-            <div className="border rounded bg-card flex flex-col items-center justify-center py-8">
-              <Package className="h-8 w-8 text-muted-foreground/40 mb-1.5" />
-              <p className="text-xs text-muted-foreground">Select a supplier to load medicine catalog</p>
+            <div className="border rounded-md bg-card flex flex-col items-center justify-center py-10">
+              <Package className="h-10 w-10 text-muted-foreground/40 mb-2" />
+              <p className="text-sm text-muted-foreground">Select a supplier to load medicine catalog</p>
             </div>
           ) : medicines.length === 0 ? (
-            <div className="border rounded bg-card flex flex-col items-center justify-center py-8">
-              <p className="text-xs text-muted-foreground">No medicines assigned to this supplier</p>
+            <div className="border rounded-md bg-card flex flex-col items-center justify-center py-10">
+              <p className="text-sm text-muted-foreground">No medicines assigned to this supplier</p>
             </div>
           ) : (
-            <div className="border rounded bg-card overflow-hidden">
-              <div className="overflow-auto max-h-[calc(100vh-280px)]">
-                <table className="w-full text-xs">
+            <div className="border rounded-md bg-card overflow-hidden">
+              <div className="overflow-auto max-h-[calc(100vh-300px)]">
+                <table className="w-full text-sm">
                   <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
                     <tr className="border-b">
-                      <th className="px-2 py-1.5 text-left font-medium w-8">#</th>
-                      <th className="px-2 py-1.5 text-left font-medium">Medicine</th>
-                      <th className="px-2 py-1.5 text-left font-medium">Category</th>
-                      <th className="px-2 py-1.5 text-center font-medium">Stock</th>
-                      <th className="px-2 py-1.5 text-center font-medium w-24">Req Qty</th>
-                      {(canReceive || isReadOnly) && <th className="px-2 py-1.5 text-center font-medium w-24">Recv Qty</th>}
-                      <th className="px-2 py-1.5 text-left font-medium">Comments</th>
+                      <th className="px-3 py-2 text-left font-medium text-xs w-10">#</th>
+                      <th className="px-3 py-2 text-left font-medium text-xs">Medicine</th>
+                      <th className="px-3 py-2 text-left font-medium text-xs">Category</th>
+                      <th className="px-3 py-2 text-center font-medium text-xs">Stock</th>
+                      <th className="px-3 py-2 text-center font-medium text-xs w-28">Req Qty</th>
+                      {(canReceive || isReadOnly) && <th className="px-3 py-2 text-center font-medium text-xs w-28">Recv Qty</th>}
+                      <th className="px-3 py-2 text-left font-medium text-xs">Comments</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -248,15 +247,15 @@ export default function CreateMedicineRequest() {
                       const stock = getStock(med.medicineId);
                       return (
                         <tr key={med.medicineId} className={`border-b last:border-b-0 transition-colors ${hasQty ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
-                          <td className="px-2 py-1 text-muted-foreground">{idx + 1}</td>
-                          <td className="px-2 py-1 font-medium">{med.medicineName}</td>
-                          <td className="px-2 py-1 text-muted-foreground">{med.category}</td>
-                          <td className="px-2 py-1 text-center">
+                          <td className="px-3 py-1.5 text-muted-foreground text-xs">{idx + 1}</td>
+                          <td className="px-3 py-1.5 font-medium">{med.medicineName}</td>
+                          <td className="px-3 py-1.5 text-muted-foreground">{med.category}</td>
+                          <td className="px-3 py-1.5 text-center">
                             <span className={stock <= 0 ? 'text-destructive font-medium' : stock < 30 ? 'text-orange-600 font-medium' : 'text-muted-foreground'}>{stock}</span>
                           </td>
-                          <td className="px-2 py-1 text-center">
+                          <td className="px-3 py-1.5 text-center">
                             {canEditRequest ? (
-                              <Input type="number" min="0" className={`w-20 h-6 mx-auto text-center text-xs ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`}
+                              <Input type="number" min="0" className={`w-24 h-8 mx-auto text-center text-sm ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`}
                                 value={med.requestedQty || ''} placeholder="0"
                                 onChange={e => updateMedicine(idx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : (
@@ -264,9 +263,9 @@ export default function CreateMedicineRequest() {
                             )}
                           </td>
                           {(canReceive || isReadOnly) && (
-                            <td className="px-2 py-1 text-center">
+                            <td className="px-3 py-1.5 text-center">
                               {canReceive ? (
-                                <Input type="number" min="0" className="w-20 h-6 mx-auto text-center text-xs"
+                                <Input type="number" min="0" className="w-24 h-8 mx-auto text-center text-sm"
                                   value={med.receivedQty || ''} placeholder="0"
                                   onChange={e => updateMedicine(idx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                               ) : (
@@ -274,9 +273,9 @@ export default function CreateMedicineRequest() {
                               )}
                             </td>
                           )}
-                          <td className="px-2 py-1">
+                          <td className="px-3 py-1.5">
                             {canEditRequest ? (
-                              <Input className="h-6 text-xs" placeholder="Optional" value={med.comments}
+                              <Input className="h-8 text-sm" placeholder="Optional" value={med.comments}
                                 onChange={e => updateMedicine(idx, 'comments', e.target.value)} />
                             ) : (
                               <span className="text-muted-foreground">{med.comments || '-'}</span>
@@ -290,29 +289,29 @@ export default function CreateMedicineRequest() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-2.5 py-1.5 border-t bg-muted/30">
-                <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/30">
+                <div className="flex items-center gap-4 text-sm">
                   <span className="text-muted-foreground">Selected: <strong className="text-foreground">{totalSelected}</strong></span>
                   <span className="text-muted-foreground">Req Qty: <strong className="text-foreground">{totalQty}</strong></span>
                   {(canReceive || isReadOnly) && <span className="text-muted-foreground">Recv Qty: <strong className="text-foreground">{totalReceived}</strong></span>}
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => navigate('/supplier-orders')}>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => navigate('/supplier-orders')}>
                     {isReadOnly ? 'Back' : 'Cancel'}
                   </Button>
                   {canEditRequest && (
                     <>
-                      <Button variant="secondary" size="sm" className="h-7 text-xs" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('DRAFT')}>
-                        <Save className="mr-1 h-3 w-3" /> Save Draft
+                      <Button variant="secondary" size="sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('DRAFT')}>
+                        <Save className="mr-1.5 h-3.5 w-3.5" /> Save Draft
                       </Button>
-                      <Button size="sm" className="h-7 text-xs" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('PENDING')}>
-                        <Send className="mr-1 h-3 w-3" /> Submit
+                      <Button size="sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('PENDING')}>
+                        <Send className="mr-1.5 h-3.5 w-3.5" /> Submit
                       </Button>
                     </>
                   )}
                   {canReceive && (
-                    <Button size="sm" className="h-7 text-xs" disabled={submitting} onClick={handleReceiveStock}>
-                      <Package className="mr-1 h-3 w-3" /> Update Received
+                    <Button size="sm" disabled={submitting} onClick={handleReceiveStock}>
+                      <Package className="mr-1.5 h-3.5 w-3.5" /> Update Received
                     </Button>
                   )}
                 </div>
