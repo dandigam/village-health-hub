@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil } from 'lucide-react';
+import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter, Clock, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,14 +13,15 @@ import { useSupplierOrders, useSupplierList } from '@/hooks/useApiData';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
+import { cn } from '@/lib/utils';
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
-  partial: { label: 'Partial', className: 'bg-orange-100 text-orange-800 border-orange-300' },
-  received: { label: 'Received', className: 'bg-green-100 text-green-800 border-green-300' },
-  cancelled: { label: 'Cancelled', className: 'bg-blue-100 text-blue-800 border-blue-300' },
-  draft: { label: 'Draft', className: 'bg-gray-100 text-gray-700 border-gray-300' },
-  sent: { label: 'Sent', className: 'bg-blue-100 text-blue-700 border-blue-300' },
+const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string }> = {
+  pending: { label: 'Pending', dot: 'bg-amber-500 animate-pulse', bg: 'bg-amber-50', text: 'text-amber-700' },
+  partial: { label: 'Partial', dot: 'bg-orange-500 animate-pulse', bg: 'bg-orange-50', text: 'text-orange-700' },
+  received: { label: 'Received', dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  cancelled: { label: 'Cancelled', dot: 'bg-muted-foreground', bg: 'bg-muted/60', text: 'text-muted-foreground' },
+  draft: { label: 'Draft', dot: 'bg-muted-foreground', bg: 'bg-muted/60', text: 'text-muted-foreground' },
+  sent: { label: 'Sent', dot: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
 };
 
 type SortKey = 'id' | 'createdAt' | 'supplierName' | 'itemCount' | 'totalQty' | 'status';
@@ -42,12 +44,25 @@ export default function SupplierOrders() {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [cancelOrderId, setCancelOrderId] = useState<number | string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => { refetchOrders?.(); }, []);
 
   const handleReset = () => {
     setFilterSupplier('all'); setFilterRequestId(''); setFilterDateFrom(''); setFilterDateTo(''); setFilterStatus('all'); setPage(1);
   };
+
+  // Stats
+  const stats = useMemo(() => {
+    const all = supplierOrders;
+    return {
+      total: all.length,
+      pending: all.filter(o => o.status?.toLowerCase() === 'pending').length,
+      partial: all.filter(o => o.status?.toLowerCase() === 'partial').length,
+      received: all.filter(o => o.status?.toLowerCase() === 'received').length,
+      draft: all.filter(o => o.status?.toLowerCase() === 'draft').length,
+    };
+  }, [supplierOrders]);
 
   const filteredOrders = useMemo(() => {
     let result = [...supplierOrders];
@@ -83,8 +98,8 @@ export default function SupplierOrders() {
   };
 
   const SortIcon = ({ col }: { col: SortKey }) => {
-    if (sortKey !== col) return <ChevronUp className="h-3.5 w-3.5 opacity-30" />;
-    return sortDir === 'asc' ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />;
+    if (sortKey !== col) return <ChevronUp className="h-3 w-3 opacity-20" />;
+    return sortDir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />;
   };
 
   const handleCancelOrder = async () => {
@@ -101,158 +116,209 @@ export default function SupplierOrders() {
 
   const getTotalQty = (order: any) => order.items?.reduce((s: number, i: any) => s + (i.requestedQuantity || i.requestedQty || 0), 0) || 0;
 
+  const hasActiveFilters = filterSupplier !== 'all' || filterRequestId || filterDateFrom || filterDateTo || filterStatus !== 'all';
+
+  const handleStatClick = (status: string) => {
+    setFilterStatus(status);
+    setPage(1);
+    setShowFilters(false);
+  };
+
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="flex items-center justify-between mb-2.5">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Supplier Orders</h1>
-        <Button size="sm" onClick={() => navigate('/supplier-orders/new')}>
-          <Send className="mr-1.5 h-4 w-4" /> Request Stock
-        </Button>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="border rounded-md bg-card px-3 py-2.5 mb-2.5">
-        <div className="flex flex-wrap items-end gap-2.5">
-          <div className="min-w-[150px]">
-            <Label className="text-xs mb-1 block text-muted-foreground">Supplier</Label>
-            <Select value={filterSupplier} onValueChange={v => { setFilterSupplier(v); setPage(1); }}>
-              <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="All Suppliers" /></SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                <SelectItem value="all">All Suppliers</SelectItem>
-                {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="min-w-[110px]">
-            <Label className="text-xs mb-1 block text-muted-foreground">Request ID</Label>
-            <Input className="h-8 text-sm" placeholder="Search ID..." value={filterRequestId} onChange={e => { setFilterRequestId(e.target.value); setPage(1); }} />
-          </div>
-          <div className="min-w-[130px]">
-            <Label className="text-xs mb-1 block text-muted-foreground">From</Label>
-            <Input type="date" className="h-8 text-sm" value={filterDateFrom} onChange={e => { setFilterDateFrom(e.target.value); setPage(1); }} />
-          </div>
-          <div className="min-w-[130px]">
-            <Label className="text-xs mb-1 block text-muted-foreground">To</Label>
-            <Input type="date" className="h-8 text-sm" value={filterDateTo} onChange={e => { setFilterDateTo(e.target.value); setPage(1); }} />
-          </div>
-          <div className="min-w-[110px]">
-            <Label className="text-xs mb-1 block text-muted-foreground">Status</Label>
-            <Select value={filterStatus} onValueChange={v => { setFilterStatus(v); setPage(1); }}>
-              <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="partial">Partial</SelectItem>
-                <SelectItem value="received">Received</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button size="sm" variant="outline" className="h-8 ml-auto" onClick={handleReset}>
-            <RotateCcw className="mr-1 h-3.5 w-3.5" /> Reset
+      <div className="flex items-center gap-3 mb-4">
+        <h1 className="text-lg font-bold tracking-tight text-foreground">Supplier Orders</h1>
+        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{supplierOrders.length}</Badge>
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="outline" size="sm" className={cn("h-8 text-xs", hasActiveFilters && "border-primary text-primary")} onClick={() => setShowFilters(!showFilters)}>
+            <Filter className="mr-1.5 h-3 w-3" />
+            Filters
+            {hasActiveFilters && <span className="ml-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">!</span>}
+          </Button>
+          <Button size="sm" className="h-8 text-xs" onClick={() => navigate('/supplier-orders/new')}>
+            <Send className="mr-1.5 h-3.5 w-3.5" /> Request Stock
           </Button>
         </div>
       </div>
 
-      {/* Table */}
-      {filteredOrders.length === 0 ? (
-        <div className="border rounded-md bg-card flex flex-col items-center justify-center py-12">
-          <PackageOpen className="h-10 w-10 text-muted-foreground/40 mb-2" />
-          <p className="text-sm text-muted-foreground font-medium mb-2">No Supplier Orders Found</p>
-          <Button size="sm" onClick={() => navigate('/supplier-orders/new')}>
-            <Send className="mr-1.5 h-4 w-4" /> Create Medicine Request
-          </Button>
-        </div>
-      ) : (
-        <div className="border rounded-md bg-card overflow-hidden">
-          <div className="overflow-auto">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
-                <tr className="border-b">
-                  {[
-                    { key: 'id' as SortKey, label: 'Request ID', align: 'text-left' },
-                    { key: 'createdAt' as SortKey, label: 'Date', align: 'text-left' },
-                    { key: 'supplierName' as SortKey, label: 'Supplier', align: 'text-left' },
-                    { key: 'itemCount' as SortKey, label: 'Medicines', align: 'text-center' },
-                    { key: 'totalQty' as SortKey, label: 'Req Qty', align: 'text-center' },
-                    { key: 'status' as SortKey, label: 'Status', align: 'text-center' },
-                  ].map(col => (
-                    <th key={col.key} className={`px-3 py-2 font-medium text-xs ${col.align} cursor-pointer select-none`} onClick={() => handleSort(col.key)}>
-                      <span className={`flex items-center gap-1 ${col.align === 'text-center' ? 'justify-center' : ''}`}>{col.label} <SortIcon col={col.key} /></span>
-                    </th>
-                  ))}
-                  <th className="px-3 py-2 text-center font-medium text-xs w-28">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pagedOrders.map((order, idx) => {
-                  const statusKey = order.status?.toLowerCase() || 'pending';
-                  const config = statusConfig[statusKey] || statusConfig.pending;
-                  const canCancel = statusKey === 'draft' || statusKey === 'pending';
-                  const canEdit = statusKey === 'draft';
-                  const canReceive = statusKey === 'pending' || statusKey === 'partial';
-                  const zebra = idx % 2 === 1 ? 'bg-muted/20' : '';
-                  return (
-                    <tr key={order.id} className={`border-b last:border-b-0 hover:bg-accent/40 transition-colors ${zebra}`}>
-                      <td className="px-3 py-1.5 font-mono text-xs">#{order.id}</td>
-                      <td className="px-3 py-1.5">{new Date(order.createdAt).toLocaleDateString()}</td>
-                      <td className="px-3 py-1.5 font-medium">{order.supplierName || '-'}</td>
-                      <td className="px-3 py-1.5 text-center">{order.items?.length || 0}</td>
-                      <td className="px-3 py-1.5 text-center">{getTotalQty(order)}</td>
-                      <td className="px-3 py-1.5 text-center">
-                        <Badge variant="outline" className={`text-[11px] px-2 py-0.5 ${config.className}`}>{config.label}</Badge>
-                      </td>
-                      <td className="px-3 py-1.5 text-center">
-                        <div className="flex items-center justify-center gap-0.5">
-                          <Button size="icon" variant="ghost" className="h-7 w-7" title="View" onClick={() => navigate(`/supplier-orders/${order.id}`)}>
-                            <Eye className="h-3.5 w-3.5" />
-                          </Button>
-                          {canEdit && (
-                            <Button size="icon" variant="ghost" className="h-7 w-7" title="Edit" onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}>
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                          {canReceive && (
-                            <Button size="icon" variant="ghost" className="h-7 w-7" title="Receive Stock" onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}>
-                              <Package className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                          {canCancel && (
-                            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive" title="Cancel" onClick={() => setCancelOrderId(order.id)}>
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
+        {[
+          { label: 'Total', value: stats.total, icon: FileText, status: 'all', color: 'text-foreground', bg: 'bg-muted/40' },
+          { label: 'Pending', value: stats.pending, icon: Clock, status: 'pending', color: 'text-amber-700', bg: 'bg-amber-50' },
+          { label: 'Partial', value: stats.partial, icon: AlertTriangle, status: 'partial', color: 'text-orange-700', bg: 'bg-orange-50' },
+          { label: 'Received', value: stats.received, icon: CheckCircle2, status: 'received', color: 'text-emerald-700', bg: 'bg-emerald-50' },
+          { label: 'Draft', value: stats.draft, icon: Pencil, status: 'draft', color: 'text-muted-foreground', bg: 'bg-muted/30' },
+        ].map(card => (
+          <motion.button
+            key={card.label}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => handleStatClick(card.status)}
+            className={cn(
+              "flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-left transition-all",
+              filterStatus === card.status ? "ring-2 ring-primary/30 border-primary/40 shadow-sm" : "hover:border-border/80",
+              card.bg
+            )}
+          >
+            <card.icon className={cn("h-4 w-4 shrink-0", card.color)} />
+            <div className="min-w-0">
+              <p className={cn("text-lg font-bold leading-none tabular-nums", card.color)}>{card.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{card.label}</p>
+            </div>
+          </motion.button>
+        ))}
+      </div>
 
-          {/* Pagination - always at bottom */}
-          <div className="flex items-center justify-end gap-4 px-3 py-2 border-t bg-muted/30 text-sm">
-            <div className="flex items-center gap-2 mr-auto">
-              <span className="text-muted-foreground text-xs">Rows:</span>
-              <Select value={String(rowsPerPage)} onValueChange={v => { setRowsPerPage(Number(v)); setPage(1); }}>
-                <SelectTrigger className="h-7 w-16 text-xs"><SelectValue /></SelectTrigger>
+      {/* Collapsible Filters */}
+      {showFilters && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="border rounded-lg bg-card px-3 py-2.5 mb-3 overflow-hidden"
+        >
+          <div className="flex flex-wrap items-end gap-2.5">
+            <div className="min-w-[150px]">
+              <Label className="text-[10px] mb-0.5 block text-muted-foreground uppercase tracking-wider">Supplier</Label>
+              <Select value={filterSupplier} onValueChange={v => { setFilterSupplier(v); setPage(1); }}>
+                <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="All Suppliers" /></SelectTrigger>
                 <SelectContent className="bg-popover z-50">
-                  {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+                  <SelectItem value="all">All Suppliers</SelectItem>
+                  {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <span className="text-muted-foreground text-xs">{filteredOrders.length} total</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Button size="sm" variant="outline" className="h-7 px-2 text-xs" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Prev</Button>
-              <span className="px-2 text-xs text-muted-foreground">{page}/{totalPages}</span>
-              <Button size="sm" variant="outline" className="h-7 px-2 text-xs" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+            <div className="min-w-[100px]">
+              <Label className="text-[10px] mb-0.5 block text-muted-foreground uppercase tracking-wider">Request ID</Label>
+              <Input className="h-7 text-xs" placeholder="ID..." value={filterRequestId} onChange={e => { setFilterRequestId(e.target.value); setPage(1); }} />
             </div>
+            <div className="min-w-[120px]">
+              <Label className="text-[10px] mb-0.5 block text-muted-foreground uppercase tracking-wider">From</Label>
+              <Input type="date" className="h-7 text-xs" value={filterDateFrom} onChange={e => { setFilterDateFrom(e.target.value); setPage(1); }} />
+            </div>
+            <div className="min-w-[120px]">
+              <Label className="text-[10px] mb-0.5 block text-muted-foreground uppercase tracking-wider">To</Label>
+              <Input type="date" className="h-7 text-xs" value={filterDateTo} onChange={e => { setFilterDateTo(e.target.value); setPage(1); }} />
+            </div>
+            <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={handleReset}>
+              <RotateCcw className="mr-1 h-3 w-3" /> Reset
+            </Button>
           </div>
-        </div>
+        </motion.div>
       )}
+
+      {/* Table */}
+      <div className="border rounded-lg bg-card overflow-hidden flex flex-col" style={{ minHeight: 'calc(100vh - 280px)' }}>
+        {filteredOrders.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center py-16">
+            <PackageOpen className="h-12 w-12 text-muted-foreground/30 mb-3" />
+            <p className="text-sm font-medium text-foreground mb-1">No orders found</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              {hasActiveFilters ? 'Try adjusting your filters' : 'Create your first medicine request'}
+            </p>
+            {hasActiveFilters ? (
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleReset}>
+                <RotateCcw className="mr-1.5 h-3 w-3" /> Clear Filters
+              </Button>
+            ) : (
+              <Button size="sm" className="h-7 text-xs" onClick={() => navigate('/supplier-orders/new')}>
+                <Send className="mr-1.5 h-3 w-3" /> New Request
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="overflow-auto flex-1">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 z-10 bg-muted/50 backdrop-blur-sm">
+                  <tr className="border-b">
+                    {[
+                      { key: 'id' as SortKey, label: 'Request ID', align: 'text-left' },
+                      { key: 'createdAt' as SortKey, label: 'Date', align: 'text-left' },
+                      { key: 'supplierName' as SortKey, label: 'Supplier', align: 'text-left' },
+                      { key: 'itemCount' as SortKey, label: 'Medicines', align: 'text-center' },
+                      { key: 'totalQty' as SortKey, label: 'Req Qty', align: 'text-center' },
+                      { key: 'status' as SortKey, label: 'Status', align: 'text-center' },
+                    ].map(col => (
+                      <th key={col.key} className={cn("px-3 py-2 font-medium text-[11px] uppercase tracking-wider text-muted-foreground cursor-pointer select-none whitespace-nowrap", col.align)} onClick={() => handleSort(col.key)}>
+                        <span className={cn("flex items-center gap-1", col.align === 'text-center' && 'justify-center')}>{col.label} <SortIcon col={col.key} /></span>
+                      </th>
+                    ))}
+                    <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {pagedOrders.map((order) => {
+                    const statusKey = order.status?.toLowerCase() || 'pending';
+                    const config = statusConfig[statusKey] || statusConfig.pending;
+                    const canCancel = statusKey === 'draft' || statusKey === 'pending';
+                    const canEdit = statusKey === 'draft';
+                    const canReceive = statusKey === 'pending' || statusKey === 'partial';
+                    return (
+                      <tr key={order.id} className="hover:bg-accent/30 transition-colors">
+                        <td className="px-3 py-2 font-mono text-xs font-medium">#{order.id}</td>
+                        <td className="px-3 py-2 text-xs">{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td className="px-3 py-2 font-medium text-xs">{order.supplierName || '-'}</td>
+                        <td className="px-3 py-2 text-center text-xs tabular-nums">{order.items?.length || 0}</td>
+                        <td className="px-3 py-2 text-center text-xs tabular-nums font-medium">{getTotalQty(order)}</td>
+                        <td className="px-3 py-2 text-center">
+                          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium", config.bg, config.text)}>
+                            <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
+                            {config.label}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          <div className="flex items-center justify-center gap-0.5">
+                            <Button size="icon" variant="ghost" className="h-6 w-6" title="View" onClick={() => navigate(`/supplier-orders/${order.id}`)}>
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            {canEdit && (
+                              <Button size="icon" variant="ghost" className="h-6 w-6" title="Edit" onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}>
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                            )}
+                            {canReceive && (
+                              <Button size="icon" variant="ghost" className="h-6 w-6" title="Receive Stock" onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}>
+                                <Package className="h-3 w-3" />
+                              </Button>
+                            )}
+                            {canCancel && (
+                              <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive hover:text-destructive" title="Cancel" onClick={() => setCancelOrderId(order.id)}>
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-3 py-1.5 border-t bg-muted/20 text-xs mt-auto">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Rows:</span>
+                <Select value={String(rowsPerPage)} onValueChange={v => { setRowsPerPage(Number(v)); setPage(1); }}>
+                  <SelectTrigger className="h-6 w-14 text-[11px]"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <span className="text-muted-foreground">{filteredOrders.length} total</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Prev</Button>
+                <span className="px-2 text-muted-foreground">{page}/{totalPages}</span>
+                <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
 
       <DeleteConfirmDialog
         open={cancelOrderId !== null}
