@@ -246,19 +246,17 @@ export default function CreateMedicineRequest() {
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
         <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
-          {/* ORDER INFORMATION section */}
+          {/* ORDER INFORMATION section - only show when supplier selected or in receive/view mode */}
+          {(selectedSupplier || canReceive || isReadOnly) && (
           <div className="px-4 py-3 border-b">
             <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">
-              {canReceive ? 'Request & Invoice Information' : 'Order Information'}
+              {canReceive ? 'Request & Invoice Information' : 'Supplier Details'}
             </p>
             <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
-              {/* Supplier name (view/edit/receive) */}
-              {!canEditRequest && (
-                <div>
-                  <Label className="text-[11px] text-muted-foreground">Supplier</Label>
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
-                </div>
-              )}
+              {/* Supplier details */}
+              {selectedSupplier && !canReceive && (
+                <>
+                  <div>
                     <Label className="text-[11px] text-muted-foreground">Contact</Label>
                     <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
                   </div>
