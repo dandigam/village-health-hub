@@ -56,6 +56,7 @@ export default function CreateMedicineRequest() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
+  const [paymentMode, setPaymentMode] = useState('');
   const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
   const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
 
@@ -95,6 +96,11 @@ export default function CreateMedicineRequest() {
         setSupplierId(String(order.supplierId));
         setOrderStatus(order.status || '');
         setOrderDate(order.createdAt || '');
+        // Populate invoice fields
+        setInvoiceNumber(order.invoiceNo || order.invoiceNumber || '');
+        setInvoiceDate(order.invoiceDate || '');
+        setInvoiceAmount(order.invoiceAmount ? String(order.invoiceAmount) : '');
+        setPaymentMode(order.paymentMode || '');
         setMedicines((order.items || []).map((item: any) => ({
           id: item.id,
           medicineId: String(item.medicineId),
@@ -185,7 +191,14 @@ export default function CreateMedicineRequest() {
     const status = isFullyReceived ? 'RECEIVED' : 'PARTIAL';
     setSubmitting(true);
     try {
-      await api.put(`/supplier-orders/${id}`, { items, status });
+      const payload: any = { items, status };
+      // Include invoice fields if provided
+      if (invoiceNumber) payload.invoiceNo = invoiceNumber;
+      if (invoiceDate) payload.invoiceDate = invoiceDate;
+      if (invoiceAmount) payload.invoiceAmount = parseFloat(invoiceAmount);
+      if (paymentMode) payload.paymentMode = paymentMode;
+      
+      await api.put(`/supplier-orders/${id}`, payload);
       toast({ 
         title: status === 'RECEIVED' ? '✅ Stock Received Successfully' : '📦 Stock Partially Received', 
         description: status === 'RECEIVED' 
@@ -284,6 +297,24 @@ export default function CreateMedicineRequest() {
                   <Input type="date" className="h-8 text-sm mt-0.5" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
                 ) : (
                   <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceDate || orderDate ? new Date(invoiceDate || orderDate).toLocaleDateString() : '-'}</p>
+                )}
+              </div>
+              {/* Payment Mode */}
+              <div className="min-w-[120px]">
+                <Label className="text-[11px] text-muted-foreground">Payment Mode</Label>
+                {canReceive || canEditRequest ? (
+                  <Select value={paymentMode} onValueChange={setPaymentMode}>
+                    <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
+                      <SelectItem value="Cash">Cash</SelectItem>
+                      <SelectItem value="UPI">UPI</SelectItem>
+                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="Cheque">Cheque</SelectItem>
+                      <SelectItem value="Credit">Credit</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-sm mt-0.5 h-8 flex items-center">{paymentMode || '-'}</p>
                 )}
               </div>
               {/* Inline Attachments */}
