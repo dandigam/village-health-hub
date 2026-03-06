@@ -205,6 +205,34 @@ export default function CreateMedicineRequest() {
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
         <>
+          {/* Receive Stock: Request & Invoice Info */}
+          {canReceive && (
+            <div className="border rounded-lg bg-card px-4 py-3 mb-2.5 shadow-sm">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div>
+                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Request ID</Label>
+                  <p className="text-sm font-semibold mt-0.5 font-mono">#{id}</p>
+                </div>
+                <div>
+                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Request Date</Label>
+                  <p className="text-sm font-medium mt-0.5">{orderDate ? new Date(orderDate).toLocaleDateString() : '-'}</p>
+                </div>
+                <div>
+                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Invoice Number</Label>
+                  <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Invoice Date</Label>
+                  <Input type="date" className="h-8 text-sm mt-0.5" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Amount (₹)</Label>
+                  <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Supplier Info */}
           <div className="border rounded-md bg-card px-3 py-2.5 mb-2.5">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
