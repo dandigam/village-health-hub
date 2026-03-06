@@ -326,7 +326,7 @@ export default function NewInvoice() {
           {/* ── Section 2: Medicine Grid ── */}
           <div className="border rounded-lg bg-background overflow-hidden flex flex-col shadow-sm" style={{ maxHeight: 'calc(100vh - 220px)' }}>
             {/* Toolbar */}
-            <div className="flex items-center gap-3 px-3 py-2 border-b bg-muted/20">
+            <div className="flex items-center gap-3 px-3 py-2 border-b bg-muted/10">
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Medicine Details</p>
               {items.length > 0 && (
                 <Badge variant="secondary" className="text-[10px] h-5 font-normal">
