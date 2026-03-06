@@ -453,7 +453,7 @@ export default function CreateMedicineRequest() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-4 py-2.5 border-t">
+              <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/20">
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span>Items with qty: <strong className="text-foreground">{totalSelected}</strong></span>
                   <span>Total Qty: <strong className="text-foreground">{canReceive ? totalReceived : totalQty}</strong></span>
