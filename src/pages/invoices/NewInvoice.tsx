@@ -62,6 +62,8 @@ export default function NewInvoice() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newMedName, setNewMedName] = useState('');
   const [newMedType, setNewMedType] = useState('');
+  const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
+  const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
 
   const selectedSupplier = useMemo(() => suppliers.find((s: any) => String(s.id) === supplierId), [suppliers, supplierId]);
 
