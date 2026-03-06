@@ -132,6 +132,8 @@ const App = () => (
               {/* Invoices */}
               <Route path="/invoices" element={<ProtectedRoute routeKey="invoices"><Invoices /></ProtectedRoute>} />
               <Route path="/invoices/new" element={<ProtectedRoute routeKey="invoices"><NewInvoice /></ProtectedRoute>} />
+              <Route path="/invoices/:id" element={<ProtectedRoute routeKey="invoices"><NewInvoice /></ProtectedRoute>} />
+              <Route path="/invoices/:id/edit" element={<ProtectedRoute routeKey="invoices"><NewInvoice /></ProtectedRoute>} />
               
               {/* Warehouses */}
               <Route path="/warehouses" element={<ProtectedRoute routeKey="warehouses"><WarehouseManagement /></ProtectedRoute>} />
