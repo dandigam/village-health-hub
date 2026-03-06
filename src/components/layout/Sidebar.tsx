@@ -192,10 +192,10 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
             >
               {({ isActive }) => (
                 <>
-                  <Settings className={cn(
-                    "h-[17px] w-[17px] shrink-0 transition-all duration-200",
-                    isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80 group-hover:rotate-45"
-                  )} />
+                  <Settings 
+                    className="h-[17px] w-[17px] shrink-0 transition-all duration-200 group-hover:rotate-45"
+                    style={{ color: 'hsl(220, 15%, 65%)', opacity: isActive ? 1 : 0.6 }}
+                  />
                   <span className={cn("truncate text-[13px]", isActive ? "font-semibold" : "font-medium")}>
                     Settings
                   </span>
