@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X } from 'lucide-react';
+import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -58,6 +62,8 @@ export default function CreateMedicineRequest() {
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
   const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
+  const [invoiceDateObj, setInvoiceDateObj] = useState<Date | undefined>(undefined);
+  const [rowExpDates, setRowExpDates] = useState<Record<string, Date | undefined>>({});
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -284,6 +290,13 @@ export default function CreateMedicineRequest() {
                 </div>
               )}
 
+              {canReceive && selectedSupplier && (
+                <div className="min-w-[140px]">
+                  <Label className="text-[11px] text-muted-foreground">Supplier</Label>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier.name}</p>
+                </div>
+              )}
+
               {/* Invoice fields - ONLY in receive mode */}
               {canReceive && (
                 <>
@@ -295,9 +308,19 @@ export default function CreateMedicineRequest() {
                     <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
                     <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
                   </div>
-                  <div className="min-w-[140px]">
+                  <div className="min-w-[150px]">
                     <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
-                    <Input type="date" className="h-8 text-sm mt-0.5" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("h-8 w-full justify-start text-left text-sm font-normal mt-0.5", !invoiceDateObj && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                          {invoiceDateObj ? format(invoiceDateObj, "dd-MM-yyyy") : <span>Pick date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 z-50" align="start">
+                        <Calendar mode="single" selected={invoiceDateObj} onSelect={setInvoiceDateObj} initialFocus className={cn("p-3 pointer-events-auto")} />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   {/* Inline Attachments */}
                   <div className="flex items-center gap-1.5 ml-auto pb-0.5">
@@ -393,7 +416,17 @@ export default function CreateMedicineRequest() {
                                 <Input className="w-20 h-7 mx-auto text-center text-xs" placeholder="Batch" />
                               </td>
                               <td className="px-3 py-1.5 text-center">
-                                <Input type="date" className="w-32 h-7 mx-auto text-xs" />
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button variant="outline" className={cn("w-32 h-7 text-xs justify-start font-normal mx-auto", !rowExpDates[med.medicineId] && "text-muted-foreground")}>
+                                      <CalendarIcon className="mr-1 h-3 w-3" />
+                                      {rowExpDates[med.medicineId] ? format(rowExpDates[med.medicineId]!, "dd-MM-yyyy") : "Exp date"}
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0 z-50" align="start">
+                                    <Calendar mode="single" selected={rowExpDates[med.medicineId]} onSelect={(date) => setRowExpDates(prev => ({ ...prev, [med.medicineId]: date }))} initialFocus className={cn("p-3 pointer-events-auto")} />
+                                  </PopoverContent>
+                                </Popover>
                               </td>
                               <td className="px-3 py-1.5 text-center">
                                 <Input className="w-16 h-7 mx-auto text-center text-xs" placeholder="HSN" />
