@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSupplierList, useWarehouseInventory, WarehouseInventoryItem } from '@/hooks/useApiData';
 import api from '@/services/api';
 import { toast } from 'sonner';
-import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill } from 'lucide-react';
+import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface InvoiceItem {
