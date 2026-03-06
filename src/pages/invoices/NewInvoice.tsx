@@ -243,11 +243,11 @@ export default function NewInvoice() {
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
         <>
-          {/* ── Section 1: Order Info ── */}
-          <div className="border rounded-md bg-muted/10 px-3 py-2.5 mb-2">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Order Information</p>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-x-3 gap-y-2">
-              <div>
+          {/* ── Section 1: Order Info — single compact row ── */}
+          <div className="border rounded-lg bg-background px-3 py-2.5 mb-2 shadow-sm">
+            <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">Order Information</p>
+            <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
+              <div className="min-w-[150px] flex-1 max-w-[180px]">
                 <Label className="text-[10px] text-muted-foreground">Supplier *</Label>
                 {canEdit ? (
                   <Select value={supplierId} onValueChange={setSupplierId}>
@@ -260,7 +260,7 @@ export default function NewInvoice() {
                   <p className="text-sm font-medium mt-0.5">{selectedSupplier?.name || '—'}</p>
                 )}
               </div>
-              <div>
+              <div className="min-w-[120px] flex-1 max-w-[150px]">
                 <Label className="text-[10px] text-muted-foreground">Payment Mode</Label>
                 {canEdit ? (
                   <Select value={paymentMode} onValueChange={setPaymentMode}>
@@ -275,7 +275,7 @@ export default function NewInvoice() {
                   <p className="text-sm font-medium mt-0.5 capitalize">{paymentMode || '—'}</p>
                 )}
               </div>
-              <div>
+              <div className="min-w-[100px] flex-1 max-w-[130px]">
                 <Label className="text-[10px] text-muted-foreground">Invoice No.</Label>
                 {canEdit ? (
                   <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
@@ -283,7 +283,7 @@ export default function NewInvoice() {
                   <p className="text-sm font-medium mt-0.5">{invoiceNumber || '—'}</p>
                 )}
               </div>
-              <div>
+              <div className="min-w-[100px] flex-1 max-w-[120px]">
                 <Label className="text-[10px] text-muted-foreground">Amount (₹)</Label>
                 {canEdit ? (
                   <Input className="h-8 text-sm mt-0.5" type="number" step="0.01" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
@@ -291,43 +291,36 @@ export default function NewInvoice() {
                   <p className="text-sm font-medium mt-0.5">₹{Number(invoiceAmount).toLocaleString()}</p>
                 )}
               </div>
-              <div>
+              <div className="min-w-[130px] flex-1 max-w-[150px]">
                 <Label className="text-[10px] text-muted-foreground">Date *</Label>
                 {canEdit ? (
                   <Input className="h-8 text-sm mt-0.5" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
                 ) : (
                   <p className="text-sm font-medium mt-0.5">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                 )}
-            </div>
-
-            {/* Invoice Upload */}
-            <div className="mt-2.5 pt-2 border-t border-border/40">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Invoice Attachments</p>
-              <div className="flex flex-wrap items-center gap-2">
+              </div>
+              {/* Inline Attachments */}
+              <div className="flex items-center gap-1.5 ml-auto pb-0.5">
                 {invoiceFiles.map((f, idx) => (
-                  <div key={idx} className="group relative flex items-center gap-1.5 border rounded-md bg-background px-2 py-1.5 text-xs cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
-                    <FileImage className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span className="max-w-[120px] truncate text-foreground">{f.name}</span>
+                  <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
+                    <FileImage className="w-3 h-3 text-primary shrink-0" />
+                    <span className="max-w-[80px] truncate">{f.name}</span>
                     {canEdit && (
-                      <button className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
-                        <X className="w-3 h-3" />
+                      <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
+                        <X className="w-2.5 h-2.5" />
                       </button>
                     )}
                   </div>
                 ))}
                 {canEdit && (
-                  <label className="flex items-center gap-1.5 border border-dashed rounded-md px-3 py-1.5 text-xs text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary transition-colors">
-                    <Upload className="w-3.5 h-3.5" />
-                    Upload Invoice
+                  <label className="flex items-center gap-1 border border-dashed rounded px-2 py-1 text-[11px] text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
+                    <Upload className="w-3 h-3" />
+                    Attach
                     <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
                   </label>
                 )}
-                {invoiceFiles.length === 0 && !canEdit && (
-                  <span className="text-xs text-muted-foreground">No attachments</span>
-                )}
               </div>
             </div>
-          </div>
           </div>
 
           {/* ── Section 2: Medicine Grid ── */}
