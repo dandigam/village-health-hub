@@ -246,7 +246,7 @@ export default function CreateMedicineRequest() {
                 )}
               </div>
 
-              {/* Contact & Address - always show when supplier selected in create/edit/view (not receive) */}
+              {/* Supplier details - show in create/edit/view (not receive) */}
               {selectedSupplier && !canReceive && (
                 <>
                   <div>
@@ -255,8 +255,18 @@ export default function CreateMedicineRequest() {
                   </div>
                   <div>
                     <Label className="text-[11px] text-muted-foreground">Address</Label>
-                    <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.address || '-'}</p>
+                    <p className="text-sm mt-0.5 h-8 flex items-center">
+                      {[selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ')}
+                      {selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : ''}
+                      {!selectedSupplier.address && !selectedSupplier.district ? '-' : ''}
+                    </p>
                   </div>
+                  {selectedSupplier.email && (
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Email</Label>
+                      <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.email}</p>
+                    </div>
+                  )}
                 </>
               )}
 
