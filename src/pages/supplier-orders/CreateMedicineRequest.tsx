@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Save, Package, Search } from 'lucide-react';
+import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -55,6 +56,27 @@ export default function CreateMedicineRequest() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
+  const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
+  const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      const url = URL.createObjectURL(file);
+      setInvoiceFiles(prev => [...prev, { name: file.name, url, file }]);
+    });
+    e.target.value = '';
+  };
+
+  const removeFile = (idx: number) => {
+    setInvoiceFiles(prev => {
+      const next = [...prev];
+      if (next[idx].url.startsWith('blob:')) URL.revokeObjectURL(next[idx].url);
+      next.splice(idx, 1);
+      return next;
+    });
+  };
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
 
@@ -264,6 +286,27 @@ export default function CreateMedicineRequest() {
                   <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceDate || orderDate ? new Date(invoiceDate || orderDate).toLocaleDateString() : '-'}</p>
                 )}
               </div>
+              {/* Inline Attachments */}
+              <div className="flex items-center gap-1.5 ml-auto pb-0.5">
+                {invoiceFiles.map((f, idx) => (
+                  <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
+                    <FileImage className="w-3 h-3 text-primary shrink-0" />
+                    <span className="max-w-[80px] truncate">{f.name}</span>
+                    {(canReceive || canEditRequest) && (
+                      <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {(canReceive || canEditRequest) && (
+                  <label className="flex items-center gap-1 border border-dashed rounded px-2 py-1 text-[11px] text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
+                    <Upload className="w-3 h-3" />
+                    Attach
+                    <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
+                  </label>
+                )}
+              </div>
             </div>
           </div>
 
@@ -401,6 +444,24 @@ export default function CreateMedicineRequest() {
           )}
         </div>
       )}
+
+      {/* Image Preview Dialog */}
+      <Dialog open={!!showImagePreview} onOpenChange={() => setShowImagePreview(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] p-2">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Invoice Preview</DialogTitle>
+          </DialogHeader>
+          {showImagePreview && (
+            <div className="flex items-center justify-center overflow-auto max-h-[70vh]">
+              {showImagePreview.endsWith('.pdf') ? (
+                <iframe src={showImagePreview} className="w-full h-[65vh] rounded border" />
+              ) : (
+                <img src={showImagePreview} alt="Invoice" className="max-w-full max-h-[65vh] object-contain rounded" />
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
