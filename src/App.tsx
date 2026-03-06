@@ -123,6 +123,8 @@ const App = () => (
               {/* Supplier Orders */}
               <Route path="/supplier-orders" element={<ProtectedRoute routeKey="supplier-orders"><SupplierOrders /></ProtectedRoute>} />
               <Route path="/supplier-orders/new" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
+              <Route path="/supplier-orders/:id" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
+              <Route path="/supplier-orders/:id/edit" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
               
               {/* Distribution Orders */}
               <Route path="/distribution-orders" element={<ProtectedRoute routeKey="distribution-orders"><DistributionOrders /></ProtectedRoute>} />
