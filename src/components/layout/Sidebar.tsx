@@ -120,10 +120,10 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
                         }
                       >
                         {({ isActive }) => (
-                          <item.icon className={cn(
-                            "h-[17px] w-[17px] transition-all duration-200",
-                            isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80"
-                          )} />
+                          <item.icon 
+                            className="h-[17px] w-[17px] transition-all duration-200"
+                            style={{ color: isActive ? item.color : undefined }}
+                          />
                         )}
                       </NavLink>
                     </TooltipTrigger>
