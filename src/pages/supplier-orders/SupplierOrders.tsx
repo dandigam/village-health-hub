@@ -167,7 +167,7 @@ export default function SupplierOrders() {
         </div>
       ) : (
         <div className="border rounded-md bg-card overflow-hidden">
-          <div className="overflow-auto max-h-[calc(100vh-260px)]">
+          <div className="overflow-auto">
             <table className="w-full text-sm">
               <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
                 <tr className="border-b">
@@ -233,9 +233,9 @@ export default function SupplierOrders() {
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/30 text-sm">
-            <div className="flex items-center gap-2">
+          {/* Pagination - always at bottom */}
+          <div className="flex items-center justify-end gap-4 px-3 py-2 border-t bg-muted/30 text-sm">
+            <div className="flex items-center gap-2 mr-auto">
               <span className="text-muted-foreground text-xs">Rows:</span>
               <Select value={String(rowsPerPage)} onValueChange={v => { setRowsPerPage(Number(v)); setPage(1); }}>
                 <SelectTrigger className="h-7 w-16 text-xs"><SelectValue /></SelectTrigger>
