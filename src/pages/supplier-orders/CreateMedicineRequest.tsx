@@ -252,25 +252,13 @@ export default function CreateMedicineRequest() {
               {canReceive ? 'Request & Invoice Information' : 'Order Information'}
             </p>
             <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
-              {/* Supplier */}
-              <div className="min-w-[180px]">
-                <Label className="text-[11px] text-muted-foreground">Supplier *</Label>
-                {canEditRequest && mode === 'create' ? (
-                  <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
-                    <SelectContent className="bg-popover z-50">
-                      {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                ) : (
+              {/* Supplier name (view/edit/receive) */}
+              {!canEditRequest && (
+                <div>
+                  <Label className="text-[11px] text-muted-foreground">Supplier</Label>
                   <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
-                )}
-              </div>
-
-              {/* Supplier details - show in create/edit/view (not receive) */}
-              {selectedSupplier && !canReceive && (
-                <>
-                  <div>
+                </div>
+              )}
                     <Label className="text-[11px] text-muted-foreground">Contact</Label>
                     <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
                   </div>
