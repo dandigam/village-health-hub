@@ -64,6 +64,8 @@ export default function CreateMedicineRequest() {
   const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
   const [invoiceDateObj, setInvoiceDateObj] = useState<Date | undefined>(undefined);
   const [rowExpDates, setRowExpDates] = useState<Record<string, Date | undefined>>({});
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
     Array.from(files).forEach(file => {
