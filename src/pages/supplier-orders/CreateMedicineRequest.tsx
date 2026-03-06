@@ -351,20 +351,18 @@ export default function CreateMedicineRequest() {
             </div>
           ) : (
             <>
-              {/* Medicine header bar */}
-              <div className="px-4 py-2 border-b flex items-center gap-3">
+              {/* Table header row with search integrated */}
+              <div className="px-3 py-1.5 border-b flex items-center gap-3 bg-muted/30">
                 <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Medicine Details</p>
-                <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5">{medicines.length} medicines</Badge>
-                <div className="ml-auto flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      className="h-8 text-sm pl-8 w-48"
-                      placeholder="Filter medicines..."
-                      value={medSearch}
-                      onChange={e => setMedSearch(e.target.value)}
-                    />
-                  </div>
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">{medicines.length}</Badge>
+                <div className="ml-auto relative">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                  <Input
+                    className="h-7 text-xs pl-7 w-44 bg-background"
+                    placeholder="Filter..."
+                    value={medSearch}
+                    onChange={e => setMedSearch(e.target.value)}
+                  />
                 </div>
               </div>
 
