@@ -435,7 +435,7 @@ export default function CreateMedicineRequest() {
                               </td>
                             </>
                           )}
-                          <td className={cn("px-4 py-2 text-center text-sm tabular-nums", stockColor)}>{stock}</td>
+                          <td className={cn("px-3 py-2 text-right text-sm tabular-nums", stockColor)}>{stock}</td>
                           <td className="px-4 py-2 text-center">
                             {canEditRequest ? (
                               <Input type="number" min="0" className={cn("w-20 h-7 mx-auto text-center text-xs rounded-md", hasQty && "border-primary/40 ring-1 ring-primary/10")}
