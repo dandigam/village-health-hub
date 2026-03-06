@@ -37,6 +37,7 @@ export default function Invoices() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => { refetch?.(); }, []);
 
