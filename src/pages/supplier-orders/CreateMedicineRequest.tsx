@@ -290,6 +290,13 @@ export default function CreateMedicineRequest() {
                 </div>
               )}
 
+              {canReceive && selectedSupplier && (
+                <div className="min-w-[140px]">
+                  <Label className="text-[11px] text-muted-foreground">Supplier</Label>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier.name}</p>
+                </div>
+              )}
+
               {/* Invoice fields - ONLY in receive mode */}
               {canReceive && (
                 <>
@@ -301,9 +308,19 @@ export default function CreateMedicineRequest() {
                     <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
                     <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
                   </div>
-                  <div className="min-w-[140px]">
+                  <div className="min-w-[150px]">
                     <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
-                    <Input type="date" className="h-8 text-sm mt-0.5" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("h-8 w-full justify-start text-left text-sm font-normal mt-0.5", !invoiceDateObj && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                          {invoiceDateObj ? format(invoiceDateObj, "dd-MM-yyyy") : <span>Pick date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 z-50" align="start">
+                        <Calendar mode="single" selected={invoiceDateObj} onSelect={setInvoiceDateObj} initialFocus className={cn("p-3 pointer-events-auto")} />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   {/* Inline Attachments */}
                   <div className="flex items-center gap-1.5 ml-auto pb-0.5">
