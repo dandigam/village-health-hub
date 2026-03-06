@@ -61,10 +61,10 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
 
   const renderNavItem = (item: typeof allNavItems[0], isActive: boolean) => (
     <>
-      <item.icon className={cn(
-        "h-[17px] w-[17px] shrink-0 transition-all duration-200",
-        isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80"
-      )} />
+      <item.icon 
+        className="h-[17px] w-[17px] shrink-0 transition-all duration-200"
+        style={{ color: isActive ? item.color : undefined }}
+      />
       {!collapsed && (
         <span className={cn("truncate text-[13px]", isActive ? "font-semibold" : "font-medium")}>
           {item.label}
