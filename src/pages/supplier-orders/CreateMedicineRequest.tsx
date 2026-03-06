@@ -354,29 +354,29 @@ export default function CreateMedicineRequest() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/30">
+              <div className="flex items-center justify-between px-3 py-2.5 border-t bg-muted/20">
                 <div className="flex items-center gap-4 text-sm">
                   <span className="text-muted-foreground">Selected: <strong className="text-foreground">{totalSelected}</strong></span>
                   <span className="text-muted-foreground">Req Qty: <strong className="text-foreground">{totalQty}</strong></span>
-                  {(canReceive || isReadOnly) && <span className="text-muted-foreground">Recv Qty: <strong className="text-foreground">{totalReceived}</strong></span>}
+                  {(canReceive || isReadOnly) && <span className="text-muted-foreground">Recv Qty: <strong className="text-emerald-600 font-bold">{totalReceived}</strong></span>}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => navigate('/supplier-orders')}>
+                  <Button variant="outline" size="sm" className="h-8 px-4 text-xs border-2 hover:bg-destructive/5 hover:text-destructive hover:border-destructive/30 transition-all" onClick={() => navigate('/supplier-orders')}>
                     {isReadOnly ? 'Back' : 'Cancel'}
                   </Button>
                   {canEditRequest && (
                     <>
-                      <Button variant="secondary" size="sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('DRAFT')}>
+                      <Button variant="secondary" size="sm" className="h-8 px-4 text-xs shadow-sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('DRAFT')}>
                         <Save className="mr-1.5 h-3.5 w-3.5" /> Save Draft
                       </Button>
-                      <Button size="sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('PENDING')}>
-                        <Send className="mr-1.5 h-3.5 w-3.5" /> Submit
+                      <Button size="sm" className="h-8 px-5 text-xs bg-gradient-to-r from-primary to-[hsl(var(--accent))] shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('PENDING')}>
+                        <Send className="mr-1.5 h-3.5 w-3.5" /> Submit Request
                       </Button>
                     </>
                   )}
                   {canReceive && (
-                    <Button size="sm" disabled={submitting} onClick={handleReceiveStock}>
-                      <Package className="mr-1.5 h-3.5 w-3.5" /> Update Received
+                    <Button size="sm" className="h-8 px-5 text-xs bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all" disabled={submitting} onClick={handleReceiveStock}>
+                      <Package className="mr-1.5 h-3.5 w-3.5" /> Confirm & Receive Stock
                     </Button>
                   )}
                 </div>
