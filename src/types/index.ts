@@ -254,8 +254,16 @@ export interface Supplier extends BaseEntity {
   name: string;
   contact: string;
   address: string;
+  stateId?: number;
+  districtId?: number;
+  mandalId?: number;
+  state?: string;
+  district?: string;
+  mandal?: string;
+  pinCode?: string;
+  email?: string;
   medicines?: { id: string | number; name: string }[];
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'ACTIVE' | 'INACTIVE';
 }
 
 export interface StockItem extends BaseEntity {
