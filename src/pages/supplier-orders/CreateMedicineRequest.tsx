@@ -416,13 +416,18 @@ export default function CreateMedicineRequest() {
                                 <Input className="w-20 h-7 mx-auto text-center text-xs" placeholder="Batch" />
                               </td>
                               <td className="px-3 py-1.5 text-center">
-                                <Input type="date" className="w-32 h-7 mx-auto text-xs" />
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button variant="outline" className={cn("w-32 h-7 text-xs justify-start font-normal mx-auto", !rowExpDates[med.medicineId] && "text-muted-foreground")}>
+                                      <CalendarIcon className="mr-1 h-3 w-3" />
+                                      {rowExpDates[med.medicineId] ? format(rowExpDates[med.medicineId]!, "dd-MM-yyyy") : "Exp date"}
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0 z-50" align="start">
+                                    <Calendar mode="single" selected={rowExpDates[med.medicineId]} onSelect={(date) => setRowExpDates(prev => ({ ...prev, [med.medicineId]: date }))} initialFocus className={cn("p-3 pointer-events-auto")} />
+                                  </PopoverContent>
+                                </Popover>
                               </td>
-                              <td className="px-3 py-1.5 text-center">
-                                <Input className="w-16 h-7 mx-auto text-center text-xs" placeholder="HSN" />
-                              </td>
-                            </>
-                          )}
                           <td className="px-3 py-1.5 text-center">
                             {canEditRequest ? (
                               <Input type="number" min="0" className={`w-16 h-7 mx-auto text-center text-xs ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`}
