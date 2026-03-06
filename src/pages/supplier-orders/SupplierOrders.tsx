@@ -52,17 +52,7 @@ export default function SupplierOrders() {
     setFilterSupplier('all'); setFilterRequestId(''); setFilterDateFrom(''); setFilterDateTo(''); setFilterStatus('all'); setPage(1);
   };
 
-  // Stats
-  const stats = useMemo(() => {
-    const all = supplierOrders;
-    return {
-      total: all.length,
-      pending: all.filter(o => o.status?.toLowerCase() === 'pending').length,
-      partial: all.filter(o => o.status?.toLowerCase() === 'partial').length,
-      received: all.filter(o => o.status?.toLowerCase() === 'received').length,
-      draft: all.filter(o => o.status?.toLowerCase() === 'draft').length,
-    };
-  }, [supplierOrders]);
+  const hasActiveFilters = filterSupplier !== 'all' || filterRequestId || filterDateFrom || filterDateTo || filterStatus !== 'all';
 
   const filteredOrders = useMemo(() => {
     let result = [...supplierOrders];
