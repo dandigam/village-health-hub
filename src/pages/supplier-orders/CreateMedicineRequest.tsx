@@ -363,7 +363,7 @@ export default function CreateMedicineRequest() {
                       {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>}
                       {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">HSN</th>}
                       <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">
-                        {canReceive ? 'Recv Qty' : 'Qty'}
+                        {canReceive ? 'Recv Qty' : 'Request Qty'}
                       </th>
                       {!canEditRequest && !canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Recv Qty</th>}
                     </tr>
