@@ -235,7 +235,18 @@ export default function CreateMedicineRequest() {
             </div>
           ) : (
             <div className="border rounded-md bg-card overflow-hidden">
-              <div className="overflow-auto max-h-[calc(100vh-300px)]">
+              {/* Medicine Search */}
+              <div className="px-3 py-2 border-b bg-muted/20 flex items-center gap-2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="h-8 text-sm max-w-xs"
+                  placeholder="Search medicines..."
+                  value={medSearch}
+                  onChange={e => setMedSearch(e.target.value)}
+                />
+                <span className="text-xs text-muted-foreground ml-auto">{filteredMedicines.length} of {medicines.length} medicines</span>
+              </div>
+              <div className="overflow-auto max-h-[calc(100vh-340px)]">
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
                     <tr className="border-b">
@@ -249,22 +260,28 @@ export default function CreateMedicineRequest() {
                     </tr>
                   </thead>
                   <tbody>
-                    {medicines.map((med, idx) => {
+                    {filteredMedicines.map((med, idx) => {
+                      const origIdx = medicines.findIndex(m => m.medicineId === med.medicineId);
                       const hasQty = med.requestedQty > 0;
                       const stock = getStock(med.medicineId);
+                      const stockBg = stock <= 0 ? 'bg-red-50' : stock < 30 ? 'bg-orange-50' : '';
+                      const zebra = idx % 2 === 1 ? 'bg-muted/15' : '';
+                      const rowBg = hasQty ? 'bg-primary/5' : stockBg || zebra;
                       return (
-                        <tr key={med.medicineId} className={`border-b last:border-b-0 transition-colors ${hasQty ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
-                          <td className="px-3 py-1.5 text-muted-foreground text-xs">{idx + 1}</td>
+                        <tr key={med.medicineId} className={`border-b last:border-b-0 hover:bg-accent/30 transition-colors ${rowBg}`}>
+                          <td className="px-3 py-1.5 text-muted-foreground text-xs">{origIdx + 1}</td>
                           <td className="px-3 py-1.5 font-medium">{med.medicineName}</td>
                           <td className="px-3 py-1.5 text-muted-foreground">{med.category}</td>
                           <td className="px-3 py-1.5 text-center">
-                            <span className={stock <= 0 ? 'text-destructive font-medium' : stock < 30 ? 'text-orange-600 font-medium' : 'text-muted-foreground'}>{stock}</span>
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium ${stock <= 0 ? 'bg-red-100 text-red-700' : stock < 30 ? 'bg-orange-100 text-orange-700' : 'text-muted-foreground'}`}>
+                              {stock}
+                            </span>
                           </td>
                           <td className="px-3 py-1.5 text-center">
                             {canEditRequest ? (
                               <Input type="number" min="0" className={`w-24 h-8 mx-auto text-center text-sm ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`}
                                 value={med.requestedQty || ''} placeholder="0"
-                                onChange={e => updateMedicine(idx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
+                                onChange={e => updateMedicine(origIdx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : (
                               <span>{med.requestedQty}</span>
                             )}
@@ -274,7 +291,7 @@ export default function CreateMedicineRequest() {
                               {canReceive ? (
                                 <Input type="number" min="0" className="w-24 h-8 mx-auto text-center text-sm"
                                   value={med.receivedQty || ''} placeholder="0"
-                                  onChange={e => updateMedicine(idx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
+                                  onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                               ) : (
                                 <span>{med.receivedQty}</span>
                               )}
@@ -283,7 +300,7 @@ export default function CreateMedicineRequest() {
                           <td className="px-3 py-1.5">
                             {canEditRequest ? (
                               <Input className="h-8 text-sm" placeholder="Optional" value={med.comments}
-                                onChange={e => updateMedicine(idx, 'comments', e.target.value)} />
+                                onChange={e => updateMedicine(origIdx, 'comments', e.target.value)} />
                             ) : (
                               <span className="text-muted-foreground">{med.comments || '-'}</span>
                             )}
