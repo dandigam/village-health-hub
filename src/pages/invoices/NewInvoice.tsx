@@ -437,17 +437,17 @@ export default function NewInvoice() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/30">
+            <div className="flex items-center justify-between px-3 py-2.5 border-t bg-background">
               <div className="flex items-center gap-4 text-xs">
-                <span className="text-muted-foreground">Items with qty: <strong className="text-foreground">{totalWithQty}</strong></span>
-                <span className="text-muted-foreground">Total Qty: <strong className="text-foreground">{totalQty}</strong></span>
+                <span className="text-muted-foreground">Items with qty: <strong className="text-foreground font-semibold">{totalWithQty}</strong></span>
+                <span className="text-muted-foreground">Total Qty: <strong className="text-foreground font-semibold">{totalQty}</strong></span>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => navigate('/invoices')}>
+              <div className="flex items-center gap-2.5">
+                <Button variant="ghost" size="sm" className="h-8 px-4 text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate('/invoices')}>
                   {isReadOnly ? 'Back' : 'Cancel'}
                 </Button>
                 {canEdit && (
-                  <Button size="sm" className="h-7 text-xs" disabled={saving || totalWithQty === 0} onClick={handleSave}>
+                  <Button size="sm" className="h-8 px-5 text-xs bg-gradient-to-r from-primary to-[hsl(var(--accent))] hover:from-primary/90 hover:to-[hsl(var(--accent)/0.9)] shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all" disabled={saving || totalWithQty === 0} onClick={handleSave}>
                     <Save className="mr-1.5 h-3.5 w-3.5" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
                   </Button>
                 )}
