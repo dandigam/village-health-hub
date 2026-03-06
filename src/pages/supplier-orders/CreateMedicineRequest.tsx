@@ -187,165 +187,181 @@ export default function CreateMedicineRequest() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="flex items-center gap-2.5 mb-2.5">
+      <div className="flex items-center gap-2.5 mb-3">
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/supplier-orders')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-xl font-bold tracking-tight text-foreground">{pageTitle}</h1>
-        {id && <span className="text-sm text-muted-foreground font-mono">#{id}</span>}
         {orderStatus && (
           <Badge variant="outline" className={`text-[11px] ml-1 ${statusConfig[statusLower]?.className || ''}`}>
             {orderStatus}
           </Badge>
         )}
-        {orderDate && <span className="text-sm text-muted-foreground ml-auto">{new Date(orderDate).toLocaleDateString()}</span>}
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
-        <>
-          {/* Receive Stock: Request & Invoice Info */}
-          {canReceive && (
-            <div className="border rounded-lg bg-card px-4 py-3 mb-2.5 shadow-sm">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                <div>
-                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Request ID</Label>
-                  <p className="text-sm font-semibold mt-0.5 font-mono">#{id}</p>
-                </div>
-                <div>
-                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Request Date</Label>
-                  <p className="text-sm font-medium mt-0.5">{orderDate ? new Date(orderDate).toLocaleDateString() : '-'}</p>
-                </div>
-                <div>
-                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Invoice Number</Label>
-                  <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Invoice Date</Label>
-                  <Input type="date" className="h-8 text-sm mt-0.5" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wide">Amount (₹)</Label>
-                  <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Supplier Info */}
-          <div className="border rounded-md bg-card px-3 py-2.5 mb-2.5">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div>
-                <Label className="text-xs text-muted-foreground">Supplier</Label>
+        <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
+          {/* ORDER INFORMATION section */}
+          <div className="px-4 py-3 border-b">
+            <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">
+              {canReceive ? 'Request & Invoice Information' : 'Order Information'}
+            </p>
+            <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+              {/* Supplier */}
+              <div className="min-w-[160px]">
+                <Label className="text-[11px] text-muted-foreground">Supplier *</Label>
                 {canEditRequest && mode === 'create' ? (
                   <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-8 text-sm mt-1"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
                     <SelectContent className="bg-popover z-50">
                       {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium mt-1">{selectedSupplier?.name || '-'}</p>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
                 )}
               </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Contact</Label>
-                <p className="text-sm mt-1">{selectedSupplier?.contact || '-'}</p>
+              {/* Request ID (receive mode) */}
+              {canReceive && (
+                <div className="min-w-[100px]">
+                  <Label className="text-[11px] text-muted-foreground">Request ID</Label>
+                  <p className="text-sm font-semibold font-mono mt-0.5 h-8 flex items-center">#{id}</p>
+                </div>
+              )}
+              {/* Request Date (receive mode) */}
+              {canReceive && (
+                <div className="min-w-[100px]">
+                  <Label className="text-[11px] text-muted-foreground">Request Date</Label>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{orderDate ? new Date(orderDate).toLocaleDateString() : '-'}</p>
+                </div>
+              )}
+              {/* Invoice No */}
+              <div className="min-w-[120px]">
+                <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
+                {canReceive || canEditRequest ? (
+                  <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                ) : (
+                  <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceNumber || '-'}</p>
+                )}
               </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Address</Label>
-                <p className="text-sm mt-1">{selectedSupplier?.address || '-'}</p>
+              {/* Amount */}
+              <div className="min-w-[100px]">
+                <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
+                {canReceive || canEditRequest ? (
+                  <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                ) : (
+                  <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceAmount || '-'}</p>
+                )}
               </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Email</Label>
-                <p className="text-sm mt-1">{(selectedSupplier as any)?.email || '-'}</p>
+              {/* Date */}
+              <div className="min-w-[140px]">
+                <Label className="text-[11px] text-muted-foreground">Date *</Label>
+                {canReceive || canEditRequest ? (
+                  <Input type="date" className="h-8 text-sm mt-0.5" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                ) : (
+                  <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceDate || orderDate ? new Date(invoiceDate || orderDate).toLocaleDateString() : '-'}</p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Medicine Grid */}
+          {/* MEDICINE DETAILS section */}
           {!supplierId ? (
-            <div className="border rounded-md bg-card flex flex-col items-center justify-center py-10">
+            <div className="flex flex-col items-center justify-center py-14">
               <Package className="h-10 w-10 text-muted-foreground/40 mb-2" />
               <p className="text-sm text-muted-foreground">Select a supplier to load medicine catalog</p>
             </div>
           ) : medicines.length === 0 ? (
-            <div className="border rounded-md bg-card flex flex-col items-center justify-center py-10">
+            <div className="flex flex-col items-center justify-center py-14">
               <p className="text-sm text-muted-foreground">No medicines assigned to this supplier</p>
             </div>
           ) : (
-            <div className="border rounded-md bg-card overflow-hidden">
-              {/* Medicine Search */}
-              <div className="px-3 py-2 border-b bg-muted/20 flex items-center gap-2">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="h-8 text-sm max-w-xs"
-                  placeholder="Search medicines..."
-                  value={medSearch}
-                  onChange={e => setMedSearch(e.target.value)}
-                />
-                <span className="text-xs text-muted-foreground ml-auto">{filteredMedicines.length} of {medicines.length} medicines</span>
+            <>
+              {/* Medicine header bar */}
+              <div className="px-4 py-2 border-b flex items-center gap-3">
+                <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Medicine Details</p>
+                <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5">{medicines.length} medicines</Badge>
+                <div className="ml-auto flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      className="h-8 text-sm pl-8 w-48"
+                      placeholder="Filter medicines..."
+                      value={medSearch}
+                      onChange={e => setMedSearch(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="overflow-auto max-h-[calc(100vh-340px)]">
+
+              {/* Table */}
+              <div className="overflow-auto max-h-[calc(100vh-320px)]">
                 <table className="w-full text-sm">
-                  <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
+                  <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur-sm">
                     <tr className="border-b">
-                      <th className="px-3 py-2 text-left font-medium text-xs w-10">#</th>
-                      <th className="px-3 py-2 text-left font-medium text-xs">Medicine</th>
-                      <th className="px-3 py-2 text-left font-medium text-xs">Category</th>
-                      <th className="px-3 py-2 text-center font-medium text-xs">Stock</th>
-                      <th className="px-3 py-2 text-center font-medium text-xs w-28">Req Qty</th>
-                      {(canReceive || isReadOnly) && <th className="px-3 py-2 text-center font-medium text-xs w-28">Recv Qty</th>}
-                      <th className="px-3 py-2 text-left font-medium text-xs">Comments</th>
+                      <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-10">#</th>
+                      <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
+                      <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Stock</th>
+                      {canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>}
+                      {canEditRequest && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>}
+                      {canEditRequest && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>}
+                      {canEditRequest && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">HSN</th>}
+                      <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">
+                        {canReceive ? 'Recv Qty' : 'Qty'}
+                      </th>
+                      {!canEditRequest && !canReceive && <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Recv Qty</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {filteredMedicines.map((med, idx) => {
                       const origIdx = medicines.findIndex(m => m.medicineId === med.medicineId);
-                      const hasQty = med.requestedQty > 0;
+                      const hasQty = canReceive ? med.receivedQty > 0 : med.requestedQty > 0;
                       const stock = getStock(med.medicineId);
-                      const stockBg = stock <= 0 ? 'bg-red-50' : stock < 30 ? 'bg-orange-50' : '';
-                      const zebra = idx % 2 === 1 ? 'bg-muted/15' : '';
-                      const rowBg = hasQty ? 'bg-primary/5' : stockBg || zebra;
+                      const stockColor = stock <= 0 ? 'text-destructive font-bold' : stock < 30 ? 'text-orange-600 font-semibold' : 'text-muted-foreground';
+                      const zebra = idx % 2 === 1 ? 'bg-muted/10' : '';
+                      const rowBg = hasQty ? 'bg-primary/5' : zebra;
                       return (
-                        <tr key={med.medicineId} className={`border-b last:border-b-0 hover:bg-accent/30 transition-colors ${rowBg}`}>
+                        <tr key={med.medicineId} className={`border-b last:border-b-0 hover:bg-accent/20 transition-colors ${rowBg}`}>
                           <td className="px-3 py-1.5 text-muted-foreground text-xs">{origIdx + 1}</td>
-                          <td className="px-3 py-1.5 font-medium">{med.medicineName}</td>
-                          <td className="px-3 py-1.5 text-muted-foreground">{med.category}</td>
-                          <td className="px-3 py-1.5 text-center">
-                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium ${stock <= 0 ? 'bg-red-100 text-red-700' : stock < 30 ? 'bg-orange-100 text-orange-700' : 'text-muted-foreground'}`}>
-                              {stock}
-                            </span>
+                          <td className="px-3 py-1.5">
+                            <span className="font-medium">{med.medicineName}</span>
+                            <span className="text-muted-foreground ml-2 text-xs">{med.category !== '-' ? med.category : ''}</span>
                           </td>
+                          <td className={`px-3 py-1.5 text-center text-xs ${stockColor}`}>{stock}</td>
+                          {canReceive && (
+                            <td className="px-3 py-1.5 text-center font-medium">{med.requestedQty}</td>
+                          )}
+                          {canEditRequest && (
+                            <>
+                              <td className="px-3 py-1.5 text-center">
+                                <Input className="w-20 h-7 mx-auto text-center text-xs" placeholder="Batch" />
+                              </td>
+                              <td className="px-3 py-1.5 text-center">
+                                <Input type="date" className="w-32 h-7 mx-auto text-xs" />
+                              </td>
+                              <td className="px-3 py-1.5 text-center">
+                                <Input className="w-16 h-7 mx-auto text-center text-xs" placeholder="HSN" />
+                              </td>
+                            </>
+                          )}
                           <td className="px-3 py-1.5 text-center">
                             {canEditRequest ? (
-                              <Input type="number" min="0" className={`w-24 h-8 mx-auto text-center text-sm ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`}
+                              <Input type="number" min="0" className={`w-16 h-7 mx-auto text-center text-xs ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`}
                                 value={med.requestedQty || ''} placeholder="0"
                                 onChange={e => updateMedicine(origIdx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
+                            ) : canReceive ? (
+                              <Input type="number" min="0" className={`w-16 h-7 mx-auto text-center text-xs ${hasQty ? 'border-emerald-500/50 bg-emerald-50' : ''}`}
+                                value={med.receivedQty || ''} placeholder="0"
+                                onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : (
                               <span>{med.requestedQty}</span>
                             )}
                           </td>
-                          {(canReceive || isReadOnly) && (
-                            <td className="px-3 py-1.5 text-center">
-                              {canReceive ? (
-                                <Input type="number" min="0" className="w-24 h-8 mx-auto text-center text-sm"
-                                  value={med.receivedQty || ''} placeholder="0"
-                                  onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
-                              ) : (
-                                <span>{med.receivedQty}</span>
-                              )}
-                            </td>
+                          {!canEditRequest && !canReceive && (
+                            <td className="px-3 py-1.5 text-center">{med.receivedQty}</td>
                           )}
-                          <td className="px-3 py-1.5">
-                            {canEditRequest ? (
-                              <Input className="h-8 text-sm" placeholder="Optional" value={med.comments}
-                                onChange={e => updateMedicine(origIdx, 'comments', e.target.value)} />
-                            ) : (
-                              <span className="text-muted-foreground">{med.comments || '-'}</span>
-                            )}
-                          </td>
                         </tr>
                       );
                     })}
@@ -354,14 +370,14 @@ export default function CreateMedicineRequest() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-3 py-2.5 border-t bg-muted/20">
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="text-muted-foreground">Selected: <strong className="text-foreground">{totalSelected}</strong></span>
-                  <span className="text-muted-foreground">Req Qty: <strong className="text-foreground">{totalQty}</strong></span>
-                  {(canReceive || isReadOnly) && <span className="text-muted-foreground">Recv Qty: <strong className="text-emerald-600 font-bold">{totalReceived}</strong></span>}
+              <div className="flex items-center justify-between px-4 py-2.5 border-t">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>Items with qty: <strong className="text-foreground">{totalSelected}</strong></span>
+                  <span>Total Qty: <strong className="text-foreground">{canReceive ? totalReceived : totalQty}</strong></span>
+                  {canReceive && <span>Requested: <strong className="text-foreground">{totalQty}</strong></span>}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="h-8 px-4 text-xs border-2 hover:bg-destructive/5 hover:text-destructive hover:border-destructive/30 transition-all" onClick={() => navigate('/supplier-orders')}>
+                  <Button variant="ghost" size="sm" className="h-8 px-4 text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate('/supplier-orders')}>
                     {isReadOnly ? 'Back' : 'Cancel'}
                   </Button>
                   {canEditRequest && (
@@ -376,14 +392,14 @@ export default function CreateMedicineRequest() {
                   )}
                   {canReceive && (
                     <Button size="sm" className="h-8 px-5 text-xs bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all" disabled={submitting} onClick={handleReceiveStock}>
-                      <Package className="mr-1.5 h-3.5 w-3.5" /> Confirm & Receive Stock
+                      <Package className="mr-1.5 h-3.5 w-3.5" /> Save Stock
                     </Button>
                   )}
                 </div>
               </div>
-            </div>
+            </>
           )}
-        </>
+        </div>
       )}
     </DashboardLayout>
   );
