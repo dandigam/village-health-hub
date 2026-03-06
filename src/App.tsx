@@ -35,6 +35,7 @@ import NewSupplier from "./pages/suppliers/NewSupplier";
 
 // Supplier Orders
 import SupplierOrders from "./pages/supplier-orders/SupplierOrders";
+import CreateMedicineRequest from "./pages/supplier-orders/CreateMedicineRequest";
 
 // Distribution Orders
 import DistributionOrders from "./pages/distribution/DistributionOrders";
@@ -121,6 +122,7 @@ const App = () => (
               
               {/* Supplier Orders */}
               <Route path="/supplier-orders" element={<ProtectedRoute routeKey="supplier-orders"><SupplierOrders /></ProtectedRoute>} />
+              <Route path="/supplier-orders/new" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
               
               {/* Distribution Orders */}
               <Route path="/distribution-orders" element={<ProtectedRoute routeKey="distribution-orders"><DistributionOrders /></ProtectedRoute>} />
