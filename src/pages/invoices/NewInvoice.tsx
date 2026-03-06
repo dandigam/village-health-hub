@@ -242,13 +242,13 @@ export default function NewInvoice() {
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
-        <>
-          {/* ── Section 1: Order Info — single compact row ── */}
-          <div className="border rounded-lg bg-background px-3 py-2.5 mb-2 shadow-sm">
-            <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-2">Order Information</p>
-            <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
-              <div className="min-w-[150px] flex-1 max-w-[180px]">
-                <Label className="text-[10px] text-muted-foreground">Supplier *</Label>
+        <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
+          {/* ── ORDER INFORMATION ── */}
+          <div className="px-4 py-3 border-b">
+            <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">Order Information</p>
+            <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+              <div className="min-w-[160px]">
+                <Label className="text-[11px] text-muted-foreground">Supplier *</Label>
                 {canEdit ? (
                   <Select value={supplierId} onValueChange={setSupplierId}>
                     <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
@@ -257,11 +257,11 @@ export default function NewInvoice() {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium mt-0.5">{selectedSupplier?.name || '—'}</p>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier?.name || '—'}</p>
                 )}
               </div>
-              <div className="min-w-[120px] flex-1 max-w-[150px]">
-                <Label className="text-[10px] text-muted-foreground">Payment Mode</Label>
+              <div className="min-w-[130px]">
+                <Label className="text-[11px] text-muted-foreground">Payment Mode</Label>
                 {canEdit ? (
                   <Select value={paymentMode} onValueChange={setPaymentMode}>
                     <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select" /></SelectTrigger>
@@ -272,31 +272,31 @@ export default function NewInvoice() {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium mt-0.5 capitalize">{paymentMode || '—'}</p>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center capitalize">{paymentMode || '—'}</p>
                 )}
               </div>
-              <div className="min-w-[100px] flex-1 max-w-[130px]">
-                <Label className="text-[10px] text-muted-foreground">Invoice No.</Label>
+              <div className="min-w-[110px]">
+                <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
                 {canEdit ? (
                   <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                 ) : (
-                  <p className="text-sm font-medium mt-0.5">{invoiceNumber || '—'}</p>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{invoiceNumber || '—'}</p>
                 )}
               </div>
-              <div className="min-w-[100px] flex-1 max-w-[120px]">
-                <Label className="text-[10px] text-muted-foreground">Amount (₹)</Label>
+              <div className="min-w-[100px]">
+                <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
                 {canEdit ? (
                   <Input className="h-8 text-sm mt-0.5" type="number" step="0.01" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
                 ) : (
-                  <p className="text-sm font-medium mt-0.5">₹{Number(invoiceAmount).toLocaleString()}</p>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
                 )}
               </div>
-              <div className="min-w-[130px] flex-1 max-w-[150px]">
-                <Label className="text-[10px] text-muted-foreground">Date *</Label>
+              <div className="min-w-[140px]">
+                <Label className="text-[11px] text-muted-foreground">Date *</Label>
                 {canEdit ? (
                   <Input className="h-8 text-sm mt-0.5" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
                 ) : (
-                  <p className="text-sm font-medium mt-0.5">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
+                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                 )}
               </div>
               {/* Inline Attachments */}
@@ -323,138 +323,126 @@ export default function NewInvoice() {
             </div>
           </div>
 
-          {/* ── Section 2: Medicine Grid ── */}
-          <div className="border rounded-lg bg-background overflow-hidden flex flex-col shadow-sm" style={{ maxHeight: 'calc(100vh - 220px)' }}>
-            {/* Toolbar */}
-            <div className="flex items-center gap-3 px-3 py-2 border-b bg-muted/10">
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Medicine Details</p>
-              {items.length > 0 && (
-                <Badge variant="secondary" className="text-[10px] h-5 font-normal">
-                  {medSearch ? `${filteredItems.length} of ${items.length}` : `${items.length} medicines`}
-                </Badge>
-              )}
-              <div className="relative ml-auto w-52">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input className="h-7 text-xs pl-8" placeholder="Filter medicines..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
-              </div>
-              {canEdit && (
-                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setNewMedName(''); setNewMedType(''); setShowAddDialog(true); }}>
-                  <PlusCircle className="w-3.5 h-3.5 mr-1" /> Add Medicine
-                </Button>
-              )}
+          {/* ── MEDICINE DETAILS ── */}
+          {!supplierId && mode === 'create' ? (
+            <div className="flex flex-col items-center justify-center py-14">
+              <Package className="h-10 w-10 text-muted-foreground/40 mb-2" />
+              <p className="text-sm text-muted-foreground">Select a supplier to load their medicine catalog</p>
             </div>
-
-            {/* Grid */}
-            <div className="overflow-auto flex-1">
-              {!supplierId && mode === 'create' ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <Package className="h-10 w-10 text-muted-foreground/30 mb-3" />
-                  <p className="text-sm text-muted-foreground">Select a supplier to load their medicine catalog</p>
+          ) : (
+            <>
+              {/* Medicine header bar */}
+              <div className="px-4 py-2 border-b flex items-center gap-3">
+                <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Medicine Details</p>
+                {items.length > 0 && (
+                  <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5">{medSearch ? `${filteredItems.length} of ${items.length}` : `${items.length} medicines`}</Badge>
+                )}
+                <div className="ml-auto flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input className="h-8 text-sm pl-8 w-48" placeholder="Filter medicines..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
+                  </div>
+                  {canEdit && (
+                    <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setNewMedName(''); setNewMedType(''); setShowAddDialog(true); }}>
+                      <PlusCircle className="w-3.5 h-3.5 mr-1" /> Add Medicine
+                    </Button>
+                  )}
                 </div>
-              ) : filteredItems.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <Pill className="h-8 w-8 text-muted-foreground/30 mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    {medSearch ? 'No medicines match your filter' : 'No medicines found for this supplier'}
-                  </p>
-                </div>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
-                    <tr className="border-b">
-                      <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-10">#</th>
-                      <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground">Medicine</th>
-                      <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-20">Stock</th>
-                      <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-28">Batch</th>
-                      <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-28">EXP Date</th>
-                      <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-20">HSN</th>
-                      <th className="px-3 py-1.5 text-right font-medium text-[10px] uppercase text-muted-foreground w-20">Qty</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.map((item, idx) => {
-                      // Find original index for updates when filtered
-                      const realIdx = items.indexOf(item);
-                      const stock = item.stock;
-                      const hasQty = item.quantity > 0;
-                      const stockBg = stock <= 0 ? 'bg-red-50 dark:bg-red-950/20' : stock < 30 ? 'bg-orange-50 dark:bg-orange-950/20' : '';
-                      const zebra = idx % 2 === 1 ? 'bg-muted/15' : '';
-                      const rowBg = hasQty ? 'bg-primary/5' : stockBg || zebra;
-
-                      return (
-                        <tr key={`${item.medicineId}-${idx}`} className={`border-b last:border-b-0 transition-colors ${rowBg} ${canEdit ? 'hover:bg-accent/20' : ''}`}>
-                          <td className="px-3 py-1 text-muted-foreground text-xs">{idx + 1}</td>
-                          <td className="px-3 py-1">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-medium text-sm">{item.medicineName}</span>
-                              <Badge variant="secondary" className="text-[9px] h-4 font-normal">{item.medicineType}</Badge>
-                              {!item.isAlreadyExist && <Badge className="text-[9px] h-4 bg-primary/10 text-primary border-primary/20">New</Badge>}
-                            </div>
-                          </td>
-                          <td className="px-3 py-1">
-                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                              stock <= 0 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                              stock < 30 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                              'text-muted-foreground'
-                            }`}>
-                              {stock}
-                            </span>
-                          </td>
-                          <td className="px-3 py-1">
-                            {canEdit ? (
-                              <Input className="h-7 text-xs" placeholder="Batch" value={item.batchNo} onChange={e => updateItem(realIdx, 'batchNo', e.target.value)} />
-                            ) : (
-                              <span className="text-muted-foreground text-xs">{item.batchNo || '—'}</span>
-                            )}
-                          </td>
-                          <td className="px-3 py-1">
-                            {canEdit ? (
-                              <Input className="h-7 text-xs" type="date" value={item.expDate} onChange={e => updateItem(realIdx, 'expDate', e.target.value)} />
-                            ) : (
-                              <span className="text-muted-foreground text-xs">{item.expDate || '—'}</span>
-                            )}
-                          </td>
-                          <td className="px-3 py-1">
-                            {canEdit ? (
-                              <Input className="h-7 text-xs" placeholder="HSN" value={item.hsnNo} onChange={e => updateItem(realIdx, 'hsnNo', e.target.value)} />
-                            ) : (
-                              <span className="text-muted-foreground text-xs">{item.hsnNo || '—'}</span>
-                            )}
-                          </td>
-                          <td className="px-3 py-1">
-                            {canEdit ? (
-                              <Input className="h-7 text-xs text-right font-semibold w-16 ml-auto" type="number" placeholder="0" value={item.quantity || ''} onChange={e => updateItem(realIdx, 'quantity', Number(e.target.value))} />
-                            ) : (
-                              <span className={`text-right block font-semibold ${item.quantity > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>{item.quantity}</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between px-3 py-2.5 border-t bg-background">
-              <div className="flex items-center gap-4 text-xs">
-                <span className="text-muted-foreground">Items with qty: <strong className="text-foreground font-semibold">{totalWithQty}</strong></span>
-                <span className="text-muted-foreground">Total Qty: <strong className="text-foreground font-semibold">{totalQty}</strong></span>
               </div>
-              <div className="flex items-center gap-2.5">
-                <Button variant="ghost" size="sm" className="h-8 px-4 text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate('/invoices')}>
-                  {isReadOnly ? 'Back' : 'Cancel'}
-                </Button>
-                {canEdit && (
-                  <Button size="sm" className="h-8 px-5 text-xs bg-gradient-to-r from-primary to-[hsl(var(--accent))] hover:from-primary/90 hover:to-[hsl(var(--accent)/0.9)] shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all" disabled={saving || totalWithQty === 0} onClick={handleSave}>
-                    <Save className="mr-1.5 h-3.5 w-3.5" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
-                  </Button>
+
+              {/* Table */}
+              <div className="overflow-auto max-h-[calc(100vh-320px)]">
+                {filteredItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-14">
+                    <Pill className="h-8 w-8 text-muted-foreground/30 mb-2" />
+                    <p className="text-sm text-muted-foreground">{medSearch ? 'No medicines match your filter' : 'No medicines found for this supplier'}</p>
+                  </div>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur-sm">
+                      <tr className="border-b">
+                        <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-10">#</th>
+                        <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
+                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Stock</th>
+                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>
+                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>
+                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">HSN</th>
+                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Qty</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredItems.map((item, idx) => {
+                        const realIdx = items.indexOf(item);
+                        const stock = item.stock;
+                        const hasQty = item.quantity > 0;
+                        const stockColor = stock <= 0 ? 'text-destructive font-bold' : stock < 30 ? 'text-orange-600 font-semibold' : 'text-muted-foreground';
+                        const zebra = idx % 2 === 1 ? 'bg-muted/10' : '';
+                        const rowBg = hasQty ? 'bg-primary/5' : zebra;
+                        return (
+                          <tr key={`${item.medicineId}-${idx}`} className={`border-b last:border-b-0 hover:bg-accent/20 transition-colors ${rowBg}`}>
+                            <td className="px-3 py-1.5 text-muted-foreground text-xs">{idx + 1}</td>
+                            <td className="px-3 py-1.5">
+                              <span className="font-medium">{item.medicineName}</span>
+                              <span className="text-muted-foreground ml-2 text-xs">{item.medicineType !== '-' ? item.medicineType : ''}</span>
+                              {!item.isAlreadyExist && <Badge className="text-[9px] h-4 ml-1.5 bg-primary/10 text-primary border-primary/20">New</Badge>}
+                            </td>
+                            <td className={`px-3 py-1.5 text-center text-xs ${stockColor}`}>{stock}</td>
+                            <td className="px-3 py-1.5 text-center">
+                              {canEdit ? (
+                                <Input className="w-20 h-7 mx-auto text-center text-xs" placeholder="Batch" value={item.batchNo} onChange={e => updateItem(realIdx, 'batchNo', e.target.value)} />
+                              ) : (
+                                <span className="text-muted-foreground text-xs">{item.batchNo || '—'}</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-1.5 text-center">
+                              {canEdit ? (
+                                <Input className="w-32 h-7 mx-auto text-xs" type="date" value={item.expDate} onChange={e => updateItem(realIdx, 'expDate', e.target.value)} />
+                              ) : (
+                                <span className="text-muted-foreground text-xs">{item.expDate || '—'}</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-1.5 text-center">
+                              {canEdit ? (
+                                <Input className="w-16 h-7 mx-auto text-center text-xs" placeholder="HSN" value={item.hsnNo} onChange={e => updateItem(realIdx, 'hsnNo', e.target.value)} />
+                              ) : (
+                                <span className="text-muted-foreground text-xs">{item.hsnNo || '—'}</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-1.5 text-center">
+                              {canEdit ? (
+                                <Input className={`w-16 h-7 mx-auto text-center text-xs ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`} type="number" placeholder="0" value={item.quantity || ''} onChange={e => updateItem(realIdx, 'quantity', Number(e.target.value))} />
+                              ) : (
+                                <span className={`font-semibold ${item.quantity > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>{item.quantity}</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 )}
               </div>
-            </div>
-          </div>
-        </>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between px-4 py-2.5 border-t">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>Items with qty: <strong className="text-foreground">{totalWithQty}</strong></span>
+                  <span>Total Qty: <strong className="text-foreground">{totalQty}</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" className="h-8 px-4 text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate('/invoices')}>
+                    {isReadOnly ? 'Back' : 'Cancel'}
+                  </Button>
+                  {canEdit && (
+                    <Button size="sm" className="h-8 px-5 text-xs bg-gradient-to-r from-primary to-[hsl(var(--accent))] shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all" disabled={saving || totalWithQty === 0} onClick={handleSave}>
+                      <Save className="mr-1.5 h-3.5 w-3.5" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       )}
 
       {/* ── Add New Medicine Dialog ── */}
