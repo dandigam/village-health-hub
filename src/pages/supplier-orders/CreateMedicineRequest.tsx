@@ -395,10 +395,10 @@ export default function CreateMedicineRequest() {
                           "transition-colors hover:bg-accent/30",
                           hasQty && "bg-primary/[0.03]"
                         )}>
-                          <td className="px-4 py-2 text-muted-foreground text-xs font-medium">{origIdx + 1}</td>
-                          <td className="px-4 py-2">
-                            <span className="font-semibold text-foreground">{med.medicineName}</span>
-                            {med.category !== '-' && <span className="text-muted-foreground ml-2 text-xs">{med.category}</span>}
+                          <td className="px-3 py-1 text-muted-foreground text-xs font-medium">{origIdx + 1}</td>
+                          <td className="px-3 py-1">
+                            <span className="font-semibold text-foreground text-xs">{med.medicineName}</span>
+                            {med.category !== '-' && <span className="text-muted-foreground ml-2 text-[11px]">{med.category}</span>}
                           </td>
                           {canReceive && (
                             <td className="px-4 py-2 text-center">
