@@ -378,19 +378,17 @@ export default function CreateMedicineRequest() {
                 <table className="w-full text-sm border-collapse">
                   <thead className="sticky top-0 z-10">
                     <tr className="border-b bg-muted/40">
-                      <th className="px-4 py-2.5 text-left font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-12">#</th>
-                      <th className="px-4 py-2.5 text-left font-medium text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
-                      {canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>}
-                      {canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>}
-                      {canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>}
-                      {canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">HSN</th>}
-                      <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">
-                        Current Stock
-                      </th>
-                      <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">
+                      <th className="px-3 py-2.5 text-left font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-10">#</th>
+                      <th className="px-3 py-2.5 text-left font-medium text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
+                      {canReceive && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-20">Req Qty</th>}
+                      {canReceive && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-24">Batch</th>}
+                      {canReceive && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-32">Exp Date</th>}
+                      {canReceive && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-20">HSN</th>}
+                      <th className="px-3 py-2.5 text-right font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-20">Stock</th>
+                      <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-24">
                         {canReceive ? 'Recv Qty' : 'Request Qty'}
                       </th>
-                      {!canEditRequest && !canReceive && <th className="px-4 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Recv Qty</th>}
+                      {!canEditRequest && !canReceive && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-20">Recv Qty</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
@@ -437,7 +435,7 @@ export default function CreateMedicineRequest() {
                               </td>
                             </>
                           )}
-                          <td className={cn("px-4 py-2 text-center text-sm tabular-nums", stockColor)}>{stock}</td>
+                          <td className={cn("px-3 py-2 text-right text-sm tabular-nums", stockColor)}>{stock}</td>
                           <td className="px-4 py-2 text-center">
                             {canEditRequest ? (
                               <Input type="number" min="0" className={cn("w-20 h-7 mx-auto text-center text-xs rounded-md", hasQty && "border-primary/40 ring-1 ring-primary/10")}
