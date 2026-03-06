@@ -122,7 +122,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
                         {({ isActive }) => (
                           <item.icon 
                             className="h-[17px] w-[17px] transition-all duration-200"
-                            style={{ color: isActive ? item.color : undefined }}
+                            style={{ color: item.color, opacity: isActive ? 1 : 0.5 }}
                           />
                         )}
                       </NavLink>
