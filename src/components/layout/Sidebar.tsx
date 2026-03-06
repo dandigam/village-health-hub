@@ -24,20 +24,20 @@ import { useAuth } from '@/context/AuthContext';
 import { hasAccess } from '@/config/routeAccess';
 
 const allNavItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', routeKey: 'dashboard' },
-  { icon: Tent, label: 'Camp Templates', href: '/camp-templates', routeKey: 'camp-templates' },
-  { icon: CalendarDays, label: 'Camp Events', href: '/camp-events', routeKey: 'camp-events' },
-  { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients' },
-  { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters' },
-  { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy' },
-  { icon: Package, label: 'Stock', href: '/stock', routeKey: 'stock' },
-  { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers' },
-  { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders' },
-  { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders' },
-  { icon: FileText, label: 'Invoices', href: '/invoices', routeKey: 'invoices' },
-  { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors' },
-  { icon: FileText, label: 'Reports', href: '/reports', routeKey: 'reports' },
-  { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', routeKey: 'dashboard', color: 'hsl(220, 90%, 65%)' },
+  { icon: Tent, label: 'Camp Templates', href: '/camp-templates', routeKey: 'camp-templates', color: 'hsl(280, 70%, 65%)' },
+  { icon: CalendarDays, label: 'Camp Events', href: '/camp-events', routeKey: 'camp-events', color: 'hsl(340, 75%, 65%)' },
+  { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients', color: 'hsl(200, 85%, 60%)' },
+  { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters', color: 'hsl(350, 80%, 62%)' },
+  { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy', color: 'hsl(160, 70%, 55%)' },
+  { icon: Package, label: 'Stock', href: '/stock', routeKey: 'stock', color: 'hsl(35, 90%, 60%)' },
+  { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers', color: 'hsl(140, 65%, 55%)' },
+  { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders', color: 'hsl(25, 95%, 60%)' },
+  { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders', color: 'hsl(270, 70%, 65%)' },
+  { icon: FileText, label: 'Invoices', href: '/invoices', routeKey: 'invoices', color: 'hsl(190, 80%, 55%)' },
+  { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors', color: 'hsl(170, 70%, 50%)' },
+  { icon: FileText, label: 'Reports', href: '/reports', routeKey: 'reports', color: 'hsl(45, 90%, 55%)' },
+  { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses', color: 'hsl(210, 60%, 60%)' },
 ];
 
 interface SidebarProps {
@@ -61,10 +61,10 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
 
   const renderNavItem = (item: typeof allNavItems[0], isActive: boolean) => (
     <>
-      <item.icon className={cn(
-        "h-[17px] w-[17px] shrink-0 transition-all duration-200",
-        isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80"
-      )} />
+      <item.icon 
+        className="h-[17px] w-[17px] shrink-0 transition-all duration-200"
+        style={{ color: item.color, opacity: isActive ? 1 : 0.5 }}
+      />
       {!collapsed && (
         <span className={cn("truncate text-[13px]", isActive ? "font-semibold" : "font-medium")}>
           {item.label}
@@ -120,10 +120,10 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
                         }
                       >
                         {({ isActive }) => (
-                          <item.icon className={cn(
-                            "h-[17px] w-[17px] transition-all duration-200",
-                            isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80"
-                          )} />
+                          <item.icon 
+                            className="h-[17px] w-[17px] transition-all duration-200"
+                            style={{ color: item.color, opacity: isActive ? 1 : 0.5 }}
+                          />
                         )}
                       </NavLink>
                     </TooltipTrigger>
@@ -168,10 +168,10 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
                   }
                 >
                   {({ isActive }) => (
-                    <Settings className={cn(
-                      "h-[17px] w-[17px] transition-all duration-200",
-                      isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80 group-hover:rotate-45"
-                    )} />
+                    <Settings 
+                      className="h-[17px] w-[17px] transition-all duration-200 group-hover:rotate-45"
+                      style={{ color: 'hsl(220, 15%, 65%)', opacity: isActive ? 1 : 0.6 }}
+                    />
                   )}
                 </NavLink>
               </TooltipTrigger>
@@ -192,10 +192,10 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
             >
               {({ isActive }) => (
                 <>
-                  <Settings className={cn(
-                    "h-[17px] w-[17px] shrink-0 transition-all duration-200",
-                    isActive ? "text-[hsl(200,90%,65%)]" : "group-hover:text-white/80 group-hover:rotate-45"
-                  )} />
+                  <Settings 
+                    className="h-[17px] w-[17px] shrink-0 transition-all duration-200 group-hover:rotate-45"
+                    style={{ color: 'hsl(220, 15%, 65%)', opacity: isActive ? 1 : 0.6 }}
+                  />
                   <span className={cn("truncate text-[13px]", isActive ? "font-semibold" : "font-medium")}>
                     Settings
                   </span>
