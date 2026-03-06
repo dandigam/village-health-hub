@@ -106,14 +106,6 @@ export default function SupplierOrders() {
 
   const getTotalQty = (order: any) => order.items?.reduce((s: number, i: any) => s + (i.requestedQuantity || i.requestedQty || 0), 0) || 0;
 
-  const hasActiveFilters = filterSupplier !== 'all' || filterRequestId || filterDateFrom || filterDateTo || filterStatus !== 'all';
-
-  const handleStatClick = (status: string) => {
-    setFilterStatus(status);
-    setPage(1);
-    setShowFilters(false);
-  };
-
   return (
     <DashboardLayout>
       {/* Header */}
