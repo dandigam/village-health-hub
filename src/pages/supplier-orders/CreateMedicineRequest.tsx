@@ -227,16 +227,31 @@ export default function CreateMedicineRequest() {
 
   return (
     <DashboardLayout>
-      {/* Header */}
-      <div className="flex items-center gap-2.5 mb-3">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/supplier-orders')}>
+      {/* Header with inline supplier selector */}
+      <div className="flex items-center gap-3 mb-3 flex-wrap">
+        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigate('/supplier-orders')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">{pageTitle}</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground whitespace-nowrap">{pageTitle}</h1>
         {orderStatus && (
-          <Badge variant="outline" className={`text-[11px] ml-1 ${statusConfig[statusLower]?.className || ''}`}>
+          <Badge variant="outline" className={`text-[11px] ${statusConfig[statusLower]?.className || ''}`}>
             {orderStatus}
           </Badge>
+        )}
+        {/* Supplier inline in header */}
+        {canEditRequest && mode === 'create' && (
+          <>
+            <div className="h-5 w-px bg-border" />
+            <div className="flex items-center gap-2">
+              <Label className="text-xs text-muted-foreground whitespace-nowrap">Supplier:</Label>
+              <Select value={supplierId} onValueChange={setSupplierId}>
+                <SelectTrigger className="h-8 text-sm w-[220px]"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
         )}
       </div>
 
@@ -244,28 +259,14 @@ export default function CreateMedicineRequest() {
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
         <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
-          {/* ORDER INFORMATION section */}
+          {/* ORDER INFORMATION section - only show when supplier selected or in receive/view mode */}
+          {(selectedSupplier || canReceive || isReadOnly) && (
           <div className="px-4 py-3 border-b">
             <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">
-              {canReceive ? 'Request & Invoice Information' : 'Order Information'}
+              {canReceive ? 'Request & Invoice Information' : 'Supplier Details'}
             </p>
             <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
-              {/* Supplier */}
-              <div className="min-w-[180px]">
-                <Label className="text-[11px] text-muted-foreground">Supplier *</Label>
-                {canEditRequest && mode === 'create' ? (
-                  <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
-                    <SelectContent className="bg-popover z-50">
-                      {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
-                )}
-              </div>
-
-              {/* Supplier details - show in create/edit/view (not receive) */}
+              {/* Supplier details */}
               {selectedSupplier && !canReceive && (
                 <>
                   <div>
@@ -356,6 +357,7 @@ export default function CreateMedicineRequest() {
               )}
             </div>
           </div>
+          )}
 
           {/* MEDICINE DETAILS section */}
           {!supplierId ? (
