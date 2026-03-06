@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Pencil, Trash2, RotateCcw, ChevronUp, ChevronDown, FileText } from 'lucide-react';
+import { Plus, Eye, Pencil, Trash2, RotateCcw, ChevronUp, ChevronDown, FileText, Package, Pill, FileImage } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useInvoices, Invoice } from '@/hooks/useApiData';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useInvoices, Invoice, InvoiceItem } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 
