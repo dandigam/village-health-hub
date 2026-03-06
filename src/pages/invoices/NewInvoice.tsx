@@ -203,6 +203,25 @@ export default function NewInvoice() {
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
   const pageTitle = mode === 'create' ? 'New Stock Entry' : mode === 'edit' ? 'Edit Stock Entry' : 'View Stock Entry';
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      const url = URL.createObjectURL(file);
+      setInvoiceFiles(prev => [...prev, { name: file.name, url, file }]);
+    });
+    e.target.value = '';
+  };
+
+  const removeFile = (idx: number) => {
+    setInvoiceFiles(prev => {
+      const next = [...prev];
+      if (next[idx].url.startsWith('blob:')) URL.revokeObjectURL(next[idx].url);
+      next.splice(idx, 1);
+      return next;
+    });
+  };
+
   return (
     <DashboardLayout>
       {/* ── Header ── */}
