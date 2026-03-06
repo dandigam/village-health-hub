@@ -63,7 +63,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
     <>
       <item.icon 
         className="h-[17px] w-[17px] shrink-0 transition-all duration-200"
-        style={{ color: isActive ? item.color : undefined }}
+        style={{ color: item.color, opacity: isActive ? 1 : 0.5 }}
       />
       {!collapsed && (
         <span className={cn("truncate text-[13px]", isActive ? "font-semibold" : "font-medium")}>
