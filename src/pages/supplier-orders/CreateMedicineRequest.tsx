@@ -249,27 +249,23 @@ export default function CreateMedicineRequest() {
             <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">
               {canReceive ? 'Request & Invoice Information' : 'Supplier Details'}
             </p>
-            <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
+            <div className="grid grid-cols-[auto_1fr_auto] gap-x-6 gap-y-0.5 items-baseline text-sm">
               {/* Supplier details */}
               {selectedSupplier && !canReceive && (
                 <>
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Contact</Label>
-                    <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
-                  </div>
-                  <div>
-                    <Label className="text-[11px] text-muted-foreground">Address</Label>
-                    <p className="text-sm mt-0.5 h-8 flex items-center">
-                      {[selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ')}
-                      {selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : ''}
-                      {!selectedSupplier.address && !selectedSupplier.district ? '-' : ''}
-                    </p>
-                  </div>
+                  <span className="text-[11px] text-muted-foreground">Contact</span>
+                  <span className="font-medium col-span-2">{selectedSupplier.contact || '-'}</span>
+                  <span className="text-[11px] text-muted-foreground">Address</span>
+                  <span className="col-span-2">
+                    {[selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ')}
+                    {selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : ''}
+                    {!selectedSupplier.address && !selectedSupplier.district ? '-' : ''}
+                  </span>
                   {selectedSupplier.email && (
-                    <div>
-                      <Label className="text-[11px] text-muted-foreground">Email</Label>
-                      <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.email}</p>
-                    </div>
+                    <>
+                      <span className="text-[11px] text-muted-foreground">Email</span>
+                      <span className="col-span-2">{selectedSupplier.email}</span>
+                    </>
                   )}
                 </>
               )}
