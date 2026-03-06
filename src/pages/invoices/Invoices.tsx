@@ -1,25 +1,26 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Plus, Eye, Pencil, Trash2, RotateCcw, ChevronUp, ChevronDown, FileText } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInvoices, Invoice } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
-import { motion } from 'framer-motion';
-import { Plus, Search, Filter, RefreshCw, X, FileText, Package, Clock, Archive, IndianRupee, TrendingUp, Layers } from 'lucide-react';
 import { format } from 'date-fns';
-import { InvoiceDetailDrawer } from '@/components/invoices/InvoiceDetailDrawer';
 
-const statConfig = [
-  { label: 'Total Invoices', key: 'total', icon: Layers, gradient: 'from-primary/90 to-accent/80', iconBg: 'bg-white/20' },
-  { label: 'Total Amount', key: 'totalAmount', icon: IndianRupee, gradient: 'from-emerald-500 to-teal-600', iconBg: 'bg-white/20' },
-  { label: 'Total Items', key: 'totalItems', icon: Package, gradient: 'from-amber-500 to-orange-600', iconBg: 'bg-white/20' },
-  { label: 'This Month', key: 'thisMonth', icon: TrendingUp, gradient: 'from-violet-500 to-purple-600', iconBg: 'bg-white/20' },
-] as const;
+const paymentConfig: Record<string, { label: string; className: string }> = {
+  cash: { label: 'Cash', className: 'bg-green-100 text-green-800 border-green-300' },
+  upi: { label: 'UPI', className: 'bg-blue-100 text-blue-800 border-blue-300' },
+  bank_transfer: { label: 'Bank Transfer', className: 'bg-violet-100 text-violet-800 border-violet-300' },
+  cheque: { label: 'Cheque', className: 'bg-orange-100 text-orange-800 border-orange-300' },
+  credit: { label: 'Credit', className: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+};
+
+type SortKey = 'id' | 'invoiceDate' | 'supplierName' | 'invoiceNumber' | 'invoiceAmount' | 'itemCount';
+type SortDir = 'asc' | 'desc';
 
 export default function Invoices() {
   const navigate = useNavigate();
@@ -27,196 +28,80 @@ export default function Invoices() {
   const warehouseId = (user as any)?.context?.warehouseId ? Number((user as any).context.warehouseId) : undefined;
   const { data: invoices = [], isLoading, refetch } = useInvoices(warehouseId);
 
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('stock-entry');
-  const [selectedOrder, setSelectedOrder] = useState<Invoice | null>(null);
+  const [filterPayment, setFilterPayment] = useState('all');
+  const [filterSearch, setFilterSearch] = useState('');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('invoiceDate');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const filtered = useMemo(() => {
-    let result = invoices;
-    if (statusFilter !== 'all') {
-      result = result.filter((o: Invoice) => o.paymentMode?.toLowerCase() === statusFilter);
+  useEffect(() => { refetch?.(); }, []);
+
+  const handleReset = () => {
+    setFilterPayment('all'); setFilterSearch(''); setFilterDateFrom(''); setFilterDateTo(''); setPage(1);
+  };
+
+  const filteredInvoices = useMemo(() => {
+    let result = [...invoices];
+    if (filterPayment !== 'all') result = result.filter(o => o.paymentMode?.toLowerCase() === filterPayment);
+    if (filterSearch.trim()) {
+      const q = filterSearch.toLowerCase();
+      result = result.filter(o => String(o.id).includes(q) || o.supplierName?.toLowerCase().includes(q) || o.invoiceNumber?.toLowerCase().includes(q));
     }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter((o: Invoice) =>
-        String(o.id).includes(q) ||
-        o.supplierName?.toLowerCase().includes(q) ||
-        o.invoiceNumber?.toLowerCase().includes(q)
-      );
-    }
+    if (filterDateFrom) result = result.filter(o => new Date(o.invoiceDate || o.createdAt) >= new Date(filterDateFrom));
+    if (filterDateTo) { const to = new Date(filterDateTo); to.setHours(23, 59, 59); result = result.filter(o => new Date(o.invoiceDate || o.createdAt) <= to); }
+    result.sort((a, b) => {
+      let aVal: any, bVal: any;
+      switch (sortKey) {
+        case 'id': aVal = a.id; bVal = b.id; break;
+        case 'invoiceDate': aVal = new Date(a.invoiceDate || a.createdAt).getTime(); bVal = new Date(b.invoiceDate || b.createdAt).getTime(); break;
+        case 'supplierName': aVal = (a.supplierName || '').toLowerCase(); bVal = (b.supplierName || '').toLowerCase(); break;
+        case 'invoiceNumber': aVal = (a.invoiceNumber || '').toLowerCase(); bVal = (b.invoiceNumber || '').toLowerCase(); break;
+        case 'invoiceAmount': aVal = a.invoiceAmount || 0; bVal = b.invoiceAmount || 0; break;
+        case 'itemCount': aVal = a.items?.length || 0; bVal = b.items?.length || 0; break;
+        default: aVal = 0; bVal = 0;
+      }
+      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
     return result;
-  }, [invoices, statusFilter, searchQuery]);
+  }, [invoices, filterPayment, filterSearch, filterDateFrom, filterDateTo, sortKey, sortDir]);
 
-  const currentMonth = new Date().getMonth();
-  const monthlyOrders = useMemo(() =>
-    invoices.filter((o: Invoice) => {
-      const d = new Date(o.createdAt);
-      return d.getMonth() === currentMonth;
-    }), [invoices, currentMonth]);
+  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / rowsPerPage));
+  const pagedInvoices = filteredInvoices.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
-  const stats = useMemo(() => {
-    const totalAmount = invoices.reduce((sum, inv) => sum + (inv.invoiceAmount || 0), 0);
-    const totalItems = invoices.reduce((sum, inv) => sum + (inv.items?.length || 0), 0);
-    return {
-      total: invoices.length,
-      totalAmount,
-      totalItems,
-      thisMonth: monthlyOrders.length,
-    };
-  }, [invoices, monthlyOrders]);
-
-  const clearFilters = () => {
-    setStatusFilter('all');
-    setSearchQuery('');
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
   };
 
-  const getStatValue = (key: string) => {
-    if (key === 'totalAmount') return `₹${stats.totalAmount.toLocaleString()}`;
-    return stats[key as keyof typeof stats];
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ChevronUp className="h-3.5 w-3.5 opacity-30" />;
+    return sortDir === 'asc' ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />;
   };
-
-  const renderTable = (data: Invoice[]) => (
-    <div className="rounded-xl border border-border/60 bg-card overflow-hidden shadow-sm">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-gradient-to-r from-muted/60 to-muted/30 border-b border-border/60">
-            <TableHead className="text-[11px] font-bold uppercase tracking-wider text-foreground/70">Invoice No</TableHead>
-            <TableHead className="text-[11px] font-bold uppercase tracking-wider text-foreground/70">Supplier</TableHead>
-            <TableHead className="text-[11px] font-bold uppercase tracking-wider text-foreground/70">Payment Mode</TableHead>
-            <TableHead className="text-[11px] font-bold uppercase tracking-wider text-foreground/70">Invoice Date</TableHead>
-            <TableHead className="text-[11px] font-bold uppercase tracking-wider text-foreground/70">Created At</TableHead>
-            <TableHead className="text-[11px] font-bold uppercase tracking-wider text-foreground/70 text-right">Amount</TableHead>
-            <TableHead className="text-[11px] font-bold uppercase tracking-wider text-foreground/70 text-right">Items</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} className="h-44">
-                <div className="flex flex-col items-center justify-center text-muted-foreground gap-3">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                    <FileText className="w-7 h-7 text-primary/40" />
-                  </div>
-                  <div className="text-center">
-                    <p className="font-semibold text-sm text-foreground/70">No invoices found</p>
-                    <p className="text-xs mt-0.5 text-muted-foreground">Create your first stock entry to get started</p>
-                  </div>
-                  <Button size="sm" className="mt-1 h-8 text-xs shadow-md" onClick={() => navigate('/invoices/new')}>
-                    <Plus className="w-3.5 h-3.5 mr-1" /> New Stock Entry
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ) : (
-            data.map((invoice: Invoice, i: number) => (
-              <motion.tr
-                key={invoice.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.04, ease: 'easeOut' }}
-                className="border-b border-border/30 hover:bg-primary/[0.04] transition-all duration-200 cursor-pointer group"
-                onClick={() => setSelectedOrder(invoice)}
-              >
-                <TableCell className="font-mono text-xs font-bold text-primary group-hover:text-primary/80 transition-colors">
-                  {invoice.invoiceNumber || `#${invoice.id}`}
-                </TableCell>
-                <TableCell className="text-sm font-medium text-foreground/90">{invoice.supplierName || '—'}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="text-[10px] capitalize font-medium shadow-sm border border-border/40">
-                    {invoice.paymentMode || '—'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground">
-                  {invoice.invoiceDate ? format(new Date(invoice.invoiceDate), 'dd MMM yyyy') : '—'}
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground">
-                  {invoice.createdAt ? format(new Date(invoice.createdAt), 'dd MMM yyyy HH:mm') : '—'}
-                </TableCell>
-                <TableCell className="text-right font-bold text-sm text-foreground">
-                  ₹{invoice.invoiceAmount?.toLocaleString() || '0'}
-                </TableCell>
-                <TableCell className="text-right">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-muted/50 text-xs font-semibold text-foreground/70">
-                    {invoice.items?.length || 0}
-                  </span>
-                </TableCell>
-              </motion.tr>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
-  );
 
   return (
     <DashboardLayout>
-      <div className="space-y-5">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
-        >
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Purchase & Stock Entries</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Track supplier invoices and incoming inventory</p>
-          </div>
-          <Button
-            className="h-10 text-sm px-5 shadow-lg bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-            onClick={() => navigate('/invoices/new')}
-          >
-            <Plus className="w-4 h-4 mr-2" /> New Stock Entry
-          </Button>
-        </motion.div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2.5">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Purchase & Stock Entries</h1>
+        <Button size="sm" onClick={() => navigate('/invoices/new')}>
+          <Plus className="mr-1.5 h-4 w-4" /> New Stock Entry
+        </Button>
+      </div>
 
-        {/* Stats - Vibrant gradient cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-          {statConfig.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 12, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: i * 0.06, type: 'spring', stiffness: 220 }}
-              className={`relative overflow-hidden rounded-lg bg-gradient-to-br ${s.gradient} p-3 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300`}
-            >
-              <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full -translate-y-5 translate-x-5" />
-              <div className="flex items-center gap-2.5 relative z-10">
-                <div className={`w-8 h-8 rounded-lg ${s.iconBg} flex items-center justify-center backdrop-blur-sm`}>
-                  <s.icon className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-xl font-extrabold tracking-tight drop-shadow-sm leading-tight">{getStatValue(s.key)}</p>
-                  <p className="text-[10px] text-white/80 font-medium">{s.label}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-card border border-border/60 h-10 p-1 shadow-sm">
-            <TabsTrigger value="stock-entry" className="text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
-              <Package className="w-3.5 h-3.5 mr-1.5" /> Stock Entry
-            </TabsTrigger>
-            <TabsTrigger value="monthly" className="text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
-              <Clock className="w-3.5 h-3.5 mr-1.5" /> Monthly
-            </TabsTrigger>
-            <TabsTrigger value="all" className="text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
-              <Archive className="w-3.5 h-3.5 mr-1.5" /> All Orders
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Filter Bar */}
-          <div className="flex items-center gap-2.5 mt-3 flex-wrap">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px] h-9 text-xs bg-card border-border/60 shadow-sm">
-                <Filter className="w-3 h-3 mr-1.5 text-muted-foreground" />
-                <SelectValue placeholder="Payment Mode" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Payments</SelectItem>
+      {/* Filter Bar */}
+      <div className="border rounded-md bg-card px-3 py-2.5 mb-2.5">
+        <div className="flex flex-wrap items-end gap-2.5">
+          <div className="min-w-[140px]">
+            <Label className="text-xs mb-1 block text-muted-foreground">Payment Mode</Label>
+            <Select value={filterPayment} onValueChange={v => { setFilterPayment(v); setPage(1); }}>
+              <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="All" /></SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="cash">Cash</SelectItem>
                 <SelectItem value="upi">UPI</SelectItem>
                 <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
@@ -224,46 +109,111 @@ export default function Invoices() {
                 <SelectItem value="credit">Credit</SelectItem>
               </SelectContent>
             </Select>
-            <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Search by invoice ID or supplier"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 text-xs bg-card border-border/60 shadow-sm"
-              />
-            </div>
-            <Button size="sm" variant="outline" className="h-9 text-xs shadow-sm border-border/60" onClick={() => refetch()}>
-              <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
-            </Button>
-            {(statusFilter !== 'all' || searchQuery) && (
-              <Button size="sm" variant="ghost" className="h-9 text-xs text-muted-foreground hover:text-destructive" onClick={clearFilters}>
-                <X className="w-3.5 h-3.5 mr-1" /> Clear
-              </Button>
-            )}
+          </div>
+          <div className="min-w-[150px]">
+            <Label className="text-xs mb-1 block text-muted-foreground">Search</Label>
+            <Input className="h-8 text-sm" placeholder="Invoice / Supplier..." value={filterSearch} onChange={e => { setFilterSearch(e.target.value); setPage(1); }} />
+          </div>
+          <div className="min-w-[130px]">
+            <Label className="text-xs mb-1 block text-muted-foreground">From</Label>
+            <Input type="date" className="h-8 text-sm" value={filterDateFrom} onChange={e => { setFilterDateFrom(e.target.value); setPage(1); }} />
+          </div>
+          <div className="min-w-[130px]">
+            <Label className="text-xs mb-1 block text-muted-foreground">To</Label>
+            <Input type="date" className="h-8 text-sm" value={filterDateTo} onChange={e => { setFilterDateTo(e.target.value); setPage(1); }} />
+          </div>
+          <Button size="sm" variant="outline" className="h-8 ml-auto" onClick={handleReset}>
+            <RotateCcw className="mr-1 h-3.5 w-3.5" /> Reset
+          </Button>
+        </div>
+      </div>
+
+      {/* Table */}
+      {filteredInvoices.length === 0 ? (
+        <div className="border rounded-md bg-card flex flex-col items-center justify-center py-12">
+          <FileText className="h-10 w-10 text-muted-foreground/40 mb-2" />
+          <p className="text-sm text-muted-foreground font-medium mb-2">No Invoices Found</p>
+          <Button size="sm" onClick={() => navigate('/invoices/new')}>
+            <Plus className="mr-1.5 h-4 w-4" /> New Stock Entry
+          </Button>
+        </div>
+      ) : (
+        <div className="border rounded-md bg-card overflow-hidden">
+          <div className="overflow-auto max-h-[calc(100vh-260px)]">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
+                <tr className="border-b">
+                  {[
+                    { key: 'invoiceNumber' as SortKey, label: 'Invoice No', align: 'text-left' },
+                    { key: 'supplierName' as SortKey, label: 'Supplier', align: 'text-left' },
+                    { key: 'invoiceDate' as SortKey, label: 'Invoice Date', align: 'text-left' },
+                    { key: 'invoiceAmount' as SortKey, label: 'Amount', align: 'text-right' },
+                    { key: 'itemCount' as SortKey, label: 'Items', align: 'text-center' },
+                  ].map(col => (
+                    <th key={col.key} className={`px-3 py-2 font-medium text-xs ${col.align} cursor-pointer select-none`} onClick={() => handleSort(col.key)}>
+                      <span className={`flex items-center gap-1 ${col.align === 'text-center' ? 'justify-center' : col.align === 'text-right' ? 'justify-end' : ''}`}>{col.label} <SortIcon col={col.key} /></span>
+                    </th>
+                  ))}
+                  <th className="px-3 py-2 text-center font-medium text-xs">Payment</th>
+                  <th className="px-3 py-2 text-center font-medium text-xs w-24">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pagedInvoices.map((invoice, idx) => {
+                  const payKey = invoice.paymentMode?.toLowerCase() || '';
+                  const payConf = paymentConfig[payKey];
+                  const zebra = idx % 2 === 1 ? 'bg-muted/20' : '';
+                  return (
+                    <tr key={invoice.id} className={`border-b last:border-b-0 hover:bg-accent/40 transition-colors ${zebra}`}>
+                      <td className="px-3 py-1.5 font-mono text-xs font-bold text-primary">{invoice.invoiceNumber || `#${invoice.id}`}</td>
+                      <td className="px-3 py-1.5 font-medium">{invoice.supplierName || '—'}</td>
+                      <td className="px-3 py-1.5 text-muted-foreground">{invoice.invoiceDate ? format(new Date(invoice.invoiceDate), 'dd MMM yyyy') : '—'}</td>
+                      <td className="px-3 py-1.5 text-right font-bold">₹{invoice.invoiceAmount?.toLocaleString() || '0'}</td>
+                      <td className="px-3 py-1.5 text-center">{invoice.items?.length || 0}</td>
+                      <td className="px-3 py-1.5 text-center">
+                        {payConf ? (
+                          <Badge variant="outline" className={`text-[11px] px-2 py-0.5 ${payConf.className}`}>{payConf.label}</Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">{invoice.paymentMode || '—'}</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-1.5 text-center">
+                        <div className="flex items-center justify-center gap-0.5">
+                          <Button size="icon" variant="ghost" className="h-7 w-7" title="View" onClick={() => navigate(`/invoices/${invoice.id}`)}>
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-7 w-7" title="Edit" onClick={() => navigate(`/invoices/${invoice.id}/edit`)}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
 
-          <TabsContent value="stock-entry" className="mt-3">
-            {renderTable(filtered)}
-          </TabsContent>
-          <TabsContent value="monthly" className="mt-3">
-            {renderTable(monthlyOrders)}
-          </TabsContent>
-          <TabsContent value="all" className="mt-3">
-            {renderTable(filtered)}
-          </TabsContent>
-        </Tabs>
-
-        <InvoiceDetailDrawer
-          open={!!selectedOrder}
-          onOpenChange={(open) => !open && setSelectedOrder(null)}
-          order={selectedOrder}
-          onEdit={(invoice) => {
-            setSelectedOrder(null);
-            navigate('/invoices/new', { state: { invoice } });
-          }}
-        />
-      </div>
+          {/* Pagination */}
+          <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/30 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground text-xs">Rows:</span>
+              <Select value={String(rowsPerPage)} onValueChange={v => { setRowsPerPage(Number(v)); setPage(1); }}>
+                <SelectTrigger className="h-7 w-16 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <span className="text-muted-foreground text-xs">{filteredInvoices.length} total</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="outline" className="h-7 px-2 text-xs" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Prev</Button>
+              <span className="px-2 text-xs text-muted-foreground">{page}/{totalPages}</span>
+              <Button size="sm" variant="outline" className="h-7 px-2 text-xs" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
