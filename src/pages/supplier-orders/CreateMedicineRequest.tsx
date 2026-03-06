@@ -395,7 +395,7 @@ export default function CreateMedicineRequest() {
                           {canReceive && (
                             <td className="px-3 py-1.5 text-center font-medium">{med.requestedQty}</td>
                           )}
-                          {canEditRequest && (
+                          {canReceive && (
                             <>
                               <td className="px-3 py-1.5 text-center">
                                 <Input className="w-20 h-7 mx-auto text-center text-xs" placeholder="Batch" />
