@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSupplierList, useWarehouseInventory, WarehouseInventoryItem } from '@/hooks/useApiData';
 import api from '@/services/api';
 import { toast } from 'sonner';
-import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill } from 'lucide-react';
+import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface InvoiceItem {
@@ -62,6 +62,8 @@ export default function NewInvoice() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newMedName, setNewMedName] = useState('');
   const [newMedType, setNewMedType] = useState('');
+  const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
+  const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
 
   const selectedSupplier = useMemo(() => suppliers.find((s: any) => String(s.id) === supplierId), [suppliers, supplierId]);
 
@@ -201,6 +203,25 @@ export default function NewInvoice() {
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
   const pageTitle = mode === 'create' ? 'New Stock Entry' : mode === 'edit' ? 'Edit Stock Entry' : 'View Stock Entry';
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      const url = URL.createObjectURL(file);
+      setInvoiceFiles(prev => [...prev, { name: file.name, url, file }]);
+    });
+    e.target.value = '';
+  };
+
+  const removeFile = (idx: number) => {
+    setInvoiceFiles(prev => {
+      const next = [...prev];
+      if (next[idx].url.startsWith('blob:')) URL.revokeObjectURL(next[idx].url);
+      next.splice(idx, 1);
+      return next;
+    });
+  };
+
   return (
     <DashboardLayout>
       {/* ── Header ── */}
@@ -277,8 +298,36 @@ export default function NewInvoice() {
                 ) : (
                   <p className="text-sm font-medium mt-0.5">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                 )}
+            </div>
+
+            {/* Invoice Upload */}
+            <div className="mt-2.5 pt-2 border-t border-border/40">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Invoice Attachments</p>
+              <div className="flex flex-wrap items-center gap-2">
+                {invoiceFiles.map((f, idx) => (
+                  <div key={idx} className="group relative flex items-center gap-1.5 border rounded-md bg-background px-2 py-1.5 text-xs cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
+                    <FileImage className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="max-w-[120px] truncate text-foreground">{f.name}</span>
+                    {canEdit && (
+                      <button className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {canEdit && (
+                  <label className="flex items-center gap-1.5 border border-dashed rounded-md px-3 py-1.5 text-xs text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary transition-colors">
+                    <Upload className="w-3.5 h-3.5" />
+                    Upload Invoice
+                    <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
+                  </label>
+                )}
+                {invoiceFiles.length === 0 && !canEdit && (
+                  <span className="text-xs text-muted-foreground">No attachments</span>
+                )}
               </div>
             </div>
+          </div>
           </div>
 
           {/* ── Section 2: Medicine Grid ── */}
@@ -440,6 +489,24 @@ export default function NewInvoice() {
             <Button variant="outline" size="sm" onClick={() => setShowAddDialog(false)}>Cancel</Button>
             <Button size="sm" onClick={handleAddNewMedicine}><Check className="w-3.5 h-3.5 mr-1" /> Add</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Image Preview Dialog ── */}
+      <Dialog open={!!showImagePreview} onOpenChange={() => setShowImagePreview(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] p-2">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Invoice Preview</DialogTitle>
+          </DialogHeader>
+          {showImagePreview && (
+            <div className="flex items-center justify-center overflow-auto max-h-[70vh]">
+              {showImagePreview.endsWith('.pdf') ? (
+                <iframe src={showImagePreview} className="w-full h-[65vh] rounded border" />
+              ) : (
+                <img src={showImagePreview} alt="Invoice" className="max-w-full max-h-[65vh] object-contain rounded" />
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </DashboardLayout>

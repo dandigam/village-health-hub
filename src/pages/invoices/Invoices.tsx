@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Pencil, Trash2, RotateCcw, ChevronUp, ChevronDown, FileText } from 'lucide-react';
+import { Plus, Eye, Pencil, Trash2, RotateCcw, ChevronUp, ChevronDown, FileText, Package, Pill, FileImage } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useInvoices, Invoice } from '@/hooks/useApiData';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useInvoices, Invoice, InvoiceItem } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 
@@ -36,6 +37,7 @@ export default function Invoices() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => { refetch?.(); }, []);
 
@@ -179,7 +181,7 @@ export default function Invoices() {
                       </td>
                       <td className="px-3 py-1.5 text-center">
                         <div className="flex items-center justify-center gap-0.5">
-                          <Button size="icon" variant="ghost" className="h-7 w-7" title="View" onClick={() => navigate(`/invoices/${invoice.id}`)}>
+                          <Button size="icon" variant="ghost" className="h-7 w-7" title="View" onClick={() => setViewInvoice(invoice)}>
                             <Eye className="h-3.5 w-3.5" />
                           </Button>
                           <Button size="icon" variant="ghost" className="h-7 w-7" title="Edit" onClick={() => navigate(`/invoices/${invoice.id}/edit`)}>
@@ -214,6 +216,107 @@ export default function Invoices() {
           </div>
         </div>
       )}
+
+      {/* ── View Invoice Dialog ── */}
+      <Dialog open={!!viewInvoice} onOpenChange={open => { if (!open) setViewInvoice(null); }}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+          {viewInvoice && (
+            <>
+              <DialogHeader className="px-5 pt-5 pb-0">
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="text-lg font-bold flex items-center gap-2">
+                    <FileText className="w-4.5 h-4.5 text-primary" />
+                    {viewInvoice.invoiceNumber || `Invoice #${viewInvoice.id}`}
+                  </DialogTitle>
+                  <Button size="sm" variant="outline" onClick={() => { setViewInvoice(null); navigate(`/invoices/${viewInvoice.id}/edit`); }}>
+                    <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
+                  </Button>
+                </div>
+              </DialogHeader>
+
+              <div className="px-5 pb-5 space-y-3">
+                {/* Order Info */}
+                <div className="border rounded-md bg-muted/10 px-3 py-2.5">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Order Information</p>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-x-3 gap-y-2">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">Supplier</span>
+                      <p className="text-sm font-medium">{viewInvoice.supplierName || '—'}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">Payment Mode</span>
+                      <p className="text-sm font-medium capitalize">{viewInvoice.paymentMode || '—'}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">Invoice No.</span>
+                      <p className="text-sm font-medium">{viewInvoice.invoiceNumber || '—'}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">Amount</span>
+                      <p className="text-sm font-medium">₹{viewInvoice.invoiceAmount?.toLocaleString() || '0'}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">Date</span>
+                      <p className="text-sm font-medium">{viewInvoice.invoiceDate ? format(new Date(viewInvoice.invoiceDate), 'dd MMM yyyy') : '—'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Items Table */}
+                <div className="border rounded-md bg-card overflow-hidden">
+                  <div className="flex items-center gap-3 px-3 py-2 border-b bg-muted/20">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Medicine Details</p>
+                    <Badge variant="secondary" className="text-[10px] h-5 font-normal">
+                      {viewInvoice.items?.length || 0} medicines · {viewInvoice.items?.reduce((s: number, i: InvoiceItem) => s + (i.quantity || 0), 0) || 0} units
+                    </Badge>
+                  </div>
+                  <div className="overflow-auto max-h-[45vh]">
+                    {(!viewInvoice.items || viewInvoice.items.length === 0) ? (
+                      <div className="flex flex-col items-center justify-center py-10">
+                        <Pill className="h-8 w-8 text-muted-foreground/30 mb-2" />
+                        <p className="text-sm text-muted-foreground">No items</p>
+                      </div>
+                    ) : (
+                      <table className="w-full text-sm">
+                        <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur-sm">
+                          <tr className="border-b">
+                            <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-10">#</th>
+                            <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground">Medicine</th>
+                            <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-28">Batch</th>
+                            <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-28">Expiry</th>
+                            <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-20">HSN</th>
+                            <th className="px-3 py-1.5 text-right font-medium text-[10px] uppercase text-muted-foreground w-16">Qty</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {viewInvoice.items.map((item: InvoiceItem, idx: number) => {
+                            const zebra = idx % 2 === 1 ? 'bg-muted/15' : '';
+                            return (
+                              <tr key={item.id || idx} className={`border-b last:border-b-0 ${zebra}`}>
+                                <td className="px-3 py-1 text-muted-foreground text-xs">{idx + 1}</td>
+                                <td className="px-3 py-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-medium text-sm">{item.medicineName || '—'}</span>
+                                    {item.medicineType && <Badge variant="secondary" className="text-[9px] h-4 font-normal">{item.medicineType}</Badge>}
+                                  </div>
+                                </td>
+                                <td className="px-3 py-1 text-xs text-muted-foreground">{item.batchNo || '—'}</td>
+                                <td className="px-3 py-1 text-xs text-muted-foreground">{item.expDate || '—'}</td>
+                                <td className="px-3 py-1 text-xs text-muted-foreground">{item.hsnNo || '—'}</td>
+                                <td className="px-3 py-1 text-right font-semibold">{item.quantity || 0}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
