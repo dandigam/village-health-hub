@@ -298,8 +298,36 @@ export default function NewInvoice() {
                 ) : (
                   <p className="text-sm font-medium mt-0.5">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                 )}
+            </div>
+
+            {/* Invoice Upload */}
+            <div className="mt-2.5 pt-2 border-t border-border/40">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Invoice Attachments</p>
+              <div className="flex flex-wrap items-center gap-2">
+                {invoiceFiles.map((f, idx) => (
+                  <div key={idx} className="group relative flex items-center gap-1.5 border rounded-md bg-background px-2 py-1.5 text-xs cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
+                    <FileImage className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="max-w-[120px] truncate text-foreground">{f.name}</span>
+                    {canEdit && (
+                      <button className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {canEdit && (
+                  <label className="flex items-center gap-1.5 border border-dashed rounded-md px-3 py-1.5 text-xs text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary transition-colors">
+                    <Upload className="w-3.5 h-3.5" />
+                    Upload Invoice
+                    <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
+                  </label>
+                )}
+                {invoiceFiles.length === 0 && !canEdit && (
+                  <span className="text-xs text-muted-foreground">No attachments</span>
+                )}
               </div>
             </div>
+          </div>
           </div>
 
           {/* ── Section 2: Medicine Grid ── */}
