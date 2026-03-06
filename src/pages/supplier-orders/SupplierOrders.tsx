@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter, Clock, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
+import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -52,17 +52,7 @@ export default function SupplierOrders() {
     setFilterSupplier('all'); setFilterRequestId(''); setFilterDateFrom(''); setFilterDateTo(''); setFilterStatus('all'); setPage(1);
   };
 
-  // Stats
-  const stats = useMemo(() => {
-    const all = supplierOrders;
-    return {
-      total: all.length,
-      pending: all.filter(o => o.status?.toLowerCase() === 'pending').length,
-      partial: all.filter(o => o.status?.toLowerCase() === 'partial').length,
-      received: all.filter(o => o.status?.toLowerCase() === 'received').length,
-      draft: all.filter(o => o.status?.toLowerCase() === 'draft').length,
-    };
-  }, [supplierOrders]);
+  const hasActiveFilters = filterSupplier !== 'all' || filterRequestId || filterDateFrom || filterDateTo || filterStatus !== 'all';
 
   const filteredOrders = useMemo(() => {
     let result = [...supplierOrders];
@@ -116,18 +106,10 @@ export default function SupplierOrders() {
 
   const getTotalQty = (order: any) => order.items?.reduce((s: number, i: any) => s + (i.requestedQuantity || i.requestedQty || 0), 0) || 0;
 
-  const hasActiveFilters = filterSupplier !== 'all' || filterRequestId || filterDateFrom || filterDateTo || filterStatus !== 'all';
-
-  const handleStatClick = (status: string) => {
-    setFilterStatus(status);
-    setPage(1);
-    setShowFilters(false);
-  };
-
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-3">
         <h1 className="text-lg font-bold tracking-tight text-foreground">Supplier Orders</h1>
         <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{supplierOrders.length}</Badge>
         <div className="ml-auto flex items-center gap-2">
@@ -140,35 +122,6 @@ export default function SupplierOrders() {
             <Send className="mr-1.5 h-3.5 w-3.5" /> Request Stock
           </Button>
         </div>
-      </div>
-
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
-        {[
-          { label: 'Total', value: stats.total, icon: FileText, status: 'all', color: 'text-foreground', bg: 'bg-muted/40' },
-          { label: 'Pending', value: stats.pending, icon: Clock, status: 'pending', color: 'text-amber-700', bg: 'bg-amber-50' },
-          { label: 'Partial', value: stats.partial, icon: AlertTriangle, status: 'partial', color: 'text-orange-700', bg: 'bg-orange-50' },
-          { label: 'Received', value: stats.received, icon: CheckCircle2, status: 'received', color: 'text-emerald-700', bg: 'bg-emerald-50' },
-          { label: 'Draft', value: stats.draft, icon: Pencil, status: 'draft', color: 'text-muted-foreground', bg: 'bg-muted/30' },
-        ].map(card => (
-          <motion.button
-            key={card.label}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => handleStatClick(card.status)}
-            className={cn(
-              "flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-left transition-all",
-              filterStatus === card.status ? "ring-2 ring-primary/30 border-primary/40 shadow-sm" : "hover:border-border/80",
-              card.bg
-            )}
-          >
-            <card.icon className={cn("h-4 w-4 shrink-0", card.color)} />
-            <div className="min-w-0">
-              <p className={cn("text-lg font-bold leading-none tabular-nums", card.color)}>{card.value}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{card.label}</p>
-            </div>
-          </motion.button>
-        ))}
       </div>
 
       {/* Collapsible Filters */}
