@@ -116,6 +116,11 @@ export default function CreateMedicineRequest() {
     return medicines.filter(m => m.medicineName.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
   }, [medicines, medSearch]);
 
+  const getStock = (medicineId: string) => {
+    const item = warehouseInventory.find(inv => String(inv.medicineId) === medicineId);
+    return item?.totalQty || 0;
+  };
+
   const handleSubmit = async (status: 'PENDING' | 'DRAFT') => {
     const validItems = medicines.filter(m => m.requestedQty > 0);
     if (validItems.length === 0) { toast({ title: 'Error', description: 'Enter quantity for at least one medicine.', variant: 'destructive' }); return; }
