@@ -138,7 +138,12 @@ export default function CreateMedicineRequest() {
       } else {
         await api.post('/supplier-orders', payload);
       }
-      toast({ title: status === 'DRAFT' ? 'Draft Saved' : 'Request Sent', description: `Order ${status === 'DRAFT' ? 'saved as draft' : 'submitted'}.` });
+      toast({ 
+        title: status === 'DRAFT' ? '📋 Draft Saved' : '✅ Request Sent Successfully', 
+        description: status === 'DRAFT' 
+          ? `Medicine request saved as draft with ${validItems.length} items.`
+          : `Request has been successfully created and sent to supplier "${selectedSupplier?.name || ''}" with ${validItems.length} medicines (${totalQty} units total).`
+      });
       navigate('/supplier-orders');
     } catch (error: any) {
       toast({ title: 'Error', description: error.message || 'Failed to submit', variant: 'destructive' });
