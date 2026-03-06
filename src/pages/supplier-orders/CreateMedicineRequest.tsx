@@ -227,8 +227,8 @@ export default function CreateMedicineRequest() {
 
   return (
     <DashboardLayout>
-      {/* Header with inline supplier selector */}
-      <div className="flex items-center gap-3 mb-3 flex-wrap">
+      {/* Header */}
+      <div className="flex items-center gap-2.5 mb-3">
         <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigate('/supplier-orders')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -238,84 +238,75 @@ export default function CreateMedicineRequest() {
             {orderStatus}
           </Badge>
         )}
-        {/* Supplier inline in header — dropdown is prominent */}
-        {canEditRequest && mode === 'create' && (
-          <>
-            <div className="h-5 w-px bg-border" />
-            <Select value={supplierId} onValueChange={setSupplierId}>
-              <SelectTrigger className="h-9 text-sm w-[240px] font-medium"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </>
-        )}
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
         <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
-          {/* ORDER INFORMATION section - only show when supplier selected or in receive/view mode */}
-          {(selectedSupplier || canReceive || isReadOnly) && (
+          {/* ORDER INFORMATION - single horizontal row */}
           <div className="px-4 py-3 border-b">
-            <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">
-              {canReceive ? 'Request & Invoice Information' : 'Supplier Details'}
+            <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2">
+              {canReceive ? 'Order Information' : 'Order Information'}
             </p>
-            <div className="grid grid-cols-[auto_1fr_auto] gap-x-6 gap-y-0.5 items-baseline text-sm">
-              {/* Supplier details */}
+
+            {/* Row 1: Core fields — always a single horizontal row */}
+            <div className="flex items-end gap-3 flex-wrap">
+              {/* Supplier */}
+              <div className="min-w-[180px]">
+                <Label className="text-[11px] text-muted-foreground">Supplier *</Label>
+                {canEditRequest && mode === 'create' ? (
+                  <Select value={supplierId} onValueChange={setSupplierId}>
+                    <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
+                      {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-sm font-medium h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
+                )}
+              </div>
+
+              {/* Contact - create/view mode */}
               {selectedSupplier && !canReceive && (
-                <>
-                  <span className="text-[11px] text-muted-foreground">Contact</span>
-                  <span className="font-medium col-span-2">{selectedSupplier.contact || '-'}</span>
-                  <span className="text-[11px] text-muted-foreground">Address</span>
-                  <span className="col-span-2">
+                <div>
+                  <Label className="text-[11px] text-muted-foreground">Contact</Label>
+                  <p className="text-sm font-medium h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
+                </div>
+              )}
+
+              {/* Address - create/view mode */}
+              {selectedSupplier && !canReceive && (
+                <div className="flex-1 min-w-[200px]">
+                  <Label className="text-[11px] text-muted-foreground">Address</Label>
+                  <p className="text-sm h-8 flex items-center truncate">
                     {[selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ')}
                     {selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : ''}
                     {!selectedSupplier.address && !selectedSupplier.district ? '-' : ''}
-                  </span>
-                  {selectedSupplier.email && (
-                    <>
-                      <span className="text-[11px] text-muted-foreground">Email</span>
-                      <span className="col-span-2">{selectedSupplier.email}</span>
-                    </>
-                  )}
-                </>
+                  </p>
+                </div>
               )}
 
-              {/* Request ID & Date (receive/view mode) */}
-              {(canReceive || isReadOnly) && id && (
+              {/* Email - create/view mode */}
+              {selectedSupplier && !canReceive && selectedSupplier.email && (
                 <div>
-                  <Label className="text-[11px] text-muted-foreground">Request ID</Label>
-                  <p className="text-sm font-semibold font-mono mt-0.5 h-8 flex items-center">#{id}</p>
-                </div>
-              )}
-              {(canReceive || isReadOnly) && (
-                <div>
-                  <Label className="text-[11px] text-muted-foreground">Request Date</Label>
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{orderDate ? new Date(orderDate).toLocaleDateString() : '-'}</p>
+                  <Label className="text-[11px] text-muted-foreground">Email</Label>
+                  <p className="text-sm h-8 flex items-center">{selectedSupplier.email}</p>
                 </div>
               )}
 
-              {canReceive && selectedSupplier && (
-                <div className="min-w-[140px]">
-                  <Label className="text-[11px] text-muted-foreground">Supplier</Label>
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier.name}</p>
-                </div>
-              )}
-
-              {/* Invoice fields - ONLY in receive mode */}
+              {/* Receive mode: Invoice No, Amount, Date, Attach — all in same row */}
               {canReceive && (
                 <>
-                  <div className="min-w-[120px]">
+                  <div className="w-[120px]">
                     <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
                     <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                   </div>
-                  <div className="min-w-[100px]">
+                  <div className="w-[110px]">
                     <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
                     <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
                   </div>
-                  <div className="min-w-[150px]">
+                  <div className="w-[160px]">
                     <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -329,12 +320,12 @@ export default function CreateMedicineRequest() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  {/* Inline Attachments */}
-                  <div className="flex items-center gap-1.5 ml-auto pb-0.5">
+                  {/* Attach */}
+                  <div className="flex items-center gap-1.5 self-end pb-0.5">
                     {invoiceFiles.map((f, idx) => (
                       <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
                         <FileImage className="w-3 h-3 text-primary shrink-0" />
-                        <span className="max-w-[80px] truncate">{f.name}</span>
+                        <span className="max-w-[60px] truncate">{f.name}</span>
                         <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
                           <X className="w-2.5 h-2.5" />
                         </button>
@@ -350,7 +341,6 @@ export default function CreateMedicineRequest() {
               )}
             </div>
           </div>
-          )}
 
           {/* MEDICINE DETAILS section */}
           {!supplierId ? (
