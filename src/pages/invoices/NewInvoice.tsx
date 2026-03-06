@@ -324,7 +324,7 @@ export default function NewInvoice() {
           </div>
 
           {/* ── Section 2: Medicine Grid ── */}
-          <div className="border rounded-md bg-card overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 260px)' }}>
+          <div className="border rounded-lg bg-background overflow-hidden flex flex-col shadow-sm" style={{ maxHeight: 'calc(100vh - 220px)' }}>
             {/* Toolbar */}
             <div className="flex items-center gap-3 px-3 py-2 border-b bg-muted/20">
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Medicine Details</p>
