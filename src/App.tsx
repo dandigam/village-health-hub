@@ -35,6 +35,7 @@ import NewSupplier from "./pages/suppliers/NewSupplier";
 
 // Supplier Orders
 import SupplierOrders from "./pages/supplier-orders/SupplierOrders";
+import CreateMedicineRequest from "./pages/supplier-orders/CreateMedicineRequest";
 
 // Distribution Orders
 import DistributionOrders from "./pages/distribution/DistributionOrders";
