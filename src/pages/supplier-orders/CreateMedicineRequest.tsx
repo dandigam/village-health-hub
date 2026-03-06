@@ -51,6 +51,7 @@ export default function CreateMedicineRequest() {
   const [loading, setLoading] = useState(false);
   const [orderStatus, setOrderStatus] = useState('');
   const [orderDate, setOrderDate] = useState('');
+  const [medSearch, setMedSearch] = useState('');
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
 
