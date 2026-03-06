@@ -407,13 +407,13 @@ export default function CreateMedicineRequest() {
                           )}
                           {canReceive && (
                             <>
-                              <td className="px-4 py-2 text-center">
-                                <Input className="w-24 h-7 mx-auto text-center text-xs rounded-md" placeholder="Batch No." />
+                              <td className="px-3 py-1 text-center">
+                                <Input className="w-24 h-6 mx-auto text-center text-xs rounded-md" placeholder="Batch No." />
                               </td>
-                              <td className="px-4 py-2 text-center">
+                              <td className="px-3 py-1 text-center">
                                 <Popover>
                                   <PopoverTrigger asChild>
-                                    <Button variant="outline" className={cn("w-32 h-7 text-xs justify-start font-normal mx-auto rounded-md", !rowExpDates[med.medicineId] && "text-muted-foreground")}>
+                                    <Button variant="outline" className={cn("w-32 h-6 text-xs justify-start font-normal mx-auto rounded-md", !rowExpDates[med.medicineId] && "text-muted-foreground")}>
                                       <CalendarIcon className="mr-1 h-3 w-3" />
                                       {rowExpDates[med.medicineId] ? format(rowExpDates[med.medicineId]!, "dd-MM-yyyy") : "Exp date"}
                                     </Button>
@@ -423,27 +423,27 @@ export default function CreateMedicineRequest() {
                                   </PopoverContent>
                                 </Popover>
                               </td>
-                              <td className="px-4 py-2 text-center">
-                                <Input className="w-20 h-7 mx-auto text-center text-xs rounded-md" placeholder="HSN" />
+                              <td className="px-3 py-1 text-center">
+                                <Input className="w-20 h-6 mx-auto text-center text-xs rounded-md" placeholder="HSN" />
                               </td>
                             </>
                           )}
-                          <td className={cn("px-3 py-2 text-right text-sm tabular-nums", stockColor)}>{stock}</td>
-                          <td className="px-4 py-2 text-center">
+                          <td className={cn("px-3 py-1 text-right text-xs tabular-nums", stockColor)}>{stock}</td>
+                          <td className="px-3 py-1 text-center">
                             {canEditRequest ? (
-                              <Input type="number" min="0" className={cn("w-20 h-7 mx-auto text-center text-xs rounded-md", hasQty && "border-primary/40 ring-1 ring-primary/10")}
+                              <Input type="number" min="0" className={cn("w-16 h-6 mx-auto text-center text-xs rounded-md", hasQty && "border-primary/40 ring-1 ring-primary/10")}
                                 value={med.requestedQty || ''} placeholder="0"
                                 onChange={e => updateMedicine(origIdx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : canReceive ? (
-                              <Input type="number" min="0" className={cn("w-20 h-7 mx-auto text-center text-xs rounded-md", hasQty && "border-emerald-500/40 ring-1 ring-emerald-500/10 bg-emerald-50/50")}
+                              <Input type="number" min="0" className={cn("w-16 h-6 mx-auto text-center text-xs rounded-md", hasQty && "border-emerald-500/40 ring-1 ring-emerald-500/10 bg-emerald-50/50")}
                                 value={med.receivedQty || ''} placeholder="0"
                                 onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))} />
                             ) : (
-                              <span className="font-medium">{med.requestedQty}</span>
+                              <span className="font-medium text-xs">{med.requestedQty}</span>
                             )}
                           </td>
                           {!canEditRequest && !canReceive && (
-                            <td className="px-4 py-2 text-center font-medium">{med.receivedQty}</td>
+                            <td className="px-3 py-1 text-center font-medium text-xs">{med.receivedQty}</td>
                           )}
                         </tr>
                       );
