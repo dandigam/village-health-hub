@@ -230,9 +230,9 @@ export default function CreateMedicineRequest() {
             <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">
               {canReceive ? 'Request & Invoice Information' : 'Order Information'}
             </p>
-            <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+            <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
               {/* Supplier */}
-              <div className="min-w-[160px]">
+              <div className="min-w-[180px]">
                 <Label className="text-[11px] text-muted-foreground">Supplier *</Label>
                 {canEditRequest && mode === 'create' ? (
                   <Select value={supplierId} onValueChange={setSupplierId}>
@@ -246,47 +246,29 @@ export default function CreateMedicineRequest() {
                 )}
               </div>
 
-              {/* Supplier details - show in create/edit (not receive) */}
+              {/* Contact & Address - always show when supplier selected in create/edit/view (not receive) */}
               {selectedSupplier && !canReceive && (
                 <>
-                  <div className="min-w-[120px]">
+                  <div>
                     <Label className="text-[11px] text-muted-foreground">Contact</Label>
-                    <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
+                    <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
                   </div>
-                  <div className="min-w-[200px]">
+                  <div>
                     <Label className="text-[11px] text-muted-foreground">Address</Label>
                     <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.address || '-'}</p>
                   </div>
-                  {(selectedSupplier as any).city && (
-                    <div className="min-w-[100px]">
-                      <Label className="text-[11px] text-muted-foreground">City</Label>
-                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).city}</p>
-                    </div>
-                  )}
-                  {(selectedSupplier as any).phone && (
-                    <div className="min-w-[120px]">
-                      <Label className="text-[11px] text-muted-foreground">Phone</Label>
-                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).phone}</p>
-                    </div>
-                  )}
-                  {(selectedSupplier as any).gstNumber && (
-                    <div className="min-w-[120px]">
-                      <Label className="text-[11px] text-muted-foreground">GST No.</Label>
-                      <p className="text-sm mt-0.5 h-8 flex items-center">{(selectedSupplier as any).gstNumber}</p>
-                    </div>
-                  )}
                 </>
               )}
 
               {/* Request ID & Date (receive/view mode) */}
               {(canReceive || isReadOnly) && id && (
-                <div className="min-w-[100px]">
+                <div>
                   <Label className="text-[11px] text-muted-foreground">Request ID</Label>
                   <p className="text-sm font-semibold font-mono mt-0.5 h-8 flex items-center">#{id}</p>
                 </div>
               )}
               {(canReceive || isReadOnly) && (
-                <div className="min-w-[100px]">
+                <div>
                   <Label className="text-[11px] text-muted-foreground">Request Date</Label>
                   <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{orderDate ? new Date(orderDate).toLocaleDateString() : '-'}</p>
                 </div>
