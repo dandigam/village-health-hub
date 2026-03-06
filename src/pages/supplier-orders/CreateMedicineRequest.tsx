@@ -245,68 +245,69 @@ export default function CreateMedicineRequest() {
                   <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
                 )}
               </div>
-              {/* Request ID (receive mode) */}
-              {canReceive && (
+
+              {/* Supplier details - show in create/edit (not receive) */}
+              {selectedSupplier && !canReceive && (
+                <>
+                  <div className="min-w-[120px]">
+                    <Label className="text-[11px] text-muted-foreground">Contact</Label>
+                    <p className="text-sm mt-0.5 h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
+                  </div>
+                  <div className="min-w-[200px]">
+                    <Label className="text-[11px] text-muted-foreground">Address</Label>
+                    <p className="text-sm mt-0.5 h-8 flex items-center truncate max-w-[250px]">{selectedSupplier.address || '-'}</p>
+                  </div>
+                </>
+              )}
+
+              {/* Request ID & Date (receive/view mode) */}
+              {(canReceive || isReadOnly) && id && (
                 <div className="min-w-[100px]">
                   <Label className="text-[11px] text-muted-foreground">Request ID</Label>
                   <p className="text-sm font-semibold font-mono mt-0.5 h-8 flex items-center">#{id}</p>
                 </div>
               )}
-              {/* Request Date (receive mode) */}
-              {canReceive && (
+              {(canReceive || isReadOnly) && (
                 <div className="min-w-[100px]">
                   <Label className="text-[11px] text-muted-foreground">Request Date</Label>
                   <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{orderDate ? new Date(orderDate).toLocaleDateString() : '-'}</p>
                 </div>
               )}
-              {/* Invoice No */}
-              <div className="min-w-[120px]">
-                <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
-                {canReceive || canEditRequest ? (
-                  <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
-                ) : (
-                  <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceNumber || '-'}</p>
-                )}
-              </div>
-              {/* Amount */}
-              <div className="min-w-[100px]">
-                <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
-                {canReceive || canEditRequest ? (
-                  <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
-                ) : (
-                  <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceAmount || '-'}</p>
-                )}
-              </div>
-              {/* Date */}
-              <div className="min-w-[140px]">
-                <Label className="text-[11px] text-muted-foreground">Date *</Label>
-                {canReceive || canEditRequest ? (
-                  <Input type="date" className="h-8 text-sm mt-0.5" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
-                ) : (
-                  <p className="text-sm mt-0.5 h-8 flex items-center">{invoiceDate || orderDate ? new Date(invoiceDate || orderDate).toLocaleDateString() : '-'}</p>
-                )}
-              </div>
-              {/* Inline Attachments */}
-              <div className="flex items-center gap-1.5 ml-auto pb-0.5">
-                {invoiceFiles.map((f, idx) => (
-                  <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
-                    <FileImage className="w-3 h-3 text-primary shrink-0" />
-                    <span className="max-w-[80px] truncate">{f.name}</span>
-                    {(canReceive || canEditRequest) && (
-                      <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
-                        <X className="w-2.5 h-2.5" />
-                      </button>
-                    )}
+
+              {/* Invoice fields - ONLY in receive mode */}
+              {canReceive && (
+                <>
+                  <div className="min-w-[120px]">
+                    <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
+                    <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                   </div>
-                ))}
-                {(canReceive || canEditRequest) && (
-                  <label className="flex items-center gap-1 border border-dashed rounded px-2 py-1 text-[11px] text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
-                    <Upload className="w-3 h-3" />
-                    Attach
-                    <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
-                  </label>
-                )}
-              </div>
+                  <div className="min-w-[100px]">
+                    <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
+                    <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                  </div>
+                  <div className="min-w-[140px]">
+                    <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
+                    <Input type="date" className="h-8 text-sm mt-0.5" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                  </div>
+                  {/* Inline Attachments */}
+                  <div className="flex items-center gap-1.5 ml-auto pb-0.5">
+                    {invoiceFiles.map((f, idx) => (
+                      <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
+                        <FileImage className="w-3 h-3 text-primary shrink-0" />
+                        <span className="max-w-[80px] truncate">{f.name}</span>
+                        <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    ))}
+                    <label className="flex items-center gap-1 border border-dashed rounded px-2 py-1 text-[11px] text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
+                      <Upload className="w-3 h-3" />
+                      Attach
+                      <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
+                    </label>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
