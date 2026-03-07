@@ -29,6 +29,7 @@ type SortDir = 'asc' | 'desc';
 
 export default function Invoices() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const warehouseId = (user as any)?.context?.warehouseId ? Number((user as any).context.warehouseId) : undefined;
   const { data: invoices = [], isLoading, refetch } = useInvoices(warehouseId);
@@ -42,6 +43,16 @@ export default function Invoices() {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
+  const [banner, setBanner] = useState<BannerState | null>(null);
+
+  // Pick up banner from navigation state
+  useEffect(() => {
+    const navBanner = (location.state as any)?.banner;
+    if (navBanner) {
+      setBanner(navBanner);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => { refetch?.(); }, []);
 
