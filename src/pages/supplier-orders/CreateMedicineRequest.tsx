@@ -190,21 +190,15 @@ export default function CreateMedicineRequest() {
       } else {
         response = await api.post('/supplier-orders', payload);
       }
-      // purchaseOrder is a string like "PO-20260307-00003"
+      console.log('Supplier Order API response:', response); // <-- Debug log
       const orderNumber = response?.purchaseOrder || (response?.id ? `#${response.id}` : '');
-      
-      // Show success banner on this page for 2 seconds, then navigate
-      if (status === 'DRAFT') {
-        setSuccessBanner({
-          message: `Draft Saved Successfully!`,
-          details: `Order Request ${orderNumber} saved as draft with ${validItems.length} medicine${validItems.length > 1 ? 's' : ''}.`
-        });
-      } else {
-        setSuccessBanner({
-          message: `Order Request ${orderNumber} has been created successfully!`,
-          details: `${validItems.length} medicine${validItems.length > 1 ? 's' : ''} with ${totalReqQty} units total.`
-        });
-      }
+      // Show banner for 2 seconds, then navigate
+      setSuccessBanner({
+        message: status === 'DRAFT' ? 'Draft Saved Successfully!' : `Order Request ${orderNumber} has been created successfully!`,
+        details: status === 'DRAFT'
+          ? `Order Request ${orderNumber} saved as draft with ${validItems.length} medicine${validItems.length > 1 ? 's' : ''}.`
+          : `${validItems.length} medicine${validItems.length > 1 ? 's' : ''} with ${totalReqQty} units total.`
+      });
       setTimeout(() => {
         navigate('/supplier-orders');
       }, 2000);
