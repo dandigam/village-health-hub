@@ -180,7 +180,12 @@ export default function CreateMedicineRequest() {
       };
       if (isEditDraft && id) await api.put(`/supplier-orders/${id}`, payload);
       else await api.post('/supplier-orders', payload);
-      navigate('/supplier-orders', { state: { banner: { type: 'success', message: status === 'DRAFT' ? `Draft saved — ${validItems.length} medicines, ${totalReqQty} units total.` : `Request sent — ${validItems.length} medicines, ${totalReqQty} units total.` } } });
+      // Show success banner on this page briefly, then navigate
+      const msg = status === 'DRAFT'
+        ? `Draft saved — ${validItems.length} medicines, ${totalReqQty} units total.`
+        : `Request sent — ${validItems.length} medicines, ${totalReqQty} units total.`;
+      setBanner({ type: 'success', message: msg });
+      setTimeout(() => navigate('/supplier-orders'), 1500);
     } catch (error: any) {
       setBanner({ type: 'error', message: error.message || 'Failed to submit request.' });
     } finally { setSubmitting(false); }
