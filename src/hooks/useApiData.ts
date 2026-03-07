@@ -198,12 +198,12 @@ export function useSuppliers() {
   });
 }
 
-export function useSupplierList(warehouseId: number) {
+export function useSupplierList(warehouseId?: number) {
   return useQuery({
     queryKey: ['suppliers', warehouseId],
     queryFn: () =>
       fetchWithFallback<Supplier[]>(
-        `/suppliers/warehouse/${warehouseId}`,
+        warehouseId ? `/suppliers/warehouse/${warehouseId}` : '/suppliers',
         mockSuppliers
       ),
     staleTime: STALE_TIME,
