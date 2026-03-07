@@ -842,19 +842,76 @@ export default function CreateMedicineRequest() {
         </DialogContent>
       </Dialog>
 
-      {/* Image Preview Dialog */}
-      <Dialog open={!!showImagePreview} onOpenChange={() => setShowImagePreview(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] p-2">
-          <DialogHeader><DialogTitle className="text-sm">Invoice Preview</DialogTitle></DialogHeader>
-          {showImagePreview && (
-            <div className="flex items-center justify-center overflow-auto max-h-[70vh]">
-              {showImagePreview.endsWith('.pdf') ? (
-                <iframe src={showImagePreview} className="w-full h-[65vh] rounded border" />
-              ) : (
-                <img src={showImagePreview} alt="Invoice" className="max-w-full max-h-[65vh] object-contain rounded" />
-              )}
+      {/* Document Preview Dialog */}
+      <Dialog open={!!showDocumentPreview} onOpenChange={() => { setShowDocumentPreview(null); if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); } setPreviewBlobUrl(null); setPreviewType('unknown'); }}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] p-0 overflow-hidden rounded-xl [&>button:last-child]:hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/30">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <FileImage className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm font-semibold text-foreground truncate">{showDocumentPreview?.name}</span>
             </div>
-          )}
+            <div className="flex items-center gap-1.5 shrink-0 ml-3">
+              {showDocumentPreview && previewBlobUrl && (
+                <>
+                  <a
+                    href={previewBlobUrl}
+                    download={showDocumentPreview.name}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 border border-border rounded-md px-3 py-1.5 hover:bg-accent/50 transition-colors"
+                  >
+                    <Upload className="w-3 h-3 rotate-180" /> Download
+                  </a>
+                  <button
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 border border-border rounded-md px-3 py-1.5 hover:bg-accent/50 transition-colors"
+                    onClick={() => {
+                      if (previewType === 'pdf' && previewBlobUrl) {
+                        const win = window.open(previewBlobUrl);
+                        win?.addEventListener('load', () => win.print());
+                      } else if (previewBlobUrl) {
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        iframe.src = previewBlobUrl;
+                        document.body.appendChild(iframe);
+                        iframe.onload = () => { iframe.contentWindow?.print(); setTimeout(() => document.body.removeChild(iframe), 1000); };
+                      }
+                    }}
+                  >
+                    Print
+                  </button>
+                </>
+              )}
+              <button
+                className="inline-flex items-center justify-center rounded-md h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                onClick={() => { setShowDocumentPreview(null); if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); } setPreviewBlobUrl(null); setPreviewType('unknown'); }}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center justify-center bg-muted/10 min-h-[400px] max-h-[75vh] overflow-auto p-4">
+            {previewLoading ? (
+              <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                <div className="h-8 w-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <span className="text-sm">Loading preview...</span>
+              </div>
+            ) : previewBlobUrl && previewType === 'pdf' ? (
+              <iframe
+                src={previewBlobUrl}
+                className="w-full h-[70vh] rounded-lg border border-border shadow-sm"
+                title={showDocumentPreview?.name}
+              />
+            ) : previewBlobUrl && previewType === 'image' ? (
+              <img
+                src={previewBlobUrl}
+                alt={showDocumentPreview?.name}
+                className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-sm"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <AlertCircle className="h-8 w-8" />
+                <p className="text-sm">Preview not available. Please download the file.</p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </DashboardLayout>
