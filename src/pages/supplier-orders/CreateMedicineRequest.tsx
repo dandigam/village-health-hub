@@ -125,7 +125,7 @@ export default function CreateMedicineRequest() {
         })));
       }
     }).catch(err => {
-      toast({ title: 'Error', description: err.message || 'Failed to load order', variant: 'destructive' });
+      setBanner({ type: 'error', message: err.message || 'Failed to load order' });
     }).finally(() => setLoading(false));
   }, [id]);
 
