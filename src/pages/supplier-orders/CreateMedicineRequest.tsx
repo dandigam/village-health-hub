@@ -405,23 +405,116 @@ export default function CreateMedicineRequest() {
                   </div>
                 )}
                 {isReceive && (
-                  <div className="flex items-center gap-1.5 self-end pb-0.5">
-                    {invoiceFiles.map((f, idx) => (
-                      <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
-                        <FileImage className="w-3 h-3 text-primary shrink-0" />
-                        <span className="max-w-[60px] truncate">{f.name}</span>
-                        <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
-                          <X className="w-2.5 h-2.5" />
-                        </button>
-                      </div>
-                    ))}
-                    <label className="flex items-center gap-1 border border-dashed rounded px-2 py-1 text-[11px] text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
-                      <Upload className="w-3 h-3" />
+                  <div className="flex items-end pb-0.5 ml-auto">
+                    <label className={cn("flex items-center gap-1.5 border border-border rounded-lg px-3 py-2 text-sm text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all shadow-sm", !invoiceNumber && "opacity-50 pointer-events-none")}>
+                      <Upload className="w-4 h-4" />
                       Attach
-                      <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        multiple
+                        className="hidden"
+                        disabled={!invoiceNumber || uploading}
+                        onChange={async (e) => {
+                          const files = e.target.files;
+                          if (!files) return;
+                          setUploading(true);
+                          for (const file of Array.from(files)) {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('invoiceNo', invoiceNumber);
+                            try {
+                              const token = localStorage.getItem('token');
+                              const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+                                method: 'POST',
+                                headers: {
+                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                },
+                                body: formData,
+                              });
+                              if (!res.ok) throw new Error('Upload failed');
+                              const doc = await res.json();
+                              if (doc && doc.documentId && doc.documentName) {
+                                setUploadedDocuments(prev => {
+                                  if (prev.some(d => d.documentId === doc.documentId)) return prev;
+                                  return [...prev, { documentId: doc.documentId, name: doc.documentName }];
+                                });
+                              }
+                            } catch (err) {
+                              setBanner({ type: 'error', message: 'Failed to upload document.' });
+                            }
+                          }
+                          setUploading(false);
+                          e.target.value = '';
+                        }}
+                      />
+                      {uploading && <span className="ml-2 text-xs text-primary">Uploading...</span>}
                     </label>
                   </div>
                 )}
+              </div>
+              {/* Uploaded document tags row */}
+              {uploadedDocuments.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 px-5 pb-3 pt-1">
+                  {uploadedDocuments.map((doc) => (
+                    <div key={doc.documentId} className="flex items-center gap-1.5 border border-emerald-200 rounded-full bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
+                      <Badge variant="outline" className="bg-emerald-100 border-emerald-200 text-emerald-700 cursor-pointer rounded-full px-2"
+                        onClick={async () => {
+                          const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
+                          setShowDocumentPreview({ url, name: doc.name });
+                          setPreviewLoading(true);
+                          try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(url, {
+                              headers: token ? { Authorization: `Bearer ${token}` } : {},
+                            });
+                            const contentType = res.headers.get('content-type') || '';
+                            const blob = await res.blob();
+                            const blobUrl = URL.createObjectURL(blob);
+                            setPreviewBlobUrl(blobUrl);
+                            const nameLower = (doc.name || '').toLowerCase();
+                            if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) {
+                              setPreviewType('pdf');
+                            } else if (contentType.startsWith('image/') || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(nameLower)) {
+                              setPreviewType('image');
+                            } else {
+                              setPreviewType('image');
+                            }
+                          } catch {
+                            setPreviewType('unknown');
+                          } finally {
+                            setPreviewLoading(false);
+                          }
+                        }}
+                        title="View document"
+                      >{doc.name}</Badge>
+                      {isReceive && (
+                        <button
+                          className="text-muted-foreground hover:text-destructive focus:outline-none"
+                          onClick={async () => {
+                            try {
+                              const token = localStorage.getItem('token');
+                              await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                },
+                              });
+                              setUploadedDocuments(prev => prev.filter((d) => d.documentId !== doc.documentId));
+                            } catch (err) {
+                              setBanner({ type: 'error', message: 'Failed to delete document.' });
+                            }
+                          }}
+                          aria-label="Remove document"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
               </div>
             </div>
           )}
