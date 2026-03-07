@@ -515,9 +515,9 @@ export default function CreateMedicineRequest() {
                   ))}
                 </div>
               )}
-              </div>
             </div>
           )}
+
 
           {/* ═══════════════════════════════════════════════════════════════ */}
           {/* CREATE MODE — Side-by-side Supplier + Deliver To + Priority   */}
