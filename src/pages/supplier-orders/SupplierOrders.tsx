@@ -110,11 +110,11 @@ export default function SupplierOrders() {
     if (!cancelOrderId) return;
     try {
       await api.delete(`/supplier-orders/${cancelOrderId}`);
-      toast({ title: 'Order Cancelled', description: 'The order has been cancelled.' });
+      setBanner({ type: 'success', message: 'Order has been cancelled successfully.' });
       setCancelOrderId(null);
       refetchOrders?.();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to cancel order', variant: 'destructive' });
+      setBanner({ type: 'error', message: error.message || 'Failed to cancel order.' });
     }
   };
 
