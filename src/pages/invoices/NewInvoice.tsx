@@ -378,7 +378,15 @@ export default function NewInvoice() {
                           const blob = await res.blob();
                           const blobUrl = URL.createObjectURL(blob);
                           setPreviewBlobUrl(blobUrl);
-                          setPreviewType(contentType.includes('pdf') ? 'pdf' : contentType.startsWith('image/') ? 'image' : 'unknown');
+                          // Detect type from content-type header, fallback to file name extension
+                          const nameLower = (doc.name || '').toLowerCase();
+                          if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) {
+                            setPreviewType('pdf');
+                          } else if (contentType.startsWith('image/') || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(nameLower)) {
+                            setPreviewType('image');
+                          } else {
+                            setPreviewType('image'); // default to image for unknown binary
+                          }
                         } catch {
                           setPreviewType('unknown');
                         } finally {
@@ -582,41 +590,49 @@ export default function NewInvoice() {
       </Dialog>
 
       {/* Document Preview Dialog */}
-      <Dialog open={!!showDocumentPreview} onOpenChange={() => { setShowDocumentPreview(null); if (previewBlobUrl && !previewBlobUrl.startsWith('blob:')) {} else if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); } setPreviewBlobUrl(null); setPreviewType('unknown'); }}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] p-0 overflow-hidden rounded-xl">
+      <Dialog open={!!showDocumentPreview} onOpenChange={() => { setShowDocumentPreview(null); if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); } setPreviewBlobUrl(null); setPreviewType('unknown'); }}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] p-0 overflow-hidden rounded-xl [&>button:last-child]:hidden">
           <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/30">
-            <div className="flex items-center gap-2.5">
-              <FileImage className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-foreground truncate max-w-[300px]">{showDocumentPreview?.name}</span>
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <FileImage className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm font-semibold text-foreground truncate">{showDocumentPreview?.name}</span>
             </div>
-            {showDocumentPreview && previewBlobUrl && (
-              <div className="flex items-center gap-1.5">
-                <a
-                  href={previewBlobUrl}
-                  download={showDocumentPreview.name}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 border border-border rounded-md px-3 py-1.5 hover:bg-accent/50 transition-colors"
-                >
-                  <Upload className="w-3 h-3 rotate-180" /> Download
-                </a>
-                <button
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 border border-border rounded-md px-3 py-1.5 hover:bg-accent/50 transition-colors"
-                  onClick={() => {
-                    if (previewType === 'pdf' && previewBlobUrl) {
-                      const win = window.open(previewBlobUrl);
-                      win?.addEventListener('load', () => win.print());
-                    } else if (previewBlobUrl) {
-                      const iframe = document.createElement('iframe');
-                      iframe.style.display = 'none';
-                      iframe.src = previewBlobUrl;
-                      document.body.appendChild(iframe);
-                      iframe.onload = () => { iframe.contentWindow?.print(); setTimeout(() => document.body.removeChild(iframe), 1000); };
-                    }
-                  }}
-                >
-                  Print
-                </button>
-              </div>
-            )}
+            <div className="flex items-center gap-1.5 shrink-0 ml-3">
+              {showDocumentPreview && previewBlobUrl && (
+                <>
+                  <a
+                    href={previewBlobUrl}
+                    download={showDocumentPreview.name}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 border border-border rounded-md px-3 py-1.5 hover:bg-accent/50 transition-colors"
+                  >
+                    <Upload className="w-3 h-3 rotate-180" /> Download
+                  </a>
+                  <button
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 border border-border rounded-md px-3 py-1.5 hover:bg-accent/50 transition-colors"
+                    onClick={() => {
+                      if (previewType === 'pdf' && previewBlobUrl) {
+                        const win = window.open(previewBlobUrl);
+                        win?.addEventListener('load', () => win.print());
+                      } else if (previewBlobUrl) {
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        iframe.src = previewBlobUrl;
+                        document.body.appendChild(iframe);
+                        iframe.onload = () => { iframe.contentWindow?.print(); setTimeout(() => document.body.removeChild(iframe), 1000); };
+                      }
+                    }}
+                  >
+                    Print
+                  </button>
+                </>
+              )}
+              <button
+                className="inline-flex items-center justify-center rounded-md h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                onClick={() => { setShowDocumentPreview(null); if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); } setPreviewBlobUrl(null); setPreviewType('unknown'); }}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           <div className="flex items-center justify-center bg-muted/10 min-h-[400px] max-h-[75vh] overflow-auto p-4">
             {previewLoading ? (
