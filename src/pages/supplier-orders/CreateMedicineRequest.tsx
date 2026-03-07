@@ -191,14 +191,15 @@ export default function CreateMedicineRequest() {
     if (!id) return;
     const overItems = medicines.filter(m => m.receivedQty > m.requestedQty);
     if (overItems.length > 0) {
-      toast({ title: 'Invalid', description: `Received exceeds requested for: ${overItems.map(i => i.medicineName).join(', ')}`, variant: 'destructive' });
+      setBanner({ type: 'error', message: `Received exceeds requested for: ${overItems.map(i => i.medicineName).join(', ')}` });
       return;
     }
     const items = medicines.filter(m => m.receivedQty > 0).map(m => ({
       id: m.id, receivedQuantity: m.receivedQty, batchNo: m.batchNo, expDate: m.expDate, hsnNo: m.hsnNo,
     }));
-    if (!items.length) { toast({ title: 'Error', description: 'Enter received qty for at least one item.', variant: 'destructive' }); return; }
+    if (!items.length) { setBanner({ type: 'error', message: 'Enter received qty for at least one item.' }); return; }
     const isFullyReceived = medicines.every(m => m.receivedQty >= m.requestedQty);
+    setBanner(null);
     setSubmitting(true);
     try {
       await api.put(`/supplier-orders/${id}`, {
@@ -206,10 +207,9 @@ export default function CreateMedicineRequest() {
         invoiceNumber, invoiceAmount: parseFloat(invoiceAmount) || 0,
         invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : undefined,
       });
-      toast({ title: isFullyReceived ? 'Stock Received' : 'Partial Stock Received', description: `${items.length} items updated.` });
-      navigate('/supplier-orders');
+      navigate('/supplier-orders', { state: { banner: { type: 'success', message: isFullyReceived ? `Stock fully received — ${items.length} items updated.` : `Partial stock received — ${items.length} items updated.` } } });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to update', variant: 'destructive' });
+      setBanner({ type: 'error', message: error.message || 'Failed to update stock.' });
     } finally { setSubmitting(false); }
   };
 
