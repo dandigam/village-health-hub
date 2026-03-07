@@ -291,54 +291,7 @@ export default function NewInvoice() {
               <div className="min-w-[130px]">
                 <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Invoice No.</Label>
                 {canEdit ? (
-                  <div className="flex items-center gap-2">
-                    <Input className="h-10 text-sm mt-1.5 bg-white border-slate-300 shadow-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
-                    <label className={cn("flex items-center gap-1.5 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-600 cursor-pointer hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm", !invoiceNumber && "opacity-50 pointer-events-none")}
-                      style={{ marginTop: '0.5rem' }}>
-                      <Upload className="w-4 h-4" />
-                      Upload Document
-                      <input
-                        type="file"
-                        multiple
-                        className="hidden"
-                        disabled={!invoiceNumber || uploading}
-                        onChange={async (e) => {
-                          const files = e.target.files;
-                          if (!files) return;
-                          setUploading(true);
-                            for (const file of Array.from(files)) {
-                            const formData = new FormData();
-                            formData.append('file', file);
-                            formData.append('invoiceNo', invoiceNumber);
-                            try {
-                              const token = localStorage.getItem('token');
-                              const res = await fetch(`${API_BASE_URL}/documents/upload`, {
-                                method: 'POST',
-                                headers: {
-                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                                },
-                                body: formData,
-                              });
-                              if (!res.ok) throw new Error('Upload failed');
-                              const doc = await res.json();
-                              if (doc && doc.documentId && doc.documentName) {
-                                setUploadedDocuments(prev => {
-                                  // Prevent duplicate documentId
-                                  if (prev.some(d => d.documentId === doc.documentId)) return prev;
-                                  return [...prev, { documentId: doc.documentId, name: doc.documentName }];
-                                });
-                              }
-                            } catch (err) {
-                              setBanner({ type: 'error', message: 'Failed to upload document.' });
-                            }
-                          }
-                          setUploading(false);
-                          e.target.value = '';
-                        }}
-                      />
-                      {uploading && <span className="ml-2 text-xs text-blue-500">Uploading...</span>}
-                    </label>
-                  </div>
+                  <Input className="h-10 text-sm mt-1.5 bg-white border-slate-300 shadow-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                 ) : (
                   <p className="text-sm font-semibold text-slate-700 mt-1.5 h-10 flex items-center">{invoiceNumber || '—'}</p>
                 )}
