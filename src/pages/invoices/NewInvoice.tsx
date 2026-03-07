@@ -424,8 +424,6 @@ export default function NewInvoice() {
                 ))}
               </div>
             )}
-              </div>
-            </div>
           </div>
 
           {/* MEDICINE DETAILS */}
