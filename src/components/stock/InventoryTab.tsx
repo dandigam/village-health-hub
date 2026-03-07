@@ -84,6 +84,7 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
   const [sortKey, setSortKey] = useState<SortKey>('medicineName');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'critical' | 'warning' | 'ok'>('all');
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -113,6 +114,11 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
       items = items.filter(i => i.medicineName.toLowerCase().includes(q));
     }
 
+    // Filter by status
+    if (statusFilter !== 'all') {
+      items = items.filter(i => i.status === statusFilter);
+    }
+
     const statusOrder = { critical: 0, warning: 1, ok: 2 };
     items.sort((a, b) => {
       let cmp = 0;
@@ -123,7 +129,7 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
     });
 
     return items;
-  }, [stockItems, sortKey, sortDir, search]);
+  }, [stockItems, sortKey, sortDir, search, statusFilter]);
 
   const criticalCount = processed.filter(i => i.status === 'critical').length;
   const warningCount = processed.filter(i => i.status === 'warning').length;
@@ -412,71 +418,108 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Summary chips + search + export */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(var(--stock-critical-bg))] text-[hsl(var(--stock-critical))] text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-[hsl(var(--stock-critical))] animate-pulse" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'critical' ? 'all' : 'critical')}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border',
+              statusFilter === 'critical' 
+                ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-500/25' 
+                : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+            )}
+          >
+            <span className={cn('w-1.5 h-1.5 rounded-full', statusFilter === 'critical' ? 'bg-white animate-pulse' : 'bg-red-500 animate-pulse')} />
             {criticalCount} Critical
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(var(--stock-warning-bg))] text-[hsl(var(--stock-warning))] text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-[hsl(var(--stock-warning))]" />
+          </button>
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'warning' ? 'all' : 'warning')}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border',
+              statusFilter === 'warning' 
+                ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/25' 
+                : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+            )}
+          >
+            <span className={cn('w-1.5 h-1.5 rounded-full', statusFilter === 'warning' ? 'bg-white' : 'bg-amber-500')} />
             {warningCount} Warning
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(var(--stock-ok-bg))] text-[hsl(var(--stock-ok))] text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-[hsl(var(--stock-ok))]" />
-            {processed.length - criticalCount - warningCount} OK
-          </div>
+          </button>
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'ok' ? 'all' : 'ok')}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border',
+              statusFilter === 'ok' 
+                ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/25' 
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+            )}
+          >
+            <span className={cn('w-1.5 h-1.5 rounded-full', statusFilter === 'ok' ? 'bg-white' : 'bg-emerald-500')} />
+            {stockItems.filter(i => getStockStatus(i.quantity, i.minimumQty || MIN_STOCK_DEFAULT) === 'ok').length} OK
+          </button>
+          {statusFilter !== 'all' && (
+            <button
+              onClick={() => setStatusFilter('all')}
+              className="text-xs text-slate-500 hover:text-slate-700 underline ml-1"
+            >
+              Clear filter
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative w-full sm:w-56">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <div className="relative w-full sm:w-52">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               placeholder="Search medicines..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="pl-9 h-9"
+              className="pl-8 h-9 text-sm bg-white border-slate-300 rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
-          <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs" onClick={exportCSV}>
+          <Button variant="outline" size="sm" className="h-9 px-3 gap-1.5 text-xs font-medium border-slate-300 hover:bg-slate-50" onClick={exportCSV}>
             <Download className="h-3.5 w-3.5" /> CSV
           </Button>
-          <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs" onClick={exportPDF}>
+          <Button variant="outline" size="sm" className="h-9 px-3 gap-1.5 text-xs font-medium border-slate-300 hover:bg-slate-50" onClick={exportPDF}>
             <FileText className="h-3.5 w-3.5" /> PDF
           </Button>
         </div>
       </div>
 
       {/* Table */}
-      <div className="data-table">
+      <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
         <table className="w-full">
           <thead>
-            <tr>
-              <th className="cursor-pointer select-none" onClick={() => toggleSort('medicineName')}>
-                <div className="flex items-center gap-1.5">
+            <tr className="bg-gradient-to-r from-slate-50 to-blue-50/30 border-b border-slate-200">
+              <th className="cursor-pointer select-none px-5 py-3 text-left" onClick={() => toggleSort('medicineName')}>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Medicine Name <SortIcon col="medicineName" />
                 </div>
               </th>
-              <th className="cursor-pointer select-none" onClick={() => toggleSort('quantity')}>
-                <div className="flex items-center gap-1.5">
+              <th className="cursor-pointer select-none px-5 py-3 text-left" onClick={() => toggleSort('quantity')}>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Quantity / Stock Level <SortIcon col="quantity" />
                 </div>
               </th>
-              <th className="cursor-pointer select-none" onClick={() => toggleSort('status')}>
-                <div className="flex items-center gap-1.5">
+              <th className="cursor-pointer select-none px-5 py-3 text-left" onClick={() => toggleSort('status')}>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Status <SortIcon col="status" />
                 </div>
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-100">
             {processed.length === 0 ? (
               <tr>
-                <td colSpan={3} className="text-center py-12">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <Package className="w-8 h-8 opacity-40" />
-                    <p className="text-sm">No medicines found</p>
+                <td colSpan={3} className="text-center py-16">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center">
+                      <Package className="w-7 h-7 text-slate-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">No medicines found</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{statusFilter !== 'all' ? 'Try clearing the filter' : 'Add medicines to your inventory'}</p>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -484,42 +527,56 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
               processed.map((item) => {
                 const cfg = statusConfig[item.status];
                 const pct = getStockPct(item.quantity, item.minQty);
+                // Color-coded badge by medicine type
+                const typeColors: Record<string, string> = {
+                  'Tablet': 'bg-blue-50 text-blue-700',
+                  'Capsule': 'bg-amber-50 text-amber-700',
+                  'Syrup': 'bg-emerald-50 text-emerald-700',
+                  'Injection': 'bg-purple-50 text-purple-700',
+                  'Cream': 'bg-pink-50 text-pink-700',
+                  'Drops': 'bg-cyan-50 text-cyan-700',
+                  'Powder': 'bg-orange-50 text-orange-700',
+                  'Inhaler': 'bg-indigo-50 text-indigo-700',
+                  'Ointment': 'bg-teal-50 text-teal-700',
+                };
+                const typeClass = item.medicineType ? (typeColors[item.medicineType] || 'bg-slate-100 text-slate-600') : '';
                 return (
                   <tr key={item.id} className={cn(
-                    item.status === 'critical' && 'bg-[hsl(var(--stock-critical-bg)/0.3)]',
-                    item.status === 'warning' && 'bg-[hsl(var(--stock-warning-bg)/0.3)]',
+                    'hover:bg-blue-50/30 transition-colors',
+                    item.status === 'critical' && 'bg-red-50/40 border-l-2 border-l-red-400',
+                    item.status === 'warning' && 'bg-amber-50/30',
                   )}>
-                    <td>
-                      <div>
-                        <span className="font-medium">{item.medicineName}</span>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm text-slate-800">{item.medicineName}</span>
                         {item.medicineType && (
-                          <span className="text-[10px] text-muted-foreground ml-2">{item.medicineType}</span>
+                          <span className={cn('text-[10px] font-medium px-2 py-0.5 rounded-full', typeClass)}>{item.medicineType}</span>
                         )}
                       </div>
                     </td>
-                    <td>
+                    <td className="px-5 py-3">
                       <div className="flex items-center gap-3 min-w-[200px]">
                         <span className={cn(
-                          'font-semibold tabular-nums text-sm min-w-[40px]',
-                          item.status === 'critical' && 'text-[hsl(var(--stock-critical))]',
-                          item.status === 'warning' && 'text-[hsl(var(--stock-warning))]',
-                          item.status === 'ok' && 'text-foreground',
+                          'font-bold tabular-nums text-sm min-w-[50px] px-2 py-0.5 rounded-md text-center',
+                          item.status === 'critical' && 'text-red-700 bg-red-100',
+                          item.status === 'warning' && 'text-amber-700 bg-amber-100',
+                          item.status === 'ok' && 'text-slate-700 bg-slate-100',
                         )}>
                           {item.quantity}
                         </span>
                         <div className="flex-1 flex items-center gap-2">
                           <Progress
                             value={pct}
-                            className={cn('h-2 flex-1', cfg.progressTrack, cfg.progressBar)}
+                            className={cn('h-2.5 flex-1 rounded-full', cfg.progressTrack, cfg.progressBar)}
                           />
-                          <span className="text-[10px] text-muted-foreground tabular-nums w-8 text-right">{pct}%</span>
+                          <span className="text-[11px] text-slate-500 font-medium tabular-nums w-10 text-right">{pct}%</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                        <span className="text-[11px] text-slate-400 whitespace-nowrap font-medium">
                           min: {item.minQty}
                         </span>
                       </div>
                     </td>
-                    <td>
+                    <td className="px-5 py-3">
                       <Badge className={cn('gap-1.5 border', cfg.className)}>
                         <span className={cn(
                           'w-1.5 h-1.5 rounded-full',
