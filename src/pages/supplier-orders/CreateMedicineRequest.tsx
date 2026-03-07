@@ -86,11 +86,16 @@ export default function CreateMedicineRequest() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [invoiceDateObj, setInvoiceDateObj] = useState<Date | undefined>(undefined);
+  // Document upload state (API-based, matching NewInvoice pattern)
+  const [uploadedDocuments, setUploadedDocuments] = useState<Array<{ documentId: string; name: string }>>([]);
+  const [uploading, setUploading] = useState(false);
+  const [showDocumentPreview, setShowDocumentPreview] = useState<{ url: string; name: string } | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'unknown'>('unknown');
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  // Legacy state kept for backward compatibility
   const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
-  const [paymentMode, setPaymentMode] = useState('');
-  const [createdAt, setCreatedAt] = useState('');
-  const [updatedAt, setUpdatedAt] = useState('');
-  const [warehouseName, setWarehouseName] = useState('');
   const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
