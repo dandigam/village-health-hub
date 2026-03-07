@@ -114,24 +114,7 @@ export default function CreateMedicineRequest() {
     return [selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ') + (selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : '');
   }, [selectedSupplier]);
 
-  // File handling
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    Array.from(files).forEach(file => {
-      const url = URL.createObjectURL(file);
-      setInvoiceFiles(prev => [...prev, { name: file.name, url, file }]);
-    });
-    e.target.value = '';
-  };
-  const removeFile = (idx: number) => {
-    setInvoiceFiles(prev => {
-      const next = [...prev];
-      if (next[idx].url.startsWith('blob:')) URL.revokeObjectURL(next[idx].url);
-      next.splice(idx, 1);
-      return next;
-    });
-  };
+  // File handling removed — using API-based document upload now
 
   // Load existing order
   useEffect(() => {
