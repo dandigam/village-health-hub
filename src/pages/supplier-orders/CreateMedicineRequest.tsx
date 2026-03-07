@@ -268,6 +268,7 @@ export default function CreateMedicineRequest() {
         items, status: isFullyReceived ? 'RECEIVED' : 'PARTIAL',
         invoiceNumber, invoiceAmount: parseFloat(invoiceAmount) || 0,
         invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : undefined,
+        documents: uploadedDocuments,
       });
       const msg = isFullyReceived ? `Stock fully received — ${items.length} items updated.` : `Partial stock received — ${items.length} items updated.`;
       setBanner({ type: 'success', message: msg });
