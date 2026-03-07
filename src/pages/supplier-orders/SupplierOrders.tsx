@@ -31,6 +31,7 @@ type SortDir = 'asc' | 'desc';
 
 export default function SupplierOrders() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser } = useAuth();
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: supplierOrders = [], refetch: refetchOrders } = useSupplierOrders(warehouseId);
@@ -47,6 +48,17 @@ export default function SupplierOrders() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [cancelOrderId, setCancelOrderId] = useState<number | string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [banner, setBanner] = useState<BannerState | null>(null);
+
+  // Pick up banner from navigation state (e.g. after creating/receiving)
+  useEffect(() => {
+    const navBanner = (location.state as any)?.banner;
+    if (navBanner) {
+      setBanner(navBanner);
+      // Clear location state so banner doesn't reappear on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => { refetchOrders?.(); }, []);
 
