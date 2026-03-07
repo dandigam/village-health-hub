@@ -224,6 +224,18 @@ export default function NewInvoice() {
         )}
       </div>
 
+      {/* Banner */}
+      {banner && (
+        <div className={cn(
+          "flex items-center gap-2.5 px-4 py-2.5 rounded-lg border mb-3",
+          banner.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'
+        )}>
+          {banner.type === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
+          <p className="text-sm font-medium flex-1">{banner.message}</p>
+          <button onClick={() => setBanner(null)} className="hover:opacity-70"><X className="h-3.5 w-3.5" /></button>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
