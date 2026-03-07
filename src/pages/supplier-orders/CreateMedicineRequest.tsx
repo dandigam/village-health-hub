@@ -98,7 +98,7 @@ export default function CreateMedicineRequest() {
   const [createdAt, setCreatedAt] = useState('');
   const [updatedAt, setUpdatedAt] = useState('');
   const [warehouseName, setWarehouseName] = useState('');
-  const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
+  const [_showImagePreview, _setShowImagePreview] = useState<string | null>(null);
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
 
