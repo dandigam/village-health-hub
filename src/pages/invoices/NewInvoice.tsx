@@ -378,7 +378,15 @@ export default function NewInvoice() {
                           const blob = await res.blob();
                           const blobUrl = URL.createObjectURL(blob);
                           setPreviewBlobUrl(blobUrl);
-                          setPreviewType(contentType.includes('pdf') ? 'pdf' : contentType.startsWith('image/') ? 'image' : 'unknown');
+                          // Detect type from content-type header, fallback to file name extension
+                          const nameLower = (doc.name || '').toLowerCase();
+                          if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) {
+                            setPreviewType('pdf');
+                          } else if (contentType.startsWith('image/') || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(nameLower)) {
+                            setPreviewType('image');
+                          } else {
+                            setPreviewType('image'); // default to image for unknown binary
+                          }
                         } catch {
                           setPreviewType('unknown');
                         } finally {
