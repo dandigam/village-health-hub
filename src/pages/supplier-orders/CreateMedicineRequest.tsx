@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -13,9 +13,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
-import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
+
+type BannerType = 'success' | 'error' | 'info';
+interface BannerState { type: BannerType; message: string }
+const bannerStyles: Record<BannerType, { bg: string; border: string; text: string; icon: typeof CheckCircle2 }> = {
+  success: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', icon: CheckCircle2 },
+  error: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', icon: AlertCircle },
+  info: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', icon: Info },
+};
 
 interface MedicineRow {
   id?: number;
@@ -66,7 +73,7 @@ export default function CreateMedicineRequest() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [medSearch, setMedSearch] = useState('');
-  const [successBanner, setSuccessBanner] = useState<{ message: string; details: string } | null>(null);
+  const [banner, setBanner] = useState<BannerState | null>(null);
 
   // Receive mode fields
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -132,7 +139,7 @@ export default function CreateMedicineRequest() {
         setWarehouseName(order.warehouseName || '');
       }
     }).catch(err => {
-      toast({ title: 'Error', description: err.message || 'Failed to load order', variant: 'destructive' });
+      setBanner({ type: 'error', message: err.message || 'Failed to load order' });
     }).finally(() => setLoading(false));
   }, [id]);
 
@@ -177,35 +184,20 @@ export default function CreateMedicineRequest() {
   // Submit request (create / edit draft)
   const handleSubmit = async (status: 'PENDING' | 'DRAFT') => {
     const validItems = medicines.filter(m => m.requestedQty > 0);
-    if (validItems.length === 0) { toast({ title: 'Error', description: 'Enter quantity for at least one medicine.', variant: 'destructive' }); return; }
+    if (validItems.length === 0) { setBanner({ type: 'error', message: 'Enter quantity for at least one medicine.' }); return; }
+    setBanner(null);
     setSubmitting(true);
     try {
       const payload = {
         warehouseId, supplierId: Number(supplierId), status,
         items: validItems.map(i => ({ medicineId: Number(i.medicineId), requestedQuantity: i.requestedQty }))
       };
-      let response;
-      if (isEditDraft && id) {
-        response = await api.put(`/supplier-orders/${id}`, payload);
-      } else {
-        response = await api.post('/supplier-orders', payload);
-      }
-      console.log('Supplier Order API response:', response); // <-- Debug log
-      const orderNumber = response?.purchaseOrder || (response?.id ? `#${response.id}` : '');
-      // Show banner for 2 seconds, then navigate
-      setSuccessBanner({
-        message: status === 'DRAFT' ? 'Draft Saved Successfully!' : `Order Request ${orderNumber} has been created successfully!`,
-        details: status === 'DRAFT'
-          ? `Order Request ${orderNumber} saved as draft with ${validItems.length} medicine${validItems.length > 1 ? 's' : ''}.`
-          : `${validItems.length} medicine${validItems.length > 1 ? 's' : ''} with ${totalReqQty} units total.`
-      });
-      setTimeout(() => {
-        navigate('/supplier-orders');
-      }, 2000);
+      if (isEditDraft && id) await api.put(`/supplier-orders/${id}`, payload);
+      else await api.post('/supplier-orders', payload);
+      navigate('/supplier-orders', { state: { banner: { type: 'success', message: status === 'DRAFT' ? `Draft saved — ${validItems.length} medicines, ${totalReqQty} units total.` : `Request sent — ${validItems.length} medicines, ${totalReqQty} units total.` } } });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to submit', variant: 'destructive' });
-      setSubmitting(false);
-    }
+      setBanner({ type: 'error', message: error.message || 'Failed to submit request.' });
+    } finally { setSubmitting(false); }
   };
 
   // Receive stock
@@ -213,14 +205,15 @@ export default function CreateMedicineRequest() {
     if (!id) return;
     const overItems = medicines.filter(m => m.receivedQty > m.requestedQty);
     if (overItems.length > 0) {
-      toast({ title: 'Invalid', description: `Received exceeds requested for: ${overItems.map(i => i.medicineName).join(', ')}`, variant: 'destructive' });
+      setBanner({ type: 'error', message: `Received exceeds requested for: ${overItems.map(i => i.medicineName).join(', ')}` });
       return;
     }
     const items = medicines.filter(m => m.receivedQty > 0).map(m => ({
       id: m.id, receivedQuantity: m.receivedQty, batchNo: m.batchNo, expDate: m.expDate, hsnNo: m.hsnNo,
     }));
-    if (!items.length) { toast({ title: 'Error', description: 'Enter received qty for at least one item.', variant: 'destructive' }); return; }
+    if (!items.length) { setBanner({ type: 'error', message: 'Enter received qty for at least one item.' }); return; }
     const isFullyReceived = medicines.every(m => m.receivedQty >= m.requestedQty);
+    setBanner(null);
     setSubmitting(true);
     try {
       await api.put(`/supplier-orders/${id}`, {
@@ -228,44 +221,16 @@ export default function CreateMedicineRequest() {
         invoiceNumber, invoiceAmount: parseFloat(invoiceAmount) || 0,
         invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : undefined,
       });
-      const totalReceived = items.reduce((sum, item) => sum + item.receivedQuantity, 0);
-      if (isFullyReceived) {
-        toast({ 
-          title: '✅ Stock Received Successfully!', 
-          description: `Order Request #${id} fully received - ${items.length} medicine${items.length > 1 ? 's' : ''} (${totalReceived} units) added to inventory.`,
-        });
-      } else {
-        toast({ 
-          title: '📦 Partial Stock Received', 
-          description: `Order Request #${id} partially received - ${items.length} medicine${items.length > 1 ? 's' : ''} (${totalReceived} units) added to inventory.`,
-        });
-      }
-      navigate('/supplier-orders');
+      navigate('/supplier-orders', { state: { banner: { type: 'success', message: isFullyReceived ? `Stock fully received — ${items.length} items updated.` : `Partial stock received — ${items.length} items updated.` } } });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to update', variant: 'destructive' });
+      setBanner({ type: 'error', message: error.message || 'Failed to update stock.' });
     } finally { setSubmitting(false); }
   };
 
   // Page title
   const pageTitle = isCreate ? 'Medicine Request' : (isReceive ? 'View Request' : (isEditDraft ? 'Edit Request' : 'View Request'));
 
-  return (
-    <DashboardLayout>
-      {/* Success Overlay - Full Page */}
-      {successBanner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center animate-in zoom-in-95 duration-300">
-            <div className="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="h-8 w-8 text-emerald-600" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{successBanner.message}</h2>
-            {successBanner.details && (
-              <p className="text-sm text-gray-600 mb-4">{successBanner.details}</p>
-            )}
-            <div className="flex items-center justify-center gap-2 text-sm text-emerald-600">
-              <div className="h-4 w-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
               <span>Redirecting to orders list...</span>
-            </div>
           </div>
         </div>
       )}
@@ -282,6 +247,19 @@ export default function CreateMedicineRequest() {
           </Badge>
         )}
       </div>
+
+      {/* Banner */}
+      {banner && (() => {
+        const s = bannerStyles[banner.type];
+        const Icon = s.icon;
+        return (
+          <div className={cn("flex items-center gap-2.5 px-4 py-2.5 rounded-lg border mb-3", s.bg, s.border, s.text)}>
+            <Icon className="h-4 w-4 shrink-0" />
+            <p className="text-sm font-medium flex-1">{banner.message}</p>
+            <button onClick={() => setBanner(null)} className="hover:opacity-70"><X className="h-3.5 w-3.5" /></button>
+          </div>
+        );
+      })()}
 
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>

@@ -1,6 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
+<<<<<<< HEAD
 import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Pencil, ChevronUp, ChevronDown, FileText, Pill, Filter } from 'lucide-react';
+=======
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Plus, Eye, Pencil, RotateCcw, ChevronUp, ChevronDown, FileText, Pill, CheckCircle2, AlertCircle, X } from 'lucide-react';
+>>>>>>> f0420582770540a8933301561b266b4c81738293
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +16,12 @@ import { useInvoices, Invoice, InvoiceItem } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+<<<<<<< HEAD
+=======
+
+type BannerType = 'success' | 'error';
+interface BannerState { type: BannerType; message: string }
+>>>>>>> f0420582770540a8933301561b266b4c81738293
 
 const paymentConfig: Record<string, { label: string; color: string; bg: string }> = {
   cash: { label: 'Cash', color: 'text-emerald-600', bg: 'bg-emerald-50 border border-emerald-200/50' },
@@ -25,6 +36,7 @@ type SortDir = 'asc' | 'desc';
 
 export default function Invoices() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const warehouseId = (user as any)?.context?.warehouseId ? Number((user as any).context.warehouseId) : undefined;
   const { data: invoices = [], isLoading, refetch } = useInvoices(warehouseId);
@@ -36,6 +48,16 @@ export default function Invoices() {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
+  const [banner, setBanner] = useState<BannerState | null>(null);
+
+  // Pick up banner from navigation state
+  useEffect(() => {
+    const navBanner = (location.state as any)?.banner;
+    if (navBanner) {
+      setBanner(navBanner);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => { refetch?.(); }, []);
 
@@ -79,6 +101,18 @@ export default function Invoices() {
 
   return (
     <DashboardLayout>
+      {/* Banner */}
+      {banner && (
+        <div className={cn(
+          "flex items-center gap-2.5 px-4 py-2.5 rounded-lg border mb-3",
+          banner.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'
+        )}>
+          {banner.type === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
+          <p className="text-sm font-medium flex-1">{banner.message}</p>
+          <button onClick={() => setBanner(null)} className="hover:opacity-70"><X className="h-3.5 w-3.5" /></button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-4 mb-4">
         <h1 className="text-lg font-semibold text-foreground">Stock Entries</h1>
