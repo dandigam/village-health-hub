@@ -432,9 +432,9 @@ export default function CreateMedicineRequest() {
           {/* CREATE MODE — Side-by-side Supplier + Deliver To + Priority   */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {isCreate && (
-            <div className="px-5 py-4 border-b bg-muted/20">
-              {/* Supplier + Priority + Details all in one section */}
-              <div className="flex items-start gap-4 flex-wrap mb-0">
+            <div className="px-5 py-4 border-b bg-muted/20 space-y-3">
+              {/* Row 1: Supplier + Priority */}
+              <div className="flex items-start gap-4 flex-wrap">
                 <div className="min-w-[220px]">
                   <Label className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Supplier *</Label>
                   <Select value={supplierId} onValueChange={setSupplierId}>
@@ -460,32 +460,28 @@ export default function CreateMedicineRequest() {
                 </div>
               </div>
 
-              {/* Side-by-side: Supplier Details | Deliver To — same card, styled divider */}
+              {/* Row 2: Inline side-by-side addresses (appears after supplier is selected) */}
               {selectedSupplier && (
-                <div className="flex border rounded-lg bg-background mt-4 overflow-hidden">
-                  {/* Supplier Details */}
-                  <div className="flex-1 p-4">
-                    <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2">Supplier Details</p>
+                <div className="flex rounded-lg overflow-hidden">
+                  {/* Supplier Address */}
+                  <div className="flex-1 bg-accent/30 rounded-l-lg px-4 py-3">
+                    <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-1.5">Supplier Address</p>
                     <p className="text-sm font-semibold text-foreground">{selectedSupplier.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
-                      📞 {selectedSupplier.contact || '-'}
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">📞 {selectedSupplier.contact || '-'}</p>
                     {selectedSupplier.email && (
                       <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">✉️ {selectedSupplier.email}</p>
                     )}
-                    <p className="text-xs mt-1.5 leading-relaxed text-primary/70 italic">
-                      {supplierAddress || '-'}
-                    </p>
+                    <p className="text-xs mt-1.5 leading-relaxed text-primary/70 italic">{supplierAddress || '-'}</p>
                   </div>
 
-                  {/* Styled vertical divider — doesn't touch top/bottom */}
-                  <div className="flex items-center py-4">
-                    <div className="w-px h-[calc(100%-32px)] bg-border/60" />
+                  {/* Vertical divider with inset spacing */}
+                  <div className="flex items-center px-0 self-stretch py-3">
+                    <div className="w-px h-full bg-border/50" />
                   </div>
 
-                  {/* Deliver To */}
-                  <div className="flex-1 p-4">
-                    <div className="flex items-center gap-1.5 mb-2">
+                  {/* Deliver To Address */}
+                  <div className="flex-1 bg-accent/30 rounded-r-lg px-4 py-3">
+                    <div className="flex items-center gap-1.5 mb-1.5">
                       <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
                       {warehouseDetail && (
                         <Tooltip>
@@ -505,15 +501,11 @@ export default function CreateMedicineRequest() {
                     {warehouseDetail ? (
                       <>
                         <p className="text-sm font-semibold text-foreground">{warehouseDetail.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
-                          📞 {warehouseDetail.phoneNumber || '-'}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">📞 {warehouseDetail.phoneNumber || '-'}</p>
                         {warehouseDetail.email && (
                           <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">✉️ {warehouseDetail.email}</p>
                         )}
-                        <p className="text-xs mt-1.5 leading-relaxed text-primary/70 italic">
-                          {warehouseAddress || '-'}
-                        </p>
+                        <p className="text-xs mt-1.5 leading-relaxed text-primary/70 italic">{warehouseAddress || '-'}</p>
                       </>
                     ) : (
                       <p className="text-xs text-muted-foreground italic">No warehouse assigned</p>
