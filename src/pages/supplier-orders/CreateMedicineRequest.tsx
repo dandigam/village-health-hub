@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Switch } from '@/components/ui/switch';
 import { useSupplierList, useWarehouseInventory, useWarehouseDetail, useMedicines } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
-import { api } from '@/services/api';
+import { api, API_BASE_URL } from '@/services/api';
 
 type BannerType = 'success' | 'error' | 'info';
 interface BannerState { type: BannerType; message: string }
@@ -86,12 +86,19 @@ export default function CreateMedicineRequest() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [invoiceDateObj, setInvoiceDateObj] = useState<Date | undefined>(undefined);
-  const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
+  // Document upload state (API-based, matching NewInvoice pattern)
+  const [uploadedDocuments, setUploadedDocuments] = useState<Array<{ documentId: string; name: string }>>([]);
+  const [uploading, setUploading] = useState(false);
+  const [showDocumentPreview, setShowDocumentPreview] = useState<{ url: string; name: string } | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'unknown'>('unknown');
+  const [previewLoading, setPreviewLoading] = useState(false);
+
   const [paymentMode, setPaymentMode] = useState('');
   const [createdAt, setCreatedAt] = useState('');
   const [updatedAt, setUpdatedAt] = useState('');
   const [warehouseName, setWarehouseName] = useState('');
-  const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
+  const [_showImagePreview, _setShowImagePreview] = useState<string | null>(null);
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
 
@@ -107,24 +114,7 @@ export default function CreateMedicineRequest() {
     return [selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ') + (selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : '');
   }, [selectedSupplier]);
 
-  // File handling
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    Array.from(files).forEach(file => {
-      const url = URL.createObjectURL(file);
-      setInvoiceFiles(prev => [...prev, { name: file.name, url, file }]);
-    });
-    e.target.value = '';
-  };
-  const removeFile = (idx: number) => {
-    setInvoiceFiles(prev => {
-      const next = [...prev];
-      if (next[idx].url.startsWith('blob:')) URL.revokeObjectURL(next[idx].url);
-      next.splice(idx, 1);
-      return next;
-    });
-  };
+  // File handling removed — using API-based document upload now
 
   // Load existing order
   useEffect(() => {
@@ -156,6 +146,13 @@ export default function CreateMedicineRequest() {
         setCreatedAt(order.createdAt || '');
         setUpdatedAt(order.updatedAt || '');
         setWarehouseName(order.warehouseName || '');
+        // Load documents from response
+        if (Array.isArray(order.documents)) {
+          setUploadedDocuments(order.documents.map((doc: any) => ({
+            documentId: doc.documentId,
+            name: doc.documentName || doc.name,
+          })));
+        }
       }
     }).catch(err => {
       setBanner({ type: 'error', message: err.message || 'Failed to load order' });
@@ -271,6 +268,7 @@ export default function CreateMedicineRequest() {
         items, status: isFullyReceived ? 'RECEIVED' : 'PARTIAL',
         invoiceNumber, invoiceAmount: parseFloat(invoiceAmount) || 0,
         invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : undefined,
+        documents: uploadedDocuments,
       });
       const msg = isFullyReceived ? `Stock fully received — ${items.length} items updated.` : `Partial stock received — ${items.length} items updated.`;
       setBanner({ type: 'success', message: msg });
@@ -408,26 +406,119 @@ export default function CreateMedicineRequest() {
                   </div>
                 )}
                 {isReceive && (
-                  <div className="flex items-center gap-1.5 self-end pb-0.5">
-                    {invoiceFiles.map((f, idx) => (
-                      <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
-                        <FileImage className="w-3 h-3 text-primary shrink-0" />
-                        <span className="max-w-[60px] truncate">{f.name}</span>
-                        <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
-                          <X className="w-2.5 h-2.5" />
-                        </button>
-                      </div>
-                    ))}
-                    <label className="flex items-center gap-1 border border-dashed rounded px-2 py-1 text-[11px] text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
-                      <Upload className="w-3 h-3" />
+                  <div className="flex items-end pb-0.5 ml-auto">
+                    <label className={cn("flex items-center gap-1.5 border border-border rounded-lg px-3 py-2 text-sm text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all shadow-sm", !invoiceNumber && "opacity-50 pointer-events-none")}>
+                      <Upload className="w-4 h-4" />
                       Attach
-                      <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        multiple
+                        className="hidden"
+                        disabled={!invoiceNumber || uploading}
+                        onChange={async (e) => {
+                          const files = e.target.files;
+                          if (!files) return;
+                          setUploading(true);
+                          for (const file of Array.from(files)) {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('invoiceNo', invoiceNumber);
+                            try {
+                              const token = localStorage.getItem('token');
+                              const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+                                method: 'POST',
+                                headers: {
+                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                },
+                                body: formData,
+                              });
+                              if (!res.ok) throw new Error('Upload failed');
+                              const doc = await res.json();
+                              if (doc && doc.documentId && doc.documentName) {
+                                setUploadedDocuments(prev => {
+                                  if (prev.some(d => d.documentId === doc.documentId)) return prev;
+                                  return [...prev, { documentId: doc.documentId, name: doc.documentName }];
+                                });
+                              }
+                            } catch (err) {
+                              setBanner({ type: 'error', message: 'Failed to upload document.' });
+                            }
+                          }
+                          setUploading(false);
+                          e.target.value = '';
+                        }}
+                      />
+                      {uploading && <span className="ml-2 text-xs text-primary">Uploading...</span>}
                     </label>
                   </div>
                 )}
               </div>
+              {/* Uploaded document tags row */}
+              {uploadedDocuments.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 px-5 pb-3 pt-1">
+                  {uploadedDocuments.map((doc) => (
+                    <div key={doc.documentId} className="flex items-center gap-1.5 border border-emerald-200 rounded-full bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
+                      <Badge variant="outline" className="bg-emerald-100 border-emerald-200 text-emerald-700 cursor-pointer rounded-full px-2"
+                        onClick={async () => {
+                          const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
+                          setShowDocumentPreview({ url, name: doc.name });
+                          setPreviewLoading(true);
+                          try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(url, {
+                              headers: token ? { Authorization: `Bearer ${token}` } : {},
+                            });
+                            const contentType = res.headers.get('content-type') || '';
+                            const blob = await res.blob();
+                            const blobUrl = URL.createObjectURL(blob);
+                            setPreviewBlobUrl(blobUrl);
+                            const nameLower = (doc.name || '').toLowerCase();
+                            if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) {
+                              setPreviewType('pdf');
+                            } else if (contentType.startsWith('image/') || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(nameLower)) {
+                              setPreviewType('image');
+                            } else {
+                              setPreviewType('image');
+                            }
+                          } catch {
+                            setPreviewType('unknown');
+                          } finally {
+                            setPreviewLoading(false);
+                          }
+                        }}
+                        title="View document"
+                      >{doc.name}</Badge>
+                      {isReceive && (
+                        <button
+                          className="text-muted-foreground hover:text-destructive focus:outline-none"
+                          onClick={async () => {
+                            try {
+                              const token = localStorage.getItem('token');
+                              await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                },
+                              });
+                              setUploadedDocuments(prev => prev.filter((d) => d.documentId !== doc.documentId));
+                            } catch (err) {
+                              setBanner({ type: 'error', message: 'Failed to delete document.' });
+                            }
+                          }}
+                          aria-label="Remove document"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
+
 
           {/* ═══════════════════════════════════════════════════════════════ */}
           {/* CREATE MODE — Side-by-side Supplier + Deliver To + Priority   */}
@@ -752,19 +843,76 @@ export default function CreateMedicineRequest() {
         </DialogContent>
       </Dialog>
 
-      {/* Image Preview Dialog */}
-      <Dialog open={!!showImagePreview} onOpenChange={() => setShowImagePreview(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] p-2">
-          <DialogHeader><DialogTitle className="text-sm">Invoice Preview</DialogTitle></DialogHeader>
-          {showImagePreview && (
-            <div className="flex items-center justify-center overflow-auto max-h-[70vh]">
-              {showImagePreview.endsWith('.pdf') ? (
-                <iframe src={showImagePreview} className="w-full h-[65vh] rounded border" />
-              ) : (
-                <img src={showImagePreview} alt="Invoice" className="max-w-full max-h-[65vh] object-contain rounded" />
-              )}
+      {/* Document Preview Dialog */}
+      <Dialog open={!!showDocumentPreview} onOpenChange={() => { setShowDocumentPreview(null); if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); } setPreviewBlobUrl(null); setPreviewType('unknown'); }}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] p-0 overflow-hidden rounded-xl [&>button:last-child]:hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b bg-muted/30">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <FileImage className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm font-semibold text-foreground truncate">{showDocumentPreview?.name}</span>
             </div>
-          )}
+            <div className="flex items-center gap-1.5 shrink-0 ml-3">
+              {showDocumentPreview && previewBlobUrl && (
+                <>
+                  <a
+                    href={previewBlobUrl}
+                    download={showDocumentPreview.name}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 border border-border rounded-md px-3 py-1.5 hover:bg-accent/50 transition-colors"
+                  >
+                    <Upload className="w-3 h-3 rotate-180" /> Download
+                  </a>
+                  <button
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 border border-border rounded-md px-3 py-1.5 hover:bg-accent/50 transition-colors"
+                    onClick={() => {
+                      if (previewType === 'pdf' && previewBlobUrl) {
+                        const win = window.open(previewBlobUrl);
+                        win?.addEventListener('load', () => win.print());
+                      } else if (previewBlobUrl) {
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        iframe.src = previewBlobUrl;
+                        document.body.appendChild(iframe);
+                        iframe.onload = () => { iframe.contentWindow?.print(); setTimeout(() => document.body.removeChild(iframe), 1000); };
+                      }
+                    }}
+                  >
+                    Print
+                  </button>
+                </>
+              )}
+              <button
+                className="inline-flex items-center justify-center rounded-md h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                onClick={() => { setShowDocumentPreview(null); if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); } setPreviewBlobUrl(null); setPreviewType('unknown'); }}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center justify-center bg-muted/10 min-h-[400px] max-h-[75vh] overflow-auto p-4">
+            {previewLoading ? (
+              <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                <div className="h-8 w-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <span className="text-sm">Loading preview...</span>
+              </div>
+            ) : previewBlobUrl && previewType === 'pdf' ? (
+              <iframe
+                src={previewBlobUrl}
+                className="w-full h-[70vh] rounded-lg border border-border shadow-sm"
+                title={showDocumentPreview?.name}
+              />
+            ) : previewBlobUrl && previewType === 'image' ? (
+              <img
+                src={previewBlobUrl}
+                alt={showDocumentPreview?.name}
+                className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-sm"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <AlertCircle className="h-8 w-8" />
+                <p className="text-sm">Preview not available. Please download the file.</p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </DashboardLayout>
