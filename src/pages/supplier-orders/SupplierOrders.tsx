@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,12 @@ import { Label } from '@/components/ui/label';
 import { DeleteConfirmDialog } from '@/components/stock/DeleteConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSupplierOrders, useSupplierList } from '@/hooks/useApiData';
-import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
 import { cn } from '@/lib/utils';
+
+type BannerType = 'success' | 'error';
+interface BannerState { type: BannerType; message: string }
 
 const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string }> = {
   pending: { label: 'Pending', dot: 'bg-amber-500 animate-pulse', bg: 'bg-amber-50', text: 'text-amber-700' },
@@ -29,6 +31,7 @@ type SortDir = 'asc' | 'desc';
 
 export default function SupplierOrders() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser } = useAuth();
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: supplierOrders = [], refetch: refetchOrders } = useSupplierOrders(warehouseId);
@@ -45,6 +48,17 @@ export default function SupplierOrders() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [cancelOrderId, setCancelOrderId] = useState<number | string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [banner, setBanner] = useState<BannerState | null>(null);
+
+  // Pick up banner from navigation state (e.g. after creating/receiving)
+  useEffect(() => {
+    const navBanner = (location.state as any)?.banner;
+    if (navBanner) {
+      setBanner(navBanner);
+      // Clear location state so banner doesn't reappear on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => { refetchOrders?.(); }, []);
 
@@ -96,11 +110,11 @@ export default function SupplierOrders() {
     if (!cancelOrderId) return;
     try {
       await api.delete(`/supplier-orders/${cancelOrderId}`);
-      toast({ title: 'Order Cancelled', description: 'The order has been cancelled.' });
+      setBanner({ type: 'success', message: 'Order has been cancelled successfully.' });
       setCancelOrderId(null);
       refetchOrders?.();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to cancel order', variant: 'destructive' });
+      setBanner({ type: 'error', message: error.message || 'Failed to cancel order.' });
     }
   };
 
@@ -108,6 +122,18 @@ export default function SupplierOrders() {
 
   return (
     <DashboardLayout>
+      {/* Banner */}
+      {banner && (
+        <div className={cn(
+          "flex items-center gap-2.5 px-4 py-2.5 rounded-lg border mb-3",
+          banner.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'
+        )}>
+          {banner.type === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
+          <p className="text-sm font-medium flex-1">{banner.message}</p>
+          <button onClick={() => setBanner(null)} className="hover:opacity-70"><X className="h-3.5 w-3.5" /></button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-3 mb-3">
         <h1 className="text-lg font-bold tracking-tight text-foreground">Supplier Orders</h1>

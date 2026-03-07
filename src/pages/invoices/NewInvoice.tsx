@@ -10,8 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useAuth } from '@/context/AuthContext';
 import { useSupplierList, useWarehouseInventory, WarehouseInventoryItem } from '@/hooks/useApiData';
 import api from '@/services/api';
-import { toast } from 'sonner';
-import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage } from 'lucide-react';
+import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+type BannerType = 'success' | 'error';
+interface BannerState { type: BannerType; message: string }
 import { format } from 'date-fns';
 
 interface InvoiceItem {
@@ -57,6 +60,7 @@ export default function NewInvoice() {
   const [medSearch, setMedSearch] = useState('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [banner, setBanner] = useState<BannerState | null>(null);
 
   // Add new medicine dialog
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -92,7 +96,7 @@ export default function NewInvoice() {
           stock: 0,
         })));
       }
-    }).catch(() => toast.error('Failed to load invoice'))
+    }).catch(() => setBanner({ type: 'error', message: 'Failed to load invoice.' }))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -135,20 +139,21 @@ export default function NewInvoice() {
   }, [items, medSearch]);
 
   const handleAddNewMedicine = () => {
-    if (!newMedName.trim() || !newMedType) { toast.error('Name and type required'); return; }
+    if (!newMedName.trim() || !newMedType) { setBanner({ type: 'error', message: 'Medicine name and type are required.' }); return; }
     setItems(prev => [...prev, {
       medicineId: '', medicineName: newMedName.trim(), medicineType: newMedType,
       isAlreadyExist: false, hsnNo: '', batchNo: '', expDate: '', quantity: 0, stock: 0,
     }]);
     setShowAddDialog(false);
-    toast.success(`"${newMedName.trim()}" added`);
+    setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list.` });
     setNewMedName(''); setNewMedType('');
   };
 
   const handleSave = async () => {
-    if (!supplierId) { toast.error('Select a supplier'); return; }
+    if (!supplierId) { setBanner({ type: 'error', message: 'Please select a supplier.' }); return; }
     const filledItems = items.filter(i => i.quantity > 0);
-    if (filledItems.length === 0) { toast.error('Enter quantity for at least one item'); return; }
+    if (filledItems.length === 0) { setBanner({ type: 'error', message: 'Enter quantity for at least one item.' }); return; }
+    setBanner(null);
     setSaving(true);
     try {
       const payload: any = {
@@ -170,9 +175,8 @@ export default function NewInvoice() {
       };
       if (id) payload.id = Number(id);
       await api.post('/invoices', payload);
-      toast.success(id ? 'Stock entry updated' : 'Stock entry saved');
-      navigate('/invoices');
-    } catch { toast.error('Failed to save'); }
+      navigate('/invoices', { state: { banner: { type: 'success', message: id ? 'Stock entry updated successfully.' : 'Stock entry saved successfully.' } } });
+    } catch { setBanner({ type: 'error', message: 'Failed to save stock entry.' }); }
     finally { setSaving(false); }
   };
 
@@ -219,6 +223,18 @@ export default function NewInvoice() {
           </Button>
         )}
       </div>
+
+      {/* Banner */}
+      {banner && (
+        <div className={cn(
+          "flex items-center gap-2.5 px-4 py-2.5 rounded-lg border mb-3",
+          banner.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'
+        )}>
+          {banner.type === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
+          <p className="text-sm font-medium flex-1">{banner.message}</p>
+          <button onClick={() => setBanner(null)} className="hover:opacity-70"><X className="h-3.5 w-3.5" /></button>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
