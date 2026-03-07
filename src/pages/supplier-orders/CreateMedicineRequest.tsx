@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon } from 'lucide-react';
+import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -66,6 +66,7 @@ export default function CreateMedicineRequest() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [medSearch, setMedSearch] = useState('');
+  const [successBanner, setSuccessBanner] = useState<{ message: string; details: string } | null>(null);
 
   // Receive mode fields
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -192,23 +193,25 @@ export default function CreateMedicineRequest() {
       // purchaseOrder is a string like "PO-20260307-00003"
       const orderNumber = response?.purchaseOrder || (response?.id ? `#${response.id}` : '');
       
+      // Show success banner on this page for 2 seconds, then navigate
       if (status === 'DRAFT') {
-        toast({ 
-          title: '📋 Draft Saved Successfully', 
-          description: `Order Request ${orderNumber} saved as draft with ${validItems.length} medicine${validItems.length > 1 ? 's' : ''}.`,
+        setSuccessBanner({
+          message: `Draft Saved Successfully!`,
+          details: `Order Request ${orderNumber} saved as draft with ${validItems.length} medicine${validItems.length > 1 ? 's' : ''}.`
         });
-        navigate('/supplier-orders');
       } else {
-        navigate('/supplier-orders', { 
-          state: { 
-            successMessage: `Order Request ${orderNumber} has been created successfully!`,
-            successDetails: `${validItems.length} medicine${validItems.length > 1 ? 's' : ''} with ${totalReqQty} units total.`
-          } 
+        setSuccessBanner({
+          message: `Order Request ${orderNumber} has been created successfully!`,
+          details: `${validItems.length} medicine${validItems.length > 1 ? 's' : ''} with ${totalReqQty} units total.`
         });
       }
+      setTimeout(() => {
+        navigate('/supplier-orders');
+      }, 2000);
     } catch (error: any) {
       toast({ title: 'Error', description: error.message || 'Failed to submit', variant: 'destructive' });
-    } finally { setSubmitting(false); }
+      setSubmitting(false);
+    }
   };
 
   // Receive stock
@@ -254,6 +257,25 @@ export default function CreateMedicineRequest() {
 
   return (
     <DashboardLayout>
+      {/* Success Overlay - Full Page */}
+      {successBanner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center animate-in zoom-in-95 duration-300">
+            <div className="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-emerald-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{successBanner.message}</h2>
+            {successBanner.details && (
+              <p className="text-sm text-gray-600 mb-4">{successBanner.details}</p>
+            )}
+            <div className="flex items-center justify-center gap-2 text-sm text-emerald-600">
+              <div className="h-4 w-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+              <span>Redirecting to orders list...</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => navigate('/supplier-orders')}>

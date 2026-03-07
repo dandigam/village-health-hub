@@ -31,19 +31,22 @@ export default function SupplierOrders() {
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: supplierOrders = [], refetch: refetchOrders } = useSupplierOrders(warehouseId);
 
-  // Success banner from navigation state
+  // Success banner from sessionStorage
   const [successBanner, setSuccessBanner] = useState<{ message: string; details: string } | null>(null);
-  
+
+  // Check for success message on mount
   useEffect(() => {
-    if (location.state?.successMessage) {
-      setSuccessBanner({
-        message: location.state.successMessage,
-        details: location.state.successDetails || ''
-      });
-      // Clear the state so it doesn't show again on refresh
-      window.history.replaceState({}, document.title);
+    const stored = sessionStorage.getItem('supplierOrderSuccess');
+    if (stored) {
+      try {
+        const data = JSON.parse(stored);
+        setSuccessBanner({ message: data.message, details: data.details || '' });
+      } catch (e) {
+        // ignore parse errors
+      }
+      sessionStorage.removeItem('supplierOrderSuccess');
     }
-  }, [location.state]);
+  }, []);
 
   const [filterSearch, setFilterSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
