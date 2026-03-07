@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Eye, Pencil, ChevronUp, ChevronDown, FileText, Pill, Filter, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Plus, Eye, Pencil, ChevronUp, ChevronDown, FileText, Pill, Filter, CheckCircle2, AlertCircle, X, MoreVertical, Download } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
