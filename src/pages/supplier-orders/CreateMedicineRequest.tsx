@@ -146,6 +146,13 @@ export default function CreateMedicineRequest() {
         setCreatedAt(order.createdAt || '');
         setUpdatedAt(order.updatedAt || '');
         setWarehouseName(order.warehouseName || '');
+        // Load documents from response
+        if (Array.isArray(order.documents)) {
+          setUploadedDocuments(order.documents.map((doc: any) => ({
+            documentId: doc.documentId,
+            name: doc.documentName || doc.name,
+          })));
+        }
       }
     }).catch(err => {
       setBanner({ type: 'error', message: err.message || 'Failed to load order' });
