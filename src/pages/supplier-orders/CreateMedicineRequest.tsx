@@ -447,18 +447,24 @@ export default function CreateMedicineRequest() {
                   </Select>
                 </div>
 
-                {/* Priority Dropdown */}
-                <div className="w-[130px] flex flex-col justify-center pr-4">
+                {/* Priority Toggle */}
+                <div className="flex flex-col justify-center pr-4">
                   <Label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mb-1">Priority</Label>
-                  <Select value={priority} onValueChange={(v: 'normal' | 'urgent') => setPriority(v)}>
-                    <SelectTrigger className={cn("h-9 text-sm bg-background border-input shadow-sm transition-colors", priority === 'urgent' && "border-red-400 text-red-700")}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover z-50">
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="urgent">🔴 Urgent</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-2 h-9">
+                    <Switch
+                      checked={priority === 'urgent'}
+                      onCheckedChange={(checked) => setPriority(checked ? 'urgent' : 'normal')}
+                      className={cn(
+                        priority === 'urgent' && "data-[state=checked]:bg-destructive"
+                      )}
+                    />
+                    <span className={cn(
+                      "text-sm font-semibold transition-colors",
+                      priority === 'urgent' ? "text-destructive" : "text-muted-foreground"
+                    )}>
+                      {priority === 'urgent' ? 'URGENT' : 'Normal'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Divider 1 */}
