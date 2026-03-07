@@ -231,7 +231,7 @@ export default function SupplierOrders() {
                           <>
                             <Button 
                               size="sm" 
-                              className="h-7 px-3 text-xs font-medium bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm rounded-full transition-all" 
+                              className="h-7 px-3 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm rounded-full transition-all" 
                               onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}
                             >
                               <Package className="h-3.5 w-3.5 mr-1" /> Receive
@@ -246,6 +246,9 @@ export default function SupplierOrders() {
                                 <DropdownMenuItem onClick={() => navigate(`/supplier-orders/${order.id}`)}>
                                   <Eye className="h-3.5 w-3.5 mr-2" /> View
                                 </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Download className="h-3.5 w-3.5 mr-2" /> Download
+                                </DropdownMenuItem>
                                 {canCancel && (
                                   <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setCancelOrderId(order.id)}>
                                     <Trash2 className="h-3.5 w-3.5 mr-2" /> Cancel
@@ -255,14 +258,28 @@ export default function SupplierOrders() {
                             </DropdownMenu>
                           </>
                         ) : (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="h-7 px-3 text-xs font-medium rounded-full transition-all" 
-                            onClick={() => navigate(`/supplier-orders/${order.id}`)}
-                          >
-                            <FileText className="h-3.5 w-3.5 mr-1" /> View
-                          </Button>
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="h-7 px-3 text-xs font-medium rounded-full transition-all" 
+                              onClick={() => navigate(`/supplier-orders/${order.id}`)}
+                            >
+                              <Eye className="h-3.5 w-3.5 mr-1" /> View
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-full">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-36">
+                                <DropdownMenuItem>
+                                  <Download className="h-3.5 w-3.5 mr-2" /> Download
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </>
                         )}
                       </div>
                     </td>
