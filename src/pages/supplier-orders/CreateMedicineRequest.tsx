@@ -73,6 +73,7 @@ export default function CreateMedicineRequest() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [medSearch, setMedSearch] = useState('');
+  const [banner, setBanner] = useState<BannerState | null>(null);
 
   // Receive mode fields
   const [invoiceNumber, setInvoiceNumber] = useState('');
