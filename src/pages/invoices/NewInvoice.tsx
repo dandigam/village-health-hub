@@ -96,7 +96,7 @@ export default function NewInvoice() {
           stock: 0,
         })));
       }
-    }).catch(() => toast.error('Failed to load invoice'))
+    }).catch(() => setBanner({ type: 'error', message: 'Failed to load invoice.' }))
       .finally(() => setLoading(false));
   }, [id]);
 
