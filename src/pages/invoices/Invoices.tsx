@@ -217,23 +217,30 @@ export default function Invoices() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-center gap-1.5">
                         <Button 
                           size="sm" 
                           variant="outline" 
-                          className="h-8 px-3 text-xs border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all" 
+                          className="h-7 px-3 text-xs font-medium rounded-full transition-all" 
                           onClick={() => setViewInvoice(invoice)}
                         >
-                          <Eye className="h-3.5 w-3.5 mr-1.5" /> View
+                          <Eye className="h-3.5 w-3.5 mr-1" /> View
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="h-8 px-3 text-xs border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all" 
-                          onClick={() => navigate(`/invoices/${invoice.id}/edit`)}
-                        >
-                          <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-full">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-36">
+                            <DropdownMenuItem onClick={() => navigate(`/invoices/${invoice.id}/edit`)}>
+                              <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Download className="h-3.5 w-3.5 mr-2" /> Download
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>
