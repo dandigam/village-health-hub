@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Pencil, Trash2, RotateCcw, ChevronUp, ChevronDown, FileText, Package, Pill, FileImage } from 'lucide-react';
+import { Plus, Eye, Pencil, RotateCcw, ChevronUp, ChevronDown, FileText, Pill } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -217,7 +217,7 @@ export default function Invoices() {
         </div>
       )}
 
-      {/* ── View Invoice Dialog ── */}
+      {/* View Invoice Dialog */}
       <Dialog open={!!viewInvoice} onOpenChange={open => { if (!open) setViewInvoice(null); }}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-0">
           {viewInvoice && (
@@ -262,7 +262,7 @@ export default function Invoices() {
                   </div>
                 </div>
 
-                {/* Items Table */}
+                {/* Items Table — Medicine, Stock, Batch, Exp Date, HSN, Qty */}
                 <div className="border rounded-md bg-card overflow-hidden">
                   <div className="flex items-center gap-3 px-3 py-2 border-b bg-muted/20">
                     <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Medicine Details</p>
@@ -282,8 +282,9 @@ export default function Invoices() {
                           <tr className="border-b">
                             <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-10">#</th>
                             <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground">Medicine</th>
+                            <th className="px-3 py-1.5 text-center font-medium text-[10px] uppercase text-muted-foreground w-16">Stock</th>
                             <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-28">Batch</th>
-                            <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-28">Expiry</th>
+                            <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-28">Exp Date</th>
                             <th className="px-3 py-1.5 text-left font-medium text-[10px] uppercase text-muted-foreground w-20">HSN</th>
                             <th className="px-3 py-1.5 text-right font-medium text-[10px] uppercase text-muted-foreground w-16">Qty</th>
                           </tr>
@@ -300,6 +301,7 @@ export default function Invoices() {
                                     {item.medicineType && <Badge variant="secondary" className="text-[9px] h-4 font-normal">{item.medicineType}</Badge>}
                                   </div>
                                 </td>
+                                <td className="px-3 py-1 text-center text-xs text-muted-foreground">{(item as any).stock ?? '—'}</td>
                                 <td className="px-3 py-1 text-xs text-muted-foreground">{item.batchNo || '—'}</td>
                                 <td className="px-3 py-1 text-xs text-muted-foreground">{item.expDate || '—'}</td>
                                 <td className="px-3 py-1 text-xs text-muted-foreground">{item.hsnNo || '—'}</td>
