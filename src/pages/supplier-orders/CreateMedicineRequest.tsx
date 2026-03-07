@@ -28,6 +28,9 @@ interface MedicineRow {
   requestedQty: number;
   receivedQty: number;
   comments: string;
+  batchNo: string;
+  expDate: string;
+  hsnNo: string;
 }
 
 type PageMode = 'create' | 'view' | 'edit';
@@ -118,6 +121,9 @@ export default function CreateMedicineRequest() {
           requestedQty: item.requestedQuantity || 0,
           receivedQty: item.receivedQuantity || 0,
           comments: item.comments || '',
+          batchNo: item.batchNo || '',
+          expDate: item.expDate || '',
+          hsnNo: item.hsnNo || '',
         })));
       }
     }).catch(err => {
@@ -140,6 +146,9 @@ export default function CreateMedicineRequest() {
       requestedQty: 0,
       receivedQty: 0,
       comments: '',
+      batchNo: '',
+      expDate: '',
+      hsnNo: '',
     })));
   }, [supplierId, suppliers, mode]);
 
@@ -295,6 +304,36 @@ export default function CreateMedicineRequest() {
                 </div>
               )}
 
+              {/* Invoice details - view mode only (for received/partial/closed orders) */}
+              {isReadOnly && (invoiceNumber || invoiceDate || invoiceAmount || paymentMode) && (
+                <>
+                  {invoiceNumber && (
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
+                      <p className="text-sm font-medium h-8 flex items-center">{invoiceNumber}</p>
+                    </div>
+                  )}
+                  {invoiceDate && (
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
+                      <p className="text-sm h-8 flex items-center">{invoiceDate}</p>
+                    </div>
+                  )}
+                  {invoiceAmount && (
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Amount</Label>
+                      <p className="text-sm font-medium h-8 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
+                    </div>
+                  )}
+                  {paymentMode && (
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Payment Mode</Label>
+                      <p className="text-sm h-8 flex items-center">{paymentMode}</p>
+                    </div>
+                  )}
+                </>
+              )}
+
               {/* Receive mode: Invoice No, Amount, Date, Attach — all in same row */}
               {canReceive && (
                 <>
@@ -380,6 +419,9 @@ export default function CreateMedicineRequest() {
                       {canReceive && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-24">Batch</th>}
                       {canReceive && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-32">Exp Date</th>}
                       {canReceive && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-20">HSN</th>}
+                      {isReadOnly && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-24">Batch</th>}
+                      {isReadOnly && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-28">Exp Date</th>}
+                      {isReadOnly && <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-20">HSN</th>}
                       <th className="px-3 py-2.5 text-right font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-20">Stock</th>
                       <th className="px-3 py-2.5 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap w-24">
                         {canReceive ? 'Recv Qty' : 'Request Qty'}
@@ -428,6 +470,13 @@ export default function CreateMedicineRequest() {
                               </td>
                               <td className="px-3 py-1 text-center">
                                 <Input className="w-20 h-6 mx-auto text-center text-xs rounded-md" placeholder="HSN" />
+                          {isReadOnly && (
+                            <>
+                              <td className="px-3 py-1 text-center text-xs text-muted-foreground">{med.batchNo || '-'}</td>
+                              <td className="px-3 py-1 text-center text-xs text-muted-foreground">{med.expDate || '-'}</td>
+                              <td className="px-3 py-1 text-center text-xs text-muted-foreground">{med.hsnNo || '-'}</td>
+                            </>
+                          )}
                               </td>
                             </>
                           )}
