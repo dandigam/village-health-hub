@@ -433,8 +433,8 @@ export default function CreateMedicineRequest() {
           {/* ═══════════════════════════════════════════════════════════════ */}
           {isCreate && (
             <div className="px-5 py-4 border-b bg-muted/20">
-              {/* Priority row */}
-              <div className="flex items-center gap-4 mb-4">
+              {/* Supplier + Priority + Details all in one section */}
+              <div className="flex items-start gap-4 flex-wrap mb-0">
                 <div className="min-w-[220px]">
                   <Label className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Supplier *</Label>
                   <Select value={supplierId} onValueChange={setSupplierId}>
@@ -460,26 +460,31 @@ export default function CreateMedicineRequest() {
                 </div>
               </div>
 
-              {/* Side-by-side: Supplier Details | Deliver To */}
+              {/* Side-by-side: Supplier Details | Deliver To — same card, styled divider */}
               {selectedSupplier && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border rounded-lg bg-background overflow-hidden">
+                <div className="flex border rounded-lg bg-background mt-4 overflow-hidden">
                   {/* Supplier Details */}
-                  <div className="p-4 border-b md:border-b-0 md:border-r border-border">
+                  <div className="flex-1 p-4">
                     <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2">Supplier Details</p>
                     <p className="text-sm font-semibold text-foreground">{selectedSupplier.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
                       📞 {selectedSupplier.contact || '-'}
                     </p>
                     {selectedSupplier.email && (
-                      <p className="text-xs text-muted-foreground mt-0.5">✉️ {selectedSupplier.email}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">✉️ {selectedSupplier.email}</p>
                     )}
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                    <p className="text-xs mt-1.5 leading-relaxed text-primary/70 italic">
                       {supplierAddress || '-'}
                     </p>
                   </div>
 
+                  {/* Styled vertical divider — doesn't touch top/bottom */}
+                  <div className="flex items-center py-4">
+                    <div className="w-px h-[calc(100%-32px)] bg-border/60" />
+                  </div>
+
                   {/* Deliver To */}
-                  <div className="p-4">
+                  <div className="flex-1 p-4">
                     <div className="flex items-center gap-1.5 mb-2">
                       <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
                       {warehouseDetail && (
@@ -500,10 +505,13 @@ export default function CreateMedicineRequest() {
                     {warehouseDetail ? (
                       <>
                         <p className="text-sm font-semibold text-foreground">{warehouseDetail.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                        <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
                           📞 {warehouseDetail.phoneNumber || '-'}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                        {warehouseDetail.email && (
+                          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">✉️ {warehouseDetail.email}</p>
+                        )}
+                        <p className="text-xs mt-1.5 leading-relaxed text-primary/70 italic">
                           {warehouseAddress || '-'}
                         </p>
                       </>
