@@ -22,7 +22,7 @@ interface InvoiceItem {
   medicineName: string;
   medicineType: string;
   isAlreadyExist: boolean;
-  hsnNo: string;
+  // hsnNo removed
   batchNo: string;
   expDate: string;
   quantity: number;
@@ -34,6 +34,9 @@ const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Dro
 type PageMode = 'create' | 'view' | 'edit';
 
 export default function NewInvoice() {
+    // Uploaded documents state
+    const [uploadedDocuments, setUploadedDocuments] = useState<Array<{ documentId: string, name: string }>>([]);
+    const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const isEditRoute = window.location.pathname.endsWith('/edit');
@@ -89,7 +92,7 @@ export default function NewInvoice() {
           medicineName: item.medicineName || '',
           medicineType: item.medicineType || '',
           isAlreadyExist: item.isAlreadyExist !== false,
-          hsnNo: item.hsnNo || '',
+          // hsnNo removed
           batchNo: item.batchNo || '',
           expDate: item.expDate || '',
           quantity: item.quantity || 0,
@@ -112,7 +115,7 @@ export default function NewInvoice() {
         medicineName: m.name || m.medicineName || '-',
         medicineType: m.category || m.medicineType || '-',
         isAlreadyExist: true,
-        hsnNo: '', batchNo: '', expDate: '',
+        batchNo: '', expDate: '',
         quantity: 0,
         stock: inv?.totalQty ?? 0,
       };
@@ -142,7 +145,7 @@ export default function NewInvoice() {
     if (!newMedName.trim() || !newMedType) { setBanner({ type: 'error', message: 'Medicine name and type are required.' }); return; }
     setItems(prev => [...prev, {
       medicineId: '', medicineName: newMedName.trim(), medicineType: newMedType,
-      isAlreadyExist: false, hsnNo: '', batchNo: '', expDate: '', quantity: 0, stock: 0,
+      isAlreadyExist: false, batchNo: '', expDate: '', quantity: 0, stock: 0,
     }]);
     setShowAddDialog(false);
     setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list.` });
@@ -164,7 +167,7 @@ export default function NewInvoice() {
         invoiceDate,
         items: filledItems.map(item => {
           const base: any = {
-            isAlreadyExist: item.isAlreadyExist, hsnNo: item.hsnNo || undefined,
+            isAlreadyExist: item.isAlreadyExist,
             batchNo: item.batchNo || undefined, expDate: item.expDate || undefined,
             quantity: Number(item.quantity), warehouseId,
           };
@@ -205,9 +208,9 @@ export default function NewInvoice() {
   };
 
   // ── Column config per mode ──
-  // Create: Medicine, Stock, Batch, Exp Date, HSN, Qty (editable)
-  // Edit:   Medicine, Stock, Batch, Exp Date, HSN, Qty (editable) + Cancel, Update Stock
-  // View:   Medicine, Stock, Batch, Exp Date, HSN, Qty (read-only)
+  // Create: Medicine, Stock, Batch, Exp Date, Qty (editable)
+  // Edit:   Medicine, Stock, Batch, Exp Date, Qty (editable) + Cancel, Update Stock
+  // View:   Medicine, Stock, Batch, Exp Date, Qty (read-only)
 
   return (
     <DashboardLayout>
@@ -277,7 +280,50 @@ export default function NewInvoice() {
               <div className="min-w-[130px]">
                 <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Invoice No.</Label>
                 {canEdit ? (
-                  <Input className="h-10 text-sm mt-1.5 bg-white border-slate-300 shadow-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                  <div className="flex items-center gap-2">
+                    <Input className="h-10 text-sm mt-1.5 bg-white border-slate-300 shadow-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                    <label className={cn("flex items-center gap-1.5 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-600 cursor-pointer hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm", !invoiceNumber && "opacity-50 pointer-events-none")}
+                      style={{ marginTop: '0.5rem' }}>
+                      <Upload className="w-4 h-4" />
+                      Upload Document
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        disabled={!invoiceNumber || uploading}
+                        onChange={async (e) => {
+                          const files = e.target.files;
+                          if (!files) return;
+                          setUploading(true);
+                          for (const file of Array.from(files)) {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('invoiceNo', invoiceNumber);
+                            try {
+                              const res = await api.post('/documents/upload', formData, {
+  headers: {
+    "Content-Type": "multipart/form-data"
+  }
+});
+                              const doc = res.data || res;
+                              if (doc && doc.documentId && doc.documentName) {
+                                setUploadedDocuments(prev => {
+                                  // Prevent duplicate documentId
+                                  if (prev.some(d => d.documentId === doc.documentId)) return prev;
+                                  return [...prev, { documentId: doc.documentId, name: doc.documentName }];
+                                });
+                              }
+                            } catch (err) {
+                              setBanner({ type: 'error', message: 'Failed to upload document.' });
+                            }
+                          }
+                          setUploading(false);
+                          e.target.value = '';
+                        }}
+                      />
+                      {uploading && <span className="ml-2 text-xs text-blue-500">Uploading...</span>}
+                    </label>
+                  </div>
                 ) : (
                   <p className="text-sm font-semibold text-slate-700 mt-1.5 h-10 flex items-center">{invoiceNumber || '—'}</p>
                 )}
@@ -370,7 +416,7 @@ export default function NewInvoice() {
                         <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-24 whitespace-nowrap">Stock</th>
                         <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-28 whitespace-nowrap">Batch</th>
                         <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-36 whitespace-nowrap">Exp Date</th>
-                        <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-24 whitespace-nowrap">HSN</th>
+                        {/* HSN column removed */}
                         <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-28 whitespace-nowrap">Qty</th>
                       </tr>
                     </thead>
@@ -403,13 +449,7 @@ export default function NewInvoice() {
                                 <span className="text-slate-500 text-sm">{item.expDate || '—'}</span>
                               )}
                             </td>
-                            <td className="px-4 py-2.5 text-center">
-                              {canEdit ? (
-                                <Input className="w-20 h-9 mx-auto text-center text-sm rounded-lg border-slate-300 bg-slate-50 focus:bg-white shadow-sm" placeholder="HSN" value={item.hsnNo} onChange={e => updateItem(realIdx, 'hsnNo', e.target.value)} />
-                              ) : (
-                                <span className="text-slate-500 text-sm">{item.hsnNo || '—'}</span>
-                              )}
-                            </td>
+                              
                             <td className="px-4 py-2.5 text-center">
                               {canEdit ? (
                                 <Input className={`w-24 h-9 mx-auto text-center text-sm font-medium rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 ${hasQty ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200 text-emerald-700' : 'border-blue-300 bg-blue-50/50'}`} type="number" placeholder="0" value={item.quantity || ''} onChange={e => updateItem(realIdx, 'quantity', Number(e.target.value))} />
