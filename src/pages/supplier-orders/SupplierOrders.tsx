@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,12 @@ import { Label } from '@/components/ui/label';
 import { DeleteConfirmDialog } from '@/components/stock/DeleteConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSupplierOrders, useSupplierList } from '@/hooks/useApiData';
-import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
 import { cn } from '@/lib/utils';
+
+type BannerType = 'success' | 'error';
+interface BannerState { type: BannerType; message: string }
 
 const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string }> = {
   pending: { label: 'Pending', dot: 'bg-amber-500 animate-pulse', bg: 'bg-amber-50', text: 'text-amber-700' },
