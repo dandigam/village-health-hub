@@ -139,13 +139,13 @@ export default function NewInvoice() {
   }, [items, medSearch]);
 
   const handleAddNewMedicine = () => {
-    if (!newMedName.trim() || !newMedType) { toast.error('Name and type required'); return; }
+    if (!newMedName.trim() || !newMedType) { setBanner({ type: 'error', message: 'Medicine name and type are required.' }); return; }
     setItems(prev => [...prev, {
       medicineId: '', medicineName: newMedName.trim(), medicineType: newMedType,
       isAlreadyExist: false, hsnNo: '', batchNo: '', expDate: '', quantity: 0, stock: 0,
     }]);
     setShowAddDialog(false);
-    toast.success(`"${newMedName.trim()}" added`);
+    setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list.` });
     setNewMedName(''); setNewMedType('');
   };
 
