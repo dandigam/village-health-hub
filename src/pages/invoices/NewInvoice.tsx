@@ -413,7 +413,7 @@ export default function NewInvoice() {
                 ))}
                 {/* Invoice Files Tags */}
                 {invoiceFiles.map((f, idx) => (
-                  <div key={idx} className="group relative flex items-center gap-1.5 border border-slate-200 rounded-lg bg-white px-2 py-1.5 text-xs cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all" onClick={() => setShowImagePreview(f.url)}>
+                  <div key={idx} className="group relative flex items-center gap-1.5 border border-slate-200 rounded-lg bg-white px-2 py-1.5 text-xs cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all" onClick={() => { setPreviewBlobUrl(f.url); setPreviewType(f.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image'); setShowDocumentPreview({ url: f.url, name: f.name }); }}>
                     <FileImage className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                     <span className="max-w-[80px] truncate text-slate-600">{f.name}</span>
                     {canEdit && (
