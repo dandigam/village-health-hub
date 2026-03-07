@@ -170,7 +170,8 @@ export default function CreateMedicineRequest() {
   // Submit request (create / edit draft)
   const handleSubmit = async (status: 'PENDING' | 'DRAFT') => {
     const validItems = medicines.filter(m => m.requestedQty > 0);
-    if (validItems.length === 0) { toast({ title: 'Error', description: 'Enter quantity for at least one medicine.', variant: 'destructive' }); return; }
+    if (validItems.length === 0) { setBanner({ type: 'error', message: 'Enter quantity for at least one medicine.' }); return; }
+    setBanner(null);
     setSubmitting(true);
     try {
       const payload = {
@@ -179,10 +180,9 @@ export default function CreateMedicineRequest() {
       };
       if (isEditDraft && id) await api.put(`/supplier-orders/${id}`, payload);
       else await api.post('/supplier-orders', payload);
-      toast({ title: status === 'DRAFT' ? 'Draft Saved' : 'Request Sent', description: `${validItems.length} medicines, ${totalReqQty} units total.` });
-      navigate('/supplier-orders');
+      navigate('/supplier-orders', { state: { banner: { type: 'success', message: status === 'DRAFT' ? `Draft saved — ${validItems.length} medicines, ${totalReqQty} units total.` : `Request sent — ${validItems.length} medicines, ${totalReqQty} units total.` } } });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to submit', variant: 'destructive' });
+      setBanner({ type: 'error', message: error.message || 'Failed to submit request.' });
     } finally { setSubmitting(false); }
   };
 
