@@ -432,13 +432,13 @@ export default function CreateMedicineRequest() {
           {/* CREATE MODE — Side-by-side Supplier + Deliver To + Priority   */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {isCreate && (
-            <div className="px-5 py-4 border-b bg-muted/20 space-y-3">
-              {/* Row 1: Supplier + Priority */}
-              <div className="flex items-start gap-4 flex-wrap">
-                <div className="min-w-[220px]">
-                  <Label className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Supplier *</Label>
+            <div className="px-5 py-3 border-b bg-muted/20">
+              <div className="flex items-stretch gap-0">
+                {/* Supplier Dropdown */}
+                <div className="min-w-[200px] flex flex-col justify-center pr-4">
+                  <Label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mb-1">Supplier *</Label>
                   <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-10 text-sm mt-1.5 bg-background border-input hover:border-primary/50 shadow-sm transition-colors">
+                    <SelectTrigger className="h-9 text-sm bg-background border-input hover:border-primary/50 shadow-sm transition-colors">
                       <SelectValue placeholder="Select Supplier" />
                     </SelectTrigger>
                     <SelectContent className="bg-popover z-50">
@@ -446,10 +446,12 @@ export default function CreateMedicineRequest() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="w-[140px]">
-                  <Label className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Priority</Label>
+
+                {/* Priority Dropdown */}
+                <div className="w-[130px] flex flex-col justify-center pr-4">
+                  <Label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mb-1">Priority</Label>
                   <Select value={priority} onValueChange={(v: 'normal' | 'urgent') => setPriority(v)}>
-                    <SelectTrigger className={cn("h-10 text-sm mt-1.5 bg-background border-input shadow-sm transition-colors", priority === 'urgent' && "border-red-400 text-red-700")}>
+                    <SelectTrigger className={cn("h-9 text-sm bg-background border-input shadow-sm transition-colors", priority === 'urgent' && "border-red-400 text-red-700")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-popover z-50">
@@ -458,37 +460,42 @@ export default function CreateMedicineRequest() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              {/* Row 2: Inline side-by-side addresses (appears after supplier is selected) */}
-              {selectedSupplier && (
-                <div className="flex rounded-lg overflow-hidden">
-                  {/* Supplier Address */}
-                  <div className="flex-1 bg-accent/30 rounded-l-lg px-4 py-3">
-                    <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-1.5">Supplier Address</p>
-                    <p className="text-sm font-semibold text-foreground">{selectedSupplier.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">📞 {selectedSupplier.contact || '-'}</p>
-                    {selectedSupplier.email && (
-                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">✉️ {selectedSupplier.email}</p>
-                    )}
-                    <p className="text-xs mt-1.5 leading-relaxed text-primary/70 italic">{supplierAddress || '-'}</p>
+                {/* Divider 1 */}
+                {selectedSupplier && (
+                  <div className="flex items-center px-3 self-stretch py-2">
+                    <div className="w-px h-full bg-border" />
                   </div>
+                )}
 
-                  {/* Vertical divider with inset spacing */}
-                  <div className="flex items-center px-0 self-stretch py-3">
-                    <div className="w-px h-full bg-border/50" />
+                {/* Supplier Address */}
+                {selectedSupplier && (
+                  <div className="flex-1 flex flex-col justify-center pr-3 min-w-[180px]">
+                    <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
+                    <p className="text-xs font-semibold text-foreground leading-tight">{selectedSupplier.name}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact || '-'}</p>
+                    <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
                   </div>
+                )}
 
-                  {/* Deliver To Address */}
-                  <div className="flex-1 bg-accent/30 rounded-r-lg px-4 py-3">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
+                {/* Divider 2 */}
+                {selectedSupplier && (
+                  <div className="flex items-center px-3 self-stretch py-2">
+                    <div className="w-px h-full bg-border" />
+                  </div>
+                )}
+
+                {/* Deliver To */}
+                {selectedSupplier && (
+                  <div className="flex-1 flex flex-col justify-center min-w-[180px]">
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
                       {warehouseDetail && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                            <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="max-w-xs text-xs">
+                          <TooltipContent side="bottom" className="max-w-xs text-xs">
                             <p className="font-semibold mb-1">{warehouseDetail.name}</p>
                             <p>{warehouseAddress}</p>
                             {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
@@ -500,19 +507,16 @@ export default function CreateMedicineRequest() {
                     </div>
                     {warehouseDetail ? (
                       <>
-                        <p className="text-sm font-semibold text-foreground">{warehouseDetail.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">📞 {warehouseDetail.phoneNumber || '-'}</p>
-                        {warehouseDetail.email && (
-                          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">✉️ {warehouseDetail.email}</p>
-                        )}
-                        <p className="text-xs mt-1.5 leading-relaxed text-primary/70 italic">{warehouseAddress || '-'}</p>
+                        <p className="text-xs font-semibold text-foreground leading-tight">{warehouseDetail.name}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber || '-'}</p>
+                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
                       </>
                     ) : (
-                      <p className="text-xs text-muted-foreground italic">No warehouse assigned</p>
+                      <p className="text-[11px] text-muted-foreground italic">No warehouse assigned</p>
                     )}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
 
