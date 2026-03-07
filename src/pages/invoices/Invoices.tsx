@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Pencil, RotateCcw, ChevronUp, ChevronDown, FileText, Pill } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Plus, Eye, Pencil, RotateCcw, ChevronUp, ChevronDown, FileText, Pill, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useInvoices, Invoice, InvoiceItem } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+type BannerType = 'success' | 'error';
+interface BannerState { type: BannerType; message: string }
 
 const paymentConfig: Record<string, { label: string; className: string }> = {
   cash: { label: 'Cash', className: 'bg-green-100 text-green-800 border-green-300' },
