@@ -237,11 +237,8 @@ export default function CreateMedicineRequest() {
   // Page title
   const pageTitle = isCreate ? 'Medicine Request' : (isReceive ? 'View Request' : (isEditDraft ? 'Edit Request' : 'View Request'));
 
-              <span>Redirecting to orders list...</span>
-          </div>
-        </div>
-      )}
-
+  return (
+    <DashboardLayout>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => navigate('/supplier-orders')}>

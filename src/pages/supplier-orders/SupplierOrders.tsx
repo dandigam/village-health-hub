@@ -1,27 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-<<<<<<< HEAD
-import { Send, Eye, Package, Trash2, ChevronUp, ChevronDown, PackageOpen, Filter, CheckCircle, X } from 'lucide-react';
-=======
-import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter, CheckCircle2, AlertCircle, X } from 'lucide-react';
-import { motion } from 'framer-motion';
->>>>>>> f0420582770540a8933301561b266b4c81738293
+import { Send, Eye, Package, Trash2, ChevronUp, ChevronDown, PackageOpen, Filter, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DeleteConfirmDialog } from '@/components/stock/DeleteConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-<<<<<<< HEAD
 import { useSupplierOrders } from '@/hooks/useApiData';
-import { toast } from '@/hooks/use-toast';
-=======
-import { useSupplierOrders, useSupplierList } from '@/hooks/useApiData';
->>>>>>> f0420582770540a8933301561b266b4c81738293
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
 import { cn } from '@/lib/utils';
 
-<<<<<<< HEAD
+type BannerType = 'success' | 'error';
+interface BannerState { type: BannerType; message: string }
+
 const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string; border: string }> = {
   pending: { label: 'Pending', dot: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
   partial: { label: 'Partial', dot: 'bg-orange-500', bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
@@ -29,18 +21,6 @@ const statusConfig: Record<string, { label: string; dot: string; bg: string; tex
   cancelled: { label: 'Cancelled', dot: 'bg-slate-400', bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200' },
   draft: { label: 'Draft', dot: 'bg-slate-400', bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200' },
   sent: { label: 'Sent', dot: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-=======
-type BannerType = 'success' | 'error';
-interface BannerState { type: BannerType; message: string }
-
-const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string }> = {
-  pending: { label: 'Pending', dot: 'bg-amber-500 animate-pulse', bg: 'bg-amber-50', text: 'text-amber-700' },
-  partial: { label: 'Partial', dot: 'bg-orange-500 animate-pulse', bg: 'bg-orange-50', text: 'text-orange-700' },
-  received: { label: 'Received', dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  cancelled: { label: 'Cancelled', dot: 'bg-muted-foreground', bg: 'bg-muted/60', text: 'text-muted-foreground' },
-  draft: { label: 'Draft', dot: 'bg-muted-foreground', bg: 'bg-muted/60', text: 'text-muted-foreground' },
-  sent: { label: 'Sent', dot: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
->>>>>>> f0420582770540a8933301561b266b4c81738293
 };
 
 type SortKey = 'id' | 'createdAt' | 'supplierName' | 'itemCount' | 'totalQty' | 'status';
@@ -53,23 +33,6 @@ export default function SupplierOrders() {
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: supplierOrders = [], refetch: refetchOrders } = useSupplierOrders(warehouseId);
 
-  // Success banner from sessionStorage
-  const [successBanner, setSuccessBanner] = useState<{ message: string; details: string } | null>(null);
-
-  // Check for success message on mount
-  useEffect(() => {
-    const stored = sessionStorage.getItem('supplierOrderSuccess');
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        setSuccessBanner({ message: data.message, details: data.details || '' });
-      } catch (e) {
-        // ignore parse errors
-      }
-      sessionStorage.removeItem('supplierOrderSuccess');
-    }
-  }, []);
-
   const [filterSearch, setFilterSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
@@ -77,21 +40,16 @@ export default function SupplierOrders() {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [cancelOrderId, setCancelOrderId] = useState<number | string | null>(null);
-<<<<<<< HEAD
-=======
-  const [showFilters, setShowFilters] = useState(false);
   const [banner, setBanner] = useState<BannerState | null>(null);
 
-  // Pick up banner from navigation state (e.g. after creating/receiving)
+  // Pick up banner from navigation state
   useEffect(() => {
     const navBanner = (location.state as any)?.banner;
     if (navBanner) {
       setBanner(navBanner);
-      // Clear location state so banner doesn't reappear on refresh
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
->>>>>>> f0420582770540a8933301561b266b4c81738293
 
   useEffect(() => { refetchOrders?.(); }, []);
 
@@ -149,27 +107,6 @@ export default function SupplierOrders() {
 
   return (
     <DashboardLayout>
-<<<<<<< HEAD
-      {/* Success Banner */}
-      {successBanner && (
-        <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3 shadow-sm animate-in slide-in-from-top-2 duration-300">
-          <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-            <CheckCircle className="h-5 w-5 text-emerald-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-emerald-800">{successBanner.message}</h3>
-            {successBanner.details && (
-              <p className="text-xs text-emerald-600 mt-0.5">{successBanner.details}</p>
-            )}
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 shrink-0 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 rounded-full" 
-            onClick={() => setSuccessBanner(null)}
-          >
-            <X className="h-4 w-4" />
-=======
       {/* Banner */}
       {banner && (
         <div className={cn(
@@ -179,20 +116,6 @@ export default function SupplierOrders() {
           {banner.type === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
           <p className="text-sm font-medium flex-1">{banner.message}</p>
           <button onClick={() => setBanner(null)} className="hover:opacity-70"><X className="h-3.5 w-3.5" /></button>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-3">
-        <h1 className="text-lg font-bold tracking-tight text-foreground">Supplier Orders</h1>
-        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{supplierOrders.length}</Badge>
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="outline" size="sm" className={cn("h-8 text-xs", hasActiveFilters && "border-primary text-primary")} onClick={() => setShowFilters(!showFilters)}>
-            <Filter className="mr-1.5 h-3 w-3" />
-            Filters
-            {hasActiveFilters && <span className="ml-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">!</span>}
->>>>>>> f0420582770540a8933301561b266b4c81738293
-          </Button>
         </div>
       )}
 
