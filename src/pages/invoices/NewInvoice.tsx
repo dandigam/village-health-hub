@@ -365,10 +365,25 @@ export default function NewInvoice() {
                 {uploadedDocuments.length > 0 && uploadedDocuments.map((doc, idx) => (
                   <div key={doc.documentId} className="flex items-center gap-1.5 border border-emerald-200 rounded-lg bg-emerald-50 px-2 py-1.5 text-xs text-emerald-800">
                     <Badge variant="outline" className="bg-emerald-100 border-emerald-200 text-emerald-700 cursor-pointer"
-                      onClick={() => {
-                        // Show preview popup using download endpoint
+                      onClick={async () => {
                         const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
                         setShowDocumentPreview({ url, name: doc.name });
+                        setPreviewLoading(true);
+                        try {
+                          const token = localStorage.getItem('token');
+                          const res = await fetch(url, {
+                            headers: token ? { Authorization: `Bearer ${token}` } : {},
+                          });
+                          const contentType = res.headers.get('content-type') || '';
+                          const blob = await res.blob();
+                          const blobUrl = URL.createObjectURL(blob);
+                          setPreviewBlobUrl(blobUrl);
+                          setPreviewType(contentType.includes('pdf') ? 'pdf' : contentType.startsWith('image/') ? 'image' : 'unknown');
+                        } catch {
+                          setPreviewType('unknown');
+                        } finally {
+                          setPreviewLoading(false);
+                        }
                       }}
                       title="View document"
                     >{doc.name}</Badge>
