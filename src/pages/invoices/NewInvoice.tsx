@@ -150,9 +150,10 @@ export default function NewInvoice() {
   };
 
   const handleSave = async () => {
-    if (!supplierId) { toast.error('Select a supplier'); return; }
+    if (!supplierId) { setBanner({ type: 'error', message: 'Please select a supplier.' }); return; }
     const filledItems = items.filter(i => i.quantity > 0);
-    if (filledItems.length === 0) { toast.error('Enter quantity for at least one item'); return; }
+    if (filledItems.length === 0) { setBanner({ type: 'error', message: 'Enter quantity for at least one item.' }); return; }
+    setBanner(null);
     setSaving(true);
     try {
       const payload: any = {
@@ -174,9 +175,8 @@ export default function NewInvoice() {
       };
       if (id) payload.id = Number(id);
       await api.post('/invoices', payload);
-      toast.success(id ? 'Stock entry updated' : 'Stock entry saved');
-      navigate('/invoices');
-    } catch { toast.error('Failed to save'); }
+      navigate('/invoices', { state: { banner: { type: 'success', message: id ? 'Stock entry updated successfully.' : 'Stock entry saved successfully.' } } });
+    } catch { setBanner({ type: 'error', message: 'Failed to save stock entry.' }); }
     finally { setSaving(false); }
   };
 
