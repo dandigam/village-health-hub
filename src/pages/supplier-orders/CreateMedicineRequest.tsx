@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Switch } from '@/components/ui/switch';
 import { useSupplierList, useWarehouseInventory, useWarehouseDetail, useMedicines } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
-import { api } from '@/services/api';
+import { api, API_BASE_URL } from '@/services/api';
 
 type BannerType = 'success' | 'error' | 'info';
 interface BannerState { type: BannerType; message: string }
