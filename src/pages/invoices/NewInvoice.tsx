@@ -175,7 +175,9 @@ export default function NewInvoice() {
       };
       if (id) payload.id = Number(id);
       await api.post('/invoices', payload);
-      navigate('/invoices', { state: { banner: { type: 'success', message: id ? 'Stock entry updated successfully.' : 'Stock entry saved successfully.' } } });
+      const msg = id ? 'Stock entry updated successfully.' : 'Stock entry saved successfully.';
+      setBanner({ type: 'success', message: msg });
+      setTimeout(() => navigate('/invoices'), 1500);
     } catch { setBanner({ type: 'error', message: 'Failed to save stock entry.' }); }
     finally { setSaving(false); }
   };
