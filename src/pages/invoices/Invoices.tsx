@@ -1,11 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-<<<<<<< HEAD
-import { useNavigate } from 'react-router-dom';
-import { Plus, Eye, Pencil, ChevronUp, ChevronDown, FileText, Pill, Filter } from 'lucide-react';
-=======
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Eye, Pencil, RotateCcw, ChevronUp, ChevronDown, FileText, Pill, CheckCircle2, AlertCircle, X } from 'lucide-react';
->>>>>>> f0420582770540a8933301561b266b4c81738293
+import { Plus, Eye, Pencil, ChevronUp, ChevronDown, FileText, Pill, Filter, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,12 +11,9 @@ import { useInvoices, Invoice, InvoiceItem } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-<<<<<<< HEAD
-=======
 
 type BannerType = 'success' | 'error';
 interface BannerState { type: BannerType; message: string }
->>>>>>> f0420582770540a8933301561b266b4c81738293
 
 const paymentConfig: Record<string, { label: string; color: string; bg: string }> = {
   cash: { label: 'Cash', color: 'text-emerald-600', bg: 'bg-emerald-50 border border-emerald-200/50' },
