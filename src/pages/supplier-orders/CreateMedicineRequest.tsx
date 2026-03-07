@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle2, AlertCircle, Info, PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { useSupplierList, useWarehouseInventory } from '@/hooks/useApiData';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useSupplierList, useWarehouseInventory, useWarehouseDetail, useMedicines } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
 
@@ -29,6 +30,8 @@ interface MedicineRow {
   medicineId: string;
   medicineName: string;
   category: string;
+  batchStrength: string;
+  unit: string;
   requestedQty: number;
   receivedQty: number;
   batchNo: string;
@@ -52,16 +55,13 @@ export default function CreateMedicineRequest() {
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: suppliers = [] } = useSupplierList(warehouseId);
   const { data: warehouseInventory = [] } = useWarehouseInventory(warehouseId);
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
+  const { data: allMedicines = [] } = useMedicines();
 
   // Determine page mode
   const [orderStatus, setOrderStatus] = useState('');
   const statusLower = orderStatus.toLowerCase();
 
-  // Mode logic:
-  // - No id → create (Medicine Request)
-  // - id + edit route + (pending|partial) → receive
-  // - id + edit route + draft → editDraft
-  // - id + no edit → view
   const isCreate = !id;
   const isReceive = !!id && isEditRoute && (statusLower === 'pending' || statusLower === 'partial');
   const isEditDraft = !!id && isEditRoute && statusLower === 'draft';
@@ -69,11 +69,17 @@ export default function CreateMedicineRequest() {
   const isReadOnly = isView || (!!id && isEditRoute && statusLower === 'received');
 
   const [supplierId, setSupplierId] = useState('');
+  const [priority, setPriority] = useState<'normal' | 'urgent'>('normal');
   const [medicines, setMedicines] = useState<MedicineRow[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [medSearch, setMedSearch] = useState('');
   const [banner, setBanner] = useState<BannerState | null>(null);
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
+
+  // Add Medicine dialog
+  const [showAddMedicine, setShowAddMedicine] = useState(false);
+  const [addMedSearch, setAddMedSearch] = useState('');
 
   // Receive mode fields
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -87,6 +93,18 @@ export default function CreateMedicineRequest() {
   const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
+
+  // Build warehouse address
+  const warehouseAddress = useMemo(() => {
+    if (!warehouseDetail) return '';
+    return [warehouseDetail.village, warehouseDetail.mandal, warehouseDetail.district, warehouseDetail.state].filter(Boolean).join(', ') + (warehouseDetail.pinCode ? ` - ${warehouseDetail.pinCode}` : '');
+  }, [warehouseDetail]);
+
+  // Build supplier address
+  const supplierAddress = useMemo(() => {
+    if (!selectedSupplier) return '';
+    return [selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ') + (selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : '');
+  }, [selectedSupplier]);
 
   // File handling
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,23 +134,23 @@ export default function CreateMedicineRequest() {
       if (order) {
         setSupplierId(String(order.supplierId));
         setOrderStatus(order.status || '');
+        setPriority(order.priority === 'urgent' || order.priority === 'URGENT' ? 'urgent' : 'normal');
         setMedicines((order.items || []).map((item: any) => ({
           id: item.id,
           medicineId: String(item.medicineId),
           medicineName: item.medicineName || '-',
           category: item.category || item.medicineType || '-',
+          batchStrength: item.batchStrength || item.strength || '-',
+          unit: item.unit || '-',
           requestedQty: item.requestedQuantity || 0,
           receivedQty: item.receivedQuantity || 0,
           batchNo: item.batchNo || '',
           expDate: item.expDate || '',
           hsnNo: item.hsnNo || '',
         })));
-        // Load invoice-related fields
         setInvoiceNumber(order.invoiceNo || '');
         setInvoiceAmount(order.invoiceAmount ? String(order.invoiceAmount) : '');
-        if (order.invoiceDate) {
-          setInvoiceDateObj(new Date(order.invoiceDate));
-        }
+        if (order.invoiceDate) setInvoiceDateObj(new Date(order.invoiceDate));
         setPaymentMode(order.paymentMode || '');
         setCreatedAt(order.createdAt || '');
         setUpdatedAt(order.updatedAt || '');
@@ -152,6 +170,8 @@ export default function CreateMedicineRequest() {
       medicineId: String(m.id),
       medicineName: m.name || '-',
       category: (m as any).category || (m as any).medicineType || '-',
+      batchStrength: (m as any).batchStrength || (m as any).strength || '-',
+      unit: (m as any).unit || '-',
       requestedQty: 0,
       receivedQty: 0,
       batchNo: '',
@@ -181,7 +201,31 @@ export default function CreateMedicineRequest() {
     setMedicines(updated);
   };
 
-  // Submit request (create / edit draft)
+  // Add medicine from global list
+  const addMedicineToList = (med: any) => {
+    const exists = medicines.some(m => String(m.medicineId) === String(med.id));
+    if (exists) return;
+    setMedicines(prev => [...prev, {
+      medicineId: String(med.id),
+      medicineName: med.name || '-',
+      category: med.category || med.medicineType || '-',
+      batchStrength: med.batchStrength || med.strength || '-',
+      unit: med.unit || '-',
+      requestedQty: 0,
+      receivedQty: 0,
+      batchNo: '',
+      expDate: '',
+      hsnNo: '',
+    }]);
+  };
+
+  const addMedicineFiltered = useMemo(() => {
+    if (!addMedSearch.trim()) return allMedicines.slice(0, 50);
+    const q = addMedSearch.toLowerCase();
+    return allMedicines.filter((m: any) => (m.name || '').toLowerCase().includes(q)).slice(0, 50);
+  }, [allMedicines, addMedSearch]);
+
+  // Submit request
   const handleSubmit = async (status: 'PENDING' | 'DRAFT') => {
     const validItems = medicines.filter(m => m.requestedQty > 0);
     if (validItems.length === 0) { setBanner({ type: 'error', message: 'Enter quantity for at least one medicine.' }); return; }
@@ -189,12 +233,13 @@ export default function CreateMedicineRequest() {
     setSubmitting(true);
     try {
       const payload = {
-        warehouseId, supplierId: Number(supplierId), status,
+        warehouseId, supplierId: Number(supplierId), status, priority: priority.toUpperCase(),
         items: validItems.map(i => ({ medicineId: Number(i.medicineId), requestedQuantity: i.requestedQty }))
       };
-      if (isEditDraft && id) await api.put(`/supplier-orders/${id}`, payload);
-      else await api.post('/supplier-orders', payload);
-      // Show success banner on this page briefly, then navigate
+      let result: any;
+      if (isEditDraft && id) result = await api.put(`/supplier-orders/${id}`, payload);
+      else result = await api.post('/supplier-orders', payload);
+      if (result?.id) setCreatedOrderId(String(result.id));
       const msg = status === 'DRAFT'
         ? `Draft saved — ${validItems.length} medicines, ${totalReqQty} units total.`
         : `Request sent — ${validItems.length} medicines, ${totalReqQty} units total.`;
@@ -234,20 +279,32 @@ export default function CreateMedicineRequest() {
     } finally { setSubmitting(false); }
   };
 
-  // Page title
   const pageTitle = isCreate ? 'Medicine Request' : (isReceive ? 'View Request' : (isEditDraft ? 'Edit Request' : 'View Request'));
+  const displayId = id || createdOrderId;
+
+  const canEdit = isCreate || isEditDraft;
 
   return (
     <DashboardLayout>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => navigate('/supplier-orders')}>
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted transition-colors" onClick={() => navigate('/supplier-orders')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
+        {displayId && (
+          <Badge variant="outline" className="text-xs px-2.5 py-0.5 rounded-full border-border text-muted-foreground font-mono">
+            #{displayId}
+          </Badge>
+        )}
         {orderStatus && (
           <Badge variant="outline" className={cn("text-xs px-2.5 py-0.5 rounded-full", statusConfig[statusLower]?.className)}>
             {statusConfig[statusLower]?.label || orderStatus}
+          </Badge>
+        )}
+        {priority === 'urgent' && (
+          <Badge className="bg-red-500 text-white text-xs px-2.5 py-0.5 rounded-full border-0">
+            🔴 Urgent
           </Badge>
         )}
       </div>
@@ -274,34 +331,29 @@ export default function CreateMedicineRequest() {
           {/* ORDER INFORMATION — only shown for view/receive (not create)  */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {!isCreate && (
-            <div className="px-5 py-4 border-b bg-slate-50/50">
+            <div className="px-5 py-4 border-b bg-muted/30">
               <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Order Information</p>
               <div className="flex items-end gap-3 flex-wrap">
-                {/* Request ID (read-only) */}
                 <div className="w-[80px]">
                   <Label className="text-[11px] text-muted-foreground">Request ID</Label>
                   <p className="text-sm font-medium h-8 flex items-center">#{id}</p>
                 </div>
-                {/* Supplier (always read-only here) */}
                 <div className="min-w-[160px]">
                   <Label className="text-[11px] text-muted-foreground">Supplier</Label>
                   <p className="text-sm font-medium h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
                 </div>
-                {/* Warehouse (read-only) - hidden for RECEIVED and PENDING */}
                 {warehouseName && !(statusLower === 'received' || statusLower === 'pending') && (
                   <div className="min-w-[120px]">
                     <Label className="text-[11px] text-muted-foreground">Warehouse</Label>
                     <p className="text-sm h-8 flex items-center">{warehouseName}</p>
                   </div>
                 )}
-                {/* Request Date (read-only) */}
                 {createdAt && (
                   <div className="w-[140px]">
                     <Label className="text-[11px] text-muted-foreground">Request Date</Label>
-                    <p className="text-sm h-8 flex items-center">{createdAt ? format(new Date(createdAt), 'dd MMM yyyy') : '—'}</p>
+                    <p className="text-sm h-8 flex items-center">{format(new Date(createdAt), 'dd MMM yyyy')}</p>
                   </div>
                 )}
-                {/* Invoice No */}
                 <div className="w-[120px]">
                   <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
                   {isReceive ? (
@@ -310,7 +362,6 @@ export default function CreateMedicineRequest() {
                     <p className="text-sm h-8 flex items-center">{invoiceNumber || '—'}</p>
                   )}
                 </div>
-                {/* Amount */}
                 <div className="w-[110px]">
                   <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
                   {isReceive ? (
@@ -319,7 +370,6 @@ export default function CreateMedicineRequest() {
                     <p className="text-sm h-8 flex items-center">{invoiceAmount ? `₹${Number(invoiceAmount).toLocaleString()}` : '—'}</p>
                   )}
                 </div>
-                {/* Invoice Date */}
                 <div className="w-[140px]">
                   <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
                   {isReceive ? (
@@ -338,28 +388,24 @@ export default function CreateMedicineRequest() {
                     <p className="text-sm h-8 flex items-center">{invoiceDateObj ? format(invoiceDateObj, 'dd MMM yyyy') : '—'}</p>
                   )}
                 </div>
-                {/* Payment Mode (read-only in view, could be editable in receive) */}
                 {(isView || paymentMode) && (
                   <div className="w-[100px]">
                     <Label className="text-[11px] text-muted-foreground">Payment Mode</Label>
                     <p className="text-sm h-8 flex items-center">{paymentMode || '—'}</p>
                   </div>
                 )}
-                {/* Received Date (read-only) */}
                 {updatedAt && statusLower === 'received' && (
                   <div className="w-[140px]">
                     <Label className="text-[11px] text-muted-foreground">Received Date</Label>
                     <p className="text-sm h-8 flex items-center">{format(new Date(updatedAt), 'dd MMM yyyy')}</p>
                   </div>
                 )}
-                {/* Email (read-only) */}
                 {selectedSupplier?.email && (
                   <div>
                     <Label className="text-[11px] text-muted-foreground">Email</Label>
                     <p className="text-sm h-8 flex items-center">{selectedSupplier.email}</p>
                   </div>
                 )}
-                {/* Attachments */}
                 {isReceive && (
                   <div className="flex items-center gap-1.5 self-end pb-0.5">
                     {invoiceFiles.map((f, idx) => (
@@ -383,37 +429,90 @@ export default function CreateMedicineRequest() {
           )}
 
           {/* ═══════════════════════════════════════════════════════════════ */}
-          {/* CREATE MODE — Supplier selector                               */}
+          {/* CREATE MODE — Side-by-side Supplier + Deliver To + Priority   */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {isCreate && (
-            <div className="px-5 py-4 border-b bg-gradient-to-r from-slate-50 to-blue-50/30">
-              <div className="flex items-end gap-6">
+            <div className="px-5 py-4 border-b bg-muted/20">
+              {/* Priority row */}
+              <div className="flex items-center gap-4 mb-4">
                 <div className="min-w-[220px]">
-                  <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Supplier *</Label>
+                  <Label className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Supplier *</Label>
                   <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-10 text-sm mt-1.5 bg-white border-slate-300 hover:border-blue-400 shadow-sm transition-colors"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                    <SelectTrigger className="h-10 text-sm mt-1.5 bg-background border-input hover:border-primary/50 shadow-sm transition-colors">
+                      <SelectValue placeholder="Select Supplier" />
+                    </SelectTrigger>
                     <SelectContent className="bg-popover z-50">
                       {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
-                {selectedSupplier && (
-                  <>
-                    <div>
-                      <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Contact</Label>
-                      <p className="text-sm font-semibold text-slate-700 h-10 flex items-center">{selectedSupplier.contact || '-'}</p>
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                      <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Address</Label>
-                      <p className="text-sm h-10 flex items-center truncate text-slate-600">
-                        {[selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ')}
-                        {selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : ''}
-                        {!selectedSupplier.address && !selectedSupplier.district ? '-' : ''}
-                      </p>
-                    </div>
-                  </>
-                )}
+                <div className="w-[140px]">
+                  <Label className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Priority</Label>
+                  <Select value={priority} onValueChange={(v: 'normal' | 'urgent') => setPriority(v)}>
+                    <SelectTrigger className={cn("h-10 text-sm mt-1.5 bg-background border-input shadow-sm transition-colors", priority === 'urgent' && "border-red-400 text-red-700")}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="urgent">🔴 Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
+              {/* Side-by-side: Supplier Details | Deliver To */}
+              {selectedSupplier && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border rounded-lg bg-background overflow-hidden">
+                  {/* Supplier Details */}
+                  <div className="p-4 border-b md:border-b-0 md:border-r border-border">
+                    <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2">Supplier Details</p>
+                    <p className="text-sm font-semibold text-foreground">{selectedSupplier.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                      📞 {selectedSupplier.contact || '-'}
+                    </p>
+                    {selectedSupplier.email && (
+                      <p className="text-xs text-muted-foreground mt-0.5">✉️ {selectedSupplier.email}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                      {supplierAddress || '-'}
+                    </p>
+                  </div>
+
+                  {/* Deliver To */}
+                  <div className="p-4">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
+                      {warehouseDetail && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs text-xs">
+                            <p className="font-semibold mb-1">{warehouseDetail.name}</p>
+                            <p>{warehouseAddress}</p>
+                            {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
+                            {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                            {warehouseDetail.authorizedPerson && <p className="mt-1">Contact: {warehouseDetail.authorizedPerson}</p>}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    {warehouseDetail ? (
+                      <>
+                        <p className="text-sm font-semibold text-foreground">{warehouseDetail.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                          📞 {warehouseDetail.phoneNumber || '-'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                          {warehouseAddress || '-'}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">No warehouse assigned</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -422,28 +521,35 @@ export default function CreateMedicineRequest() {
           {/* ═══════════════════════════════════════════════════════════════ */}
           {(isCreate && !supplierId) ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <Package className="h-8 w-8 text-slate-400" />
+              <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+                <Package className="h-8 w-8 text-muted-foreground" />
               </div>
               <p className="text-sm font-medium text-foreground mb-1">Select a Supplier</p>
               <p className="text-xs text-muted-foreground">Choose a supplier above to load their medicine catalog</p>
             </div>
           ) : medicines.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <Package className="h-8 w-8 text-slate-400" />
+              <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+                <Package className="h-8 w-8 text-muted-foreground" />
               </div>
               <p className="text-sm font-medium text-foreground">No medicines found</p>
             </div>
           ) : (
             <>
-              {/* Search bar */}
-              <div className="px-4 py-3 border-b flex items-center gap-3 bg-white">
-                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Medicine Details</p>
-                <span className="text-xs text-white bg-blue-500 px-2 py-0.5 rounded-full font-medium">{medicines.length}</span>
-                <div className="ml-auto relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <Input className="h-8 text-sm pl-8 w-48 bg-slate-50 border-slate-200 focus:bg-white transition-colors" placeholder="Search..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
+              {/* Search bar + Add Medicine */}
+              <div className="px-4 py-3 border-b flex items-center gap-3 bg-background">
+                <p className="text-xs font-semibold text-primary uppercase tracking-wider">Medicine Details</p>
+                <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full font-medium border-0">{medicines.length}</Badge>
+                <div className="ml-auto flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input className="h-8 text-sm pl-8 w-48 bg-muted/30 border-input focus:bg-background transition-colors" placeholder="Filter medicines..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
+                  </div>
+                  {canEdit && (
+                    <Button variant="outline" size="sm" className="h-8 text-sm gap-1.5" onClick={() => { setShowAddMedicine(true); setAddMedSearch(''); }}>
+                      <PlusCircle className="h-3.5 w-3.5" /> Add Medicine
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -451,38 +557,38 @@ export default function CreateMedicineRequest() {
               <div className="overflow-auto max-h-[calc(100vh-320px)]">
                 <table className="w-full text-sm border-collapse">
                   <thead className="sticky top-0 z-10">
-                    <tr className="border-b bg-gradient-to-r from-slate-50 to-blue-50/30 border-slate-200">
-                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-slate-600 w-12">#</th>
-                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-slate-600">Medicine</th>
+                    <tr className="border-b bg-muted/40 border-border">
+                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground w-12">#</th>
+                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground">Medicine Name</th>
+                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32">Batch / Strength</th>
 
-                      {/* CREATE: Current Stock, Request Qty */}
+                      {/* CREATE columns */}
                       {isCreate && (
                         <>
-                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-32 whitespace-nowrap">Stock</th>
-                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-40 whitespace-nowrap">Request Qty</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-28">Current Stock</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20">Unit</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-36">Request Qty</th>
                         </>
                       )}
 
-                      {/* RECEIVE / VIEW (pending/partial/received): Req Qty, Batch, Exp Date, HSN, Stock, Recv Qty */}
+                      {/* VIEW/RECEIVE columns */}
                       {!isCreate && (
                         <>
-                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24 whitespace-nowrap">Req Qty</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>
                           {!(statusLower === 'received' || statusLower === 'pending') && (
                             <>
-                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24 whitespace-nowrap">Batch</th>
-                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32 whitespace-nowrap">Exp Date</th>
-                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20 whitespace-nowrap">HSN</th>
-                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20 whitespace-nowrap">Stock</th>
+                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Batch</th>
+                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32">Exp Date</th>
+                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20">HSN</th>
+                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20">Stock</th>
                             </>
                           )}
-                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32 whitespace-nowrap">Recv Qty</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32">Recv Qty</th>
                         </>
                       )}
-
-                      {/* EDIT DRAFT: same as create */}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border/50">
                     {filteredMedicines.map((med, idx) => {
                       const origIdx = medicines.findIndex(m => m.medicineId === med.medicineId);
                       const stock = getStock(med.medicineId);
@@ -491,20 +597,22 @@ export default function CreateMedicineRequest() {
                       const hasRecvQty = med.receivedQty > 0;
 
                       return (
-                        <tr key={med.medicineId} className={cn("transition-colors duration-150 hover:bg-blue-50/50", (isCreate ? hasReqQty : hasRecvQty) && "bg-emerald-50/60")}>
-                          <td className="px-4 py-2 text-slate-500 text-sm w-12">{origIdx + 1}</td>
+                        <tr key={med.medicineId} className={cn("transition-colors duration-150 hover:bg-primary/[0.03]", (isCreate ? hasReqQty : hasRecvQty) && "bg-emerald-50/60")}>
+                          <td className="px-4 py-2 text-muted-foreground text-sm w-12">{origIdx + 1}</td>
                           <td className="px-4 py-2">
-                            <span className="font-semibold text-slate-800 text-sm">{med.medicineName}</span>
-                            {med.category !== '-' && <span className="text-slate-500 ml-2 text-xs">({med.category})</span>}
+                            <span className="font-semibold text-foreground text-sm">{med.medicineName}</span>
+                            {med.category !== '-' && <span className="text-muted-foreground ml-2 text-xs">({med.category})</span>}
                           </td>
+                          <td className="px-4 py-2 text-sm text-muted-foreground">{med.batchStrength !== '-' ? med.batchStrength : '—'}</td>
 
-                          {/* ── CREATE columns ── */}
+                          {/* CREATE columns */}
                           {isCreate && (
                             <>
-                              <td className={cn("px-4 py-2 text-center text-sm tabular-nums w-32", stockColor)}>{stock}</td>
-                              <td className="px-4 py-2 text-center w-40">
+                              <td className={cn("px-4 py-2 text-center text-sm tabular-nums w-28", stockColor)}>{stock}</td>
+                              <td className="px-4 py-2 text-center text-sm text-muted-foreground w-20">{med.unit !== '-' ? med.unit : '—'}</td>
+                              <td className="px-4 py-2 text-center w-36">
                                 <Input type="number" min="0"
-                                  className={cn("w-28 h-9 mx-auto text-center text-sm rounded-lg border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all shadow-sm", hasReqQty && "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200")}
+                                  className={cn("w-28 h-9 mx-auto text-center text-sm rounded-lg border-input focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm", hasReqQty && "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200")}
                                   value={med.requestedQty || ''} placeholder="0"
                                   onChange={e => updateMedicine(origIdx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))}
                                 />
@@ -512,7 +620,7 @@ export default function CreateMedicineRequest() {
                             </>
                           )}
 
-                          {/* ── VIEW / RECEIVE columns ── */}
+                          {/* VIEW / RECEIVE columns */}
                           {!isCreate && (
                             <>
                               <td className="px-4 py-2 text-center text-sm font-medium">{med.requestedQty}</td>
@@ -520,26 +628,26 @@ export default function CreateMedicineRequest() {
                                 <>
                                   <td className="px-4 py-2 text-center">
                                     {isReceive ? (
-                                      <Input className="w-24 h-8 mx-auto text-center text-sm rounded-lg border-slate-300 shadow-sm" placeholder="Batch"
+                                      <Input className="w-24 h-8 mx-auto text-center text-sm rounded-lg border-input shadow-sm" placeholder="Batch"
                                         value={med.batchNo} onChange={e => updateMedicine(origIdx, 'batchNo', e.target.value)} />
                                     ) : (
-                                      <span className="text-sm text-slate-500">{med.batchNo || '—'}</span>
+                                      <span className="text-sm text-muted-foreground">{med.batchNo || '—'}</span>
                                     )}
                                   </td>
                                   <td className="px-4 py-2 text-center">
                                     {isReceive ? (
-                                      <Input type="date" className="w-32 h-8 mx-auto text-sm rounded-lg border-slate-300 shadow-sm"
+                                      <Input type="date" className="w-32 h-8 mx-auto text-sm rounded-lg border-input shadow-sm"
                                         value={med.expDate} onChange={e => updateMedicine(origIdx, 'expDate', e.target.value)} />
                                     ) : (
-                                      <span className="text-sm text-slate-500">{med.expDate || '—'}</span>
+                                      <span className="text-sm text-muted-foreground">{med.expDate || '—'}</span>
                                     )}
                                   </td>
                                   <td className="px-4 py-2 text-center">
                                     {isReceive ? (
-                                      <Input className="w-20 h-8 mx-auto text-center text-sm rounded-lg border-slate-300 shadow-sm" placeholder="HSN"
+                                      <Input className="w-20 h-8 mx-auto text-center text-sm rounded-lg border-input shadow-sm" placeholder="HSN"
                                         value={med.hsnNo} onChange={e => updateMedicine(origIdx, 'hsnNo', e.target.value)} />
                                     ) : (
-                                      <span className="text-sm text-slate-500">{med.hsnNo || '—'}</span>
+                                      <span className="text-sm text-muted-foreground">{med.hsnNo || '—'}</span>
                                     )}
                                   </td>
                                   <td className={cn("px-4 py-2 text-center text-sm tabular-nums", stockColor)}>{stock}</td>
@@ -548,7 +656,7 @@ export default function CreateMedicineRequest() {
                               <td className="px-4 py-2 text-center">
                                 {isReceive ? (
                                   <Input type="number" min="0"
-                                    className={cn("w-28 h-9 mx-auto text-center text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all shadow-sm", hasRecvQty && "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200")}
+                                    className={cn("w-28 h-9 mx-auto text-center text-sm rounded-lg border-input focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all shadow-sm", hasRecvQty && "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200")}
                                     value={med.receivedQty || ''} placeholder="0"
                                     onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))}
                                   />
@@ -566,22 +674,22 @@ export default function CreateMedicineRequest() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-5 py-3.5 border-t bg-gradient-to-r from-slate-50 to-blue-50/30">
-                <div className="flex items-center gap-5 text-sm text-slate-600">
+              <div className="flex items-center justify-between px-5 py-3.5 border-t bg-muted/20">
+                <div className="flex items-center gap-5 text-sm text-muted-foreground">
                   <span>Items with qty: <strong className="text-foreground font-semibold">{totalSelected}</strong></span>
                   <span>Total Qty: <strong className="text-foreground font-semibold">{isReceive ? totalRecvQty : totalReqQty}</strong></span>
                   {isReceive && <span>Requested: <strong className="text-foreground font-semibold">{totalReqQty}</strong></span>}
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => navigate('/supplier-orders')}>
+                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => navigate('/supplier-orders')}>
                     Cancel
                   </Button>
                   {(isCreate || isEditDraft) && (
                     <>
-                      <Button variant="outline" size="sm" className="h-9 px-4 text-sm border-slate-300 text-slate-700 hover:bg-slate-100 shadow-sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('DRAFT')}>
+                      <Button variant="outline" size="sm" className="h-9 px-4 text-sm border-input shadow-sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('DRAFT')}>
                         <Save className="mr-1.5 h-4 w-4" /> Save Draft
                       </Button>
-                      <Button size="sm" className="h-9 px-5 text-sm bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('PENDING')}>
+                      <Button size="sm" className="h-9 px-5 text-sm shadow-lg" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('PENDING')}>
                         <Send className="mr-1.5 h-4 w-4" /> Submit Request
                       </Button>
                     </>
@@ -597,6 +705,41 @@ export default function CreateMedicineRequest() {
           )}
         </div>
       )}
+
+      {/* Add Medicine Dialog */}
+      <Dialog open={showAddMedicine} onOpenChange={setShowAddMedicine}>
+        <DialogContent className="sm:max-w-md max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold">Add Medicine</DialogTitle>
+          </DialogHeader>
+          <div className="relative mb-3">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input className="pl-8 h-9 text-sm" placeholder="Search medicines..." value={addMedSearch} onChange={e => setAddMedSearch(e.target.value)} autoFocus />
+          </div>
+          <div className="overflow-auto max-h-[50vh] border rounded-lg divide-y divide-border/50">
+            {addMedicineFiltered.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No medicines found</p>
+            ) : (
+              addMedicineFiltered.map((med: any) => {
+                const alreadyAdded = medicines.some(m => String(m.medicineId) === String(med.id));
+                return (
+                  <div key={med.id} className={cn("flex items-center justify-between px-3 py-2.5 text-sm transition-colors", alreadyAdded ? "bg-muted/40 opacity-60" : "hover:bg-primary/[0.03] cursor-pointer")} onClick={() => !alreadyAdded && addMedicineToList(med)}>
+                    <div>
+                      <p className="font-medium text-foreground">{med.name}</p>
+                      <p className="text-xs text-muted-foreground">{med.category || med.medicineType || '-'}</p>
+                    </div>
+                    {alreadyAdded ? (
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground">Added</Badge>
+                    ) : (
+                      <PlusCircle className="h-4 w-4 text-primary shrink-0" />
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Image Preview Dialog */}
       <Dialog open={!!showImagePreview} onOpenChange={() => setShowImagePreview(null)}>
@@ -615,5 +758,4 @@ export default function CreateMedicineRequest() {
       </Dialog>
     </DashboardLayout>
   );
-  
 }
