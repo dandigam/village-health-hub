@@ -60,6 +60,7 @@ export default function NewInvoice() {
   const [medSearch, setMedSearch] = useState('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [banner, setBanner] = useState<BannerState | null>(null);
 
   // Add new medicine dialog
   const [showAddDialog, setShowAddDialog] = useState(false);
