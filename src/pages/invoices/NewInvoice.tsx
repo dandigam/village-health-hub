@@ -212,15 +212,15 @@ export default function NewInvoice() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="flex items-center gap-2.5 mb-2">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/invoices')}>
+      <div className="flex items-center gap-3 mb-4">
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => navigate('/invoices')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">{pageTitle}</h1>
-        {id && <span className="text-sm text-muted-foreground font-mono">#{id}</span>}
-        {createdAt && <span className="text-sm text-muted-foreground ml-auto">{new Date(createdAt).toLocaleDateString()}</span>}
+        <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
+        {id && <span className="text-sm text-slate-500 font-mono">#{id}</span>}
+        {createdAt && <span className="text-sm text-slate-500 ml-auto">{new Date(createdAt).toLocaleDateString()}</span>}
         {isReadOnly && (
-          <Button size="sm" variant="outline" className="ml-2" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
+          <Button size="sm" variant="outline" className="ml-2 border-blue-200 text-blue-600 hover:bg-blue-50" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
             <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
           </Button>
         )}
@@ -243,27 +243,27 @@ export default function NewInvoice() {
       ) : (
         <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
           {/* ORDER INFORMATION */}
-          <div className="px-4 py-3 border-b">
-            <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">Order Information</p>
-            <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
-              <div className="min-w-[160px]">
-                <Label className="text-[11px] text-muted-foreground">Supplier *</Label>
+          <div className="px-5 py-4 border-b bg-gradient-to-r from-slate-50 to-blue-50/30">
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Order Information</p>
+            <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
+              <div className="min-w-[180px]">
+                <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Supplier *</Label>
                 {canEdit ? (
                   <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                    <SelectTrigger className="h-10 text-sm mt-1.5 bg-white border-slate-300 hover:border-blue-400 shadow-sm"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
                     <SelectContent className="bg-popover z-50">
                       {suppliers.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{selectedSupplier?.name || '—'}</p>
+                  <p className="text-sm font-semibold text-slate-700 mt-1.5 h-10 flex items-center">{selectedSupplier?.name || '—'}</p>
                 )}
               </div>
-              <div className="min-w-[130px]">
-                <Label className="text-[11px] text-muted-foreground">Payment Mode</Label>
+              <div className="min-w-[140px]">
+                <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Payment Mode</Label>
                 {canEdit ? (
                   <Select value={paymentMode} onValueChange={setPaymentMode}>
-                    <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectTrigger className="h-10 text-sm mt-1.5 bg-white border-slate-300 hover:border-blue-400 shadow-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent className="bg-popover z-50">
                       {['cash', 'upi', 'bank_transfer', 'cheque', 'credit'].map(m => (
                         <SelectItem key={m} value={m}>{m.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
@@ -271,49 +271,49 @@ export default function NewInvoice() {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center capitalize">{paymentMode || '—'}</p>
+                  <p className="text-sm font-semibold text-slate-700 mt-1.5 h-10 flex items-center capitalize">{paymentMode || '—'}</p>
                 )}
               </div>
-              <div className="min-w-[110px]">
-                <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
+              <div className="min-w-[130px]">
+                <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Invoice No.</Label>
                 {canEdit ? (
-                  <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                  <Input className="h-10 text-sm mt-1.5 bg-white border-slate-300 shadow-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                 ) : (
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{invoiceNumber || '—'}</p>
+                  <p className="text-sm font-semibold text-slate-700 mt-1.5 h-10 flex items-center">{invoiceNumber || '—'}</p>
                 )}
               </div>
-              <div className="min-w-[100px]">
-                <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
+              <div className="min-w-[120px]">
+                <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Amount (₹)</Label>
                 {canEdit ? (
-                  <Input className="h-8 text-sm mt-0.5" type="number" step="0.01" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                  <Input className="h-10 text-sm mt-1.5 bg-white border-slate-300 shadow-sm" type="number" step="0.01" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
                 ) : (
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
+                  <p className="text-sm font-semibold text-slate-700 mt-1.5 h-10 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
                 )}
               </div>
-              <div className="min-w-[140px]">
-                <Label className="text-[11px] text-muted-foreground">Date *</Label>
+              <div className="min-w-[150px]">
+                <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Date *</Label>
                 {canEdit ? (
-                  <Input className="h-8 text-sm mt-0.5" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                  <Input className="h-10 text-sm mt-1.5 bg-white border-slate-300 shadow-sm" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
                 ) : (
-                  <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
+                  <p className="text-sm font-semibold text-slate-700 mt-1.5 h-10 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                 )}
               </div>
               {/* Attachments */}
-              <div className="flex items-center gap-1.5 ml-auto pb-0.5">
+              <div className="flex items-center gap-2 ml-auto pb-0.5">
                 {invoiceFiles.map((f, idx) => (
-                  <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
-                    <FileImage className="w-3 h-3 text-primary shrink-0" />
-                    <span className="max-w-[80px] truncate">{f.name}</span>
+                  <div key={idx} className="group relative flex items-center gap-1.5 border border-slate-200 rounded-lg bg-white px-2 py-1.5 text-xs cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all" onClick={() => setShowImagePreview(f.url)}>
+                    <FileImage className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                    <span className="max-w-[80px] truncate text-slate-600">{f.name}</span>
                     {canEdit && (
-                      <button className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
-                        <X className="w-2.5 h-2.5" />
+                      <button className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-500" onClick={e => { e.stopPropagation(); removeFile(idx); }}>
+                        <X className="w-3 h-3" />
                       </button>
                     )}
                   </div>
                 ))}
                 {canEdit && (
-                  <label className="flex items-center gap-1 border border-dashed rounded px-2 py-1 text-[11px] text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
-                    <Upload className="w-3 h-3" />
+                  <label className="flex items-center gap-1.5 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-600 cursor-pointer hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm">
+                    <Upload className="w-4 h-4" />
                     Attach
                     <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} />
                   </label>
@@ -324,26 +324,29 @@ export default function NewInvoice() {
 
           {/* MEDICINE DETAILS */}
           {!supplierId && mode === 'create' ? (
-            <div className="flex flex-col items-center justify-center py-14">
-              <Package className="h-10 w-10 text-muted-foreground/40 mb-2" />
-              <p className="text-sm text-muted-foreground">Select a supplier to load their medicine catalog</p>
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                <Package className="h-8 w-8 text-slate-400" />
+              </div>
+              <p className="text-sm font-medium text-slate-700 mb-1">Select a Supplier</p>
+              <p className="text-xs text-slate-500">Choose a supplier above to load their medicine catalog</p>
             </div>
           ) : (
             <>
               {/* Medicine header */}
-              <div className="px-4 py-2 border-b flex items-center gap-3">
-                <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Medicine Details</p>
+              <div className="px-4 py-3 border-b flex items-center gap-3 bg-white">
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Medicine Details</p>
                 {items.length > 0 && (
-                  <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5">{medSearch ? `${filteredItems.length} of ${items.length}` : `${items.length} medicines`}</Badge>
+                  <span className="text-xs text-white bg-blue-500 px-2.5 py-0.5 rounded-full font-medium">{items.length} {items.length === 1 ? 'medicine' : 'medicines'}</span>
                 )}
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ml-auto flex items-center gap-3">
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                    <Input className="h-8 text-sm pl-8 w-48" placeholder="Filter medicines..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                    <Input className="h-9 text-sm pl-8 w-48 bg-slate-50 border-slate-200 focus:bg-white" placeholder="Filter medicines..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
                   </div>
                   {canEdit && (
-                    <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setNewMedName(''); setNewMedType(''); setShowAddDialog(true); }}>
-                      <PlusCircle className="w-3.5 h-3.5 mr-1" /> Add Medicine
+                    <Button size="sm" variant="outline" className="h-9 text-sm border-slate-300 hover:border-blue-400 hover:bg-blue-50" onClick={() => { setNewMedName(''); setNewMedType(''); setShowAddDialog(true); }}>
+                      <PlusCircle className="w-4 h-4 mr-1.5" /> Add Medicine
                     </Button>
                   )}
                 </div>
@@ -352,66 +355,66 @@ export default function NewInvoice() {
               {/* Table */}
               <div className="overflow-auto max-h-[calc(100vh-320px)]">
                 {filteredItems.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-14">
-                    <Pill className="h-8 w-8 text-muted-foreground/30 mb-2" />
-                    <p className="text-sm text-muted-foreground">{medSearch ? 'No medicines match your filter' : 'No medicines found'}</p>
+                  <div className="flex flex-col items-center justify-center py-20">
+                    <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                      <Pill className="h-8 w-8 text-slate-400" />
+                    </div>
+                    <p className="text-sm font-medium text-slate-700">{medSearch ? 'No medicines match your filter' : 'No medicines found'}</p>
                   </div>
                 ) : (
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur-sm">
-                      <tr className="border-b">
-                        <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-10">#</th>
-                        <th className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
-                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Stock</th>
-                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>
-                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>
-                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">HSN</th>
-                        <th className="px-3 py-2 text-center font-semibold text-[11px] uppercase tracking-wider text-muted-foreground w-20">Qty</th>
+                    <thead className="sticky top-0 z-10">
+                      <tr className="border-b bg-gradient-to-r from-slate-50 to-blue-50/30 border-slate-200">
+                        <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-slate-600 w-12">#</th>
+                        <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-slate-600">Medicine</th>
+                        <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-24 whitespace-nowrap">Stock</th>
+                        <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-28 whitespace-nowrap">Batch</th>
+                        <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-36 whitespace-nowrap">Exp Date</th>
+                        <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-24 whitespace-nowrap">HSN</th>
+                        <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-28 whitespace-nowrap">Qty</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-slate-200">
                       {filteredItems.map((item, idx) => {
                         const realIdx = items.indexOf(item);
                         const stock = item.stock;
                         const hasQty = item.quantity > 0;
-                        const stockColor = stock <= 0 ? 'text-destructive font-bold' : stock < 30 ? 'text-orange-600 font-semibold' : 'text-muted-foreground';
-                        const zebra = idx % 2 === 1 ? 'bg-muted/10' : '';
-                        const rowBg = hasQty ? 'bg-primary/5' : zebra;
+                        const stockColor = stock <= 0 ? 'text-red-500 font-bold' : stock < 30 ? 'text-amber-600 font-semibold' : 'text-emerald-600 font-medium';
                         return (
-                          <tr key={`${item.medicineId}-${idx}`} className={`border-b last:border-b-0 hover:bg-accent/20 transition-colors ${rowBg}`}>
-                            <td className="px-3 py-1.5 text-muted-foreground text-xs">{idx + 1}</td>
-                            <td className="px-3 py-1.5">
-                              <span className="font-medium">{item.medicineName}</span>
-                              <span className="text-muted-foreground ml-2 text-xs">{item.medicineType !== '-' ? item.medicineType : ''}</span>
-                              {!item.isAlreadyExist && <Badge className="text-[9px] h-4 ml-1.5 bg-primary/10 text-primary border-primary/20">New</Badge>}
+                          <tr key={`${item.medicineId}-${idx}`} className={`transition-colors duration-150 hover:bg-blue-50/50 ${hasQty ? 'bg-emerald-50/60' : 'bg-white'}`}>
+                            <td className="px-4 py-2.5 text-slate-500 text-sm font-medium">{idx + 1}</td>
+                            <td className="px-4 py-2.5">
+                              <span className="font-semibold text-slate-800">{item.medicineName}</span>
+                              <span className="text-slate-500 ml-2 text-xs">{item.medicineType !== '-' ? item.medicineType : ''}</span>
+                              {!item.isAlreadyExist && <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded bg-blue-100 text-blue-600 font-medium">New</span>}
                             </td>
-                            <td className={`px-3 py-1.5 text-center text-xs ${stockColor}`}>{stock}</td>
-                            <td className="px-3 py-1.5 text-center">
+                            <td className={`px-4 py-2.5 text-center text-sm tabular-nums ${stockColor}`}>{stock}</td>
+                            <td className="px-4 py-2.5 text-center">
                               {canEdit ? (
-                                <Input className="w-20 h-7 mx-auto text-center text-xs" placeholder="Batch" value={item.batchNo} onChange={e => updateItem(realIdx, 'batchNo', e.target.value)} />
+                                <Input className="w-24 h-9 mx-auto text-center text-sm rounded-lg border-slate-300 bg-slate-50 focus:bg-white shadow-sm" placeholder="Batch" value={item.batchNo} onChange={e => updateItem(realIdx, 'batchNo', e.target.value)} />
                               ) : (
-                                <span className="text-muted-foreground text-xs">{item.batchNo || '—'}</span>
+                                <span className="text-slate-500 text-sm">{item.batchNo || '—'}</span>
                               )}
                             </td>
-                            <td className="px-3 py-1.5 text-center">
+                            <td className="px-4 py-2.5 text-center">
                               {canEdit ? (
-                                <Input className="w-32 h-7 mx-auto text-xs" type="date" value={item.expDate} onChange={e => updateItem(realIdx, 'expDate', e.target.value)} />
+                                <Input className="w-36 h-9 mx-auto text-sm rounded-lg border-slate-300 bg-slate-50 focus:bg-white shadow-sm" type="date" value={item.expDate} onChange={e => updateItem(realIdx, 'expDate', e.target.value)} />
                               ) : (
-                                <span className="text-muted-foreground text-xs">{item.expDate || '—'}</span>
+                                <span className="text-slate-500 text-sm">{item.expDate || '—'}</span>
                               )}
                             </td>
-                            <td className="px-3 py-1.5 text-center">
+                            <td className="px-4 py-2.5 text-center">
                               {canEdit ? (
-                                <Input className="w-16 h-7 mx-auto text-center text-xs" placeholder="HSN" value={item.hsnNo} onChange={e => updateItem(realIdx, 'hsnNo', e.target.value)} />
+                                <Input className="w-20 h-9 mx-auto text-center text-sm rounded-lg border-slate-300 bg-slate-50 focus:bg-white shadow-sm" placeholder="HSN" value={item.hsnNo} onChange={e => updateItem(realIdx, 'hsnNo', e.target.value)} />
                               ) : (
-                                <span className="text-muted-foreground text-xs">{item.hsnNo || '—'}</span>
+                                <span className="text-slate-500 text-sm">{item.hsnNo || '—'}</span>
                               )}
                             </td>
-                            <td className="px-3 py-1.5 text-center">
+                            <td className="px-4 py-2.5 text-center">
                               {canEdit ? (
-                                <Input className={`w-16 h-7 mx-auto text-center text-xs ${hasQty ? 'border-primary/50 bg-primary/5' : ''}`} type="number" placeholder="0" value={item.quantity || ''} onChange={e => updateItem(realIdx, 'quantity', Number(e.target.value))} />
+                                <Input className={`w-24 h-9 mx-auto text-center text-sm font-medium rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 ${hasQty ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200 text-emerald-700' : 'border-blue-300 bg-blue-50/50'}`} type="number" placeholder="0" value={item.quantity || ''} onChange={e => updateItem(realIdx, 'quantity', Number(e.target.value))} />
                               ) : (
-                                <span className={`font-semibold ${item.quantity > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>{item.quantity}</span>
+                                <span className={`font-semibold ${item.quantity > 0 ? 'text-slate-800' : 'text-slate-400'}`}>{item.quantity}</span>
                               )}
                             </td>
                           </tr>
@@ -423,18 +426,18 @@ export default function NewInvoice() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-4 py-2.5 border-t">
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>Items with qty: <strong className="text-foreground">{totalWithQty}</strong></span>
-                  <span>Total Qty: <strong className="text-foreground">{totalQty}</strong></span>
+              <div className="flex items-center justify-between px-5 py-3.5 border-t bg-gradient-to-r from-slate-50 to-blue-50/30">
+                <div className="flex items-center gap-5 text-sm text-slate-600">
+                  <span>Items with qty: <strong className="text-slate-800 font-semibold">{totalWithQty}</strong></span>
+                  <span>Total Qty: <strong className="text-slate-800 font-semibold">{totalQty}</strong></span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" className="h-8 px-4 text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate('/invoices')}>
-                    {isReadOnly ? 'Back' : 'Cancel'}
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => navigate('/invoices')}>
+                    Cancel
                   </Button>
                   {canEdit && (
-                    <Button size="sm" className="h-8 px-5 text-xs" disabled={saving || totalWithQty === 0} onClick={handleSave}>
-                      <Save className="mr-1.5 h-3.5 w-3.5" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
+                    <Button size="sm" className="h-9 px-5 text-sm bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25" disabled={saving || totalWithQty === 0} onClick={handleSave}>
+                      <Save className="mr-1.5 h-4 w-4" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
                     </Button>
                   )}
                 </div>

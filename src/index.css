@@ -213,17 +213,29 @@
 
   /* Premium scrollbar */
   .premium-scroll::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
+    height: 6px;
   }
   .premium-scroll::-webkit-scrollbar-track {
     background: transparent;
+    margin: 4px;
   }
   .premium-scroll::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.2);
+    background: hsl(var(--muted-foreground) / 0.15);
     border-radius: 10px;
+    transition: background 0.2s ease;
   }
   .premium-scroll::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.35);
+    background: hsl(var(--muted-foreground) / 0.3);
+  }
+  .premium-scroll::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox scrollbar */
+  .premium-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.15) transparent;
   }
 }
 

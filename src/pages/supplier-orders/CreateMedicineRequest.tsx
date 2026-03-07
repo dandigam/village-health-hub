@@ -80,6 +80,10 @@ export default function CreateMedicineRequest() {
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [invoiceDateObj, setInvoiceDateObj] = useState<Date | undefined>(undefined);
   const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
+  const [paymentMode, setPaymentMode] = useState('');
+  const [createdAt, setCreatedAt] = useState('');
+  const [updatedAt, setUpdatedAt] = useState('');
+  const [warehouseName, setWarehouseName] = useState('');
   const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
@@ -123,6 +127,16 @@ export default function CreateMedicineRequest() {
           expDate: item.expDate || '',
           hsnNo: item.hsnNo || '',
         })));
+        // Load invoice-related fields
+        setInvoiceNumber(order.invoiceNo || '');
+        setInvoiceAmount(order.invoiceAmount ? String(order.invoiceAmount) : '');
+        if (order.invoiceDate) {
+          setInvoiceDateObj(new Date(order.invoiceDate));
+        }
+        setPaymentMode(order.paymentMode || '');
+        setCreatedAt(order.createdAt || '');
+        setUpdatedAt(order.updatedAt || '');
+        setWarehouseName(order.warehouseName || '');
       }
     }).catch(err => {
       setBanner({ type: 'error', message: err.message || 'Failed to load order' });
@@ -223,16 +237,19 @@ export default function CreateMedicineRequest() {
   // Page title
   const pageTitle = isCreate ? 'Medicine Request' : (isReceive ? 'View Request' : (isEditDraft ? 'Edit Request' : 'View Request'));
 
-  return (
-    <DashboardLayout>
+              <span>Redirecting to orders list...</span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="flex items-center gap-2.5 mb-3">
-        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigate('/supplier-orders')}>
+      <div className="flex items-center gap-3 mb-4">
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => navigate('/supplier-orders')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-lg font-bold tracking-tight text-foreground">{pageTitle}</h1>
+        <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
         {orderStatus && (
-          <Badge variant="outline" className={cn("text-[11px]", statusConfig[statusLower]?.className)}>
+          <Badge variant="outline" className={cn("text-xs px-2.5 py-0.5 rounded-full", statusConfig[statusLower]?.className)}>
             {statusConfig[statusLower]?.label || orderStatus}
           </Badge>
         )}
@@ -260,14 +277,33 @@ export default function CreateMedicineRequest() {
           {/* ORDER INFORMATION — only shown for view/receive (not create)  */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {!isCreate && (
-            <div className="px-4 py-3 border-b">
-              <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2">Order Information</p>
+            <div className="px-5 py-4 border-b bg-slate-50/50">
+              <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Order Information</p>
               <div className="flex items-end gap-3 flex-wrap">
+                {/* Request ID (read-only) */}
+                <div className="w-[80px]">
+                  <Label className="text-[11px] text-muted-foreground">Request ID</Label>
+                  <p className="text-sm font-medium h-8 flex items-center">#{id}</p>
+                </div>
                 {/* Supplier (always read-only here) */}
                 <div className="min-w-[160px]">
                   <Label className="text-[11px] text-muted-foreground">Supplier</Label>
                   <p className="text-sm font-medium h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
                 </div>
+                {/* Warehouse (read-only) - hidden for RECEIVED and PENDING */}
+                {warehouseName && !(statusLower === 'received' || statusLower === 'pending') && (
+                  <div className="min-w-[120px]">
+                    <Label className="text-[11px] text-muted-foreground">Warehouse</Label>
+                    <p className="text-sm h-8 flex items-center">{warehouseName}</p>
+                  </div>
+                )}
+                {/* Request Date (read-only) */}
+                {createdAt && (
+                  <div className="w-[140px]">
+                    <Label className="text-[11px] text-muted-foreground">Request Date</Label>
+                    <p className="text-sm h-8 flex items-center">{createdAt ? format(new Date(createdAt), 'dd MMM yyyy') : '—'}</p>
+                  </div>
+                )}
                 {/* Invoice No */}
                 <div className="w-[120px]">
                   <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
@@ -287,7 +323,7 @@ export default function CreateMedicineRequest() {
                   )}
                 </div>
                 {/* Invoice Date */}
-                <div className="w-[160px]">
+                <div className="w-[140px]">
                   <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
                   {isReceive ? (
                     <Popover>
@@ -305,6 +341,20 @@ export default function CreateMedicineRequest() {
                     <p className="text-sm h-8 flex items-center">{invoiceDateObj ? format(invoiceDateObj, 'dd MMM yyyy') : '—'}</p>
                   )}
                 </div>
+                {/* Payment Mode (read-only in view, could be editable in receive) */}
+                {(isView || paymentMode) && (
+                  <div className="w-[100px]">
+                    <Label className="text-[11px] text-muted-foreground">Payment Mode</Label>
+                    <p className="text-sm h-8 flex items-center">{paymentMode || '—'}</p>
+                  </div>
+                )}
+                {/* Received Date (read-only) */}
+                {updatedAt && statusLower === 'received' && (
+                  <div className="w-[140px]">
+                    <Label className="text-[11px] text-muted-foreground">Received Date</Label>
+                    <p className="text-sm h-8 flex items-center">{format(new Date(updatedAt), 'dd MMM yyyy')}</p>
+                  </div>
+                )}
                 {/* Email (read-only) */}
                 {selectedSupplier?.email && (
                   <div>
@@ -339,12 +389,12 @@ export default function CreateMedicineRequest() {
           {/* CREATE MODE — Supplier selector                               */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {isCreate && (
-            <div className="px-4 py-3 border-b">
-              <div className="flex items-end gap-3">
-                <div className="min-w-[200px]">
-                  <Label className="text-[11px] text-muted-foreground">Supplier *</Label>
+            <div className="px-5 py-4 border-b bg-gradient-to-r from-slate-50 to-blue-50/30">
+              <div className="flex items-end gap-6">
+                <div className="min-w-[220px]">
+                  <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Supplier *</Label>
                   <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-8 text-sm mt-0.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                    <SelectTrigger className="h-10 text-sm mt-1.5 bg-white border-slate-300 hover:border-blue-400 shadow-sm transition-colors"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
                     <SelectContent className="bg-popover z-50">
                       {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                     </SelectContent>
@@ -353,12 +403,12 @@ export default function CreateMedicineRequest() {
                 {selectedSupplier && (
                   <>
                     <div>
-                      <Label className="text-[11px] text-muted-foreground">Contact</Label>
-                      <p className="text-sm font-medium h-8 flex items-center">{selectedSupplier.contact || '-'}</p>
+                      <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Contact</Label>
+                      <p className="text-sm font-semibold text-slate-700 h-10 flex items-center">{selectedSupplier.contact || '-'}</p>
                     </div>
                     <div className="flex-1 min-w-[200px]">
-                      <Label className="text-[11px] text-muted-foreground">Address</Label>
-                      <p className="text-sm h-8 flex items-center truncate">
+                      <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Address</Label>
+                      <p className="text-sm h-10 flex items-center truncate text-slate-600">
                         {[selectedSupplier.address, selectedSupplier.mandal, selectedSupplier.district, selectedSupplier.state].filter(Boolean).join(', ')}
                         {selectedSupplier.pinCode ? ` - ${selectedSupplier.pinCode}` : ''}
                         {!selectedSupplier.address && !selectedSupplier.district ? '-' : ''}
@@ -374,23 +424,29 @@ export default function CreateMedicineRequest() {
           {/* MEDICINE TABLE                                                */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {(isCreate && !supplierId) ? (
-            <div className="flex flex-col items-center justify-center py-14">
-              <Package className="h-10 w-10 text-muted-foreground/40 mb-2" />
-              <p className="text-sm text-muted-foreground">Select a supplier to load medicine catalog</p>
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                <Package className="h-8 w-8 text-slate-400" />
+              </div>
+              <p className="text-sm font-medium text-foreground mb-1">Select a Supplier</p>
+              <p className="text-xs text-muted-foreground">Choose a supplier above to load their medicine catalog</p>
             </div>
           ) : medicines.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-14">
-              <p className="text-sm text-muted-foreground">No medicines found</p>
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                <Package className="h-8 w-8 text-slate-400" />
+              </div>
+              <p className="text-sm font-medium text-foreground">No medicines found</p>
             </div>
           ) : (
             <>
               {/* Search bar */}
-              <div className="px-3 py-1.5 border-b flex items-center gap-3 bg-muted/30">
-                <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Medicine Details</p>
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">{medicines.length}</Badge>
+              <div className="px-4 py-3 border-b flex items-center gap-3 bg-white">
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Medicine Details</p>
+                <span className="text-xs text-white bg-blue-500 px-2 py-0.5 rounded-full font-medium">{medicines.length}</span>
                 <div className="ml-auto relative">
-                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-                  <Input className="h-7 text-xs pl-7 w-44 bg-background" placeholder="Search..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input className="h-8 text-sm pl-8 w-48 bg-slate-50 border-slate-200 focus:bg-white transition-colors" placeholder="Search..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
                 </div>
               </div>
 
@@ -398,56 +454,60 @@ export default function CreateMedicineRequest() {
               <div className="overflow-auto max-h-[calc(100vh-320px)]">
                 <table className="w-full text-sm border-collapse">
                   <thead className="sticky top-0 z-10">
-                    <tr className="border-b bg-muted/40">
-                      <th className="px-3 py-2 text-left font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-10">#</th>
-                      <th className="px-3 py-2 text-left font-medium text-[11px] uppercase tracking-wider text-muted-foreground">Medicine</th>
+                    <tr className="border-b bg-gradient-to-r from-slate-50 to-blue-50/30 border-slate-200">
+                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-slate-600 w-12">#</th>
+                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-slate-600">Medicine</th>
 
                       {/* CREATE: Current Stock, Request Qty */}
                       {isCreate && (
                         <>
-                          <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Current Stock</th>
-                          <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Request Qty</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-32 whitespace-nowrap">Stock</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-slate-600 w-40 whitespace-nowrap">Request Qty</th>
                         </>
                       )}
 
                       {/* RECEIVE / VIEW (pending/partial/received): Req Qty, Batch, Exp Date, HSN, Stock, Recv Qty */}
                       {!isCreate && (
                         <>
-                          <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-20">Req Qty</th>
-                          <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Batch</th>
-                          <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-32">Exp Date</th>
-                          <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-20">HSN</th>
-                          <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-20">Stock</th>
-                          <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Recv Qty</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24 whitespace-nowrap">Req Qty</th>
+                          {!(statusLower === 'received' || statusLower === 'pending') && (
+                            <>
+                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24 whitespace-nowrap">Batch</th>
+                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32 whitespace-nowrap">Exp Date</th>
+                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20 whitespace-nowrap">HSN</th>
+                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20 whitespace-nowrap">Stock</th>
+                            </>
+                          )}
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32 whitespace-nowrap">Recv Qty</th>
                         </>
                       )}
 
                       {/* EDIT DRAFT: same as create */}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/50">
+                  <tbody className="divide-y divide-slate-100">
                     {filteredMedicines.map((med, idx) => {
                       const origIdx = medicines.findIndex(m => m.medicineId === med.medicineId);
                       const stock = getStock(med.medicineId);
-                      const stockColor = stock <= 0 ? 'text-destructive font-semibold' : stock < 30 ? 'text-orange-600 font-medium' : 'text-foreground';
+                      const stockColor = stock <= 0 ? 'text-red-500 font-semibold' : stock < 30 ? 'text-amber-600 font-medium' : 'text-emerald-600 font-medium';
                       const hasReqQty = med.requestedQty > 0;
                       const hasRecvQty = med.receivedQty > 0;
 
                       return (
-                        <tr key={med.medicineId} className={cn("transition-colors hover:bg-accent/30", (isCreate ? hasReqQty : hasRecvQty) && "bg-primary/[0.03]")}>
-                          <td className="px-3 py-1 text-muted-foreground text-xs">{origIdx + 1}</td>
-                          <td className="px-3 py-1">
-                            <span className="font-semibold text-foreground text-xs">{med.medicineName}</span>
-                            {med.category !== '-' && <span className="text-muted-foreground ml-2 text-[11px]">({med.category})</span>}
+                        <tr key={med.medicineId} className={cn("transition-colors duration-150 hover:bg-blue-50/50", (isCreate ? hasReqQty : hasRecvQty) && "bg-emerald-50/60")}>
+                          <td className="px-4 py-2 text-slate-500 text-sm w-12">{origIdx + 1}</td>
+                          <td className="px-4 py-2">
+                            <span className="font-semibold text-slate-800 text-sm">{med.medicineName}</span>
+                            {med.category !== '-' && <span className="text-slate-500 ml-2 text-xs">({med.category})</span>}
                           </td>
 
                           {/* ── CREATE columns ── */}
                           {isCreate && (
                             <>
-                              <td className={cn("px-3 py-1 text-center text-xs tabular-nums", stockColor)}>{stock}</td>
-                              <td className="px-3 py-1 text-center">
+                              <td className={cn("px-4 py-2 text-center text-sm tabular-nums w-32", stockColor)}>{stock}</td>
+                              <td className="px-4 py-2 text-center w-40">
                                 <Input type="number" min="0"
-                                  className={cn("w-16 h-6 mx-auto text-center text-xs rounded-md", hasReqQty && "border-primary/40 ring-1 ring-primary/10")}
+                                  className={cn("w-28 h-9 mx-auto text-center text-sm rounded-lg border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all shadow-sm", hasReqQty && "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200")}
                                   value={med.requestedQty || ''} placeholder="0"
                                   onChange={e => updateMedicine(origIdx, 'requestedQty', e.target.value === '' ? 0 : Number(e.target.value))}
                                 />
@@ -458,41 +518,45 @@ export default function CreateMedicineRequest() {
                           {/* ── VIEW / RECEIVE columns ── */}
                           {!isCreate && (
                             <>
-                              <td className="px-3 py-1 text-center text-xs font-medium">{med.requestedQty}</td>
-                              <td className="px-3 py-1 text-center">
-                                {isReceive ? (
-                                  <Input className="w-24 h-6 mx-auto text-center text-xs rounded-md" placeholder="Batch"
-                                    value={med.batchNo} onChange={e => updateMedicine(origIdx, 'batchNo', e.target.value)} />
-                                ) : (
-                                  <span className="text-xs text-muted-foreground">{med.batchNo || '—'}</span>
-                                )}
-                              </td>
-                              <td className="px-3 py-1 text-center">
-                                {isReceive ? (
-                                  <Input type="date" className="w-32 h-6 mx-auto text-xs rounded-md"
-                                    value={med.expDate} onChange={e => updateMedicine(origIdx, 'expDate', e.target.value)} />
-                                ) : (
-                                  <span className="text-xs text-muted-foreground">{med.expDate || '—'}</span>
-                                )}
-                              </td>
-                              <td className="px-3 py-1 text-center">
-                                {isReceive ? (
-                                  <Input className="w-20 h-6 mx-auto text-center text-xs rounded-md" placeholder="HSN"
-                                    value={med.hsnNo} onChange={e => updateMedicine(origIdx, 'hsnNo', e.target.value)} />
-                                ) : (
-                                  <span className="text-xs text-muted-foreground">{med.hsnNo || '—'}</span>
-                                )}
-                              </td>
-                              <td className={cn("px-3 py-1 text-center text-xs tabular-nums", stockColor)}>{stock}</td>
-                              <td className="px-3 py-1 text-center">
+                              <td className="px-4 py-2 text-center text-sm font-medium">{med.requestedQty}</td>
+                              {!(statusLower === 'received' || statusLower === 'pending') && (
+                                <>
+                                  <td className="px-4 py-2 text-center">
+                                    {isReceive ? (
+                                      <Input className="w-24 h-8 mx-auto text-center text-sm rounded-lg border-slate-300 shadow-sm" placeholder="Batch"
+                                        value={med.batchNo} onChange={e => updateMedicine(origIdx, 'batchNo', e.target.value)} />
+                                    ) : (
+                                      <span className="text-sm text-slate-500">{med.batchNo || '—'}</span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                    {isReceive ? (
+                                      <Input type="date" className="w-32 h-8 mx-auto text-sm rounded-lg border-slate-300 shadow-sm"
+                                        value={med.expDate} onChange={e => updateMedicine(origIdx, 'expDate', e.target.value)} />
+                                    ) : (
+                                      <span className="text-sm text-slate-500">{med.expDate || '—'}</span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                    {isReceive ? (
+                                      <Input className="w-20 h-8 mx-auto text-center text-sm rounded-lg border-slate-300 shadow-sm" placeholder="HSN"
+                                        value={med.hsnNo} onChange={e => updateMedicine(origIdx, 'hsnNo', e.target.value)} />
+                                    ) : (
+                                      <span className="text-sm text-slate-500">{med.hsnNo || '—'}</span>
+                                    )}
+                                  </td>
+                                  <td className={cn("px-4 py-2 text-center text-sm tabular-nums", stockColor)}>{stock}</td>
+                                </>
+                              )}
+                              <td className="px-4 py-2 text-center">
                                 {isReceive ? (
                                   <Input type="number" min="0"
-                                    className={cn("w-16 h-6 mx-auto text-center text-xs rounded-md", hasRecvQty && "border-emerald-500/40 ring-1 ring-emerald-500/10 bg-emerald-50/50")}
+                                    className={cn("w-28 h-9 mx-auto text-center text-sm rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all shadow-sm", hasRecvQty && "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200")}
                                     value={med.receivedQty || ''} placeholder="0"
                                     onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))}
                                   />
                                 ) : (
-                                  <span className="text-xs font-medium">{med.receivedQty}</span>
+                                  <span className="text-sm font-medium">{med.receivedQty}</span>
                                 )}
                               </td>
                             </>
@@ -505,29 +569,29 @@ export default function CreateMedicineRequest() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/20">
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>Items with qty: <strong className="text-foreground">{totalSelected}</strong></span>
-                  <span>Total Qty: <strong className="text-foreground">{isReceive ? totalRecvQty : totalReqQty}</strong></span>
-                  {isReceive && <span>Requested: <strong className="text-foreground">{totalReqQty}</strong></span>}
+              <div className="flex items-center justify-between px-5 py-3.5 border-t bg-gradient-to-r from-slate-50 to-blue-50/30">
+                <div className="flex items-center gap-5 text-sm text-slate-600">
+                  <span>Items with qty: <strong className="text-foreground font-semibold">{totalSelected}</strong></span>
+                  <span>Total Qty: <strong className="text-foreground font-semibold">{isReceive ? totalRecvQty : totalReqQty}</strong></span>
+                  {isReceive && <span>Requested: <strong className="text-foreground font-semibold">{totalReqQty}</strong></span>}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" className="h-8 px-4 text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate('/supplier-orders')}>
-                    {isReadOnly ? 'Back' : 'Cancel'}
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => navigate('/supplier-orders')}>
+                    Cancel
                   </Button>
                   {(isCreate || isEditDraft) && (
                     <>
-                      <Button variant="secondary" size="sm" className="h-8 px-4 text-xs shadow-sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('DRAFT')}>
-                        <Save className="mr-1.5 h-3.5 w-3.5" /> Save Draft
+                      <Button variant="outline" size="sm" className="h-9 px-4 text-sm border-slate-300 text-slate-700 hover:bg-slate-100 shadow-sm" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('DRAFT')}>
+                        <Save className="mr-1.5 h-4 w-4" /> Save Draft
                       </Button>
-                      <Button size="sm" className="h-8 px-5 text-xs" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('PENDING')}>
-                        <Send className="mr-1.5 h-3.5 w-3.5" /> Submit Request
+                      <Button size="sm" className="h-9 px-5 text-sm bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/25" disabled={submitting || totalSelected === 0} onClick={() => handleSubmit('PENDING')}>
+                        <Send className="mr-1.5 h-4 w-4" /> Submit Request
                       </Button>
                     </>
                   )}
                   {isReceive && (
-                    <Button size="sm" className="h-8 px-5 text-xs bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all" disabled={submitting} onClick={handleReceiveStock}>
-                      <Package className="mr-1.5 h-3.5 w-3.5" /> Save Stock
+                    <Button size="sm" className="h-9 px-5 text-sm bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white shadow-lg shadow-emerald-500/25" disabled={submitting} onClick={handleReceiveStock}>
+                      <Package className="mr-1.5 h-4 w-4" /> Save Stock
                     </Button>
                   )}
                 </div>
@@ -554,4 +618,5 @@ export default function CreateMedicineRequest() {
       </Dialog>
     </DashboardLayout>
   );
+  
 }

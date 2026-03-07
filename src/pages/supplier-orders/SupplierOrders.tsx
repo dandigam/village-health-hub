@@ -1,19 +1,35 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+<<<<<<< HEAD
+import { Send, Eye, Package, Trash2, ChevronUp, ChevronDown, PackageOpen, Filter, CheckCircle, X } from 'lucide-react';
+=======
 import { Send, Eye, Package, Trash2, RotateCcw, ChevronUp, ChevronDown, PackageOpen, Pencil, Filter, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { motion } from 'framer-motion';
+>>>>>>> f0420582770540a8933301561b266b4c81738293
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { DeleteConfirmDialog } from '@/components/stock/DeleteConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+<<<<<<< HEAD
+import { useSupplierOrders } from '@/hooks/useApiData';
+import { toast } from '@/hooks/use-toast';
+=======
 import { useSupplierOrders, useSupplierList } from '@/hooks/useApiData';
+>>>>>>> f0420582770540a8933301561b266b4c81738293
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
 import { cn } from '@/lib/utils';
 
+<<<<<<< HEAD
+const statusConfig: Record<string, { label: string; dot: string; bg: string; text: string; border: string }> = {
+  pending: { label: 'Pending', dot: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+  partial: { label: 'Partial', dot: 'bg-orange-500', bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+  received: { label: 'Received', dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  cancelled: { label: 'Cancelled', dot: 'bg-slate-400', bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200' },
+  draft: { label: 'Draft', dot: 'bg-slate-400', bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200' },
+  sent: { label: 'Sent', dot: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+=======
 type BannerType = 'success' | 'error';
 interface BannerState { type: BannerType; message: string }
 
@@ -24,6 +40,7 @@ const statusConfig: Record<string, { label: string; dot: string; bg: string; tex
   cancelled: { label: 'Cancelled', dot: 'bg-muted-foreground', bg: 'bg-muted/60', text: 'text-muted-foreground' },
   draft: { label: 'Draft', dot: 'bg-muted-foreground', bg: 'bg-muted/60', text: 'text-muted-foreground' },
   sent: { label: 'Sent', dot: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
+>>>>>>> f0420582770540a8933301561b266b4c81738293
 };
 
 type SortKey = 'id' | 'createdAt' | 'supplierName' | 'itemCount' | 'totalQty' | 'status';
@@ -35,18 +52,33 @@ export default function SupplierOrders() {
   const { user: authUser } = useAuth();
   const warehouseId = authUser?.context?.warehouseId ? Number(authUser.context.warehouseId) : undefined;
   const { data: supplierOrders = [], refetch: refetchOrders } = useSupplierOrders(warehouseId);
-  const { data: suppliers = [] } = useSupplierList(warehouseId);
 
-  const [filterSupplier, setFilterSupplier] = useState('all');
-  const [filterRequestId, setFilterRequestId] = useState('');
-  const [filterDateFrom, setFilterDateFrom] = useState('');
-  const [filterDateTo, setFilterDateTo] = useState('');
+  // Success banner from sessionStorage
+  const [successBanner, setSuccessBanner] = useState<{ message: string; details: string } | null>(null);
+
+  // Check for success message on mount
+  useEffect(() => {
+    const stored = sessionStorage.getItem('supplierOrderSuccess');
+    if (stored) {
+      try {
+        const data = JSON.parse(stored);
+        setSuccessBanner({ message: data.message, details: data.details || '' });
+      } catch (e) {
+        // ignore parse errors
+      }
+      sessionStorage.removeItem('supplierOrderSuccess');
+    }
+  }, []);
+
+  const [filterSearch, setFilterSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [cancelOrderId, setCancelOrderId] = useState<number | string | null>(null);
+<<<<<<< HEAD
+=======
   const [showFilters, setShowFilters] = useState(false);
   const [banner, setBanner] = useState<BannerState | null>(null);
 
@@ -59,21 +91,16 @@ export default function SupplierOrders() {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+>>>>>>> f0420582770540a8933301561b266b4c81738293
 
   useEffect(() => { refetchOrders?.(); }, []);
 
-  const handleReset = () => {
-    setFilterSupplier('all'); setFilterRequestId(''); setFilterDateFrom(''); setFilterDateTo(''); setFilterStatus('all'); setPage(1);
-  };
-
-  const hasActiveFilters = filterSupplier !== 'all' || filterRequestId || filterDateFrom || filterDateTo || filterStatus !== 'all';
-
   const filteredOrders = useMemo(() => {
     let result = [...supplierOrders];
-    if (filterSupplier !== 'all') result = result.filter(o => String(o.supplierId) === filterSupplier);
-    if (filterRequestId.trim()) result = result.filter(o => String(o.id).includes(filterRequestId.trim()));
-    if (filterDateFrom) result = result.filter(o => new Date(o.createdAt) >= new Date(filterDateFrom));
-    if (filterDateTo) { const to = new Date(filterDateTo); to.setHours(23, 59, 59); result = result.filter(o => new Date(o.createdAt) <= to); }
+    if (filterSearch.trim()) {
+      const q = filterSearch.toLowerCase();
+      result = result.filter(o => String(o.id).includes(q) || o.supplierName?.toLowerCase().includes(q));
+    }
     if (filterStatus !== 'all') result = result.filter(o => o.status?.toLowerCase() === filterStatus);
     result.sort((a, b) => {
       let aVal: any, bVal: any;
@@ -91,7 +118,7 @@ export default function SupplierOrders() {
       return 0;
     });
     return result;
-  }, [supplierOrders, filterSupplier, filterRequestId, filterDateFrom, filterDateTo, filterStatus, sortKey, sortDir]);
+  }, [supplierOrders, filterSearch, filterStatus, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / rowsPerPage));
   const pagedOrders = filteredOrders.slice((page - 1) * rowsPerPage, page * rowsPerPage);
@@ -102,8 +129,8 @@ export default function SupplierOrders() {
   };
 
   const SortIcon = ({ col }: { col: SortKey }) => {
-    if (sortKey !== col) return <ChevronUp className="h-3 w-3 opacity-20" />;
-    return sortDir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />;
+    if (sortKey !== col) return <ChevronUp className="h-3.5 w-3.5 opacity-30" />;
+    return sortDir === 'asc' ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />;
   };
 
   const handleCancelOrder = async () => {
@@ -122,6 +149,27 @@ export default function SupplierOrders() {
 
   return (
     <DashboardLayout>
+<<<<<<< HEAD
+      {/* Success Banner */}
+      {successBanner && (
+        <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3 shadow-sm animate-in slide-in-from-top-2 duration-300">
+          <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+            <CheckCircle className="h-5 w-5 text-emerald-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-emerald-800">{successBanner.message}</h3>
+            {successBanner.details && (
+              <p className="text-xs text-emerald-600 mt-0.5">{successBanner.details}</p>
+            )}
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 shrink-0 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 rounded-full" 
+            onClick={() => setSuccessBanner(null)}
+          >
+            <X className="h-4 w-4" />
+=======
       {/* Banner */}
       {banner && (
         <div className={cn(
@@ -143,161 +191,191 @@ export default function SupplierOrders() {
             <Filter className="mr-1.5 h-3 w-3" />
             Filters
             {hasActiveFilters && <span className="ml-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">!</span>}
+>>>>>>> f0420582770540a8933301561b266b4c81738293
           </Button>
-          <Button size="sm" className="h-8 text-xs" onClick={() => navigate('/supplier-orders/new')}>
-            <Send className="mr-1.5 h-3.5 w-3.5" /> Request Stock
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-4">
+        <h1 className="text-lg font-semibold text-foreground">Supplier Orders</h1>
+        <span className="text-sm text-muted-foreground">({supplierOrders.length})</span>
+        
+        <div className="flex-1 max-w-sm ml-4">
+          <Input 
+            className="h-9 text-sm" 
+            placeholder="Search by Request ID / Supplier" 
+            value={filterSearch} 
+            onChange={e => { setFilterSearch(e.target.value); setPage(1); }} 
+          />
+        </div>
+
+        <div className="ml-auto flex items-center gap-3">
+          <Select value={filterStatus} onValueChange={v => { setFilterStatus(v); setPage(1); }}>
+            <SelectTrigger className="h-9 w-[140px] text-sm">
+              <Filter className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="partial">Partial</SelectItem>
+              <SelectItem value="received">Received</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button onClick={() => navigate('/supplier-orders/new')}>
+            <Send className="mr-1.5 h-4 w-4" /> Request Stock
           </Button>
         </div>
       </div>
 
-      {/* Collapsible Filters */}
-      {showFilters && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="border rounded-lg bg-card px-3 py-2.5 mb-3 overflow-hidden"
-        >
-          <div className="flex flex-wrap items-end gap-2.5">
-            <div className="min-w-[150px]">
-              <Label className="text-[10px] mb-0.5 block text-muted-foreground uppercase tracking-wider">Supplier</Label>
-              <Select value={filterSupplier} onValueChange={v => { setFilterSupplier(v); setPage(1); }}>
-                <SelectTrigger className="h-7 text-xs"><SelectValue placeholder="All Suppliers" /></SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  <SelectItem value="all">All Suppliers</SelectItem>
-                  {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+      {/* Table */}
+      {filteredOrders.length === 0 ? (
+        <div className="border rounded-xl bg-gradient-to-br from-card to-muted/10 flex flex-col items-center justify-center py-16 shadow-sm">
+          <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+            <PackageOpen className="h-8 w-8 text-muted-foreground/40" />
+          </div>
+          <p className="text-sm font-semibold text-foreground mb-1">No Orders Found</p>
+          <p className="text-xs text-muted-foreground mb-4">Create your first medicine request to get started</p>
+          <Button size="sm" className="shadow-md" onClick={() => navigate('/supplier-orders/new')}>
+            <Send className="mr-1.5 h-4 w-4" /> New Request
+          </Button>
+        </div>
+      ) : (
+        <div className="border rounded-lg bg-card overflow-hidden shadow-sm">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50/80 border-b border-slate-200">
+              <tr>
+                {[
+                  { key: 'id' as SortKey, label: 'Request ID', align: 'text-left' },
+                  { key: 'createdAt' as SortKey, label: 'Date', align: 'text-left' },
+                  { key: 'supplierName' as SortKey, label: 'Supplier', align: 'text-left' },
+                  { key: 'itemCount' as SortKey, label: 'Medicines', align: 'text-center' },
+                  { key: 'totalQty' as SortKey, label: 'Req Qty', align: 'text-center' },
+                  { key: 'status' as SortKey, label: 'Status', align: 'text-center' },
+                ].map(col => (
+                  <th 
+                    key={col.key} 
+                    className={cn(
+                      "px-4 py-3 font-semibold text-xs uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors",
+                      col.align
+                    )} 
+                    onClick={() => handleSort(col.key)}
+                  >
+                    <span className={cn("flex items-center gap-1", col.align === 'text-center' && 'justify-center')}>
+                      {col.label} <SortIcon col={col.key} />
+                    </span>
+                  </th>
+                ))}
+                <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedOrders.map((order) => {
+                const statusKey = order.status?.toLowerCase() || 'pending';
+                const config = statusConfig[statusKey] || statusConfig.pending;
+                const canCancel = statusKey === 'draft' || statusKey === 'pending';
+                const canReceive = statusKey === 'pending' || statusKey === 'partial';
+                return (
+                  <tr key={order.id} className="border-b last:border-b-0 hover:bg-blue-50/30 transition-colors duration-150">
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs font-medium text-primary">#{order.id}</span>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground text-sm">
+                      {new Date(order.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-medium text-sm">{order.supplierName || '—'}</span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-sm text-muted-foreground">{order.items?.length || 0}</span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-sm text-muted-foreground">{getTotalQty(order)}</span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border", config.bg, config.text, config.border)}>
+                        <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
+                        {config.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-8 w-8 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all" 
+                          onClick={() => navigate(`/supplier-orders/${order.id}`)}
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {canReceive && (
+                          <Button 
+                            size="sm" 
+                            className="h-7 px-3 text-xs font-medium bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm rounded-full transition-all" 
+                            onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}
+                          >
+                            <Package className="h-3.5 w-3.5 mr-1" /> Receive
+                          </Button>
+                        )}
+                        {canCancel && (
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all" 
+                            onClick={() => setCancelOrderId(order.id)}
+                            title="Cancel Order"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/20">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Rows:</span>
+              <Select value={String(rowsPerPage)} onValueChange={v => { setRowsPerPage(Number(v)); setPage(1); }}>
+                <SelectTrigger className="h-8 w-16 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <span className="text-sm text-muted-foreground">{filteredOrders.length} total</span>
             </div>
-            <div className="min-w-[100px]">
-              <Label className="text-[10px] mb-0.5 block text-muted-foreground uppercase tracking-wider">Request ID</Label>
-              <Input className="h-7 text-xs" placeholder="ID..." value={filterRequestId} onChange={e => { setFilterRequestId(e.target.value); setPage(1); }} />
+            <div className="flex items-center gap-1">
+              <Button 
+                size="sm"
+                variant="ghost" 
+                className="h-8" 
+                disabled={page <= 1} 
+                onClick={() => setPage(p => p - 1)}
+              >
+                Prev
+              </Button>
+              <span className="px-3 text-sm text-muted-foreground">{page}/{totalPages}</span>
+              <Button 
+                size="sm"
+                variant="ghost" 
+                className="h-8" 
+                disabled={page >= totalPages} 
+                onClick={() => setPage(p => p + 1)}
+              >
+                Next
+              </Button>
             </div>
-            <div className="min-w-[120px]">
-              <Label className="text-[10px] mb-0.5 block text-muted-foreground uppercase tracking-wider">From</Label>
-              <Input type="date" className="h-7 text-xs" value={filterDateFrom} onChange={e => { setFilterDateFrom(e.target.value); setPage(1); }} />
-            </div>
-            <div className="min-w-[120px]">
-              <Label className="text-[10px] mb-0.5 block text-muted-foreground uppercase tracking-wider">To</Label>
-              <Input type="date" className="h-7 text-xs" value={filterDateTo} onChange={e => { setFilterDateTo(e.target.value); setPage(1); }} />
-            </div>
-            <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground" onClick={handleReset}>
-              <RotateCcw className="mr-1 h-3 w-3" /> Reset
-            </Button>
           </div>
-        </motion.div>
+        </div>
       )}
-
-      {/* Table */}
-      <div className="border rounded-lg bg-card overflow-hidden flex flex-col" style={{ minHeight: 'calc(100vh - 280px)' }}>
-        {filteredOrders.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center py-16">
-            <PackageOpen className="h-12 w-12 text-muted-foreground/30 mb-3" />
-            <p className="text-sm font-medium text-foreground mb-1">No orders found</p>
-            <p className="text-xs text-muted-foreground mb-4">
-              {hasActiveFilters ? 'Try adjusting your filters' : 'Create your first medicine request'}
-            </p>
-            {hasActiveFilters ? (
-              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleReset}>
-                <RotateCcw className="mr-1.5 h-3 w-3" /> Clear Filters
-              </Button>
-            ) : (
-              <Button size="sm" className="h-7 text-xs" onClick={() => navigate('/supplier-orders/new')}>
-                <Send className="mr-1.5 h-3 w-3" /> New Request
-              </Button>
-            )}
-          </div>
-        ) : (
-          <>
-            <div className="overflow-auto flex-1">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-muted/50 backdrop-blur-sm">
-                  <tr className="border-b">
-                    {[
-                      { key: 'id' as SortKey, label: 'Request ID', align: 'text-left' },
-                      { key: 'createdAt' as SortKey, label: 'Date', align: 'text-left' },
-                      { key: 'supplierName' as SortKey, label: 'Supplier', align: 'text-left' },
-                      { key: 'itemCount' as SortKey, label: 'Medicines', align: 'text-center' },
-                      { key: 'totalQty' as SortKey, label: 'Req Qty', align: 'text-center' },
-                      { key: 'status' as SortKey, label: 'Status', align: 'text-center' },
-                    ].map(col => (
-                      <th key={col.key} className={cn("px-3 py-2 font-medium text-[11px] uppercase tracking-wider text-muted-foreground cursor-pointer select-none whitespace-nowrap", col.align)} onClick={() => handleSort(col.key)}>
-                        <span className={cn("flex items-center gap-1", col.align === 'text-center' && 'justify-center')}>{col.label} <SortIcon col={col.key} /></span>
-                      </th>
-                    ))}
-                    <th className="px-3 py-2 text-center font-medium text-[11px] uppercase tracking-wider text-muted-foreground w-24">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {pagedOrders.map((order) => {
-                    const statusKey = order.status?.toLowerCase() || 'pending';
-                    const config = statusConfig[statusKey] || statusConfig.pending;
-                    const canCancel = statusKey === 'draft' || statusKey === 'pending';
-                    const canEdit = statusKey === 'draft';
-                    const canReceive = statusKey === 'pending' || statusKey === 'partial';
-                    return (
-                      <tr key={order.id} className="hover:bg-accent/30 transition-colors">
-                        <td className="px-3 py-2 font-mono text-xs font-medium">#{order.id}</td>
-                        <td className="px-3 py-2 text-xs">{new Date(order.createdAt).toLocaleDateString()}</td>
-                        <td className="px-3 py-2 font-medium text-xs">{order.supplierName || '-'}</td>
-                        <td className="px-3 py-2 text-center text-xs tabular-nums">{order.items?.length || 0}</td>
-                        <td className="px-3 py-2 text-center text-xs tabular-nums font-medium">{getTotalQty(order)}</td>
-                        <td className="px-3 py-2 text-center">
-                          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium", config.bg, config.text)}>
-                            <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
-                            {config.label}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          <div className="flex items-center justify-center gap-0.5">
-                            <Button size="icon" variant="ghost" className="h-6 w-6" title="View" onClick={() => navigate(`/supplier-orders/${order.id}`)}>
-                              <Eye className="h-3 w-3" />
-                            </Button>
-                            {canEdit && (
-                              <Button size="icon" variant="ghost" className="h-6 w-6" title="Edit" onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}>
-                                <Pencil className="h-3 w-3" />
-                              </Button>
-                            )}
-                            {canReceive && (
-                              <Button size="icon" variant="ghost" className="h-6 w-6" title="Receive Stock" onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}>
-                                <Package className="h-3 w-3" />
-                              </Button>
-                            )}
-                            {canCancel && (
-                              <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive hover:text-destructive" title="Cancel" onClick={() => setCancelOrderId(order.id)}>
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-3 py-1.5 border-t bg-muted/20 text-xs mt-auto">
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Rows:</span>
-                <Select value={String(rowsPerPage)} onValueChange={v => { setRowsPerPage(Number(v)); setPage(1); }}>
-                  <SelectTrigger className="h-6 w-14 text-[11px]"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-popover z-50">
-                    {[10, 25, 50, 100].map(n => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <span className="text-muted-foreground">{filteredOrders.length} total</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Prev</Button>
-                <span className="px-2 text-muted-foreground">{page}/{totalPages}</span>
-                <Button size="sm" variant="outline" className="h-6 px-2 text-[11px]" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
 
       <DeleteConfirmDialog
         open={cancelOrderId !== null}
