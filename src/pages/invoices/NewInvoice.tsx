@@ -71,6 +71,9 @@ export default function NewInvoice() {
   const [newMedType, setNewMedType] = useState('');
   const [invoiceFiles, setInvoiceFiles] = useState<{ name: string; url: string; file?: File }[]>([]);
   const [showDocumentPreview, setShowDocumentPreview] = useState<{ url: string; name: string } | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'unknown'>('unknown');
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const selectedSupplier = useMemo(() => suppliers.find((s: any) => String(s.id) === supplierId), [suppliers, supplierId]);
 
