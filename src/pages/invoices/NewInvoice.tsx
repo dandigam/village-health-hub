@@ -23,7 +23,7 @@ interface InvoiceItem {
   batchNo: string;
   expDate: string;
   quantity: number;
-  stock: number; // current warehouse stock for display
+  stock: number;
 }
 
 const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Other'];
@@ -67,7 +67,7 @@ export default function NewInvoice() {
 
   const selectedSupplier = useMemo(() => suppliers.find((s: any) => String(s.id) === supplierId), [suppliers, supplierId]);
 
-  // Load existing invoice for view/edit
+  // Load existing invoice
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -98,10 +98,7 @@ export default function NewInvoice() {
 
   // Auto-populate medicines when supplier changes (create mode)
   useEffect(() => {
-    if (mode !== 'create' || !supplierId) {
-      if (mode === 'create') setItems([]);
-      return;
-    }
+    if (mode !== 'create' || !supplierId) { if (mode === 'create') setItems([]); return; }
     const supplier = suppliers.find((s: any) => String(s.id) === supplierId);
     const meds = (supplier as any)?.medicines ?? [];
     setItems(meds.map((m: any) => {
@@ -111,16 +108,14 @@ export default function NewInvoice() {
         medicineName: m.name || m.medicineName || '-',
         medicineType: m.category || m.medicineType || '-',
         isAlreadyExist: true,
-        hsnNo: '',
-        batchNo: '',
-        expDate: '',
+        hsnNo: '', batchNo: '', expDate: '',
         quantity: 0,
         stock: inv?.totalQty ?? 0,
       };
     }));
   }, [supplierId, suppliers, mode, inventory]);
 
-  // Update stock values when inventory changes
+  // Update stock values
   useEffect(() => {
     if (mode !== 'create') return;
     setItems(prev => prev.map(item => {
@@ -130,41 +125,26 @@ export default function NewInvoice() {
   }, [inventory, mode]);
 
   const updateItem = (idx: number, field: keyof InvoiceItem, value: any) => {
-    setItems(prev => {
-      const next = [...prev];
-      next[idx] = { ...next[idx], [field]: value };
-      return next;
-    });
+    setItems(prev => { const next = [...prev]; next[idx] = { ...next[idx], [field]: value }; return next; });
   };
 
-  // Filter
   const filteredItems = useMemo(() => {
     if (!medSearch.trim()) return items;
     const q = medSearch.toLowerCase();
     return items.filter(m => m.medicineName.toLowerCase().includes(q) || m.medicineType.toLowerCase().includes(q));
   }, [items, medSearch]);
 
-  // Add new medicine inline
   const handleAddNewMedicine = () => {
     if (!newMedName.trim() || !newMedType) { toast.error('Name and type required'); return; }
     setItems(prev => [...prev, {
-      medicineId: '',
-      medicineName: newMedName.trim(),
-      medicineType: newMedType,
-      isAlreadyExist: false,
-      hsnNo: '',
-      batchNo: '',
-      expDate: '',
-      quantity: 0,
-      stock: 0,
+      medicineId: '', medicineName: newMedName.trim(), medicineType: newMedType,
+      isAlreadyExist: false, hsnNo: '', batchNo: '', expDate: '', quantity: 0, stock: 0,
     }]);
     setShowAddDialog(false);
     toast.success(`"${newMedName.trim()}" added`);
-    setNewMedName('');
-    setNewMedType('');
+    setNewMedName(''); setNewMedType('');
   };
 
-  // Save
   const handleSave = async () => {
     if (!supplierId) { toast.error('Select a supplier'); return; }
     const filledItems = items.filter(i => i.quantity > 0);
@@ -179,12 +159,9 @@ export default function NewInvoice() {
         invoiceDate,
         items: filledItems.map(item => {
           const base: any = {
-            isAlreadyExist: item.isAlreadyExist,
-            hsnNo: item.hsnNo || undefined,
-            batchNo: item.batchNo || undefined,
-            expDate: item.expDate || undefined,
-            quantity: Number(item.quantity),
-            warehouseId,
+            isAlreadyExist: item.isAlreadyExist, hsnNo: item.hsnNo || undefined,
+            batchNo: item.batchNo || undefined, expDate: item.expDate || undefined,
+            quantity: Number(item.quantity), warehouseId,
           };
           if (item.isAlreadyExist) base.medicineId = Number(item.medicineId);
           else { base.medicineName = item.medicineName; base.medicineType = item.medicineType; }
@@ -201,7 +178,7 @@ export default function NewInvoice() {
 
   const totalWithQty = items.filter(i => i.quantity > 0).length;
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
-  const pageTitle = mode === 'create' ? 'New Stock Entry' : mode === 'edit' ? 'Edit Stock Entry' : 'View Stock Entry';
+  const pageTitle = mode === 'create' ? 'New Stock Entry' : mode === 'edit' ? 'Edit Stock Entry' : 'View Invoice';
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -212,7 +189,6 @@ export default function NewInvoice() {
     });
     e.target.value = '';
   };
-
   const removeFile = (idx: number) => {
     setInvoiceFiles(prev => {
       const next = [...prev];
@@ -222,9 +198,14 @@ export default function NewInvoice() {
     });
   };
 
+  // ── Column config per mode ──
+  // Create: Medicine, Stock, Batch, Exp Date, HSN, Qty (editable)
+  // Edit:   Medicine, Stock, Batch, Exp Date, HSN, Qty (editable) + Cancel, Update Stock
+  // View:   Medicine, Stock, Batch, Exp Date, HSN, Qty (read-only)
+
   return (
     <DashboardLayout>
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex items-center gap-2.5 mb-2">
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/invoices')}>
           <ArrowLeft className="h-4 w-4" />
@@ -243,7 +224,7 @@ export default function NewInvoice() {
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
         <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
-          {/* ── ORDER INFORMATION ── */}
+          {/* ORDER INFORMATION */}
           <div className="px-4 py-3 border-b">
             <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-2.5">Order Information</p>
             <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
@@ -299,7 +280,7 @@ export default function NewInvoice() {
                   <p className="text-sm font-medium mt-0.5 h-8 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                 )}
               </div>
-              {/* Inline Attachments */}
+              {/* Attachments */}
               <div className="flex items-center gap-1.5 ml-auto pb-0.5">
                 {invoiceFiles.map((f, idx) => (
                   <div key={idx} className="group relative flex items-center gap-1 border rounded bg-muted/30 px-1.5 py-1 text-[11px] cursor-pointer hover:border-primary/40 transition-colors" onClick={() => setShowImagePreview(f.url)}>
@@ -323,7 +304,7 @@ export default function NewInvoice() {
             </div>
           </div>
 
-          {/* ── MEDICINE DETAILS ── */}
+          {/* MEDICINE DETAILS */}
           {!supplierId && mode === 'create' ? (
             <div className="flex flex-col items-center justify-center py-14">
               <Package className="h-10 w-10 text-muted-foreground/40 mb-2" />
@@ -331,7 +312,7 @@ export default function NewInvoice() {
             </div>
           ) : (
             <>
-              {/* Medicine header bar */}
+              {/* Medicine header */}
               <div className="px-4 py-2 border-b flex items-center gap-3">
                 <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Medicine Details</p>
                 {items.length > 0 && (
@@ -355,7 +336,7 @@ export default function NewInvoice() {
                 {filteredItems.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-14">
                     <Pill className="h-8 w-8 text-muted-foreground/30 mb-2" />
-                    <p className="text-sm text-muted-foreground">{medSearch ? 'No medicines match your filter' : 'No medicines found for this supplier'}</p>
+                    <p className="text-sm text-muted-foreground">{medSearch ? 'No medicines match your filter' : 'No medicines found'}</p>
                   </div>
                 ) : (
                   <table className="w-full text-sm">
@@ -434,7 +415,7 @@ export default function NewInvoice() {
                     {isReadOnly ? 'Back' : 'Cancel'}
                   </Button>
                   {canEdit && (
-                    <Button size="sm" className="h-8 px-5 text-xs bg-gradient-to-r from-primary to-[hsl(var(--accent))] shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all" disabled={saving || totalWithQty === 0} onClick={handleSave}>
+                    <Button size="sm" className="h-8 px-5 text-xs" disabled={saving || totalWithQty === 0} onClick={handleSave}>
                       <Save className="mr-1.5 h-3.5 w-3.5" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
                     </Button>
                   )}
@@ -445,7 +426,7 @@ export default function NewInvoice() {
         </div>
       )}
 
-      {/* ── Add New Medicine Dialog ── */}
+      {/* Add New Medicine Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
@@ -473,12 +454,10 @@ export default function NewInvoice() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Image Preview Dialog ── */}
+      {/* Image Preview Dialog */}
       <Dialog open={!!showImagePreview} onOpenChange={() => setShowImagePreview(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] p-2">
-          <DialogHeader>
-            <DialogTitle className="text-sm">Invoice Preview</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle className="text-sm">Invoice Preview</DialogTitle></DialogHeader>
           {showImagePreview && (
             <div className="flex items-center justify-center overflow-auto max-h-[70vh]">
               {showImagePreview.endsWith('.pdf') ? (
