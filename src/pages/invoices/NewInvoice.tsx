@@ -295,17 +295,21 @@ export default function NewInvoice() {
                           const files = e.target.files;
                           if (!files) return;
                           setUploading(true);
-                          for (const file of Array.from(files)) {
+                            for (const file of Array.from(files)) {
                             const formData = new FormData();
                             formData.append('file', file);
                             formData.append('invoiceNo', invoiceNumber);
                             try {
-                              const res = await api.post('/documents/upload', formData, {
-  headers: {
-    "Content-Type": "multipart/form-data"
-  }
-});
-                              const doc = res.data || res;
+                              const token = localStorage.getItem('token');
+                              const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+                                method: 'POST',
+                                headers: {
+                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                },
+                                body: formData,
+                              });
+                              if (!res.ok) throw new Error('Upload failed');
+                              const doc = await res.json();
                               if (doc && doc.documentId && doc.documentName) {
                                 setUploadedDocuments(prev => {
                                   // Prevent duplicate documentId
