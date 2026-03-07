@@ -10,8 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useAuth } from '@/context/AuthContext';
 import { useSupplierList, useWarehouseInventory, WarehouseInventoryItem } from '@/hooks/useApiData';
 import api from '@/services/api';
-import { toast } from 'sonner';
-import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage } from 'lucide-react';
+import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+type BannerType = 'success' | 'error';
+interface BannerState { type: BannerType; message: string }
 import { format } from 'date-fns';
 
 interface InvoiceItem {
