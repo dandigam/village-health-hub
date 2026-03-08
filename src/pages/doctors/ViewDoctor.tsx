@@ -46,7 +46,7 @@ export default function ViewDoctor() {
         </CardHeader>
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Stethoscope className="h-4 w-4" /> {doctor.specialization}
+            <Stethoscope className="h-4 w-4 text-icon-stethoscope" /> {doctor.specialization}
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Phone className="h-4 w-4" /> {doctor.phoneNumber ?? doctor.phone}
