@@ -32,7 +32,8 @@ interface InvoiceItem {
   stock: number;
 }
 
-const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Other'];
+const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Powder', 'Inhaler', 'Ointment', 'Other'];
+const UNITS = ['mg', 'ml', 'gm', 'mcg', 'IU', 'units', '%'];
 
 type PageMode = 'create' | 'view' | 'edit';
 
@@ -76,6 +77,8 @@ export default function NewInvoice() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newMedName, setNewMedName] = useState('');
   const [newMedType, setNewMedType] = useState('');
+  const [newMedStrength, setNewMedStrength] = useState('');
+  const [newMedUnit, setNewMedUnit] = useState('');
   
   const [showDocumentPreview, setShowDocumentPreview] = useState<{ url: string; name: string } | null>(null);
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
@@ -179,7 +182,7 @@ export default function NewInvoice() {
     }]);
     setShowAddDialog(false);
     setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list.` });
-    setNewMedName(''); setNewMedType('');
+    setNewMedName(''); setNewMedType(''); setNewMedStrength(''); setNewMedUnit('');
   };
 
   const handleSave = async () => {
@@ -524,7 +527,7 @@ export default function NewInvoice() {
                     <Input className="h-8 text-xs pl-8 w-48" placeholder="Filter medicines..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
                   </div>
                   {canEdit && (
-                    <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setNewMedName(''); setNewMedType(''); setShowAddDialog(true); }}>
+                    <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setNewMedName(''); setNewMedType(''); setNewMedStrength(''); setNewMedUnit(''); setShowAddDialog(true); }}>
                       <PlusCircle className="w-3.5 h-3.5 mr-1" /> Add Medicine
                     </Button>
                   )}
@@ -627,7 +630,7 @@ export default function NewInvoice() {
 
       {/* Add New Medicine Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-base flex items-center gap-2">
               <PlusCircle className="w-4 h-4 text-primary" /> Add New Medicine
@@ -635,15 +638,28 @@ export default function NewInvoice() {
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div>
-              <Label className="text-xs text-muted-foreground">Medicine Name *</Label>
-              <Input className="h-8 text-sm mt-1" value={newMedName} onChange={e => setNewMedName(e.target.value)} />
+              <Label className="text-xs">Medicine Name <span className="text-destructive">*</span></Label>
+              <Input className="h-9 text-sm mt-1" value={newMedName} onChange={e => setNewMedName(e.target.value)} placeholder="Enter medicine name" />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Type *</Label>
+              <Label className="text-xs">Type <span className="text-destructive">*</span></Label>
               <Select value={newMedType} onValueChange={setNewMedType}>
-                <SelectTrigger className="h-8 text-sm mt-1"><SelectValue placeholder="Select Type" /></SelectTrigger>
-                <SelectContent>{MEDICINE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                <SelectTrigger className="h-9 text-sm mt-1"><SelectValue placeholder="Select Type" /></SelectTrigger>
+                <SelectContent className="bg-popover z-50">{MEDICINE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
               </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Strength</Label>
+                <Input className="h-9 text-sm mt-1" placeholder="e.g. 500" value={newMedStrength} onChange={e => setNewMedStrength(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Unit</Label>
+                <Select value={newMedUnit} onValueChange={setNewMedUnit}>
+                  <SelectTrigger className="h-9 text-sm mt-1"><SelectValue placeholder="Unit" /></SelectTrigger>
+                  <SelectContent className="bg-popover z-50">{UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <DialogFooter>
