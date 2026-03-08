@@ -84,6 +84,18 @@ export default function NewInvoice() {
 
   const selectedSupplier = useMemo(() => suppliers.find((s: any) => String(s.id) === supplierId), [suppliers, supplierId]);
 
+  // Build full supplier address
+  const supplierAddress = useMemo(() => {
+    if (!selectedSupplier) return '';
+    return [(selectedSupplier as any).address, (selectedSupplier as any).mandal, (selectedSupplier as any).district, (selectedSupplier as any).state].filter(Boolean).join(', ') + ((selectedSupplier as any).pinCode ? ` - ${(selectedSupplier as any).pinCode}` : '');
+  }, [selectedSupplier]);
+
+  // Build warehouse address
+  const warehouseAddress = useMemo(() => {
+    if (!warehouseDetail) return '';
+    return [warehouseDetail.village, warehouseDetail.mandal, warehouseDetail.district, warehouseDetail.state].filter(Boolean).join(', ') + (warehouseDetail.pinCode ? ` - ${warehouseDetail.pinCode}` : '');
+  }, [warehouseDetail]);
+
   // Load existing invoice
   useEffect(() => {
     if (!id) return;
