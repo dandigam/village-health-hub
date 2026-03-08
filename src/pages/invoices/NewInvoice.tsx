@@ -241,7 +241,7 @@ export default function NewInvoice() {
         <div className="border border-border/40 rounded-xl overflow-hidden shadow-sm">
           {/* INVOICE INFORMATION — fieldset card style */}
           <div className="px-4 pt-4 pb-3 border-b border-border/30">
-            <fieldset className="border border-border/50 rounded-lg px-0 pt-0 pb-0 relative max-w-4xl">
+            <fieldset className="border border-border/50 rounded-lg px-0 pt-0 pb-0 relative">
               <legend className="text-xs font-semibold text-primary px-3 ml-3 tracking-wide">Invoice Information</legend>
 
               <div className="px-4 py-3">
