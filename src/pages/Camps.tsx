@@ -100,7 +100,7 @@ export default function Camps() {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Calendar className="h-3.5 w-3.5" />
+                      <Calendar className="h-3.5 w-3.5 text-icon-calendar" />
                       <span>{camp.startDate && camp.endDate ? `${new Date(camp.startDate).toLocaleDateString()} – ${new Date(camp.endDate).toLocaleDateString()}` : '—'}</span>
                     </div>
                   </TableCell>
