@@ -486,7 +486,7 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
         </div>
       </div>
 
-      {/* Card-based inventory grid */}
+      {/* Table-based inventory */}
       {processed.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 rounded-2xl bg-muted/30 border border-border">
           <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
@@ -496,85 +496,88 @@ export function InventoryTab({ stockItems, warehouseInfo }: InventoryTabProps) {
           <p className="text-xs text-muted-foreground mt-1">{statusFilter !== 'all' ? 'Try clearing the filter' : 'Add medicines to your inventory'}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {processed.map((item) => {
-            const cfg = statusConfig[item.status];
-            const pct = getStockPct(item.quantity, item.minQty);
-            const typeColors: Record<string, string> = {
-              'Tablet': 'bg-blue-50 text-blue-600 border-blue-100',
-              'Capsule': 'bg-amber-50 text-amber-600 border-amber-100',
-              'Syrup': 'bg-emerald-50 text-emerald-600 border-emerald-100',
-              'Injection': 'bg-purple-50 text-purple-600 border-purple-100',
-              'Cream': 'bg-pink-50 text-pink-600 border-pink-100',
-              'Drops': 'bg-cyan-50 text-cyan-600 border-cyan-100',
-              'Powder': 'bg-orange-50 text-orange-600 border-orange-100',
-              'Inhaler': 'bg-indigo-50 text-indigo-600 border-indigo-100',
-              'Ointment': 'bg-teal-50 text-teal-600 border-teal-100',
-            };
-            const typeClass = item.medicineType ? (typeColors[item.medicineType] || 'bg-muted text-muted-foreground border-border') : '';
-            
-            return (
-              <div
-                key={item.id}
-                className={cn(
-                  'relative rounded-2xl border p-4 transition-all hover:shadow-md',
-                  item.status === 'critical' 
-                    ? 'bg-red-50/50 border-red-200 hover:border-red-300' 
-                    : item.status === 'warning' 
-                      ? 'bg-amber-50/30 border-amber-200 hover:border-amber-300'
-                      : 'bg-card border-border hover:border-primary/30'
-                )}
-              >
-                {/* Top row: Name + Type */}
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">
-                    {item.medicineName}
-                  </h3>
-                  {item.medicineType && (
-                    <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-md border whitespace-nowrap', typeClass)}>
-                      {item.medicineType}
-                    </span>
-                  )}
-                </div>
+        <div className="rounded-xl border border-border bg-card overflow-hidden" style={{ boxShadow: 'var(--card-shadow)' }}>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-muted/50 border-b border-border">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort('medicineName')}>
+                  <span className="inline-flex items-center gap-1.5">Medicine Name <SortIcon col="medicineName" /></span>
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort('quantity')}>
+                  <span className="inline-flex items-center gap-1.5 justify-end">In Stock <SortIcon col="quantity" /></span>
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Min Qty</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-36">Stock Level</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer select-none" onClick={() => toggleSort('status')}>
+                  <span className="inline-flex items-center gap-1.5">Status <SortIcon col="status" /></span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/60">
+              {processed.map((item) => {
+                const cfg = statusConfig[item.status];
+                const pct = getStockPct(item.quantity, item.minQty);
+                const typeColors: Record<string, string> = {
+                  'Tablet': 'bg-blue-50 text-blue-600 border-blue-100',
+                  'Capsule': 'bg-amber-50 text-amber-600 border-amber-100',
+                  'Syrup': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                  'Injection': 'bg-purple-50 text-purple-600 border-purple-100',
+                  'Cream': 'bg-pink-50 text-pink-600 border-pink-100',
+                  'Drops': 'bg-cyan-50 text-cyan-600 border-cyan-100',
+                  'Powder': 'bg-orange-50 text-orange-600 border-orange-100',
+                  'Inhaler': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+                  'Ointment': 'bg-teal-50 text-teal-600 border-teal-100',
+                };
+                const typeClass = item.medicineType ? (typeColors[item.medicineType] || 'bg-muted text-muted-foreground border-border') : '';
 
-                {/* Quantity display */}
-                <div className="flex items-end justify-between mb-2.5">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-0.5">In Stock</p>
-                    <p className={cn(
-                      'text-2xl font-bold tabular-nums leading-none',
+                return (
+                  <tr
+                    key={item.id}
+                    className={cn(
+                      'transition-colors duration-150',
+                      item.status === 'critical' && 'bg-red-50/40',
+                      item.status === 'warning' && 'bg-amber-50/30',
+                      item.status === 'ok' && 'hover:bg-primary/[0.03]',
+                    )}
+                  >
+                    <td className="px-4 py-3 text-sm font-semibold text-foreground">{item.medicineName}</td>
+                    <td className="px-4 py-3">
+                      {item.medicineType && (
+                        <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-md border whitespace-nowrap', typeClass)}>
+                          {item.medicineType}
+                        </span>
+                      )}
+                    </td>
+                    <td className={cn(
+                      'px-4 py-3 text-right text-sm font-bold tabular-nums',
                       item.status === 'critical' && 'text-red-600',
                       item.status === 'warning' && 'text-amber-600',
                       item.status === 'ok' && 'text-foreground',
                     )}>
                       {item.quantity.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mb-0.5">Min Qty</p>
-                    <p className="text-sm font-medium text-muted-foreground tabular-nums">{item.minQty}</p>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                <div className="flex items-center gap-2">
-                  <Progress
-                    value={pct}
-                    className={cn('h-2 flex-1 rounded-full', cfg.progressTrack, cfg.progressBar)}
-                  />
-                  <span className="text-[11px] font-semibold tabular-nums text-muted-foreground w-9 text-right">{pct}%</span>
-                </div>
-
-                {/* Status badge */}
-                <div className="mt-3 flex items-center justify-between">
-                  <Badge className={cn('gap-1.5 border text-[11px]', cfg.className)}>
-                    <span className={cn('w-1.5 h-1.5 rounded-full', cfg.dot, cfg.pulse && 'animate-pulse')} />
-                    {cfg.label}
-                  </Badge>
-                </div>
-              </div>
-            );
-          })}
+                    </td>
+                    <td className="px-4 py-3 text-right text-sm text-muted-foreground tabular-nums">{item.minQty}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Progress
+                          value={pct}
+                          className={cn('h-2 flex-1 rounded-full', cfg.progressTrack, cfg.progressBar)}
+                        />
+                        <span className="text-[11px] font-semibold tabular-nums text-muted-foreground w-9 text-right">{pct}%</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge className={cn('gap-1.5 border text-[11px]', cfg.className)}>
+                        <span className={cn('w-1.5 h-1.5 rounded-full', cfg.dot, cfg.pulse && 'animate-pulse')} />
+                        {cfg.label}
+                      </Badge>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
