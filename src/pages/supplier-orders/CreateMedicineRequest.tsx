@@ -653,88 +653,87 @@ export default function CreateMedicineRequest() {
           {/* CREATE MODE — Side-by-side Supplier + Deliver To + Priority   */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {isCreate && (
-            <div className="px-3 pt-3 pb-2 border-b border-border/30 bg-[hsl(var(--card-surface-bg))]">
-              <fieldset className="border border-[hsl(var(--field-border))] rounded-lg px-0 pt-0 pb-0 relative bg-[hsl(var(--card-raised-bg))]" style={{ boxShadow: '0 1px 4px hsl(var(--shadow-color) / 0.04)' }}>
-                <legend className="text-[10px] font-bold text-primary px-2 ml-3 tracking-wider uppercase">Request Information</legend>
+            <div className="px-5 py-4 border-b bg-muted/20">
+              <div className="flex items-stretch gap-0">
+                {/* Supplier */}
+                <div className="pr-4 min-w-[220px]">
+                  <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Supplier <span className="text-destructive">*</span></Label>
+                  <Select value={supplierId} onValueChange={(v) => { setSupplierId(v); setDirty(true); }}>
+                    <SelectTrigger className="h-8 text-xs mt-1"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
+                      {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <div className="px-3 py-2">
-                  {/* Row 1: Supplier | Priority */}
-                  <div className="grid grid-cols-4 gap-0">
-                    {/* Supplier */}
-                    <div className="pr-3">
-                      <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Supplier <span className="text-destructive">*</span></Label>
-                      <Select value={supplierId} onValueChange={(v) => { setSupplierId(v); setDirty(true); }}>
-                        <SelectTrigger className="h-7 text-xs mt-1"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
-                        <SelectContent className="bg-popover z-50">
-                          {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                {/* Divider */}
+                <div className="flex items-center px-3 self-stretch py-2">
+                  <div className="w-px h-full bg-border" />
+                </div>
 
-                    {/* Priority */}
-                    <div className="px-3 border-l border-border/40">
-                      <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Priority</Label>
-                      <div className="flex items-center gap-2 h-7 mt-1">
-                        <Switch
-                          checked={priority === 'urgent'}
-                          onCheckedChange={(checked) => { setPriority(checked ? 'urgent' : 'normal'); setDirty(true); }}
-                          className={cn(priority === 'urgent' && "data-[state=checked]:bg-destructive")}
-                        />
-                        <span className={cn("text-xs font-semibold transition-colors", priority === 'urgent' ? "text-destructive" : "text-muted-foreground")}>
-                          {priority === 'urgent' ? 'URGENT' : 'Normal'}
-                        </span>
-                      </div>
-                    </div>
+                {/* Priority */}
+                <div className="pr-4">
+                  <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Priority</Label>
+                  <div className="flex items-center gap-2 h-8 mt-1">
+                    <Switch
+                      checked={priority === 'urgent'}
+                      onCheckedChange={(checked) => { setPriority(checked ? 'urgent' : 'normal'); setDirty(true); }}
+                      className={cn(priority === 'urgent' && "data-[state=checked]:bg-destructive")}
+                    />
+                    <span className={cn("text-xs font-semibold transition-colors", priority === 'urgent' ? "text-destructive" : "text-muted-foreground")}>
+                      {priority === 'urgent' ? 'URGENT' : 'Normal'}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-                    {/* Empty cols for alignment */}
-                    <div className="px-3 border-l border-border/40" />
-                    <div className="pl-3 border-l border-border/40" />
+              {/* Row 2: Supplier Address | Deliver To */}
+              {selectedSupplier && (
+                <div className="flex items-stretch gap-0 mt-3 pt-3 border-t border-border/30">
+                  {/* Supplier Address */}
+                  <div className="flex-1 pr-3 min-w-[180px]">
+                    <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
+                    <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
+                    {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
+                    {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
+                    <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
                   </div>
 
-                  {/* Row 2: Supplier Address | Deliver To */}
-                  {selectedSupplier && (
-                    <div className="grid grid-cols-4 gap-0 mt-1.5 pt-1.5 border-t border-border/20">
-                      {/* Supplier Address */}
-                      <div className="pr-3 col-span-2">
-                        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
-                        <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
-                        {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
-                        {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
-                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
-                      </div>
+                  {/* Divider */}
+                  <div className="flex items-center px-3 self-stretch py-2">
+                    <div className="w-px h-full bg-border" />
+                  </div>
 
-                      {/* Deliver To */}
-                      <div className="pl-3 border-l border-border/40 col-span-2">
-                        <div className="flex items-center gap-1 mb-0.5">
-                          <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
-                          {warehouseDetail && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" className="max-w-xs text-xs">
-                                <p className="font-semibold mb-1">{warehouseDetail.name}</p>
-                                <p>{warehouseAddress}</p>
-                                {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
-                                {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </div>
-                        {warehouseDetail ? (
-                          <>
-                            <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
-                            {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
-                            <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
-                          </>
-                        ) : (
-                          <p className="text-[11px] text-muted-foreground italic mt-1">No warehouse assigned</p>
-                        )}
-                      </div>
+                  {/* Deliver To */}
+                  <div className="flex-1 min-w-[180px]">
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
+                      {warehouseDetail && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs text-xs">
+                            <p className="font-semibold mb-1">{warehouseDetail.name}</p>
+                            <p>{warehouseAddress}</p>
+                            {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
+                            {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
-                  )}
+                    {warehouseDetail ? (
+                      <>
+                        <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
+                        {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
+                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
+                      </>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground italic mt-1">No warehouse assigned</p>
+                    )}
+                  </div>
                 </div>
-              </fieldset>
+              )}
             </div>
           )}
 
