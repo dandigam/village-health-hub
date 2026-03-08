@@ -685,55 +685,54 @@ export default function CreateMedicineRequest() {
                     </span>
                   </div>
                 </div>
-              </div>
 
-              {/* Row 2: Supplier Address | Deliver To */}
-              {selectedSupplier && (
-                <div className="flex items-stretch gap-0 mt-3 pt-3 border-t border-border/30">
-                  {/* Supplier Address */}
-                  <div className="flex-1 pr-3 min-w-[180px]">
-                    <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
-                    <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
-                    {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
-                    {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
-                    <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
-                  </div>
+                {/* Supplier Address (same row, shown when supplier selected) */}
+                {selectedSupplier && (
+                  <>
+                    <div className="flex items-center px-3 self-stretch py-2">
+                      <div className="w-px h-full bg-border" />
+                    </div>
+                    <div className="flex-1 pr-3 min-w-[180px]">
+                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
+                      <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
+                      {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
+                      {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
+                      <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
+                    </div>
 
-                  {/* Divider */}
-                  <div className="flex items-center px-3 self-stretch py-2">
-                    <div className="w-px h-full bg-border" />
-                  </div>
-
-                  {/* Deliver To */}
-                  <div className="flex-1 min-w-[180px]">
-                    <div className="flex items-center gap-1 mb-0.5">
-                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
-                      {warehouseDetail && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs text-xs">
-                            <p className="font-semibold mb-1">{warehouseDetail.name}</p>
-                            <p>{warehouseAddress}</p>
-                            {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
-                            {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
-                          </TooltipContent>
-                        </Tooltip>
+                    <div className="flex items-center px-3 self-stretch py-2">
+                      <div className="w-px h-full bg-border" />
+                    </div>
+                    <div className="flex-1 min-w-[180px]">
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
+                        {warehouseDetail && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="max-w-xs text-xs">
+                              <p className="font-semibold mb-1">{warehouseDetail.name}</p>
+                              <p>{warehouseAddress}</p>
+                              {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
+                              {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                      {warehouseDetail ? (
+                        <>
+                          <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
+                          {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
+                          <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
+                        </>
+                      ) : (
+                        <p className="text-[11px] text-muted-foreground italic mt-1">No warehouse assigned</p>
                       )}
                     </div>
-                    {warehouseDetail ? (
-                      <>
-                        <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
-                        {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
-                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
-                      </>
-                    ) : (
-                      <p className="text-[11px] text-muted-foreground italic mt-1">No warehouse assigned</p>
-                    )}
-                  </div>
-                </div>
-              )}
+                  </>
+                )}
+              </div>
             </div>
           )}
 
