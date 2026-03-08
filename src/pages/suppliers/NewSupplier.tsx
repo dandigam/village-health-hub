@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Truck, Pill, Search, X, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Truck, Pill, Search, X, MapPin, ClipboardPaste } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,6 +65,10 @@ export default function NewSupplier() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showBulkPaste, setShowBulkPaste] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [manualShowSuggestions, setManualShowSuggestions] = useState(false);
+  const medicineNameRef = useRef<HTMLInputElement>(null);
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -96,6 +101,18 @@ export default function NewSupplier() {
     setPinCode(digitsOnly);
   };
 
+  // Auto-suggest for manual name field
+  const manualSuggestions = useMemo(() => {
+    if (!medicineName.trim() || medicineName.trim().length < 2) return [];
+    const q = medicineName.toLowerCase();
+    return inventoryItems
+      .filter(item =>
+        (item.medicineName?.toLowerCase().includes(q)) &&
+        !medicinesList.some(m => m.name.toLowerCase() === item.medicineName?.toLowerCase())
+      )
+      .slice(0, 6);
+  }, [medicineName, inventoryItems, medicinesList]);
+
   const addMedicine = () => {
     if (!medicineName.trim() || !medicineType) return;
     setMedicinesList(prev => [...prev, { 
@@ -108,6 +125,36 @@ export default function NewSupplier() {
     setMedicineType('');
     setMedicineStrength('');
     setMedicineUnit('');
+    setManualShowSuggestions(false);
+    // Auto-focus back to name field for rapid entry
+    setTimeout(() => medicineNameRef.current?.focus(), 50);
+  };
+
+  const handleManualKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && medicineName.trim() && medicineType) {
+      e.preventDefault();
+      addMedicine();
+    }
+  };
+
+  const handleBulkPaste = () => {
+    if (!bulkText.trim()) return;
+    const lines = bulkText.split('\n').map(l => l.trim()).filter(Boolean);
+    const newMeds: MedicineEntry[] = [];
+    for (const line of lines) {
+      // Skip duplicates
+      if (medicinesList.some(m => m.name.toLowerCase() === line.toLowerCase()) ||
+          newMeds.some(m => m.name.toLowerCase() === line.toLowerCase())) continue;
+      // Try to match from inventory
+      const match = inventoryItems.find(item => item.medicineName?.toLowerCase() === line.toLowerCase());
+      newMeds.push({ name: match?.medicineName || line, type: match?.medicineType || 'Tablet' });
+    }
+    if (newMeds.length > 0) {
+      setMedicinesList(prev => [...prev, ...newMeds]);
+      toast({ title: `${newMeds.length} medicine(s) added`, description: `From ${lines.length} pasted lines` });
+    }
+    setBulkText('');
+    setShowBulkPaste(false);
   };
 
   const removeMedicine = async (index: number) => {
@@ -405,10 +452,40 @@ export default function NewSupplier() {
             </div>
 
             {/* Manual medicine entry — compact inline row */}
-            <div className="flex items-end gap-2">
-              <div className="flex-1 space-y-1">
+            <div className="flex items-end gap-2" onKeyDown={handleManualKeyDown}>
+              <div className="flex-1 space-y-1 relative">
                 <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Medicine Name</Label>
-                <Input className="h-9 text-sm" placeholder="Enter medicine name" value={medicineName} onChange={e => setMedicineName(e.target.value)} />
+                <Input
+                  ref={medicineNameRef}
+                  className="h-9 text-sm"
+                  placeholder="Enter medicine name"
+                  value={medicineName}
+                  onChange={e => { setMedicineName(e.target.value); setManualShowSuggestions(true); }}
+                  onFocus={() => setManualShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setManualShowSuggestions(false), 200)}
+                />
+                {manualShowSuggestions && manualSuggestions.length > 0 && (
+                  <div className="absolute z-20 top-full left-0 right-0 mt-1 border border-border rounded-lg bg-popover shadow-lg max-h-44 overflow-auto">
+                    {manualSuggestions.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-primary/[0.03] cursor-pointer transition-colors text-left border-b border-border/30 last:border-b-0"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setMedicineName(item.medicineName || '');
+                          setMedicineType(item.medicineType || '');
+                          setManualShowSuggestions(false);
+                        }}
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-value">{item.medicineName}</p>
+                          <p className="text-xs text-muted-foreground">{item.medicineType} {item.totalQty !== undefined ? `· ${item.totalQty} in stock` : ''}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="w-32 space-y-1">
                 <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Type</Label>
@@ -440,6 +517,41 @@ export default function NewSupplier() {
                 <Plus className="h-4 w-4 mr-1" /> Add
               </Button>
             </div>
+
+            {/* Hint */}
+            <p className="text-[10px] text-muted-foreground">Tip: Press <kbd className="px-1 py-0.5 rounded border border-border bg-muted text-[9px] font-mono">Enter</kbd> to quickly add and start next entry</p>
+
+            {/* Bulk paste toggle */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1.5"
+                onClick={() => setShowBulkPaste(!showBulkPaste)}
+              >
+                <ClipboardPaste className="h-3 w-3" />
+                {showBulkPaste ? 'Hide' : 'Bulk Paste'} Medicines
+              </Button>
+              {showBulkPaste && <span className="text-[10px] text-muted-foreground">Paste one medicine name per line</span>}
+            </div>
+            {showBulkPaste && (
+              <div className="space-y-2 p-3 rounded-lg border border-border bg-muted/20">
+                <Textarea
+                  placeholder={"Paste medicine names here, one per line:\nParacetamol 500mg\nAmoxicillin\nCetrizine"}
+                  className="min-h-[100px] text-sm"
+                  value={bulkText}
+                  onChange={e => setBulkText(e.target.value)}
+                />
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground">
+                    {bulkText.trim() ? `${bulkText.split('\n').filter(l => l.trim()).length} medicine(s) detected` : 'Paste your list above'}
+                  </span>
+                  <Button size="sm" className="h-7 text-xs" onClick={handleBulkPaste} disabled={!bulkText.trim()}>
+                    <Plus className="h-3 w-3 mr-1" /> Add All
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Medicines table */}
             {medicinesList.length > 0 ? (
