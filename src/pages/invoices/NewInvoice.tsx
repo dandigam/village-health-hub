@@ -241,208 +241,210 @@ export default function NewInvoice() {
         <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
           {/* INVOICE INFORMATION — fieldset card style */}
           <div className="px-5 pt-5 pb-4 border-b">
-            <fieldset className="border border-border/60 rounded-2xl px-5 pt-1 pb-4 relative bg-muted/10">
-              <legend className="text-xs font-semibold text-primary px-2 tracking-wide">Invoice Information</legend>
+            <fieldset className="border border-border/50 rounded-xl px-0 pt-0 pb-0 relative bg-background">
+              <legend className="text-xs font-semibold text-primary px-3 ml-3 tracking-wide">Invoice Information</legend>
 
-              {/* Row 1: Supplier | Payment Mode | Invoice No. | Invoice Attach */}
-              <div className="grid grid-cols-4 gap-x-6 gap-y-1 mt-2">
-                {/* Supplier */}
-                <div>
-                  <Label className="text-[11px] text-muted-foreground font-medium">Supplier</Label>
-                  {canEdit ? (
-                    <Select value={supplierId} onValueChange={setSupplierId}>
-                      <SelectTrigger className="h-9 text-sm mt-1 bg-background border-input hover:border-primary/50 shadow-sm"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
-                      <SelectContent className="bg-popover z-50">
-                        {suppliers.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{selectedSupplier?.name || '—'}</p>
-                  )}
-                </div>
-
-                {/* Payment Mode */}
-                <div>
-                  <Label className="text-[11px] text-muted-foreground font-medium">Payment Mode</Label>
-                  {canEdit ? (
-                    <Select value={paymentMode} onValueChange={setPaymentMode}>
-                      <SelectTrigger className="h-9 text-sm mt-1 bg-background border-input hover:border-primary/50 shadow-sm"><SelectValue placeholder="Select Mode" /></SelectTrigger>
-                      <SelectContent className="bg-popover z-50">
-                        {['cash', 'upi', 'bank_transfer', 'cheque', 'credit'].map(m => (
-                          <SelectItem key={m} value={m}>{m.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center capitalize">{paymentMode || '—'}</p>
-                  )}
-                </div>
-
-                {/* Invoice No. */}
-                <div>
-                  <Label className="text-[11px] text-muted-foreground font-medium">Invoice No.</Label>
-                  {canEdit ? (
-                    <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
-                  ) : (
-                    <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{invoiceNumber || '—'}</p>
-                  )}
-                </div>
-
-                {/* Invoice Attach */}
-                <div>
-                  <Label className="text-[11px] text-muted-foreground font-medium">Invoice Attach</Label>
-                  <div className="mt-1 space-y-1.5">
-                    {uploadedDocuments.map((doc) => {
-                      const nameLower = (doc.name || '').toLowerCase();
-                      const isPdf = nameLower.endsWith('.pdf');
-                      return (
-                        <div key={doc.documentId} className="flex items-center gap-2">
-                          <button
-                            className="flex items-center gap-1.5 text-xs font-medium hover:underline truncate max-w-[150px]"
-                            style={{ color: isPdf ? 'hsl(var(--primary))' : 'hsl(var(--warning))' }}
-                            onClick={async () => {
-                              const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
-                              setShowDocumentPreview({ url, name: doc.name });
-                              setPreviewLoading(true);
-                              try {
-                                const token = localStorage.getItem('token');
-                                const res = await fetch(url, {
-                                  headers: token ? { Authorization: `Bearer ${token}` } : {},
-                                });
-                                const contentType = res.headers.get('content-type') || '';
-                                const blob = await res.blob();
-                                const blobUrl = URL.createObjectURL(blob);
-                                setPreviewBlobUrl(blobUrl);
-                                if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) {
-                                  setPreviewType('pdf');
-                                } else {
-                                  setPreviewType('image');
-                                }
-                              } catch {
-                                setPreviewType('unknown');
-                              } finally {
-                                setPreviewLoading(false);
-                              }
-                            }}
-                            title="View document"
-                          >
-                            {isPdf ? <FileImage className="w-3.5 h-3.5 shrink-0 text-primary" /> : <FileImage className="w-3.5 h-3.5 shrink-0 text-warning" />}
-                            <span className="truncate">{doc.name}</span>
-                          </button>
-                          {canEdit && (
-                            <button
-                              className="text-muted-foreground/50 hover:text-destructive shrink-0"
-                              onClick={async () => {
-                                try {
-                                  const token = localStorage.getItem('token');
-                                  await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
-                                    method: 'DELETE',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                                    },
-                                  });
-                                  setUploadedDocuments(prev => prev.filter(d => d.documentId !== doc.documentId));
-                                } catch {
-                                  setBanner({ type: 'error', message: 'Failed to delete document.' });
-                                }
-                              }}
-                              aria-label="Remove document"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {canEdit && (
-                      <label className={cn(
-                        "flex items-center gap-1.5 border border-dashed border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary transition-all w-fit",
-                        !invoiceNumber && "opacity-50 pointer-events-none"
-                      )}>
-                        <PlusCircle className="w-3.5 h-3.5" />
-                        Add More
-                        <input
-                          type="file"
-                          accept="image/*,.pdf"
-                          multiple
-                          className="hidden"
-                          disabled={!invoiceNumber || uploading}
-                          onChange={async (e) => {
-                            const files = e.target.files;
-                            if (!files) return;
-                            setUploading(true);
-                            for (const file of Array.from(files)) {
-                              const formData = new FormData();
-                              formData.append('file', file);
-                              formData.append('invoiceNo', invoiceNumber);
-                              try {
-                                const token = localStorage.getItem('token');
-                                const res = await fetch(`${API_BASE_URL}/documents/upload`, {
-                                  method: 'POST',
-                                  headers: {
-                                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                                  },
-                                  body: formData,
-                                });
-                                if (!res.ok) throw new Error('Upload failed');
-                                const doc = await res.json();
-                                if (doc && doc.documentId && doc.documentName) {
-                                  setUploadedDocuments(prev => {
-                                    if (prev.some(d => d.documentId === doc.documentId)) return prev;
-                                    return [...prev, { documentId: doc.documentId, name: doc.documentName }];
-                                  });
-                                }
-                              } catch {
-                                setBanner({ type: 'error', message: 'Failed to upload document.' });
-                              }
-                            }
-                            setUploading(false);
-                            e.target.value = '';
-                          }}
-                        />
-                        {uploading && <span className="ml-1 text-primary">Uploading...</span>}
-                      </label>
+              <div className="px-5 py-4">
+                {/* Row 1: Supplier | Payment Mode | Invoice No. | Invoice Attach */}
+                <div className="grid grid-cols-4 gap-0">
+                  {/* Supplier */}
+                  <div className="pr-5">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Supplier</Label>
+                    {canEdit ? (
+                      <Select value={supplierId} onValueChange={setSupplierId}>
+                        <SelectTrigger className="h-9 text-sm mt-1 bg-background border-input hover:border-primary/50 shadow-sm"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          {suppliers.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{selectedSupplier?.name || '—'}</p>
                     )}
                   </div>
-                </div>
-              </div>
 
-              {/* Row 2: Supplier details | Amount | Date */}
-              <div className="grid grid-cols-4 gap-x-6 mt-1">
-                {/* Supplier contact & address */}
-                <div className="space-y-0.5 min-h-[3rem]">
-                  {(selectedSupplier as any)?.contact && (
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <span className="text-primary">📞</span> {(selectedSupplier as any).contact}
-                    </p>
-                  )}
-                  {selectedSupplier?.address && (
-                    <p className="text-[11px] text-muted-foreground/80 leading-snug">{selectedSupplier.address}</p>
-                  )}
+                  {/* Payment Mode */}
+                  <div className="px-5 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Payment Mode</Label>
+                    {canEdit ? (
+                      <Select value={paymentMode} onValueChange={setPaymentMode}>
+                        <SelectTrigger className="h-9 text-sm mt-1 bg-background border-input hover:border-primary/50 shadow-sm"><SelectValue placeholder="Select Mode" /></SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          {['cash', 'upi', 'bank_transfer', 'cheque', 'credit'].map(m => (
+                            <SelectItem key={m} value={m}>{m.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center capitalize">{paymentMode || '—'}</p>
+                    )}
+                  </div>
+
+                  {/* Invoice No. */}
+                  <div className="px-5 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Invoice No.</Label>
+                    {canEdit ? (
+                      <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                    ) : (
+                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{invoiceNumber || '—'}</p>
+                    )}
+                  </div>
+
+                  {/* Invoice Attach */}
+                  <div className="pl-5 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Invoice Attach</Label>
+                    <div className="mt-1 space-y-1.5">
+                      {uploadedDocuments.map((doc) => {
+                        const nameLower = (doc.name || '').toLowerCase();
+                        const isPdf = nameLower.endsWith('.pdf');
+                        return (
+                          <div key={doc.documentId} className="flex items-center gap-2">
+                            <button
+                              className="flex items-center gap-1.5 text-xs font-medium hover:underline truncate max-w-[150px]"
+                              style={{ color: isPdf ? 'hsl(var(--primary))' : 'hsl(var(--warning))' }}
+                              onClick={async () => {
+                                const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
+                                setShowDocumentPreview({ url, name: doc.name });
+                                setPreviewLoading(true);
+                                try {
+                                  const token = localStorage.getItem('token');
+                                  const res = await fetch(url, {
+                                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                                  });
+                                  const contentType = res.headers.get('content-type') || '';
+                                  const blob = await res.blob();
+                                  const blobUrl = URL.createObjectURL(blob);
+                                  setPreviewBlobUrl(blobUrl);
+                                  if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) {
+                                    setPreviewType('pdf');
+                                  } else {
+                                    setPreviewType('image');
+                                  }
+                                } catch {
+                                  setPreviewType('unknown');
+                                } finally {
+                                  setPreviewLoading(false);
+                                }
+                              }}
+                              title="View document"
+                            >
+                              {isPdf ? <FileImage className="w-3.5 h-3.5 shrink-0 text-primary" /> : <FileImage className="w-3.5 h-3.5 shrink-0 text-warning" />}
+                              <span className="truncate">{doc.name}</span>
+                            </button>
+                            {canEdit && (
+                              <button
+                                className="text-muted-foreground/50 hover:text-destructive shrink-0"
+                                onClick={async () => {
+                                  try {
+                                    const token = localStorage.getItem('token');
+                                    await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
+                                      method: 'DELETE',
+                                      headers: {
+                                        'Content-Type': 'application/json',
+                                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                      },
+                                    });
+                                    setUploadedDocuments(prev => prev.filter(d => d.documentId !== doc.documentId));
+                                  } catch {
+                                    setBanner({ type: 'error', message: 'Failed to delete document.' });
+                                  }
+                                }}
+                                aria-label="Remove document"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {canEdit && (
+                        <label className={cn(
+                          "flex items-center gap-1.5 border border-dashed border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary transition-all w-fit",
+                          !invoiceNumber && "opacity-50 pointer-events-none"
+                        )}>
+                          <PlusCircle className="w-3.5 h-3.5" />
+                          Add More
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            multiple
+                            className="hidden"
+                            disabled={!invoiceNumber || uploading}
+                            onChange={async (e) => {
+                              const files = e.target.files;
+                              if (!files) return;
+                              setUploading(true);
+                              for (const file of Array.from(files)) {
+                                const formData = new FormData();
+                                formData.append('file', file);
+                                formData.append('invoiceNo', invoiceNumber);
+                                try {
+                                  const token = localStorage.getItem('token');
+                                  const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+                                    method: 'POST',
+                                    headers: {
+                                      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                    },
+                                    body: formData,
+                                  });
+                                  if (!res.ok) throw new Error('Upload failed');
+                                  const doc = await res.json();
+                                  if (doc && doc.documentId && doc.documentName) {
+                                    setUploadedDocuments(prev => {
+                                      if (prev.some(d => d.documentId === doc.documentId)) return prev;
+                                      return [...prev, { documentId: doc.documentId, name: doc.documentName }];
+                                    });
+                                  }
+                                } catch {
+                                  setBanner({ type: 'error', message: 'Failed to upload document.' });
+                                }
+                              }
+                              setUploading(false);
+                              e.target.value = '';
+                            }}
+                          />
+                          {uploading && <span className="ml-1 text-primary">Uploading...</span>}
+                        </label>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Amount */}
-                <div>
-                  <Label className="text-[11px] text-muted-foreground font-medium">Amount (₹)</Label>
-                  {canEdit ? (
-                    <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
-                  ) : (
-                    <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
-                  )}
-                </div>
+                {/* Row 2: Supplier contact | Amount | Date */}
+                <div className="grid grid-cols-4 gap-0 mt-1">
+                  {/* Supplier contact & address */}
+                  <div className="pr-5 space-y-0.5 min-h-[2.5rem]">
+                    {(selectedSupplier as any)?.contact && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <span>📞</span> {(selectedSupplier as any).contact}
+                      </p>
+                    )}
+                    {selectedSupplier?.address && (
+                      <p className="text-[11px] text-muted-foreground/80 leading-snug">{selectedSupplier.address}</p>
+                    )}
+                  </div>
 
-                {/* Date */}
-                <div>
-                  <Label className="text-[11px] text-muted-foreground font-medium">Date *</Label>
-                  {canEdit ? (
-                    <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
-                  ) : (
-                    <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
-                  )}
-                </div>
+                  {/* Amount */}
+                  <div className="px-5 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Amount (₹)</Label>
+                    {canEdit ? (
+                      <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                    ) : (
+                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
+                    )}
+                  </div>
 
-                <div>{/* spacer for 4th column */}</div>
+                  {/* Date */}
+                  <div className="px-5 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Date *</Label>
+                    {canEdit ? (
+                      <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                    ) : (
+                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
+                    )}
+                  </div>
+
+                  <div className="pl-5 border-l border-border/40">{/* spacer */}</div>
+                </div>
               </div>
             </fieldset>
           </div>
