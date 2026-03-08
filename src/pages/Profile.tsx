@@ -190,7 +190,7 @@ export default function Profile() {
               </div>
               <Separator />
               <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <Calendar className="h-5 w-5 text-icon-calendar" />
                 <div>
                   <p className="text-xs text-muted-foreground">Join Date</p>
                   <p className="font-medium">{new Date(profile.joinDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
