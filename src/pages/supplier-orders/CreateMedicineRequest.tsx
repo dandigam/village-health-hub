@@ -845,49 +845,45 @@ export default function CreateMedicineRequest() {
                             </>
                           )}
 
-                          {/* VIEW / RECEIVE columns */}
-                          {!isCreate && (
+                          {/* PENDING VIEW — just req qty */}
+                          {isPendingView && (
+                            <td className="px-4 py-2 text-center text-sm font-medium">{med.requestedQty}</td>
+                          )}
+
+                          {/* RECEIVED VIEW — read-only full details */}
+                          {isReceivedView && (
                             <>
                               <td className="px-4 py-2 text-center text-sm font-medium">{med.requestedQty}</td>
-                              {!(statusLower === 'received' || statusLower === 'pending') && (
-                                <>
-                                  <td className="px-4 py-2 text-center">
-                                    {isReceive ? (
-                                      <Input className="w-24 h-8 mx-auto text-center text-sm rounded-lg border-input shadow-sm" placeholder="Batch"
-                                        value={med.batchNo} onChange={e => updateMedicine(origIdx, 'batchNo', e.target.value)} />
-                                    ) : (
-                                      <span className="text-sm text-muted-foreground">{med.batchNo || '—'}</span>
-                                    )}
-                                  </td>
-                                  <td className="px-4 py-2 text-center">
-                                    {isReceive ? (
-                                      <Input type="date" className="w-32 h-8 mx-auto text-sm rounded-lg border-input shadow-sm"
-                                        value={med.expDate} onChange={e => updateMedicine(origIdx, 'expDate', e.target.value)} />
-                                    ) : (
-                                      <span className="text-sm text-muted-foreground">{med.expDate || '—'}</span>
-                                    )}
-                                  </td>
-                                  <td className="px-4 py-2 text-center">
-                                    {isReceive ? (
-                                      <Input className="w-20 h-8 mx-auto text-center text-sm rounded-lg border-input shadow-sm" placeholder="HSN"
-                                        value={med.hsnNo} onChange={e => updateMedicine(origIdx, 'hsnNo', e.target.value)} />
-                                    ) : (
-                                      <span className="text-sm text-muted-foreground">{med.hsnNo || '—'}</span>
-                                    )}
-                                  </td>
-                                  <td className={cn("px-4 py-2 text-center text-sm tabular-nums", stockColor)}>{stock}</td>
-                                </>
-                              )}
+                              <td className="px-4 py-2 text-center text-sm text-muted-foreground">{med.batchNo || '—'}</td>
+                              <td className="px-4 py-2 text-center text-sm text-muted-foreground">{med.expDate || '—'}</td>
+                              <td className="px-4 py-2 text-center text-sm text-muted-foreground">{med.hsnNo || '—'}</td>
+                              <td className="px-4 py-2 text-center text-sm font-medium">{med.receivedQty}</td>
+                            </>
+                          )}
+
+                          {/* RECEIVE MODE — editable */}
+                          {isReceive && (
+                            <>
+                              <td className="px-4 py-2 text-center text-sm font-medium">{med.requestedQty}</td>
                               <td className="px-4 py-2 text-center">
-                                {isReceive ? (
-                                  <Input type="number" min="0"
-                                    className={cn("w-28 h-9 mx-auto text-center text-sm rounded-lg border-input focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all shadow-sm", hasRecvQty && "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200")}
-                                    value={med.receivedQty || ''} placeholder="0"
-                                    onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))}
-                                  />
-                                ) : (
-                                  <span className="text-sm font-medium">{med.receivedQty}</span>
-                                )}
+                                <Input className="w-24 h-8 mx-auto text-center text-sm rounded-lg border-input shadow-sm" placeholder="Batch"
+                                  value={med.batchNo} onChange={e => updateMedicine(origIdx, 'batchNo', e.target.value)} />
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                <Input type="date" className="w-32 h-8 mx-auto text-sm rounded-lg border-input shadow-sm"
+                                  value={med.expDate} onChange={e => updateMedicine(origIdx, 'expDate', e.target.value)} />
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                <Input className="w-20 h-8 mx-auto text-center text-sm rounded-lg border-input shadow-sm" placeholder="HSN"
+                                  value={med.hsnNo} onChange={e => updateMedicine(origIdx, 'hsnNo', e.target.value)} />
+                              </td>
+                              <td className={cn("px-4 py-2 text-center text-sm tabular-nums", stockColor)}>{stock}</td>
+                              <td className="px-4 py-2 text-center">
+                                <Input type="number" min="0"
+                                  className={cn("w-28 h-9 mx-auto text-center text-sm rounded-lg border-input focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all shadow-sm", hasRecvQty && "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200")}
+                                  value={med.receivedQty || ''} placeholder="0"
+                                  onChange={e => updateMedicine(origIdx, 'receivedQty', e.target.value === '' ? 0 : Number(e.target.value))}
+                                />
                               </td>
                             </>
                           )}
