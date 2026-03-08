@@ -568,13 +568,13 @@ export default function NewInvoice() {
                 ) : (
                   <table className="w-full text-sm">
                     <thead className="sticky top-0 z-10">
-                      <tr className="border-b border-border/40 bg-[hsl(var(--card-surface-bg))]">
-                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-label w-12">#</th>
-                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-label">Medicine</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-label w-24">Stock</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-label w-28">Batch</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-label w-36">Exp Date</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-label w-28">Qty</th>
+                      <tr className="border-b-2 border-primary/15 bg-muted/50">
+                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-12">#</th>
+                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-muted-foreground">Medicine</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-24">Stock</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-28">Qty</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
@@ -591,9 +591,15 @@ export default function NewInvoice() {
                           )}>
                             <td className="px-4 py-2 text-muted-foreground text-xs font-medium">{idx + 1}</td>
                             <td className="px-4 py-2">
-                              <span className="font-semibold text-value text-sm">{item.medicineName}</span>
-                              <span className="text-muted-foreground ml-2 text-xs">{item.medicineType !== '-' ? item.medicineType : ''}</span>
-                              {!item.isAlreadyExist && <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold">New</span>}
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-value text-sm">{item.medicineName}</span>
+                                {!item.isAlreadyExist && <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold">New</span>}
+                              </div>
+                              {item.medicineType && item.medicineType !== '-' && (
+                                <span className="text-[10px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+                                  <Pill className="h-2.5 w-2.5" /> {item.medicineType}
+                                </span>
+                              )}
                             </td>
                             <td className={`px-4 py-2 text-center text-xs tabular-nums ${stockColor}`}>{stock}</td>
                             <td className="px-4 py-2 text-center">
