@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle2, AlertCircle, Info, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle2, AlertCircle, Info, PlusCircle, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -369,8 +369,8 @@ export default function CreateMedicineRequest() {
                   <div className="flex-1 flex flex-col justify-center pr-3 min-w-[180px]">
                     <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
                     <p className="text-xs font-semibold text-foreground leading-tight">{selectedSupplier.name}</p>
-                    {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
-                    {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
+                    {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {selectedSupplier.contact}</p>}
+                    {selectedSupplier.email && <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {selectedSupplier.email}</p>}
                     <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
                   </div>
                 )}
@@ -394,8 +394,8 @@ export default function CreateMedicineRequest() {
                         <TooltipContent side="bottom" className="max-w-xs text-xs">
                           <p className="font-semibold mb-1">{warehouseDetail.name}</p>
                           <p>{warehouseAddress}</p>
-                          {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
-                          {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                          {warehouseDetail.phoneNumber && <p className="mt-1 flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {warehouseDetail.phoneNumber}</p>}
+                          {warehouseDetail.email && <p className="flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {warehouseDetail.email}</p>}
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -403,8 +403,8 @@ export default function CreateMedicineRequest() {
                   {warehouseDetail ? (
                     <>
                       <p className="text-xs font-semibold text-foreground leading-tight">{warehouseDetail.name}</p>
-                      {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
-                      {warehouseDetail.email && <p className="text-[11px] text-muted-foreground">✉️ {warehouseDetail.email}</p>}
+                      {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {warehouseDetail.phoneNumber}</p>}
+                      {warehouseDetail.email && <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {warehouseDetail.email}</p>}
                       <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
                     </>
                   ) : warehouseName ? (
@@ -695,8 +695,8 @@ export default function CreateMedicineRequest() {
                     <div className="flex-1 pr-3 min-w-[180px]">
                       <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
                       <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
-                      {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
-                      {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
+                      {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {selectedSupplier.contact}</p>}
+                      {selectedSupplier.email && <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {selectedSupplier.email}</p>}
                       <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
                     </div>
 
@@ -714,8 +714,8 @@ export default function CreateMedicineRequest() {
                             <TooltipContent side="bottom" className="max-w-xs text-xs">
                               <p className="font-semibold mb-1">{warehouseDetail.name}</p>
                               <p>{warehouseAddress}</p>
-                              {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
-                              {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                              {warehouseDetail.phoneNumber && <p className="mt-1 flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {warehouseDetail.phoneNumber}</p>}
+                              {warehouseDetail.email && <p className="flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {warehouseDetail.email}</p>}
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -723,7 +723,7 @@ export default function CreateMedicineRequest() {
                       {warehouseDetail ? (
                         <>
                           <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
-                          {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
+                          {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {warehouseDetail.phoneNumber}</p>}
                           <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
                         </>
                       ) : (

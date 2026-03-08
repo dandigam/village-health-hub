@@ -94,7 +94,7 @@ export function PatientHistoryPanel({ patientId }: PatientHistoryPanelProps) {
                     <p className="text-[11px] text-foreground">{selected.chiefComplaint}</p>
                   </div>
                   <div>
-                    <div className="flex items-center gap-1 mb-1"><Stethoscope className="h-3 w-3 text-muted-foreground" /><span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Diagnosis</span></div>
+                    <div className="flex items-center gap-1 mb-1"><Stethoscope className="h-3 w-3 text-icon-stethoscope" /><span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">Diagnosis</span></div>
                     <div className="flex flex-wrap gap-1">
                       {selected.diagnosis.map((d, i) => (<Badge key={i} variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-primary/8 text-primary border-primary/25">{d}</Badge>))}
                     </div>

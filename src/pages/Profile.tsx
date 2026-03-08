@@ -174,7 +174,7 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
-                <IdCard className="h-5 w-5 text-muted-foreground" />
+                <IdCard className="h-5 w-5 text-icon-id" />
                 <div>
                   <p className="text-xs text-muted-foreground">Employee ID</p>
                   <p className="font-medium">{profile.employeeId}</p>
@@ -182,7 +182,7 @@ export default function Profile() {
               </div>
               <Separator />
               <div className="flex items-center gap-3">
-                <Building className="h-5 w-5 text-muted-foreground" />
+                <Building className="h-5 w-5 text-icon-building" />
                 <div>
                   <p className="text-xs text-muted-foreground">Department</p>
                   <p className="font-medium">{profile.department}</p>
@@ -190,7 +190,7 @@ export default function Profile() {
               </div>
               <Separator />
               <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <Calendar className="h-5 w-5 text-icon-calendar" />
                 <div>
                   <p className="text-xs text-muted-foreground">Join Date</p>
                   <p className="font-medium">{new Date(profile.joinDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
@@ -218,7 +218,7 @@ export default function Profile() {
                   />
                 ) : (
                   <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50">
-                    <User className="h-4 w-4 text-muted-foreground" />
+                    <User className="h-4 w-4 text-icon-user" />
                     <span>{profile.name}</span>
                   </div>
                 )}
@@ -235,7 +235,7 @@ export default function Profile() {
                   />
                 ) : (
                   <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <Mail className="h-4 w-4 text-icon-mail" />
                     <span>{profile.email}</span>
                   </div>
                 )}
@@ -251,7 +251,7 @@ export default function Profile() {
                   />
                 ) : (
                   <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <Phone className="h-4 w-4 text-icon-phone" />
                     <span>{profile.phone}</span>
                   </div>
                 )}
@@ -267,7 +267,7 @@ export default function Profile() {
                   />
                 ) : (
                   <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <MapPin className="h-4 w-4 text-icon-location" />
                     <span>{profile.location}</span>
                   </div>
                 )}

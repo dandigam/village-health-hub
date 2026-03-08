@@ -89,24 +89,24 @@ export default function Camps() {
                     <div>
                       <p className="font-medium text-sm">{camp.campName}</p>
                       <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
+                        <MapPin className="h-3 w-3 text-icon-location" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
+                      <MapPin className="h-3.5 w-3.5 text-icon-location" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Calendar className="h-3.5 w-3.5" />
+                      <Calendar className="h-3.5 w-3.5 text-icon-calendar" />
                       <span>{camp.startDate && camp.endDate ? `${new Date(camp.startDate).toLocaleDateString()} – ${new Date(camp.endDate).toLocaleDateString()}` : '—'}</span>
                     </div>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Users className="h-3.5 w-3.5" /> {assignedDoctors.length} assigned
+                      <Users className="h-3.5 w-3.5 text-icon-users" /> {assignedDoctors.length} assigned
                     </div>
                   </TableCell>
                   <TableCell>

@@ -171,11 +171,11 @@ export default function Doctors() {
                   {/* Contact info */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <Phone className="h-4 w-4 text-icon-phone shrink-0" />
                       <span className="text-foreground">{selectedDoctor.phone}</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm">
-                      <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <Mail className="h-4 w-4 text-icon-mail shrink-0" />
                       <span className="text-foreground">{selectedDoctor.email || '—'}</span>
                     </div>
                   </div>

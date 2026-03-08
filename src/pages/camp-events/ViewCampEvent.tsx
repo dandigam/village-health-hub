@@ -78,7 +78,7 @@ export default function ViewCampEvent() {
           <Card className="shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <Calendar className="h-5 w-5 text-icon-calendar" />
               </div>
               <div>
                 <p className="text-sm font-semibold">{event.endDate ? new Date(event.endDate).toLocaleDateString() : '—'}</p>
