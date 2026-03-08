@@ -89,6 +89,18 @@
     --sidebar-border: 215 40% 22%;
     --sidebar-ring: 195 80% 50%;
 
+    /* Icon semantic colors */
+    --icon-phone: 152 60% 38%;
+    --icon-mail: 38 85% 50%;
+    --icon-location: 0 72% 55%;
+    --icon-calendar: 210 80% 50%;
+    --icon-user: 210 70% 45%;
+    --icon-building: 262 50% 50%;
+    --icon-id: 175 60% 40%;
+    --icon-stethoscope: 210 85% 42%;
+    --icon-clock: 30 70% 48%;
+    --icon-users: 195 70% 42%;
+
     /* Premium additions */
     --shadow-color: 215 35% 12%;
     --card-shadow: 0 1px 3px hsl(var(--shadow-color) / 0.06), 0 4px 12px hsl(var(--shadow-color) / 0.04);
