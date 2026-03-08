@@ -222,7 +222,7 @@ export default function Invoices() {
                           size="sm" 
                           variant="outline" 
                           className="h-7 px-3 text-xs font-medium rounded-full transition-all" 
-                          onClick={() => setViewInvoice(invoice)}
+                          onClick={() => navigate(`/invoices/${invoice.id}`)}
                         >
                           <Eye className="h-3.5 w-3.5 mr-1" /> View
                         </Button>
