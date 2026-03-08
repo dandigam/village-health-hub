@@ -429,17 +429,22 @@ export default function NewInvoice() {
                   </div>
                 </div>
 
-                {/* Row 2: Supplier contact | Amount | Date */}
+                {/* Row 2: Supplier Address | Amount | Date | Deliver To */}
                 <div className="grid grid-cols-4 gap-0 mt-1.5 pt-1.5 border-t border-border/20">
-                  {/* Supplier contact & address */}
+                  {/* Supplier Full Address */}
                   <div className="pr-3 space-y-0 min-h-[1.75rem]">
-                    {(selectedSupplier as any)?.contact && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <span>📞</span> <span className="text-value font-medium">{(selectedSupplier as any).contact}</span>
-                      </p>
-                    )}
-                    {selectedSupplier?.address && (
-                      <p className="text-[11px] text-primary/70 italic leading-snug">{selectedSupplier.address}</p>
+                    {selectedSupplier && (
+                      <>
+                        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
+                        <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
+                        {(selectedSupplier as any)?.contact && (
+                          <p className="text-[11px] text-muted-foreground mt-0.5">📞 {(selectedSupplier as any).contact}</p>
+                        )}
+                        {(selectedSupplier as any)?.email && (
+                          <p className="text-[11px] text-muted-foreground">✉️ {(selectedSupplier as any).email}</p>
+                        )}
+                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
+                      </>
                     )}
                   </div>
 
@@ -447,7 +452,7 @@ export default function NewInvoice() {
                   <div className="px-3 border-l border-border/40">
                     <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Amount (₹) <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-7 text-xs mt-1" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => { setInvoiceAmount(e.target.value); setDirty(true); }} />
                     ) : (
                       <p className="text-xs font-bold text-value mt-1 h-7 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
                     )}
@@ -457,13 +462,40 @@ export default function NewInvoice() {
                   <div className="px-3 border-l border-border/40">
                     <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Date <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-7 text-xs mt-1" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" type="date" value={invoiceDate} onChange={e => { setInvoiceDate(e.target.value); setDirty(true); }} />
                     ) : (
                       <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                     )}
                   </div>
 
-                  <div className="pl-3 border-l border-border/40">{/* spacer */}</div>
+                  {/* Deliver To */}
+                  <div className="pl-3 border-l border-border/40">
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
+                      {warehouseDetail && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs text-xs">
+                            <p className="font-semibold mb-1">{warehouseDetail.name}</p>
+                            <p>{warehouseAddress}</p>
+                            {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
+                            {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    {warehouseDetail ? (
+                      <>
+                        <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
+                        {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
+                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
+                      </>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground italic mt-1">No warehouse assigned</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </fieldset>
