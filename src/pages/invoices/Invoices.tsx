@@ -40,7 +40,7 @@ export default function Invoices() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
+  // viewInvoice state removed — now navigates to view page
   const [banner, setBanner] = useState<BannerState | null>(null);
 
   // Pick up banner from navigation state
