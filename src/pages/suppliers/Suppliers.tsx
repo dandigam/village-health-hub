@@ -116,7 +116,7 @@ export default function Suppliers() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Phone className="h-3.5 w-3.5" />
+                          <Phone className="h-3.5 w-3.5 text-icon-phone" />
                           <span className="font-mono text-sm">{supplier.contact}</span>
                         </div>
                       </td>
