@@ -583,6 +583,7 @@ export default function NewInvoice() {
                         const stock = item.stock;
                         const hasQty = item.quantity > 0;
                         const stockColor = stock <= 0 ? 'text-destructive font-bold' : stock < 30 ? 'text-warning font-semibold' : 'text-success font-medium';
+                        const errs = validationErrors[realIdx];
                         return (
                           <tr key={`${item.medicineId}-${idx}`} className={cn(
                             "transition-colors duration-150 hover:bg-primary/[0.03]",
@@ -597,16 +598,54 @@ export default function NewInvoice() {
                             <td className={`px-4 py-2 text-center text-xs tabular-nums ${stockColor}`}>{stock}</td>
                             <td className="px-4 py-2 text-center">
                               {canEdit ? (
-                                <Input className="w-24 h-8 mx-auto text-center text-xs" placeholder="Batch" value={item.batchNo} onChange={e => updateItem(realIdx, 'batchNo', e.target.value)} />
+                                <div>
+                                  <Input
+                                    ref={(el) => { batchRefs.current[realIdx] = el; }}
+                                    className={cn("w-24 h-8 mx-auto text-center text-xs", errs?.batch && "border-destructive ring-1 ring-destructive/30")}
+                                    placeholder="Batch"
+                                    value={item.batchNo}
+                                    onChange={e => { updateItem(realIdx, 'batchNo', e.target.value); setValidationErrors(prev => { const n = { ...prev }; if (n[realIdx]) { delete n[realIdx].batch; if (!Object.keys(n[realIdx]).length) delete n[realIdx]; } return n; }); }}
+                                  />
+                                  {errs?.batch && <p className="text-[10px] text-destructive mt-0.5">Required</p>}
+                                </div>
                               ) : (
                                 <span className="text-value text-xs font-medium">{item.batchNo || '—'}</span>
                               )}
                             </td>
                             <td className="px-4 py-2 text-center">
                               {canEdit ? (
-                                <Input className="w-36 h-8 mx-auto text-xs" type="date" value={item.expDate} onChange={e => updateItem(realIdx, 'expDate', e.target.value)} />
+                                <div>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button variant="outline" className={cn(
+                                        "w-36 h-8 mx-auto text-xs justify-start text-left font-normal",
+                                        !item.expDate && "text-muted-foreground",
+                                        (errs?.expDate || errs?.expPast) && "border-destructive ring-1 ring-destructive/30"
+                                      )}>
+                                        <CalendarIcon className="mr-1.5 h-3 w-3" />
+                                        {item.expDate ? format(new Date(item.expDate), 'dd-MM-yyyy') : 'dd-mm-yyyy'}
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                                      <Calendar
+                                        mode="single"
+                                        selected={item.expDate ? new Date(item.expDate) : undefined}
+                                        onSelect={(date) => {
+                                          if (date) {
+                                            updateItem(realIdx, 'expDate', format(date, 'yyyy-MM-dd'));
+                                            setValidationErrors(prev => { const n = { ...prev }; if (n[realIdx]) { delete n[realIdx].expDate; delete n[realIdx].expPast; if (!Object.keys(n[realIdx]).length) delete n[realIdx]; } return n; });
+                                          }
+                                        }}
+                                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+                                        initialFocus
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  {errs?.expDate && <p className="text-[10px] text-destructive mt-0.5">Required</p>}
+                                  {errs?.expPast && <p className="text-[10px] text-destructive mt-0.5">Past date</p>}
+                                </div>
                               ) : (
-                                <span className="text-value text-xs font-medium">{item.expDate || '—'}</span>
+                                <span className="text-value text-xs font-medium">{item.expDate ? format(new Date(item.expDate), 'dd-MM-yyyy') : '—'}</span>
                               )}
                             </td>
                               
