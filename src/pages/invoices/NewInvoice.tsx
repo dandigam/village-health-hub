@@ -230,7 +230,7 @@ export default function NewInvoice() {
     <DashboardLayout>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted transition-colors" onClick={() => navigate('/invoices')}>
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted transition-colors" onClick={() => confirmNavigation('/invoices')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-lg font-semibold text-value">{pageTitle}</h1>
