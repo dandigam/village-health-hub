@@ -235,7 +235,7 @@ export default function Profile() {
                   />
                 ) : (
                   <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <Mail className="h-4 w-4 text-icon-mail" />
                     <span>{profile.email}</span>
                   </div>
                 )}
