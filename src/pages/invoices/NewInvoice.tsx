@@ -240,16 +240,16 @@ export default function NewInvoice() {
       ) : (
         <div className="border border-border/40 rounded-xl overflow-hidden shadow-sm">
           {/* INVOICE INFORMATION — fieldset card style */}
-          <div className="px-4 pt-4 pb-3 border-b border-border/30">
+          <div className="px-3 pt-3 pb-2 border-b border-border/30">
             <fieldset className="border border-border/50 rounded-lg px-0 pt-0 pb-0 relative">
-              <legend className="text-xs font-semibold text-primary px-3 ml-3 tracking-wide">Invoice Information</legend>
+              <legend className="text-[11px] font-semibold text-primary px-2 ml-3 tracking-wide">Invoice Information</legend>
 
-              <div className="px-4 py-3">
+              <div className="px-3 py-2">
                 {/* Row 1: Supplier | Payment Mode | Invoice No. | Invoice Attach */}
                 <div className="grid grid-cols-4 gap-0">
                   {/* Supplier */}
-                  <div className="pr-5">
-                    <Label className="text-[11px] text-muted-foreground font-medium">Supplier</Label>
+                  <div className="pr-4">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Supplier <span className="text-destructive">*</span></Label>
                     {canEdit ? (
                       <Select value={supplierId} onValueChange={setSupplierId}>
                         <SelectTrigger className="h-9 text-sm mt-1 bg-background border-input hover:border-primary/50 shadow-sm"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
