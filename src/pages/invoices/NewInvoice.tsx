@@ -275,17 +275,17 @@ export default function NewInvoice() {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center capitalize">{paymentMode || '—'}</p>
+                      <p className="text-xs font-semibold text-foreground mt-1 h-8 flex items-center capitalize">{paymentMode || '—'}</p>
                     )}
                   </div>
 
                   {/* Invoice No. */}
-                  <div className="px-5 border-l border-border/40">
-                    <Label className="text-[11px] text-muted-foreground font-medium">Invoice No.</Label>
+                  <div className="px-4 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Invoice No. <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                      <Input className="h-8 text-xs mt-1" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                     ) : (
-                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{invoiceNumber || '—'}</p>
+                      <p className="text-xs font-semibold text-foreground mt-1 h-8 flex items-center">{invoiceNumber || '—'}</p>
                     )}
                   </div>
 
