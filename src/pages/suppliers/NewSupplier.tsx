@@ -101,6 +101,18 @@ export default function NewSupplier() {
     setPinCode(digitsOnly);
   };
 
+  // Auto-suggest for manual name field
+  const manualSuggestions = useMemo(() => {
+    if (!medicineName.trim() || medicineName.trim().length < 2) return [];
+    const q = medicineName.toLowerCase();
+    return inventoryItems
+      .filter(item =>
+        (item.medicineName?.toLowerCase().includes(q)) &&
+        !medicinesList.some(m => m.name.toLowerCase() === item.medicineName?.toLowerCase())
+      )
+      .slice(0, 6);
+  }, [medicineName, inventoryItems, medicinesList]);
+
   const addMedicine = () => {
     if (!medicineName.trim() || !medicineType) return;
     setMedicinesList(prev => [...prev, { 
@@ -113,6 +125,36 @@ export default function NewSupplier() {
     setMedicineType('');
     setMedicineStrength('');
     setMedicineUnit('');
+    setManualShowSuggestions(false);
+    // Auto-focus back to name field for rapid entry
+    setTimeout(() => medicineNameRef.current?.focus(), 50);
+  };
+
+  const handleManualKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && medicineName.trim() && medicineType) {
+      e.preventDefault();
+      addMedicine();
+    }
+  };
+
+  const handleBulkPaste = () => {
+    if (!bulkText.trim()) return;
+    const lines = bulkText.split('\n').map(l => l.trim()).filter(Boolean);
+    const newMeds: MedicineEntry[] = [];
+    for (const line of lines) {
+      // Skip duplicates
+      if (medicinesList.some(m => m.name.toLowerCase() === line.toLowerCase()) ||
+          newMeds.some(m => m.name.toLowerCase() === line.toLowerCase())) continue;
+      // Try to match from inventory
+      const match = inventoryItems.find(item => item.medicineName?.toLowerCase() === line.toLowerCase());
+      newMeds.push({ name: match?.medicineName || line, type: match?.medicineType || 'Tablet' });
+    }
+    if (newMeds.length > 0) {
+      setMedicinesList(prev => [...prev, ...newMeds]);
+      toast({ title: `${newMeds.length} medicine(s) added`, description: `From ${lines.length} pasted lines` });
+    }
+    setBulkText('');
+    setShowBulkPaste(false);
   };
 
   const removeMedicine = async (index: number) => {
