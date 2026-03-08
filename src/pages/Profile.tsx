@@ -174,7 +174,7 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
-                <IdCard className="h-5 w-5 text-muted-foreground" />
+                <IdCard className="h-5 w-5 text-icon-id" />
                 <div>
                   <p className="text-xs text-muted-foreground">Employee ID</p>
                   <p className="font-medium">{profile.employeeId}</p>
