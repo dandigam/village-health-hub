@@ -909,13 +909,13 @@ export default function CreateMedicineRequest() {
               {/* Footer */}
               <div className="flex items-center justify-between px-5 py-3.5 border-t bg-muted/20">
                 <div className="flex items-center gap-5 text-sm text-muted-foreground">
-                  <span>Items with qty: <strong className="text-foreground font-semibold">{totalSelected}</strong></span>
-                  <span>Total Qty: <strong className="text-foreground font-semibold">{isReceive ? totalRecvQty : totalReqQty}</strong></span>
-                  {isReceive && <span>Requested: <strong className="text-foreground font-semibold">{totalReqQty}</strong></span>}
+                  <span>Total Medicines: <strong className="text-foreground font-semibold">{medicines.length}</strong></span>
+                  <span>Total Req Qty: <strong className="text-foreground font-semibold">{totalReqQty}</strong></span>
+                  {(isReceive || isReceivedView) && <span>Total Recv Qty: <strong className="text-foreground font-semibold">{totalRecvQty}</strong></span>}
                 </div>
                 <div className="flex items-center gap-3">
                   <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => navigate('/supplier-orders')}>
-                    Cancel
+                    {isView ? 'Back' : 'Cancel'}
                   </Button>
                   {(isCreate || isEditDraft) && (
                     <>
