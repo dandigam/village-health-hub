@@ -101,7 +101,7 @@ export function DistributionFulfillment({ order, allOrders, onClose, onUpdate, o
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/40 flex"
+      className="fixed inset-0 top-14 sm:top-[60px] z-40 bg-black/40 flex"
     >
       <motion.div
         initial={{ x: '100%' }}
