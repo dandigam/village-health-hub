@@ -16,6 +16,7 @@ import {
   ShoppingCart,
   ArrowRightLeft,
   Warehouse as WarehouseIcon,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -23,21 +24,54 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { useAuth } from '@/context/AuthContext';
 import { hasAccess } from '@/config/routeAccess';
 
-const allNavItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', routeKey: 'dashboard', color: 'hsl(220, 90%, 65%)' },
-  { icon: Tent, label: 'Camp Templates', href: '/camp-templates', routeKey: 'camp-templates', color: 'hsl(280, 70%, 65%)' },
-  { icon: CalendarDays, label: 'Camp Events', href: '/camp-events', routeKey: 'camp-events', color: 'hsl(340, 75%, 65%)' },
-  { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients', color: 'hsl(200, 85%, 60%)' },
-  { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters', color: 'hsl(350, 80%, 62%)' },
-  { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy', color: 'hsl(160, 70%, 55%)' },
-  { icon: Package, label: 'Inventory', href: '/stock', routeKey: 'stock', color: 'hsl(35, 90%, 60%)' },
-  { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers', color: 'hsl(140, 65%, 55%)' },
-  { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders', color: 'hsl(25, 95%, 60%)' },
-  { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders', color: 'hsl(270, 70%, 65%)' },
-  { icon: FileText, label: 'Invoices', href: '/invoices', routeKey: 'invoices', color: 'hsl(190, 80%, 55%)' },
-  { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors', color: 'hsl(170, 70%, 50%)' },
-  { icon: FileText, label: 'Reports', href: '/reports', routeKey: 'reports', color: 'hsl(45, 90%, 55%)' },
-  { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses', color: 'hsl(210, 60%, 60%)' },
+type NavItem = {
+  icon: typeof LayoutDashboard;
+  label: string;
+  href: string;
+  routeKey: string;
+  color: string;
+};
+
+type NavGroup = {
+  title: string;
+  items: NavItem[];
+};
+
+const navGroups: NavGroup[] = [
+  {
+    title: 'Overview',
+    items: [
+      { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', routeKey: 'dashboard', color: 'hsl(220, 90%, 65%)' },
+    ],
+  },
+  {
+    title: 'Clinical',
+    items: [
+      { icon: Tent, label: 'Camp Templates', href: '/camp-templates', routeKey: 'camp-templates', color: 'hsl(280, 70%, 65%)' },
+      { icon: CalendarDays, label: 'Camp Events', href: '/camp-events', routeKey: 'camp-events', color: 'hsl(340, 75%, 65%)' },
+      { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients', color: 'hsl(200, 85%, 60%)' },
+      { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters', color: 'hsl(350, 80%, 62%)' },
+      { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy', color: 'hsl(160, 70%, 55%)' },
+      { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors', color: 'hsl(170, 70%, 50%)' },
+    ],
+  },
+  {
+    title: 'Supply Chain',
+    items: [
+      { icon: Package, label: 'Inventory', href: '/stock', routeKey: 'stock', color: 'hsl(35, 90%, 60%)' },
+      { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers', color: 'hsl(140, 65%, 55%)' },
+      { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders', color: 'hsl(25, 95%, 60%)' },
+      { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders', color: 'hsl(270, 70%, 65%)' },
+      { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses', color: 'hsl(210, 60%, 60%)' },
+    ],
+  },
+  {
+    title: 'Operations',
+    items: [
+      { icon: FileText, label: 'Invoices', href: '/invoices', routeKey: 'invoices', color: 'hsl(190, 80%, 55%)' },
+      { icon: BarChart3, label: 'Reports', href: '/reports', routeKey: 'reports', color: 'hsl(45, 90%, 55%)' },
+    ],
+  },
 ];
 
 interface SidebarProps {
@@ -50,7 +84,12 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
   const collapsed = mobile ? false : isCollapsed;
   const { user } = useAuth();
 
-  const mainNavItems = allNavItems.filter(item => hasAccess(item.routeKey, user?.role));
+  const filteredGroups = navGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => hasAccess(item.routeKey, user?.role)),
+    }))
+    .filter(group => group.items.length > 0);
 
   const handleNavClick = () => {
     if (onNavigate) onNavigate();
@@ -59,7 +98,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
   const activeClass = 'bg-white/[0.14] text-white border-l-[3px] border-l-[hsl(200,90%,60%)] shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]';
   const inactiveClass = 'text-white/55 hover:text-white/90 hover:bg-white/[0.06] border-l-[3px] border-l-transparent';
 
-  const renderNavItem = (item: typeof allNavItems[0], isActive: boolean) => (
+  const renderNavItem = (item: NavItem, isActive: boolean) => (
     <>
       <item.icon 
         className="h-[17px] w-[17px] shrink-0 transition-all duration-200"
@@ -101,53 +140,69 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="pt-4 px-2 overflow-y-auto flex-1 min-h-0">
-          <ul className="space-y-0.5">
-            {mainNavItems.map((item) => (
-              <li key={item.href}>
-                {collapsed ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+          {filteredGroups.map((group, groupIdx) => (
+            <div key={group.title} className={cn(groupIdx > 0 && "mt-3")}>
+              {/* Section header */}
+              {!collapsed ? (
+                <div className="px-3 pt-1 pb-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/30">
+                    {group.title}
+                  </span>
+                </div>
+              ) : (
+                groupIdx > 0 && (
+                  <div className="mx-3 my-2 border-t border-white/[0.08]" />
+                )
+              )}
+              <ul className="space-y-0.5">
+                {group.items.map((item) => (
+                  <li key={item.href}>
+                    {collapsed ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <NavLink
+                            to={item.href}
+                            onClick={handleNavClick}
+                            className={({ isActive }) =>
+                              cn(
+                                'group flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-all duration-200',
+                                isActive 
+                                  ? 'bg-white/[0.14] text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]' 
+                                  : 'text-white/55 hover:text-white/90 hover:bg-white/[0.06]'
+                              )
+                            }
+                          >
+                            {({ isActive }) => (
+                              <item.icon 
+                                className="h-[17px] w-[17px] transition-all duration-200"
+                                style={{ color: item.color, opacity: isActive ? 1 : 0.5 }}
+                              />
+                            )}
+                          </NavLink>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="bg-foreground text-background border-0 font-medium px-3 py-1.5 text-xs">
+                          {item.label}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
                       <NavLink
                         to={item.href}
                         onClick={handleNavClick}
                         className={({ isActive }) =>
                           cn(
-                            'group flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-all duration-200',
-                            isActive 
-                              ? 'bg-white/[0.14] text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]' 
-                              : 'text-white/55 hover:text-white/90 hover:bg-white/[0.06]'
+                            'group flex items-center gap-2.5 px-3 py-2 rounded-r-lg text-sm transition-all duration-200',
+                            isActive ? activeClass : inactiveClass
                           )
                         }
                       >
-                        {({ isActive }) => (
-                          <item.icon 
-                            className="h-[17px] w-[17px] transition-all duration-200"
-                            style={{ color: item.color, opacity: isActive ? 1 : 0.5 }}
-                          />
-                        )}
+                        {({ isActive }) => renderNavItem(item, isActive)}
                       </NavLink>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="bg-foreground text-background border-0 font-medium px-3 py-1.5 text-xs">
-                      {item.label}
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <NavLink
-                    to={item.href}
-                    onClick={handleNavClick}
-                    className={({ isActive }) =>
-                      cn(
-                        'group flex items-center gap-2.5 px-3 py-2 rounded-r-lg text-sm transition-all duration-200',
-                        isActive ? activeClass : inactiveClass
-                      )
-                    }
-                  >
-                    {({ isActive }) => renderNavItem(item, isActive)}
-                  </NavLink>
-                )}
-              </li>
-            ))}
-          </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         {/* Settings - pinned bottom */}
