@@ -122,7 +122,7 @@ export default function Suppliers() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-1.5 text-muted-foreground max-w-[200px]">
-                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-icon-location" />
                           <span className="truncate text-sm">{supplier.address}</span>
                         </div>
                       </td>
