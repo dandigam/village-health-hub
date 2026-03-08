@@ -777,9 +777,9 @@ export default function CreateMedicineRequest() {
               <div className="overflow-auto max-h-[calc(100vh-320px)]">
                 <table className="w-full text-sm border-collapse">
                   <thead className="sticky top-0 z-10">
-                    <tr className="border-b bg-muted/40 border-border">
+                    <tr className="border-b-2 border-primary/15 bg-muted/50">
                       <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground w-12">#</th>
-                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground">Medicine Name</th>
+                      <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground w-[35%]">Medicine Name</th>
                       <th className="px-4 py-3 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32">Batch / Strength</th>
 
                       {/* CREATE columns */}
