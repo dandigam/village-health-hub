@@ -48,6 +48,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Visual hierarchy tokens
+        label: "hsl(var(--label))",
+        value: "hsl(var(--value))",
+        "field-bg": "hsl(var(--field-bg))",
+        "field-border": "hsl(var(--field-border))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

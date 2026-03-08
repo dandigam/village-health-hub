@@ -37,6 +37,19 @@
 
     --radius: 0.625rem;
 
+    /* ── Enhanced Visual Hierarchy Tokens ── */
+    --label: 215 20% 46%;
+    --value: 215 35% 15%;
+    --field-bg: 210 30% 97%;
+    --field-border: 210 25% 85%;
+    --field-focus-border: 210 80% 55%;
+    --field-focus-ring: 210 90% 42%;
+    
+    /* Card elevation levels */
+    --card-raised-bg: 0 0% 100%;
+    --card-raised-border: 210 25% 90%;
+    --card-surface-bg: 210 25% 98%;
+
     /* Semantic Status Colors */
     --navy: 215 65% 16%;
     --navy-light: 215 50% 32%;
@@ -78,8 +91,9 @@
 
     /* Premium additions */
     --shadow-color: 215 35% 12%;
-    --card-shadow: 0 1px 3px hsl(var(--shadow-color) / 0.05), 0 4px 16px hsl(var(--shadow-color) / 0.04);
+    --card-shadow: 0 1px 3px hsl(var(--shadow-color) / 0.06), 0 4px 12px hsl(var(--shadow-color) / 0.04);
     --card-shadow-hover: 0 4px 20px hsl(var(--shadow-color) / 0.1), 0 8px 36px hsl(var(--shadow-color) / 0.06);
+    --card-shadow-elevated: 0 2px 8px hsl(var(--shadow-color) / 0.08), 0 8px 24px hsl(var(--shadow-color) / 0.06);
   }
 
   .dark {
@@ -111,6 +125,16 @@
     --border: 215 22% 20%;
     --input: 215 22% 20%;
     --ring: 210 80% 55%;
+
+    --label: 215 15% 65%;
+    --value: 210 18% 95%;
+    --field-bg: 215 25% 14%;
+    --field-border: 215 22% 22%;
+    --field-focus-border: 210 70% 50%;
+    --field-focus-ring: 210 80% 55%;
+    --card-raised-bg: 215 28% 13%;
+    --card-raised-border: 215 22% 22%;
+    --card-surface-bg: 215 28% 10%;
 
     --sidebar-background: 215 32% 9%;
     --sidebar-foreground: 210 18% 95%;
