@@ -240,11 +240,11 @@ export default function NewInvoice() {
       ) : (
         <div className="rounded-xl border border-[hsl(var(--card-raised-border))] bg-[hsl(var(--card-raised-bg))] overflow-hidden" style={{ boxShadow: 'var(--card-shadow-elevated)' }}>
           {/* INVOICE INFORMATION — fieldset card style */}
-          <div className="px-4 pt-4 pb-3 border-b border-border/30 bg-[hsl(var(--card-surface-bg))]">
+          <div className="px-3 pt-3 pb-2 border-b border-border/30 bg-[hsl(var(--card-surface-bg))]">
             <fieldset className="border border-[hsl(var(--field-border))] rounded-lg px-0 pt-0 pb-0 relative bg-[hsl(var(--card-raised-bg))]" style={{ boxShadow: '0 1px 4px hsl(var(--shadow-color) / 0.04)' }}>
-              <legend className="text-[11px] font-bold text-primary px-2.5 ml-3 tracking-wider uppercase">Invoice Information</legend>
+              <legend className="text-[10px] font-bold text-primary px-2 ml-3 tracking-wider uppercase">Invoice Information</legend>
 
-              <div className="px-4 py-3">
+              <div className="px-3 py-2">
                 {/* Row 1: Supplier | Payment Mode | Invoice No. | Invoice Attach */}
                 <div className="grid grid-cols-4 gap-0">
                   {/* Supplier */}
