@@ -238,10 +238,10 @@ export default function NewInvoice() {
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
-        <div className="border rounded-xl bg-background shadow-sm overflow-hidden">
+        <div className="rounded-xl overflow-hidden">
           {/* INVOICE INFORMATION — fieldset card style */}
-          <div className="px-5 pt-5 pb-4 border-b">
-            <fieldset className="border border-border/50 rounded-xl px-0 pt-0 pb-0 relative bg-background">
+          <div className="px-5 pt-5 pb-4 border-b border-border/30">
+            <fieldset className="border border-border/50 rounded-xl px-0 pt-0 pb-0 relative">
               <legend className="text-xs font-semibold text-primary px-3 ml-3 tracking-wide">Invoice Information</legend>
 
               <div className="px-5 py-4">
