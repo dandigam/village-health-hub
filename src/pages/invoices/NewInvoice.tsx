@@ -527,7 +527,7 @@ export default function NewInvoice() {
                     <Input className="h-8 text-xs pl-8 w-48" placeholder="Filter medicines..." value={medSearch} onChange={e => setMedSearch(e.target.value)} />
                   </div>
                   {canEdit && (
-                    <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setNewMedName(''); setNewMedType(''); setShowAddDialog(true); }}>
+                    <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setNewMedName(''); setNewMedType(''); setNewMedStrength(''); setNewMedUnit(''); setShowAddDialog(true); }}>
                       <PlusCircle className="w-3.5 h-3.5 mr-1" /> Add Medicine
                     </Button>
                   )}
