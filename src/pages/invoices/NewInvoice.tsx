@@ -73,6 +73,11 @@ export default function NewInvoice() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState<BannerState | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<number, { batch?: boolean; expDate?: boolean; expPast?: boolean }>>({});
+
+  // Refs for auto-focus on batch fields
+  const batchRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const lastAddedIdx = useRef<number | null>(null);
 
   // Add new medicine dialog
   const [showAddDialog, setShowAddDialog] = useState(false);
