@@ -182,14 +182,27 @@ export default function NewInvoice() {
 
   const handleAddNewMedicine = () => {
     if (!newMedName.trim() || !newMedType) { setBanner({ type: 'error', message: 'Medicine name and type are required.' }); return; }
+    const newIdx = items.length;
     setItems(prev => [...prev, {
       medicineId: '', medicineName: newMedName.trim(), medicineType: newMedType,
       isAlreadyExist: false, batchNo: '', expDate: '', quantity: 0, stock: 0,
     }]);
+    lastAddedIdx.current = newIdx;
     setShowAddDialog(false);
     setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list.` });
     setNewMedName(''); setNewMedType(''); setNewMedStrength(''); setNewMedUnit('');
   };
+
+  // Auto-focus batch field when a new medicine is added
+  useEffect(() => {
+    if (lastAddedIdx.current !== null) {
+      const idx = lastAddedIdx.current;
+      lastAddedIdx.current = null;
+      setTimeout(() => {
+        batchRefs.current[idx]?.focus();
+      }, 100);
+    }
+  }, [items.length]);
 
   const handleSave = async () => {
     if (!supplierId) { setBanner({ type: 'error', message: 'Please select a supplier.' }); return; }
