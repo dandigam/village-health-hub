@@ -473,7 +473,7 @@ export default function NewInvoice() {
 
                   {/* Empty col for alignment */}
                   <div className="pl-3 border-l border-border/40" />
-              </div>
+                </div>
             </fieldset>
           </div>
 
