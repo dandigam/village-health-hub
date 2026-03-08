@@ -307,7 +307,7 @@ export default function NewInvoice() {
 
               <div className="px-3 py-2">
                 {/* Row 1: Supplier | Payment Mode | Invoice No. | Invoice Attach */}
-                <div className="grid grid-cols-4 gap-0">
+                <div className="grid gap-0" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 0.8fr' }}>
                   {/* Supplier */}
                   <div className="pr-3">
                     <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Supplier <span className="text-destructive">*</span></Label>
