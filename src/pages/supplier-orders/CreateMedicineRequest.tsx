@@ -834,7 +834,7 @@ export default function CreateMedicineRequest() {
                       const hasRecvQty = med.receivedQty > 0;
 
                       return (
-                        <tr key={med.medicineId} className={cn("transition-colors duration-150 hover:bg-primary/[0.03]", (isCreate ? hasReqQty : hasRecvQty) && "bg-emerald-50/60")}>
+                        <tr key={med.medicineId} className={cn("transition-colors duration-150 hover:bg-primary/[0.03]", (isCreate ? hasReqQty : (isPendingView ? hasReqQty : hasRecvQty)) && "bg-emerald-50/60")}>
                           <td className="px-4 py-2 text-muted-foreground text-sm w-12">{origIdx + 1}</td>
                           <td className="px-4 py-2">
                             <span className="font-semibold text-foreground text-sm">{med.medicineName}</span>
