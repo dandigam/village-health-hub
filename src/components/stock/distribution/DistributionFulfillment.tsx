@@ -108,7 +108,7 @@ export function DistributionFulfillment({ order, allOrders, onClose, onUpdate, o
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="ml-auto flex h-full w-full max-w-[1100px] bg-background shadow-2xl"
+        className="ml-auto flex h-full w-full max-w-[1100px] bg-background shadow-2xl overflow-hidden"
       >
         {/* Left sidebar - Pending Requests (only for non-completed) */}
         {!isCompleted && pendingOrders.length > 0 && (
