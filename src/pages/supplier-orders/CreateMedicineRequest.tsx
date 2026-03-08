@@ -204,6 +204,7 @@ export default function CreateMedicineRequest() {
     const updated = [...medicines];
     (updated[idx] as any)[field] = value;
     setMedicines(updated);
+    setDirty(true);
   };
 
   // Add medicine from global list
