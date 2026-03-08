@@ -725,6 +725,9 @@ export default function NewInvoice() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Discard Changes Dialog */}
+      <DiscardChangesDialog open={showDiscardDialog} onDiscard={handleDiscard} onCancel={handleDiscardCancel} />
     </DashboardLayout>
   );
 }
