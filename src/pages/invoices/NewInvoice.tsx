@@ -162,6 +162,7 @@ export default function NewInvoice() {
 
   const updateItem = (idx: number, field: keyof InvoiceItem, value: any) => {
     setItems(prev => { const next = [...prev]; next[idx] = { ...next[idx], [field]: value }; return next; });
+    setDirty(true);
   };
 
   const filteredItems = useMemo(() => {
