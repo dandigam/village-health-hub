@@ -24,21 +24,54 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { useAuth } from '@/context/AuthContext';
 import { hasAccess } from '@/config/routeAccess';
 
-const allNavItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', routeKey: 'dashboard', color: 'hsl(220, 90%, 65%)' },
-  { icon: Tent, label: 'Camp Templates', href: '/camp-templates', routeKey: 'camp-templates', color: 'hsl(280, 70%, 65%)' },
-  { icon: CalendarDays, label: 'Camp Events', href: '/camp-events', routeKey: 'camp-events', color: 'hsl(340, 75%, 65%)' },
-  { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients', color: 'hsl(200, 85%, 60%)' },
-  { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters', color: 'hsl(350, 80%, 62%)' },
-  { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy', color: 'hsl(160, 70%, 55%)' },
-  { icon: Package, label: 'Inventory', href: '/stock', routeKey: 'stock', color: 'hsl(35, 90%, 60%)' },
-  { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers', color: 'hsl(140, 65%, 55%)' },
-  { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders', color: 'hsl(25, 95%, 60%)' },
-  { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders', color: 'hsl(270, 70%, 65%)' },
-  { icon: FileText, label: 'Invoices', href: '/invoices', routeKey: 'invoices', color: 'hsl(190, 80%, 55%)' },
-  { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors', color: 'hsl(170, 70%, 50%)' },
-  { icon: FileText, label: 'Reports', href: '/reports', routeKey: 'reports', color: 'hsl(45, 90%, 55%)' },
-  { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses', color: 'hsl(210, 60%, 60%)' },
+type NavItem = {
+  icon: typeof LayoutDashboard;
+  label: string;
+  href: string;
+  routeKey: string;
+  color: string;
+};
+
+type NavGroup = {
+  title: string;
+  items: NavItem[];
+};
+
+const navGroups: NavGroup[] = [
+  {
+    title: 'Overview',
+    items: [
+      { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', routeKey: 'dashboard', color: 'hsl(220, 90%, 65%)' },
+    ],
+  },
+  {
+    title: 'Clinical',
+    items: [
+      { icon: Tent, label: 'Camp Templates', href: '/camp-templates', routeKey: 'camp-templates', color: 'hsl(280, 70%, 65%)' },
+      { icon: CalendarDays, label: 'Camp Events', href: '/camp-events', routeKey: 'camp-events', color: 'hsl(340, 75%, 65%)' },
+      { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients', color: 'hsl(200, 85%, 60%)' },
+      { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters', color: 'hsl(350, 80%, 62%)' },
+      { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy', color: 'hsl(160, 70%, 55%)' },
+      { icon: ClipboardList, label: 'Doctors', href: '/doctors', routeKey: 'doctors', color: 'hsl(170, 70%, 50%)' },
+    ],
+  },
+  {
+    title: 'Supply Chain',
+    items: [
+      { icon: Package, label: 'Inventory', href: '/stock', routeKey: 'stock', color: 'hsl(35, 90%, 60%)' },
+      { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers', color: 'hsl(140, 65%, 55%)' },
+      { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders', color: 'hsl(25, 95%, 60%)' },
+      { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders', color: 'hsl(270, 70%, 65%)' },
+      { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses', color: 'hsl(210, 60%, 60%)' },
+    ],
+  },
+  {
+    title: 'Operations',
+    items: [
+      { icon: FileText, label: 'Invoices', href: '/invoices', routeKey: 'invoices', color: 'hsl(190, 80%, 55%)' },
+      { icon: BarChart3, label: 'Reports', href: '/reports', routeKey: 'reports', color: 'hsl(45, 90%, 55%)' },
+    ],
+  },
 ];
 
 interface SidebarProps {
