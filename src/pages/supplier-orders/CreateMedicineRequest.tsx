@@ -68,6 +68,8 @@ export default function CreateMedicineRequest() {
   const isEditDraft = !!id && isEditRoute && statusLower === 'draft';
   const isView = !!id && !isEditRoute;
   const isReadOnly = isView || (!!id && isEditRoute && statusLower === 'received');
+  const isPendingView = isView && (statusLower === 'pending' || statusLower === 'draft');
+  const isReceivedView = isView && (statusLower === 'received' || statusLower === 'partial');
 
   const [supplierId, setSupplierId] = useState('');
   const [priority, setPriority] = useState<'normal' | 'urgent'>('normal');
