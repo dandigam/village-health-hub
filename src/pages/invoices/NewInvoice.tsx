@@ -8,10 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useAuth } from '@/context/AuthContext';
-import { useSupplierList, useWarehouseInventory, WarehouseInventoryItem } from '@/hooks/useApiData';
+import { useSupplierList, useWarehouseInventory, useWarehouseDetail, WarehouseInventoryItem } from '@/hooks/useApiData';
 import api, { API_BASE_URL } from '@/services/api';
-import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardChangesDialog } from '@/components/shared/DiscardChangesDialog';
 
 type BannerType = 'success' | 'error';
 interface BannerState { type: BannerType; message: string }
@@ -45,6 +48,10 @@ export default function NewInvoice() {
 
   const { data: suppliers = [] } = useSupplierList(warehouseId);
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
+
+  // Unsaved changes tracking
+  const { isDirty, setDirty, confirmNavigation, showDiscardDialog, handleDiscard, handleCancel: handleDiscardCancel } = useUnsavedChanges();
 
   const [mode, setMode] = useState<PageMode>(id ? (isEditRoute ? 'edit' : 'view') : 'create');
   const isReadOnly = mode === 'view';
@@ -76,6 +83,18 @@ export default function NewInvoice() {
   const [previewLoading, setPreviewLoading] = useState(false);
 
   const selectedSupplier = useMemo(() => suppliers.find((s: any) => String(s.id) === supplierId), [suppliers, supplierId]);
+
+  // Build full supplier address
+  const supplierAddress = useMemo(() => {
+    if (!selectedSupplier) return '';
+    return [(selectedSupplier as any).address, (selectedSupplier as any).mandal, (selectedSupplier as any).district, (selectedSupplier as any).state].filter(Boolean).join(', ') + ((selectedSupplier as any).pinCode ? ` - ${(selectedSupplier as any).pinCode}` : '');
+  }, [selectedSupplier]);
+
+  // Build warehouse address
+  const warehouseAddress = useMemo(() => {
+    if (!warehouseDetail) return '';
+    return [warehouseDetail.village, warehouseDetail.mandal, warehouseDetail.district, warehouseDetail.state].filter(Boolean).join(', ') + (warehouseDetail.pinCode ? ` - ${warehouseDetail.pinCode}` : '');
+  }, [warehouseDetail]);
 
   // Load existing invoice
   useEffect(() => {
@@ -143,6 +162,7 @@ export default function NewInvoice() {
 
   const updateItem = (idx: number, field: keyof InvoiceItem, value: any) => {
     setItems(prev => { const next = [...prev]; next[idx] = { ...next[idx], [field]: value }; return next; });
+    setDirty(true);
   };
 
   const filteredItems = useMemo(() => {
@@ -210,7 +230,7 @@ export default function NewInvoice() {
     <DashboardLayout>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted transition-colors" onClick={() => navigate('/invoices')}>
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted transition-colors" onClick={() => confirmNavigation('/invoices')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-lg font-semibold text-value">{pageTitle}</h1>
@@ -409,17 +429,22 @@ export default function NewInvoice() {
                   </div>
                 </div>
 
-                {/* Row 2: Supplier contact | Amount | Date */}
+                {/* Row 2: Supplier Address | Amount | Date | Deliver To */}
                 <div className="grid grid-cols-4 gap-0 mt-1.5 pt-1.5 border-t border-border/20">
-                  {/* Supplier contact & address */}
+                  {/* Supplier Full Address */}
                   <div className="pr-3 space-y-0 min-h-[1.75rem]">
-                    {(selectedSupplier as any)?.contact && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <span>📞</span> <span className="text-value font-medium">{(selectedSupplier as any).contact}</span>
-                      </p>
-                    )}
-                    {selectedSupplier?.address && (
-                      <p className="text-[11px] text-primary/70 italic leading-snug">{selectedSupplier.address}</p>
+                    {selectedSupplier && (
+                      <>
+                        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
+                        <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
+                        {(selectedSupplier as any)?.contact && (
+                          <p className="text-[11px] text-muted-foreground mt-0.5">📞 {(selectedSupplier as any).contact}</p>
+                        )}
+                        {(selectedSupplier as any)?.email && (
+                          <p className="text-[11px] text-muted-foreground">✉️ {(selectedSupplier as any).email}</p>
+                        )}
+                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
+                      </>
                     )}
                   </div>
 
@@ -427,7 +452,7 @@ export default function NewInvoice() {
                   <div className="px-3 border-l border-border/40">
                     <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Amount (₹) <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-7 text-xs mt-1" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => { setInvoiceAmount(e.target.value); setDirty(true); }} />
                     ) : (
                       <p className="text-xs font-bold text-value mt-1 h-7 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
                     )}
@@ -437,13 +462,40 @@ export default function NewInvoice() {
                   <div className="px-3 border-l border-border/40">
                     <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Date <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-7 text-xs mt-1" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" type="date" value={invoiceDate} onChange={e => { setInvoiceDate(e.target.value); setDirty(true); }} />
                     ) : (
                       <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                     )}
                   </div>
 
-                  <div className="pl-3 border-l border-border/40">{/* spacer */}</div>
+                  {/* Deliver To */}
+                  <div className="pl-3 border-l border-border/40">
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
+                      {warehouseDetail && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs text-xs">
+                            <p className="font-semibold mb-1">{warehouseDetail.name}</p>
+                            <p>{warehouseAddress}</p>
+                            {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
+                            {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    {warehouseDetail ? (
+                      <>
+                        <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
+                        {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
+                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
+                      </>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground italic mt-1">No warehouse assigned</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </fieldset>
@@ -558,7 +610,7 @@ export default function NewInvoice() {
                   <span>Total Qty: <strong className="text-value font-bold">{totalQty}</strong></span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" className="h-8 px-4 text-xs" onClick={() => navigate('/invoices')}>
+                  <Button variant="ghost" size="sm" className="h-8 px-4 text-xs" onClick={() => confirmNavigation('/invoices')}>
                     Cancel
                   </Button>
                   {canEdit && (
@@ -673,6 +725,9 @@ export default function NewInvoice() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Discard Changes Dialog */}
+      <DiscardChangesDialog open={showDiscardDialog} onDiscard={handleDiscard} onCancel={handleDiscardCancel} />
     </DashboardLayout>
   );
 }

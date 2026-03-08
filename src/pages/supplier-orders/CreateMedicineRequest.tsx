@@ -17,6 +17,8 @@ import { Switch } from '@/components/ui/switch';
 import { useSupplierList, useWarehouseInventory, useWarehouseDetail, useMedicines } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { api, API_BASE_URL } from '@/services/api';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardChangesDialog } from '@/components/shared/DiscardChangesDialog';
 
 type BannerType = 'success' | 'error' | 'info';
 interface BannerState { type: BannerType; message: string }
@@ -103,6 +105,9 @@ export default function CreateMedicineRequest() {
   const [_showImagePreview, _setShowImagePreview] = useState<string | null>(null);
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
+
+  // Unsaved changes tracking
+  const { setDirty, confirmNavigation, showDiscardDialog, handleDiscard, handleCancel: handleDiscardCancel } = useUnsavedChanges();
 
   // Build warehouse address
   const warehouseAddress = useMemo(() => {
@@ -199,6 +204,7 @@ export default function CreateMedicineRequest() {
     const updated = [...medicines];
     (updated[idx] as any)[field] = value;
     setMedicines(updated);
+    setDirty(true);
   };
 
   // Add medicine from global list
@@ -289,7 +295,7 @@ export default function CreateMedicineRequest() {
     <DashboardLayout>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted transition-colors" onClick={() => navigate('/supplier-orders')}>
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted transition-colors" onClick={() => confirmNavigation('/supplier-orders')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
@@ -326,7 +332,7 @@ export default function CreateMedicineRequest() {
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
-        <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-[hsl(var(--card-raised-border))] bg-[hsl(var(--card-raised-bg))] overflow-hidden" style={{ boxShadow: 'var(--card-shadow-elevated)' }}>
 
           {/* ═══════════════════════════════════════════════════════════════ */}
           {/* PENDING VIEW — Read-only with Supplier + Warehouse addresses   */}
@@ -647,97 +653,88 @@ export default function CreateMedicineRequest() {
           {/* CREATE MODE — Side-by-side Supplier + Deliver To + Priority   */}
           {/* ═══════════════════════════════════════════════════════════════ */}
           {isCreate && (
-            <div className="px-5 py-3 border-b bg-muted/20">
-              <div className="flex items-stretch gap-0">
-                {/* Supplier Dropdown */}
-                <div className="min-w-[200px] flex flex-col justify-center pr-4">
-                  <Label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mb-1">Supplier *</Label>
-                  <Select value={supplierId} onValueChange={setSupplierId}>
-                    <SelectTrigger className="h-9 text-sm bg-background border-input hover:border-primary/50 shadow-sm transition-colors">
-                      <SelectValue placeholder="Select Supplier" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover z-50">
-                      {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="px-3 pt-3 pb-2 border-b border-border/30 bg-[hsl(var(--card-surface-bg))]">
+              <fieldset className="border border-[hsl(var(--field-border))] rounded-lg px-0 pt-0 pb-0 relative bg-[hsl(var(--card-raised-bg))]" style={{ boxShadow: '0 1px 4px hsl(var(--shadow-color) / 0.04)' }}>
+                <legend className="text-[10px] font-bold text-primary px-2 ml-3 tracking-wider uppercase">Request Information</legend>
 
-                {/* Priority Toggle */}
-                <div className="flex flex-col justify-center pr-4">
-                  <Label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mb-1">Priority</Label>
-                  <div className="flex items-center gap-2 h-9">
-                    <Switch
-                      checked={priority === 'urgent'}
-                      onCheckedChange={(checked) => setPriority(checked ? 'urgent' : 'normal')}
-                      className={cn(
-                        priority === 'urgent' && "data-[state=checked]:bg-destructive"
-                      )}
-                    />
-                    <span className={cn(
-                      "text-sm font-semibold transition-colors",
-                      priority === 'urgent' ? "text-destructive" : "text-muted-foreground"
-                    )}>
-                      {priority === 'urgent' ? 'URGENT' : 'Normal'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Divider 1 */}
-                {selectedSupplier && (
-                  <div className="flex items-center px-3 self-stretch py-2">
-                    <div className="w-px h-full bg-border" />
-                  </div>
-                )}
-
-                {/* Supplier Address */}
-                {selectedSupplier && (
-                  <div className="flex-1 flex flex-col justify-center pr-3 min-w-[180px]">
-                    <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
-                    <p className="text-xs font-semibold text-foreground leading-tight">{selectedSupplier.name}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact || '-'}</p>
-                    <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
-                  </div>
-                )}
-
-                {/* Divider 2 */}
-                {selectedSupplier && (
-                  <div className="flex items-center px-3 self-stretch py-2">
-                    <div className="w-px h-full bg-border" />
-                  </div>
-                )}
-
-                {/* Deliver To */}
-                {selectedSupplier && (
-                  <div className="flex-1 flex flex-col justify-center min-w-[180px]">
-                    <div className="flex items-center gap-1 mb-0.5">
-                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
-                      {warehouseDetail && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs text-xs">
-                            <p className="font-semibold mb-1">{warehouseDetail.name}</p>
-                            <p>{warehouseAddress}</p>
-                            {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
-                            {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
-                            {warehouseDetail.authorizedPerson && <p className="mt-1">Contact: {warehouseDetail.authorizedPerson}</p>}
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
+                <div className="px-3 py-2">
+                  {/* Row 1: Supplier | Priority */}
+                  <div className="grid grid-cols-4 gap-0">
+                    {/* Supplier */}
+                    <div className="pr-3">
+                      <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Supplier <span className="text-destructive">*</span></Label>
+                      <Select value={supplierId} onValueChange={(v) => { setSupplierId(v); setDirty(true); }}>
+                        <SelectTrigger className="h-7 text-xs mt-1"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                        <SelectContent className="bg-popover z-50">
+                          {suppliers.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    {warehouseDetail ? (
-                      <>
-                        <p className="text-xs font-semibold text-foreground leading-tight">{warehouseDetail.name}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber || '-'}</p>
-                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
-                      </>
-                    ) : (
-                      <p className="text-[11px] text-muted-foreground italic">No warehouse assigned</p>
-                    )}
+
+                    {/* Priority */}
+                    <div className="px-3 border-l border-border/40">
+                      <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Priority</Label>
+                      <div className="flex items-center gap-2 h-7 mt-1">
+                        <Switch
+                          checked={priority === 'urgent'}
+                          onCheckedChange={(checked) => { setPriority(checked ? 'urgent' : 'normal'); setDirty(true); }}
+                          className={cn(priority === 'urgent' && "data-[state=checked]:bg-destructive")}
+                        />
+                        <span className={cn("text-xs font-semibold transition-colors", priority === 'urgent' ? "text-destructive" : "text-muted-foreground")}>
+                          {priority === 'urgent' ? 'URGENT' : 'Normal'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Empty cols for alignment */}
+                    <div className="px-3 border-l border-border/40" />
+                    <div className="pl-3 border-l border-border/40" />
                   </div>
-                )}
-              </div>
+
+                  {/* Row 2: Supplier Address | Deliver To */}
+                  {selectedSupplier && (
+                    <div className="grid grid-cols-4 gap-0 mt-1.5 pt-1.5 border-t border-border/20">
+                      {/* Supplier Address */}
+                      <div className="pr-3 col-span-2">
+                        <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
+                        <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
+                        {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
+                        {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
+                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
+                      </div>
+
+                      {/* Deliver To */}
+                      <div className="pl-3 border-l border-border/40 col-span-2">
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
+                          {warehouseDetail && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" className="max-w-xs text-xs">
+                                <p className="font-semibold mb-1">{warehouseDetail.name}</p>
+                                <p>{warehouseAddress}</p>
+                                {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
+                                {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                        {warehouseDetail ? (
+                          <>
+                            <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
+                            {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
+                            <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
+                          </>
+                        ) : (
+                          <p className="text-[11px] text-muted-foreground italic mt-1">No warehouse assigned</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </fieldset>
             </div>
           )}
 
@@ -914,7 +911,7 @@ export default function CreateMedicineRequest() {
                   {(isReceive || isReceivedView) && <span>Total Recv Qty: <strong className="text-foreground font-semibold">{totalRecvQty}</strong></span>}
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => navigate('/supplier-orders')}>
+                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => confirmNavigation('/supplier-orders')}>
                     {isView ? 'Back' : 'Cancel'}
                   </Button>
                   {(isCreate || isEditDraft) && (
@@ -1046,6 +1043,9 @@ export default function CreateMedicineRequest() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Discard Changes Dialog */}
+      <DiscardChangesDialog open={showDiscardDialog} onDiscard={handleDiscard} onCancel={handleDiscardCancel} />
     </DashboardLayout>
   );
 }
