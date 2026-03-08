@@ -695,8 +695,8 @@ export default function CreateMedicineRequest() {
                     <div className="flex-1 pr-3 min-w-[180px]">
                       <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
                       <p className="text-xs font-semibold text-value leading-tight">{selectedSupplier.name}</p>
-                      {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
-                      {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
+                      {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {selectedSupplier.contact}</p>}
+                      {selectedSupplier.email && <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {selectedSupplier.email}</p>}
                       <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
                     </div>
 
