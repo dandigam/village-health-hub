@@ -568,13 +568,13 @@ export default function NewInvoice() {
                 ) : (
                   <table className="w-full text-sm">
                     <thead className="sticky top-0 z-10">
-                      <tr className="border-b border-border/40 bg-[hsl(var(--card-surface-bg))]">
-                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-label w-12">#</th>
-                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-label">Medicine</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-label w-24">Stock</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-label w-28">Batch</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-label w-36">Exp Date</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-label w-28">Qty</th>
+                      <tr className="border-b-2 border-primary/15 bg-muted/50">
+                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-12">#</th>
+                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-muted-foreground">Medicine</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-24">Stock</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-28">Qty</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
