@@ -210,14 +210,14 @@ export default function NewInvoice() {
     <DashboardLayout>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => navigate('/invoices')}>
+        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg hover:bg-muted transition-colors" onClick={() => navigate('/invoices')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
-        {id && <span className="text-sm text-slate-500 font-mono">#{id}</span>}
-        {createdAt && <span className="text-sm text-slate-500 ml-auto">{new Date(createdAt).toLocaleDateString()}</span>}
+        <h1 className="text-lg font-semibold text-value">{pageTitle}</h1>
+        {id && <span className="text-sm text-muted-foreground font-mono">#{id}</span>}
+        {createdAt && <span className="text-sm text-muted-foreground ml-auto">{new Date(createdAt).toLocaleDateString()}</span>}
         {isReadOnly && (
-          <Button size="sm" variant="outline" className="ml-2 border-blue-200 text-blue-600 hover:bg-blue-50" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
+          <Button size="sm" variant="outline" className="ml-2" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
             <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
           </Button>
         )}
