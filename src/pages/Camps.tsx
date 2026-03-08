@@ -95,7 +95,7 @@ export default function Camps() {
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
+                      <MapPin className="h-3.5 w-3.5 text-icon-location" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
