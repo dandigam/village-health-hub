@@ -117,24 +117,24 @@ export function DistributionFulfillment({ order, allOrders, onClose, onUpdate, o
               <h3 className="text-sm font-semibold text-foreground">Pending Requests</h3>
               <p className="text-[11px] text-muted-foreground">{pendingOrders.length} other orders</p>
             </div>
-            <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+            <div className="flex-1 overflow-y-auto p-3 space-y-2">
               {pendingOrders.map(o => {
                 const oCfg = statusConfig[o.status];
                 return (
                   <div
                     key={o.id}
                     onClick={() => onSelectOrder(o)}
-                    className="p-3 rounded-xl border bg-card cursor-pointer hover:border-primary/30 hover:shadow-sm transition-all"
+                    className="p-3.5 rounded-xl border bg-card cursor-pointer hover:border-primary/30 hover:shadow-sm transition-all"
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-semibold text-primary">ORD-{o.id.padStart(4, '0')}</span>
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${oCfg.bg} ${oCfg.text}`}>
                         <span className={`w-1 h-1 rounded-full ${oCfg.dot}`} />
                         {oCfg.label}
                       </span>
                     </div>
-                    <p className="text-xs font-medium">{o.clientName}</p>
-                    <p className="text-[11px] text-muted-foreground">{o.requestedBy}</p>
+                    <p className="text-xs font-medium mt-1">{o.clientName}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{o.requestedBy}</p>
                   </div>
                 );
               })}
@@ -157,7 +157,6 @@ export function DistributionFulfillment({ order, allOrders, onClose, onUpdate, o
               <div className="flex items-center gap-4 mt-0.5 text-[11px] text-muted-foreground">
                 <span>Requested by: <strong className="text-foreground">{order.requestedBy}</strong></span>
                 <span>Date: <strong className="text-foreground">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong></span>
-                {wh && <span>Warehouse: <strong className="text-foreground">{wh.name}</strong></span>}
               </div>
             </div>
             <div className="flex items-center gap-2">

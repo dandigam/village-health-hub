@@ -56,25 +56,24 @@ export default function DistributionOrders() {
 
   return (
     <DashboardLayout>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2.5">
+      {/* Top Header Bar */}
+      <div className="rounded-xl border bg-card px-5 py-3 mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
-            <ArrowRightLeft className="h-4 w-4 text-primary" />
+            <ArrowRightLeft className="h-4.5 w-4.5 text-primary" />
           </div>
           <div>
             <h1 className="text-base font-bold text-foreground">Distribution Orders</h1>
-            <p className="text-[11px] text-muted-foreground">{localOrders.length} total orders</p>
+            <p className="text-[11px] text-muted-foreground">{localOrders.length} total orders · Manage stock distribution requests</p>
           </div>
         </div>
-        {/* Stat chips */}
         <div className="flex items-center gap-2">
           {[
             { label: 'Pending', count: stats.pending, color: 'bg-amber-500 animate-pulse' },
             { label: 'Draft', count: stats.draft, color: 'bg-muted-foreground' },
             { label: 'Completed', count: stats.completed, color: 'bg-emerald-500' },
           ].map(s => (
-            <span key={s.label} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/50 text-xs text-muted-foreground">
+            <span key={s.label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/40 text-xs font-medium text-muted-foreground border border-border/50">
               <span className={`w-1.5 h-1.5 rounded-full ${s.color}`} />
               {s.count} {s.label}
             </span>
