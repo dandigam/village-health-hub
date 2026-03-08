@@ -17,6 +17,8 @@ import { Switch } from '@/components/ui/switch';
 import { useSupplierList, useWarehouseInventory, useWarehouseDetail, useMedicines } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { api, API_BASE_URL } from '@/services/api';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardChangesDialog } from '@/components/shared/DiscardChangesDialog';
 
 type BannerType = 'success' | 'error' | 'info';
 interface BannerState { type: BannerType; message: string }
