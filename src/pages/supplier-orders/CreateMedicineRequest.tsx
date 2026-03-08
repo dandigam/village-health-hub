@@ -911,7 +911,7 @@ export default function CreateMedicineRequest() {
                   {(isReceive || isReceivedView) && <span>Total Recv Qty: <strong className="text-foreground font-semibold">{totalRecvQty}</strong></span>}
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => navigate('/supplier-orders')}>
+                  <Button variant="ghost" size="sm" className="h-9 px-4 text-sm text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => confirmNavigation('/supplier-orders')}>
                     {isView ? 'Back' : 'Cancel'}
                   </Button>
                   {(isCreate || isEditDraft) && (
