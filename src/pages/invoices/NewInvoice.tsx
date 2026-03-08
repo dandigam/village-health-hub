@@ -330,8 +330,19 @@ export default function NewInvoice() {
                       <Select value={paymentMode} onValueChange={setPaymentMode}>
                         <SelectTrigger className="h-7 text-xs mt-1"><SelectValue placeholder="Select Mode" /></SelectTrigger>
                         <SelectContent className="bg-popover z-50">
-                          {['cash', 'upi', 'bank_transfer', 'cheque', 'credit'].map(m => (
-                            <SelectItem key={m} value={m}>{m.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
+                          {[
+                            { value: 'cash', label: 'Cash', icon: Banknote, color: 'text-icon-phone' },
+                            { value: 'upi', label: 'UPI', icon: QrCode, color: 'text-icon-calendar' },
+                            { value: 'bank_transfer', label: 'Bank Transfer', icon: Landmark, color: 'text-icon-building' },
+                            { value: 'cheque', label: 'Cheque', icon: CreditCard, color: 'text-icon-id' },
+                            { value: 'credit', label: 'Credit', icon: Wallet, color: 'text-icon-mail' },
+                          ].map(m => (
+                            <SelectItem key={m.value} value={m.value}>
+                              <span className="flex items-center gap-2">
+                                <m.icon className={`h-3.5 w-3.5 ${m.color}`} />
+                                {m.label}
+                              </span>
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
