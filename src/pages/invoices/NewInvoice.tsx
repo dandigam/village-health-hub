@@ -32,7 +32,8 @@ interface InvoiceItem {
   stock: number;
 }
 
-const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Other'];
+const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Powder', 'Inhaler', 'Ointment', 'Other'];
+const UNITS = ['mg', 'ml', 'gm', 'mcg', 'IU', 'units', '%'];
 
 type PageMode = 'create' | 'view' | 'edit';
 
