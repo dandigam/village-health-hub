@@ -591,9 +591,15 @@ export default function NewInvoice() {
                           )}>
                             <td className="px-4 py-2 text-muted-foreground text-xs font-medium">{idx + 1}</td>
                             <td className="px-4 py-2">
-                              <span className="font-semibold text-value text-sm">{item.medicineName}</span>
-                              <span className="text-muted-foreground ml-2 text-xs">{item.medicineType !== '-' ? item.medicineType : ''}</span>
-                              {!item.isAlreadyExist && <span className="text-[10px] ml-2 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold">New</span>}
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-value text-sm">{item.medicineName}</span>
+                                {!item.isAlreadyExist && <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold">New</span>}
+                              </div>
+                              {item.medicineType && item.medicineType !== '-' && (
+                                <span className="text-[10px] text-muted-foreground mt-0.5 inline-flex items-center gap-1">
+                                  <Pill className="h-2.5 w-2.5" /> {item.medicineType}
+                                </span>
+                              )}
                             </td>
                             <td className={`px-4 py-2 text-center text-xs tabular-nums ${stockColor}`}>{stock}</td>
                             <td className="px-4 py-2 text-center">
