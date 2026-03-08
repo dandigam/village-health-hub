@@ -48,6 +48,22 @@ export default function NewInvoice() {
 
   const { data: suppliers = [] } = useSupplierList(warehouseId);
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
+
+  // Unsaved changes tracking
+  const { isDirty, setDirty, confirmNavigation, showDiscardDialog, handleDiscard, handleCancel: handleDiscardCancel } = useUnsavedChanges();
+
+  // Build full supplier address
+  const supplierAddress = useMemo(() => {
+    if (!selectedSupplier) return '';
+    return [(selectedSupplier as any).address, (selectedSupplier as any).mandal, (selectedSupplier as any).district, (selectedSupplier as any).state].filter(Boolean).join(', ') + ((selectedSupplier as any).pinCode ? ` - ${(selectedSupplier as any).pinCode}` : '');
+  }, [selectedSupplier]);
+
+  // Build warehouse address
+  const warehouseAddress = useMemo(() => {
+    if (!warehouseDetail) return '';
+    return [warehouseDetail.village, warehouseDetail.mandal, warehouseDetail.district, warehouseDetail.state].filter(Boolean).join(', ') + (warehouseDetail.pinCode ? ` - ${warehouseDetail.pinCode}` : '');
+  }, [warehouseDetail]);
 
   const [mode, setMode] = useState<PageMode>(id ? (isEditRoute ? 'edit' : 'view') : 'create');
   const isReadOnly = mode === 'view';
