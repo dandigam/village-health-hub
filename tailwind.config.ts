@@ -94,6 +94,19 @@ export default {
           teal: "hsl(var(--stat-teal))",
           "teal-text": "hsl(var(--stat-teal-text))",
         },
+        // Icon semantic colors
+        icon: {
+          phone: "hsl(var(--icon-phone))",
+          mail: "hsl(var(--icon-mail))",
+          location: "hsl(var(--icon-location))",
+          calendar: "hsl(var(--icon-calendar))",
+          user: "hsl(var(--icon-user))",
+          building: "hsl(var(--icon-building))",
+          id: "hsl(var(--icon-id))",
+          stethoscope: "hsl(var(--icon-stethoscope))",
+          clock: "hsl(var(--icon-clock))",
+          users: "hsl(var(--icon-users))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
