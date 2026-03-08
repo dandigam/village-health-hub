@@ -106,6 +106,9 @@ export default function CreateMedicineRequest() {
 
   const selectedSupplier = useMemo(() => suppliers.find(s => String(s.id) === supplierId), [suppliers, supplierId]);
 
+  // Unsaved changes tracking
+  const { setDirty, confirmNavigation, showDiscardDialog, handleDiscard, handleCancel: handleDiscardCancel } = useUnsavedChanges();
+
   // Build warehouse address
   const warehouseAddress = useMemo(() => {
     if (!warehouseDetail) return '';
