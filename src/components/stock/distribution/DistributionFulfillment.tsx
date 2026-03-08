@@ -157,7 +157,6 @@ export function DistributionFulfillment({ order, allOrders, onClose, onUpdate, o
               <div className="flex items-center gap-4 mt-0.5 text-[11px] text-muted-foreground">
                 <span>Requested by: <strong className="text-foreground">{order.requestedBy}</strong></span>
                 <span>Date: <strong className="text-foreground">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong></span>
-                {wh && <span>Warehouse: <strong className="text-foreground">{wh.name}</strong></span>}
               </div>
             </div>
             <div className="flex items-center gap-2">
