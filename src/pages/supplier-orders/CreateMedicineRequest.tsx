@@ -394,8 +394,8 @@ export default function CreateMedicineRequest() {
                         <TooltipContent side="bottom" className="max-w-xs text-xs">
                           <p className="font-semibold mb-1">{warehouseDetail.name}</p>
                           <p>{warehouseAddress}</p>
-                          {warehouseDetail.phoneNumber && <p className="mt-1 flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {warehouseDetail.phoneNumber}</p>}
-                          {warehouseDetail.email && <p className="flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {warehouseDetail.email}</p>}
+                          {warehouseDetail.phoneNumber && <p className="mt-1 flex items-center gap-1"><Phone className="h-3.5 w-3.5 text-icon-phone" /> {warehouseDetail.phoneNumber}</p>}
+                          {warehouseDetail.email && <p className="flex items-center gap-1"><Mail className="h-3.5 w-3.5 text-icon-mail" /> {warehouseDetail.email}</p>}
                         </TooltipContent>
                       </Tooltip>
                     )}
