@@ -140,53 +140,69 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="pt-4 px-2 overflow-y-auto flex-1 min-h-0">
-          <ul className="space-y-0.5">
-            {mainNavItems.map((item) => (
-              <li key={item.href}>
-                {collapsed ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+          {filteredGroups.map((group, groupIdx) => (
+            <div key={group.title} className={cn(groupIdx > 0 && "mt-3")}>
+              {/* Section header */}
+              {!collapsed ? (
+                <div className="px-3 pt-1 pb-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/30">
+                    {group.title}
+                  </span>
+                </div>
+              ) : (
+                groupIdx > 0 && (
+                  <div className="mx-3 my-2 border-t border-white/[0.08]" />
+                )
+              )}
+              <ul className="space-y-0.5">
+                {group.items.map((item) => (
+                  <li key={item.href}>
+                    {collapsed ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <NavLink
+                            to={item.href}
+                            onClick={handleNavClick}
+                            className={({ isActive }) =>
+                              cn(
+                                'group flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-all duration-200',
+                                isActive 
+                                  ? 'bg-white/[0.14] text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]' 
+                                  : 'text-white/55 hover:text-white/90 hover:bg-white/[0.06]'
+                              )
+                            }
+                          >
+                            {({ isActive }) => (
+                              <item.icon 
+                                className="h-[17px] w-[17px] transition-all duration-200"
+                                style={{ color: item.color, opacity: isActive ? 1 : 0.5 }}
+                              />
+                            )}
+                          </NavLink>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="bg-foreground text-background border-0 font-medium px-3 py-1.5 text-xs">
+                          {item.label}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
                       <NavLink
                         to={item.href}
                         onClick={handleNavClick}
                         className={({ isActive }) =>
                           cn(
-                            'group flex items-center justify-center h-10 w-10 mx-auto rounded-lg transition-all duration-200',
-                            isActive 
-                              ? 'bg-white/[0.14] text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]' 
-                              : 'text-white/55 hover:text-white/90 hover:bg-white/[0.06]'
+                            'group flex items-center gap-2.5 px-3 py-2 rounded-r-lg text-sm transition-all duration-200',
+                            isActive ? activeClass : inactiveClass
                           )
                         }
                       >
-                        {({ isActive }) => (
-                          <item.icon 
-                            className="h-[17px] w-[17px] transition-all duration-200"
-                            style={{ color: item.color, opacity: isActive ? 1 : 0.5 }}
-                          />
-                        )}
+                        {({ isActive }) => renderNavItem(item, isActive)}
                       </NavLink>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="bg-foreground text-background border-0 font-medium px-3 py-1.5 text-xs">
-                      {item.label}
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <NavLink
-                    to={item.href}
-                    onClick={handleNavClick}
-                    className={({ isActive }) =>
-                      cn(
-                        'group flex items-center gap-2.5 px-3 py-2 rounded-r-lg text-sm transition-all duration-200',
-                        isActive ? activeClass : inactiveClass
-                      )
-                    }
-                  >
-                    {({ isActive }) => renderNavItem(item, isActive)}
-                  </NavLink>
-                )}
-              </li>
-            ))}
-          </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         {/* Settings - pinned bottom */}
