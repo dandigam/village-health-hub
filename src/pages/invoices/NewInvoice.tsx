@@ -410,9 +410,9 @@ export default function NewInvoice() {
                 </div>
 
                 {/* Row 2: Supplier contact | Amount | Date */}
-                <div className="grid grid-cols-4 gap-0 mt-2 pt-2 border-t border-border/20">
+                <div className="grid grid-cols-4 gap-0 mt-1.5 pt-1.5 border-t border-border/20">
                   {/* Supplier contact & address */}
-                  <div className="pr-4 space-y-0.5 min-h-[2.25rem]">
+                  <div className="pr-3 space-y-0 min-h-[1.75rem]">
                     {(selectedSupplier as any)?.contact && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <span>📞</span> <span className="text-value font-medium">{(selectedSupplier as any).contact}</span>
