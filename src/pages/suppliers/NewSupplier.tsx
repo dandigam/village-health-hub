@@ -65,6 +65,10 @@ export default function NewSupplier() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showBulkPaste, setShowBulkPaste] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [manualShowSuggestions, setManualShowSuggestions] = useState(false);
+  const medicineNameRef = useRef<HTMLInputElement>(null);
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
