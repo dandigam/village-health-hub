@@ -424,26 +424,26 @@ export default function NewInvoice() {
                   </div>
 
                   {/* Amount */}
-                  <div className="px-5 border-l border-border/40">
-                    <Label className="text-[11px] text-muted-foreground font-medium">Amount (₹)</Label>
+                  <div className="px-4 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Amount (₹) <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                      <Input className="h-8 text-xs mt-1" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
                     ) : (
-                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
+                      <p className="text-xs font-semibold text-foreground mt-1 h-8 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
                     )}
                   </div>
 
                   {/* Date */}
-                  <div className="px-5 border-l border-border/40">
-                    <Label className="text-[11px] text-muted-foreground font-medium">Date *</Label>
+                  <div className="px-4 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Date <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-9 text-sm mt-1 bg-background border-input shadow-sm" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                      <Input className="h-8 text-xs mt-1" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
                     ) : (
-                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
+                      <p className="text-xs font-semibold text-foreground mt-1 h-8 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                     )}
                   </div>
 
-                  <div className="pl-5 border-l border-border/40">{/* spacer */}</div>
+                  <div className="pl-4 border-l border-border/40">{/* spacer */}</div>
                 </div>
               </div>
             </fieldset>
