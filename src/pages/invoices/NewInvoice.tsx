@@ -503,7 +503,17 @@ export default function NewInvoice() {
                   <div className="px-3 border-l border-border/40">
                     <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Date <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-7 text-xs mt-1" type="date" value={invoiceDate} onChange={e => { setInvoiceDate(e.target.value); setDirty(true); }} />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("h-7 text-xs mt-1 w-full justify-start text-left font-normal", !invoiceDate && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-1.5 h-3 w-3" />
+                            {invoiceDate ? format(new Date(invoiceDate), 'dd-MM-yyyy') : 'dd-mm-yyyy'}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-50" align="start">
+                          <Calendar mode="single" selected={invoiceDate ? new Date(invoiceDate) : undefined} onSelect={(date) => { if (date) { setInvoiceDate(format(date, 'yyyy-MM-dd')); setDirty(true); } }} initialFocus />
+                        </PopoverContent>
+                      </Popover>
                     ) : (
                       <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                     )}
