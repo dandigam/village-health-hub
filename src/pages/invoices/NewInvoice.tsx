@@ -424,10 +424,10 @@ export default function NewInvoice() {
                   </div>
 
                   {/* Amount */}
-                  <div className="px-4 border-l border-border/40">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Amount (₹) <span className="text-destructive">*</span></Label>
+                  <div className="px-3 border-l border-border/40">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Amount (₹) <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-8 text-xs mt-1.5" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
                     ) : (
                       <p className="text-sm font-bold text-value mt-1.5 h-8 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
                     )}
