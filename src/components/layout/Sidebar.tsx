@@ -30,7 +30,7 @@ const allNavItems = [
   { icon: Users, label: 'Patients', href: '/patients', routeKey: 'patients', color: 'hsl(200, 85%, 60%)' },
   { icon: Activity, label: 'Encounters', href: '/encounters', routeKey: 'encounters', color: 'hsl(350, 80%, 62%)' },
   { icon: Pill, label: 'Pharmacy', href: '/pharmacy', routeKey: 'pharmacy', color: 'hsl(160, 70%, 55%)' },
-  { icon: Package, label: 'Stock', href: '/stock', routeKey: 'stock', color: 'hsl(35, 90%, 60%)' },
+  { icon: Package, label: 'Inventory', href: '/stock', routeKey: 'stock', color: 'hsl(35, 90%, 60%)' },
   { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers', color: 'hsl(140, 65%, 55%)' },
   { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders', color: 'hsl(25, 95%, 60%)' },
   { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders', color: 'hsl(270, 70%, 65%)' },
