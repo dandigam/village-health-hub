@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle2, AlertCircle, Info, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Send, Save, Package, Search, Upload, FileImage, X, CalendarIcon, CheckCircle2, AlertCircle, Info, PlusCircle, Phone, Mail } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
