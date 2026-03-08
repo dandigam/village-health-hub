@@ -329,12 +329,95 @@ export default function CreateMedicineRequest() {
         <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
 
           {/* ═══════════════════════════════════════════════════════════════ */}
-          {/* ORDER INFORMATION — only shown for view/receive (not create)  */}
+          {/* PENDING VIEW — Read-only with Supplier + Warehouse addresses   */}
           {/* ═══════════════════════════════════════════════════════════════ */}
-          {!isCreate && (
+          {isPendingView && (
+            <div className="px-5 py-4 border-b bg-muted/20">
+              <div className="flex items-stretch gap-0">
+                {/* Request Info */}
+                <div className="flex flex-col justify-center pr-4">
+                  <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-1">Request Details</p>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <Label className="text-[11px] text-muted-foreground">Request ID</Label>
+                      <p className="text-sm font-medium">#{id}</p>
+                    </div>
+                    {createdAt && (
+                      <div>
+                        <Label className="text-[11px] text-muted-foreground">Request Date</Label>
+                        <p className="text-sm">{format(new Date(createdAt), 'dd MMM yyyy')}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                {selectedSupplier && (
+                  <div className="flex items-center px-3 self-stretch py-2">
+                    <div className="w-px h-full bg-border" />
+                  </div>
+                )}
+
+                {/* Supplier Address */}
+                {selectedSupplier && (
+                  <div className="flex-1 flex flex-col justify-center pr-3 min-w-[180px]">
+                    <p className="text-[10px] font-semibold text-primary uppercase tracking-wider mb-0.5">Supplier Address</p>
+                    <p className="text-xs font-semibold text-foreground leading-tight">{selectedSupplier.name}</p>
+                    {selectedSupplier.contact && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {selectedSupplier.contact}</p>}
+                    {selectedSupplier.email && <p className="text-[11px] text-muted-foreground">✉️ {selectedSupplier.email}</p>}
+                    <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
+                  </div>
+                )}
+
+                {/* Divider */}
+                {selectedSupplier && (
+                  <div className="flex items-center px-3 self-stretch py-2">
+                    <div className="w-px h-full bg-border" />
+                  </div>
+                )}
+
+                {/* Deliver To */}
+                <div className="flex-1 flex flex-col justify-center min-w-[180px]">
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
+                    {warehouseDetail && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs text-xs">
+                          <p className="font-semibold mb-1">{warehouseDetail.name}</p>
+                          <p>{warehouseAddress}</p>
+                          {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
+                          {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                  {warehouseDetail ? (
+                    <>
+                      <p className="text-xs font-semibold text-foreground leading-tight">{warehouseDetail.name}</p>
+                      {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
+                      {warehouseDetail.email && <p className="text-[11px] text-muted-foreground">✉️ {warehouseDetail.email}</p>}
+                      <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
+                    </>
+                  ) : warehouseName ? (
+                    <p className="text-xs font-semibold text-foreground">{warehouseName}</p>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground italic">No warehouse assigned</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* RECEIVED VIEW — Full order info with invoice details           */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {isReceivedView && (
             <div className="px-5 py-4 border-b bg-muted/30">
               <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Order Information</p>
-              <div className="flex items-end gap-3 flex-wrap">
+              <div className="flex items-end gap-4 flex-wrap">
                 <div className="w-[80px]">
                   <Label className="text-[11px] text-muted-foreground">Request ID</Label>
                   <p className="text-sm font-medium h-8 flex items-center">#{id}</p>
@@ -343,7 +426,7 @@ export default function CreateMedicineRequest() {
                   <Label className="text-[11px] text-muted-foreground">Supplier</Label>
                   <p className="text-sm font-medium h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
                 </div>
-                {warehouseName && !(statusLower === 'received' || statusLower === 'pending') && (
+                {warehouseName && (
                   <div className="min-w-[120px]">
                     <Label className="text-[11px] text-muted-foreground">Warehouse</Label>
                     <p className="text-sm h-8 flex items-center">{warehouseName}</p>
@@ -357,45 +440,23 @@ export default function CreateMedicineRequest() {
                 )}
                 <div className="w-[120px]">
                   <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
-                  {isReceive ? (
-                    <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
-                  ) : (
-                    <p className="text-sm h-8 flex items-center">{invoiceNumber || '—'}</p>
-                  )}
+                  <p className="text-sm h-8 flex items-center">{invoiceNumber || '—'}</p>
                 </div>
                 <div className="w-[110px]">
                   <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
-                  {isReceive ? (
-                    <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
-                  ) : (
-                    <p className="text-sm h-8 flex items-center">{invoiceAmount ? `₹${Number(invoiceAmount).toLocaleString()}` : '—'}</p>
-                  )}
+                  <p className="text-sm h-8 flex items-center">{invoiceAmount ? `₹${Number(invoiceAmount).toLocaleString()}` : '—'}</p>
                 </div>
                 <div className="w-[140px]">
                   <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
-                  {isReceive ? (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("h-8 w-full justify-start text-left text-sm font-normal mt-0.5", !invoiceDateObj && "text-muted-foreground")}>
-                          <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                          {invoiceDateObj ? format(invoiceDateObj, "dd-MM-yyyy") : "Pick date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 z-50" align="start">
-                        <Calendar mode="single" selected={invoiceDateObj} onSelect={setInvoiceDateObj} initialFocus className={cn("p-3 pointer-events-auto")} />
-                      </PopoverContent>
-                    </Popover>
-                  ) : (
-                    <p className="text-sm h-8 flex items-center">{invoiceDateObj ? format(invoiceDateObj, 'dd MMM yyyy') : '—'}</p>
-                  )}
+                  <p className="text-sm h-8 flex items-center">{invoiceDateObj ? format(invoiceDateObj, 'dd MMM yyyy') : '—'}</p>
                 </div>
-                {(isView || paymentMode) && (
+                {paymentMode && (
                   <div className="w-[100px]">
                     <Label className="text-[11px] text-muted-foreground">Payment Mode</Label>
-                    <p className="text-sm h-8 flex items-center">{paymentMode || '—'}</p>
+                    <p className="text-sm h-8 flex items-center">{paymentMode}</p>
                   </div>
                 )}
-                {updatedAt && statusLower === 'received' && (
+                {updatedAt && (
                   <div className="w-[140px]">
                     <Label className="text-[11px] text-muted-foreground">Received Date</Label>
                     <p className="text-sm h-8 flex items-center">{format(new Date(updatedAt), 'dd MMM yyyy')}</p>
@@ -403,62 +464,137 @@ export default function CreateMedicineRequest() {
                 )}
                 {selectedSupplier?.email && (
                   <div>
-                    <Label className="text-[11px] text-muted-foreground">Email</Label>
+                    <Label className="text-[11px] text-muted-foreground">Supplier Email</Label>
                     <p className="text-sm h-8 flex items-center">{selectedSupplier.email}</p>
                   </div>
                 )}
-                {isReceive && (
-                  <div className="flex items-end pb-0.5 ml-auto">
-                    <label className={cn("flex items-center gap-1.5 border border-border rounded-lg px-3 py-2 text-sm text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all shadow-sm", !invoiceNumber && "opacity-50 pointer-events-none")}>
-                      <Upload className="w-4 h-4" />
-                      Attach
-                      <input
-                        type="file"
-                        accept="image/*,.pdf"
-                        multiple
-                        className="hidden"
-                        disabled={!invoiceNumber || uploading}
-                        onChange={async (e) => {
-                          const files = e.target.files;
-                          if (!files) return;
-                          setUploading(true);
-                          for (const file of Array.from(files)) {
-                            const formData = new FormData();
-                            formData.append('file', file);
-                            formData.append('invoiceNo', invoiceNumber);
-                            try {
-                              const token = localStorage.getItem('token');
-                              const res = await fetch(`${API_BASE_URL}/documents/upload`, {
-                                method: 'POST',
-                                headers: {
-                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                                },
-                                body: formData,
-                              });
-                              if (!res.ok) throw new Error('Upload failed');
-                              const doc = await res.json();
-                              if (doc && doc.documentId && doc.documentName) {
-                                setUploadedDocuments(prev => {
-                                  if (prev.some(d => d.documentId === doc.documentId)) return prev;
-                                  return [...prev, { documentId: doc.documentId, name: doc.documentName }];
-                                });
-                              }
-                            } catch (err) {
-                              setBanner({ type: 'error', message: 'Failed to upload document.' });
-                            }
-                          }
-                          setUploading(false);
-                          e.target.value = '';
-                        }}
-                      />
-                      {uploading && <span className="ml-2 text-xs text-primary">Uploading...</span>}
-                    </label>
+                {selectedSupplier?.contact && (
+                  <div>
+                    <Label className="text-[11px] text-muted-foreground">Supplier Phone</Label>
+                    <p className="text-sm h-8 flex items-center">{selectedSupplier.contact}</p>
                   </div>
                 )}
               </div>
               {/* Uploaded document tags row */}
               {uploadedDocuments.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2 px-5 pb-3 pt-1">
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  {uploadedDocuments.map((doc) => (
+                    <Badge key={doc.documentId} variant="outline" className="bg-emerald-50 border-emerald-200 text-emerald-700 cursor-pointer rounded-full px-3 py-1"
+                      onClick={async () => {
+                        const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
+                        setShowDocumentPreview({ url, name: doc.name });
+                        setPreviewLoading(true);
+                        try {
+                          const token = localStorage.getItem('token');
+                          const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+                          const contentType = res.headers.get('content-type') || '';
+                          const blob = await res.blob();
+                          const blobUrl = URL.createObjectURL(blob);
+                          setPreviewBlobUrl(blobUrl);
+                          const nameLower = (doc.name || '').toLowerCase();
+                          if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) setPreviewType('pdf');
+                          else setPreviewType('image');
+                        } catch { setPreviewType('unknown'); }
+                        finally { setPreviewLoading(false); }
+                      }}
+                    >{doc.name}</Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* RECEIVE MODE — Order info with editable invoice fields          */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {isReceive && (
+            <div className="px-5 py-4 border-b bg-muted/30">
+              <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Order Information</p>
+              <div className="flex items-end gap-3 flex-wrap">
+                <div className="w-[80px]">
+                  <Label className="text-[11px] text-muted-foreground">Request ID</Label>
+                  <p className="text-sm font-medium h-8 flex items-center">#{id}</p>
+                </div>
+                <div className="min-w-[160px]">
+                  <Label className="text-[11px] text-muted-foreground">Supplier</Label>
+                  <p className="text-sm font-medium h-8 flex items-center">{selectedSupplier?.name || '-'}</p>
+                </div>
+                {createdAt && (
+                  <div className="w-[140px]">
+                    <Label className="text-[11px] text-muted-foreground">Request Date</Label>
+                    <p className="text-sm h-8 flex items-center">{format(new Date(createdAt), 'dd MMM yyyy')}</p>
+                  </div>
+                )}
+                <div className="w-[120px]">
+                  <Label className="text-[11px] text-muted-foreground">Invoice No.</Label>
+                  <Input className="h-8 text-sm mt-0.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                </div>
+                <div className="w-[110px]">
+                  <Label className="text-[11px] text-muted-foreground">Amount (₹)</Label>
+                  <Input type="number" min="0" className="h-8 text-sm mt-0.5" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                </div>
+                <div className="w-[140px]">
+                  <Label className="text-[11px] text-muted-foreground">Invoice Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("h-8 w-full justify-start text-left text-sm font-normal mt-0.5", !invoiceDateObj && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                        {invoiceDateObj ? format(invoiceDateObj, "dd-MM-yyyy") : "Pick date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <Calendar mode="single" selected={invoiceDateObj} onSelect={setInvoiceDateObj} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="flex items-end pb-0.5 ml-auto">
+                  <label className={cn("flex items-center gap-1.5 border border-border rounded-lg px-3 py-2 text-sm text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all shadow-sm", !invoiceNumber && "opacity-50 pointer-events-none")}>
+                    <Upload className="w-4 h-4" />
+                    Attach
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      multiple
+                      className="hidden"
+                      disabled={!invoiceNumber || uploading}
+                      onChange={async (e) => {
+                        const files = e.target.files;
+                        if (!files) return;
+                        setUploading(true);
+                        for (const file of Array.from(files)) {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          formData.append('invoiceNo', invoiceNumber);
+                          try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+                              method: 'POST',
+                              headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                              body: formData,
+                            });
+                            if (!res.ok) throw new Error('Upload failed');
+                            const doc = await res.json();
+                            if (doc && doc.documentId && doc.documentName) {
+                              setUploadedDocuments(prev => {
+                                if (prev.some(d => d.documentId === doc.documentId)) return prev;
+                                return [...prev, { documentId: doc.documentId, name: doc.documentName }];
+                              });
+                            }
+                          } catch (err) {
+                            setBanner({ type: 'error', message: 'Failed to upload document.' });
+                          }
+                        }
+                        setUploading(false);
+                        e.target.value = '';
+                      }}
+                    />
+                    {uploading && <span className="ml-2 text-xs text-primary">Uploading...</span>}
+                  </label>
+                </div>
+              </div>
+              {/* Uploaded document tags row */}
+              {uploadedDocuments.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 mt-3">
                   {uploadedDocuments.map((doc) => (
                     <div key={doc.documentId} className="flex items-center gap-1.5 border border-emerald-200 rounded-full bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
                       <Badge variant="outline" className="bg-emerald-100 border-emerald-200 text-emerald-700 cursor-pointer rounded-full px-2"
@@ -468,52 +604,37 @@ export default function CreateMedicineRequest() {
                           setPreviewLoading(true);
                           try {
                             const token = localStorage.getItem('token');
-                            const res = await fetch(url, {
-                              headers: token ? { Authorization: `Bearer ${token}` } : {},
-                            });
+                            const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
                             const contentType = res.headers.get('content-type') || '';
                             const blob = await res.blob();
                             const blobUrl = URL.createObjectURL(blob);
                             setPreviewBlobUrl(blobUrl);
                             const nameLower = (doc.name || '').toLowerCase();
-                            if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) {
-                              setPreviewType('pdf');
-                            } else if (contentType.startsWith('image/') || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(nameLower)) {
-                              setPreviewType('image');
-                            } else {
-                              setPreviewType('image');
-                            }
-                          } catch {
-                            setPreviewType('unknown');
-                          } finally {
-                            setPreviewLoading(false);
-                          }
+                            if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) setPreviewType('pdf');
+                            else setPreviewType('image');
+                          } catch { setPreviewType('unknown'); }
+                          finally { setPreviewLoading(false); }
                         }}
                         title="View document"
                       >{doc.name}</Badge>
-                      {isReceive && (
-                        <button
-                          className="text-muted-foreground hover:text-destructive focus:outline-none"
-                          onClick={async () => {
-                            try {
-                              const token = localStorage.getItem('token');
-                              await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                                },
-                              });
-                              setUploadedDocuments(prev => prev.filter((d) => d.documentId !== doc.documentId));
-                            } catch (err) {
-                              setBanner({ type: 'error', message: 'Failed to delete document.' });
-                            }
-                          }}
-                          aria-label="Remove document"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      )}
+                      <button
+                        className="text-muted-foreground hover:text-destructive focus:outline-none"
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('token');
+                            await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
+                              method: 'DELETE',
+                              headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                            });
+                            setUploadedDocuments(prev => prev.filter((d) => d.documentId !== doc.documentId));
+                          } catch (err) {
+                            setBanner({ type: 'error', message: 'Failed to delete document.' });
+                          }
+                        }}
+                        aria-label="Remove document"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
                     </div>
                   ))}
                 </div>
