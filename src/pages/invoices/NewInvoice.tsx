@@ -258,13 +258,13 @@ export default function NewInvoice() {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <p className="text-sm font-semibold text-foreground mt-1 h-9 flex items-center">{selectedSupplier?.name || '—'}</p>
+                      <p className="text-xs font-semibold text-foreground mt-1 h-8 flex items-center">{selectedSupplier?.name || '—'}</p>
                     )}
                   </div>
 
                   {/* Payment Mode */}
-                  <div className="px-5 border-l border-border/40">
-                    <Label className="text-[11px] text-muted-foreground font-medium">Payment Mode</Label>
+                  <div className="px-4 border-l border-border/40">
+                    <Label className="text-[11px] text-muted-foreground font-medium">Payment Mode <span className="text-destructive">*</span></Label>
                     {canEdit ? (
                       <Select value={paymentMode} onValueChange={setPaymentMode}>
                         <SelectTrigger className="h-9 text-sm mt-1 bg-background border-input hover:border-primary/50 shadow-sm"><SelectValue placeholder="Select Mode" /></SelectTrigger>
