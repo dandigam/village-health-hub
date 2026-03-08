@@ -84,7 +84,12 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
   const collapsed = mobile ? false : isCollapsed;
   const { user } = useAuth();
 
-  const mainNavItems = allNavItems.filter(item => hasAccess(item.routeKey, user?.role));
+  const filteredGroups = navGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => hasAccess(item.routeKey, user?.role)),
+    }))
+    .filter(group => group.items.length > 0);
 
   const handleNavClick = () => {
     if (onNavigate) onNavigate();
@@ -93,7 +98,7 @@ export function Sidebar({ mobile, onNavigate }: SidebarProps) {
   const activeClass = 'bg-white/[0.14] text-white border-l-[3px] border-l-[hsl(200,90%,60%)] shadow-[inset_0_0_20px_rgba(255,255,255,0.04)]';
   const inactiveClass = 'text-white/55 hover:text-white/90 hover:bg-white/[0.06] border-l-[3px] border-l-transparent';
 
-  const renderNavItem = (item: typeof allNavItems[0], isActive: boolean) => (
+  const renderNavItem = (item: NavItem, isActive: boolean) => (
     <>
       <item.icon 
         className="h-[17px] w-[17px] shrink-0 transition-all duration-200"
