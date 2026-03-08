@@ -89,17 +89,17 @@
     --sidebar-border: 215 40% 22%;
     --sidebar-ring: 195 80% 50%;
 
-    /* Icon semantic colors */
-    --icon-phone: 152 60% 38%;
-    --icon-mail: 38 85% 50%;
-    --icon-location: 0 72% 55%;
-    --icon-calendar: 210 80% 50%;
-    --icon-user: 210 70% 45%;
-    --icon-building: 262 50% 50%;
-    --icon-id: 175 60% 40%;
-    --icon-stethoscope: 210 85% 42%;
-    --icon-clock: 30 70% 48%;
-    --icon-users: 195 70% 42%;
+    /* Icon semantic colors — vibrant */
+    --icon-phone: 145 65% 36%;
+    --icon-mail: 30 90% 48%;
+    --icon-location: 0 78% 52%;
+    --icon-calendar: 215 85% 48%;
+    --icon-user: 215 75% 50%;
+    --icon-building: 265 60% 52%;
+    --icon-id: 175 65% 38%;
+    --icon-stethoscope: 215 90% 45%;
+    --icon-clock: 25 80% 48%;
+    --icon-users: 190 75% 40%;
 
     /* Premium additions */
     --shadow-color: 215 35% 12%;

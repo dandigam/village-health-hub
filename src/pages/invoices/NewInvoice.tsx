@@ -482,7 +482,7 @@ export default function NewInvoice() {
                           <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1"><Phone className="h-3.5 w-3.5 text-icon-phone" /> {(selectedSupplier as any).contact}</p>
                         )}
                         {(selectedSupplier as any)?.email && (
-                          <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {(selectedSupplier as any).email}</p>
+                          <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Mail className="h-3.5 w-3.5 text-icon-mail" /> {(selectedSupplier as any).email}</p>
                         )}
                         <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={supplierAddress}>{supplierAddress || '-'}</p>
                       </>
