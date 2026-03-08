@@ -14,13 +14,17 @@ import { toast } from '@/hooks/use-toast';
 import { api } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { useStatesHierarchy, useWarehouseInventory } from '@/hooks/useApiData';
+import { cn } from '@/lib/utils';
 
 const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Powder', 'Inhaler', 'Ointment'];
+const UNITS = ['mg', 'ml', 'gm', 'mcg', 'IU', 'units', '%'];
 
 interface MedicineEntry {
   id?: number;
   name: string;
   type: string;
+  strength?: string;
+  unit?: string;
 }
 
 const STEPS = [
@@ -35,10 +39,11 @@ export default function NewSupplier() {
   const { id: supplierId } = useParams<{ id: string }>();
   const isEditMode = Boolean(supplierId);
   const supplierFromState = location.state?.supplier;
+  const focusStep = location.state?.focusStep;
   const { data: statesHierarchy = [] } = useStatesHierarchy();
   const warehouseId = authUser?.context?.warehouseId;
   const { data: inventoryItems = [] } = useWarehouseInventory(warehouseId ? Number(warehouseId) : undefined);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(focusStep || 1);
   const [isLoading, setIsLoading] = useState(false);
 
   const [name, setName] = useState('');
@@ -52,6 +57,8 @@ export default function NewSupplier() {
 
   const [medicineName, setMedicineName] = useState('');
   const [medicineType, setMedicineType] = useState('');
+  const [medicineStrength, setMedicineStrength] = useState('');
+  const [medicineUnit, setMedicineUnit] = useState('');
   const [medicinesList, setMedicinesList] = useState<MedicineEntry[]>([]);
   const [deleteMedicineIndex, setDeleteMedicineIndex] = useState<number | null>(null);
 
@@ -91,9 +98,16 @@ export default function NewSupplier() {
 
   const addMedicine = () => {
     if (!medicineName.trim() || !medicineType) return;
-    setMedicinesList(prev => [...prev, { name: medicineName.trim(), type: medicineType }]);
+    setMedicinesList(prev => [...prev, { 
+      name: medicineName.trim(), 
+      type: medicineType,
+      strength: medicineStrength.trim() || undefined,
+      unit: medicineUnit || undefined,
+    }]);
     setMedicineName('');
     setMedicineType('');
+    setMedicineStrength('');
+    setMedicineUnit('');
   };
 
   const removeMedicine = async (index: number) => {
@@ -139,7 +153,7 @@ export default function NewSupplier() {
       setAddress(data.address || '');
       setPinCode(data.pinCode || '');
       if (data.medicines && Array.isArray(data.medicines)) {
-        setMedicinesList(data.medicines.map((m: any) => ({ id: m.id, name: m.name, type: m.type })));
+        setMedicinesList(data.medicines.map((m: any) => ({ id: m.id, name: m.name, type: m.type, strength: m.strength, unit: m.unit })));
       }
     }
   }, [isEditMode, supplierFromState]);
@@ -193,24 +207,36 @@ export default function NewSupplier() {
     }
   };
 
+  const typeColors: Record<string, string> = {
+    'Tablet': 'bg-primary/10 text-primary border-primary/20',
+    'Capsule': 'bg-warning/10 text-warning border-warning/20',
+    'Syrup': 'bg-success/10 text-success border-success/20',
+    'Injection': 'bg-accent/10 text-accent-foreground border-accent/20',
+    'Cream': 'bg-destructive/10 text-destructive border-destructive/20',
+    'Drops': 'bg-info/10 text-info border-info/20',
+    'Powder': 'bg-warning/10 text-warning border-warning/20',
+    'Inhaler': 'bg-accent/10 text-accent-foreground border-accent/20',
+    'Ointment': 'bg-success/10 text-success border-success/20',
+  };
+
   return (
     <DashboardLayout>
-      {/* Premium Header */}
-      <div className="flex items-center justify-between bg-white border border-slate-200 rounded-xl shadow-sm px-5 py-3 mb-5">
+      {/* Header */}
+      <div className="flex items-center justify-between rounded-xl border border-[hsl(var(--card-raised-border))] bg-[hsl(var(--card-raised-bg))] px-5 py-3 mb-5" style={{ boxShadow: 'var(--card-shadow)' }}>
         <div className="flex items-center gap-3 shrink-0">
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-9 w-9 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all" 
+            className="h-9 w-9 rounded-full hover:bg-muted transition-all" 
             onClick={() => navigate('/suppliers')}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
-              <Truck className="h-4 w-4 text-white" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Truck className="h-4 w-4 text-primary" />
             </div>
-            <h1 className="text-base font-semibold text-slate-800">{isEditMode ? 'Edit Supplier' : 'Add New Supplier'}</h1>
+            <h1 className="text-base font-semibold text-value">{isEditMode ? 'Edit Supplier' : 'Add New Supplier'}</h1>
           </div>
         </div>
         <div className="flex-1 max-w-[420px] mx-8">
@@ -219,7 +245,7 @@ export default function NewSupplier() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-9 w-9 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all" 
+          className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all" 
           onClick={() => navigate('/suppliers')}
         >
           <X className="h-4 w-4" />
@@ -228,58 +254,58 @@ export default function NewSupplier() {
 
       {currentStep === 1 && (
         <div className="grid lg:grid-cols-2 gap-5">
-          <Card className="border-0 shadow-sm rounded-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-slate-50 to-blue-50/30 px-5 py-3 border-b border-slate-100">
+          <Card>
+            <div className="px-5 py-3 border-b border-border/50 bg-muted/20">
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Truck className="h-3.5 w-3.5 text-blue-600" />
+                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Truck className="h-3.5 w-3.5 text-primary" />
                 </div>
-                <span className="text-sm font-semibold text-slate-800">Supplier Details</span>
+                <span className="text-sm font-semibold text-value">Supplier Details</span>
               </div>
             </div>
             <CardContent className="p-5 space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Supplier Name <span className="text-red-500">*</span></Label>
-                <Input className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" placeholder="e.g. MedPharma Distributors" value={name} onChange={e => setName(e.target.value)} />
+                <Label className="text-xs">Supplier Name <span className="text-destructive">*</span></Label>
+                <Input placeholder="e.g. MedPharma Distributors" value={name} onChange={e => setName(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Contact Number <span className="text-red-500">*</span></Label>
-                <Input className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" placeholder="e.g. 9876543210" value={contact} onChange={e => handleContactChange(e.target.value)} maxLength={10} />
-                {contact && !isValidContact(contact) && <p className="text-[11px] text-red-500 mt-1">Must be exactly 10 digits</p>}
+                <Label className="text-xs">Contact Number <span className="text-destructive">*</span></Label>
+                <Input placeholder="e.g. 9876543210" value={contact} onChange={e => handleContactChange(e.target.value)} maxLength={10} />
+                {contact && !isValidContact(contact) && <p className="text-[11px] text-destructive mt-1">Must be exactly 10 digits</p>}
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Email <span className="text-red-500">*</span></Label>
-                <Input className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" type="email" placeholder="e.g. supplier@example.com" value={email} onChange={e => setEmail(e.target.value)} />
-                {email && !isValidEmail(email) && <p className="text-[11px] text-red-500 mt-1">Enter a valid email address</p>}
+                <Label className="text-xs">Email <span className="text-destructive">*</span></Label>
+                <Input type="email" placeholder="e.g. supplier@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                {email && !isValidEmail(email) && <p className="text-[11px] text-destructive mt-1">Enter a valid email address</p>}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm rounded-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-slate-50 to-blue-50/30 px-5 py-3 border-b border-slate-100">
+          <Card>
+            <div className="px-5 py-3 border-b border-border/50 bg-muted/20">
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-                  <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+                <div className="h-7 w-7 rounded-lg bg-success/10 flex items-center justify-center">
+                  <MapPin className="h-3.5 w-3.5 text-success" />
                 </div>
-                <span className="text-sm font-semibold text-slate-800">Location</span>
+                <span className="text-sm font-semibold text-value">Location</span>
               </div>
             </div>
             <CardContent className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">State <span className="text-red-500">*</span></Label>
+                  <Label className="text-xs">State <span className="text-destructive">*</span></Label>
                   <Select value={stateId} onValueChange={v => { setStateId(v); setDistrictId(''); setMandalId(''); }}>
-                    <SelectTrigger className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"><SelectValue placeholder="Select state" /></SelectTrigger>
-                    <SelectContent className="bg-white z-50 shadow-lg border-slate-200">
+                    <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
                       {statesHierarchy.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">District <span className="text-red-500">*</span></Label>
+                  <Label className="text-xs">District <span className="text-destructive">*</span></Label>
                   <Select value={districtId} onValueChange={v => { setDistrictId(v); setMandalId(''); }} disabled={!stateId}>
-                    <SelectTrigger className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"><SelectValue placeholder="Select district" /></SelectTrigger>
-                    <SelectContent className="bg-white z-50 shadow-lg border-slate-200">
+                    <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
                       {availableDistricts.map(d => <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -287,10 +313,10 @@ export default function NewSupplier() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Mandal</Label>
+                  <Label className="text-xs">Mandal</Label>
                   <Select value={mandalId} onValueChange={setMandalId} disabled={!districtId}>
-                    <SelectTrigger className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"><SelectValue placeholder="Select mandal" /></SelectTrigger>
-                    <SelectContent className="bg-white z-50 shadow-lg border-slate-200">
+                    <SelectTrigger><SelectValue placeholder="Select mandal" /></SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
                       {availableMandals.length > 0 ? (
                         availableMandals.map(m => <SelectItem key={m.id} value={String(m.id)}>{m.name}</SelectItem>)
                       ) : (
@@ -300,14 +326,14 @@ export default function NewSupplier() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">PIN Code <span className="text-red-500">*</span></Label>
-                  <Input className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" placeholder="e.g. 522001" value={pinCode} onChange={e => handlePinCodeChange(e.target.value)} maxLength={6} />
-                  {pinCode && !isValidPinCode(pinCode) && <p className="text-[11px] text-red-500 mt-1">Must be exactly 6 digits</p>}
+                  <Label className="text-xs">PIN Code <span className="text-destructive">*</span></Label>
+                  <Input placeholder="e.g. 522001" value={pinCode} onChange={e => handlePinCodeChange(e.target.value)} maxLength={6} />
+                  {pinCode && !isValidPinCode(pinCode) && <p className="text-[11px] text-destructive mt-1">Must be exactly 6 digits</p>}
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Address <span className="text-red-500">*</span></Label>
-                <Input className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" placeholder="e.g. Industrial Area, Guntur" value={address} onChange={e => setAddress(e.target.value)} />
+                <Label className="text-xs">Address <span className="text-destructive">*</span></Label>
+                <Input placeholder="e.g. Industrial Area, Guntur" value={address} onChange={e => setAddress(e.target.value)} />
               </div>
             </CardContent>
           </Card>
@@ -315,27 +341,27 @@ export default function NewSupplier() {
       )}
 
       {currentStep === 2 && (
-        <Card className="border-0 shadow-sm rounded-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-50 to-blue-50/30 px-5 py-3 border-b border-slate-100">
+        <Card>
+          <div className="px-5 py-3 border-b border-border/50 bg-muted/20">
             <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-purple-100 flex items-center justify-center">
-                <Pill className="h-3.5 w-3.5 text-purple-600" />
+              <div className="h-7 w-7 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Pill className="h-3.5 w-3.5 text-accent-foreground" />
               </div>
-              <span className="text-sm font-semibold text-slate-800">Medicines Supplied</span>
+              <span className="text-sm font-semibold text-value">Medicines Supplied</span>
               {medicinesList.length > 0 && (
-                <span className="ml-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">{medicinesList.length}</span>
+                <Badge variant="secondary" className="text-xs ml-1">{medicinesList.length}</Badge>
               )}
             </div>
           </div>
-          <CardContent className="p-5 space-y-5">
-            {/* Search existing medicines from warehouse inventory API */}
+          <CardContent className="p-5 space-y-4">
+            {/* Search existing medicines */}
             <div className="relative">
-              <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2 block">Search Existing Medicines</Label>
+              <Label className="text-[10px] text-label font-semibold uppercase tracking-wide mb-1.5 block">Search Existing Medicines</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by medicine name or type..."
-                  className="pl-10 h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                  className="pl-10"
                   value={searchQuery}
                   onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
                   onFocus={() => setShowSearchResults(true)}
@@ -343,27 +369,27 @@ export default function NewSupplier() {
                 />
               </div>
               {showSearchResults && searchQuery.trim() && (
-                <div className="absolute z-20 top-full left-0 right-0 mt-1 border border-slate-200 rounded-xl bg-white shadow-xl max-h-52 overflow-auto">
+                <div className="absolute z-20 top-full left-0 right-0 mt-1 border border-border rounded-lg bg-popover shadow-lg max-h-52 overflow-auto">
                   {searchResults.length > 0 ? (
                     searchResults.map((item) => (
                       <button
                         key={item.id}
                         type="button"
-                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-blue-50/50 cursor-pointer transition-colors text-left border-b border-slate-100 last:border-b-0"
+                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-primary/[0.03] cursor-pointer transition-colors text-left border-b border-border/30 last:border-b-0"
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => addFromSearch(item)}
                       >
                         <div>
-                          <p className="text-sm font-medium text-slate-700">{item.medicineName}</p>
-                          <p className="text-xs text-slate-500">{item.medicineType}</p>
+                          <p className="text-sm font-medium text-value">{item.medicineName}</p>
+                          <p className="text-xs text-muted-foreground">{item.medicineType} {item.totalQty !== undefined ? `· ${item.totalQty} in stock` : ''}</p>
                         </div>
-                        <div className="h-7 w-7 rounded-full bg-blue-100 flex items-center justify-center">
-                          <Plus className="h-3.5 w-3.5 text-blue-600" />
+                        <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Plus className="h-3 w-3 text-primary" />
                         </div>
                       </button>
                     ))
                   ) : (
-                    <div className="px-4 py-4 text-center text-sm text-slate-400">
+                    <div className="px-4 py-4 text-center text-sm text-muted-foreground">
                       No matching medicines found in inventory
                     </div>
                   )}
@@ -371,78 +397,84 @@ export default function NewSupplier() {
               )}
             </div>
 
+            {/* Divider */}
             <div className="relative flex items-center gap-4">
-              <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-xs font-medium text-slate-400 px-3">or add manually</span>
-              <div className="flex-1 h-px bg-slate-200" />
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide px-2">or add manually</span>
+              <div className="flex-1 h-px bg-border" />
             </div>
 
-            {/* Manual medicine entry */}
-            <div className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
-                <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Medicine Name</Label>
-                <Input className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20" placeholder="Enter medicine name" value={medicineName} onChange={e => setMedicineName(e.target.value)} />
+            {/* Manual medicine entry — compact inline row */}
+            <div className="flex items-end gap-2">
+              <div className="flex-1 space-y-1">
+                <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Medicine Name</Label>
+                <Input className="h-9 text-sm" placeholder="Enter medicine name" value={medicineName} onChange={e => setMedicineName(e.target.value)} />
               </div>
-              <div className="w-40 space-y-1.5">
-                <Label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Type</Label>
+              <div className="w-32 space-y-1">
+                <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Type</Label>
                 <Select value={medicineType} onValueChange={setMedicineType}>
-                  <SelectTrigger className="h-10 bg-white border-slate-300 text-sm rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"><SelectValue placeholder="Select type" /></SelectTrigger>
-                  <SelectContent className="bg-white z-50 shadow-lg border-slate-200">
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
                     {MEDICINE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
+              <div className="w-24 space-y-1">
+                <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Strength</Label>
+                <Input className="h-9 text-sm" placeholder="e.g. 500" value={medicineStrength} onChange={e => setMedicineStrength(e.target.value)} />
+              </div>
+              <div className="w-24 space-y-1">
+                <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Unit</Label>
+                <Select value={medicineUnit} onValueChange={setMedicineUnit}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Unit" /></SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    {UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button 
-                className="h-10 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium shadow-md shadow-blue-500/25 rounded-lg transition-all" 
+                className="h-9 px-4 shrink-0" 
                 onClick={addMedicine} 
                 disabled={!medicineName.trim() || !medicineType}
               >
-                <Plus className="h-4 w-4 mr-1.5" /> Add
+                <Plus className="h-4 w-4 mr-1" /> Add
               </Button>
             </div>
 
             {/* Medicines table */}
             {medicinesList.length > 0 ? (
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <div className="border border-border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gradient-to-r from-slate-50 to-blue-50/30">
-                      <th className="text-left px-4 py-3 font-semibold text-xs text-slate-600 uppercase tracking-wider">#</th>
-                      <th className="text-left px-4 py-3 font-semibold text-xs text-slate-600 uppercase tracking-wider">Medicine Name</th>
-                      <th className="text-left px-4 py-3 font-semibold text-xs text-slate-600 uppercase tracking-wider">Type</th>
-                      <th className="text-center px-4 py-3 font-semibold text-xs text-slate-600 uppercase tracking-wider w-16"></th>
+                    <tr className="bg-muted/30 border-b border-border/50">
+                      <th className="text-left px-4 py-2.5 font-bold text-[10px] text-label uppercase tracking-wider w-10">#</th>
+                      <th className="text-left px-4 py-2.5 font-bold text-[10px] text-label uppercase tracking-wider">Medicine Name</th>
+                      <th className="text-left px-4 py-2.5 font-bold text-[10px] text-label uppercase tracking-wider w-28">Type</th>
+                      <th className="text-left px-4 py-2.5 font-bold text-[10px] text-label uppercase tracking-wider w-28">Strength</th>
+                      <th className="text-center px-4 py-2.5 font-bold text-[10px] text-label uppercase tracking-wider w-12"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border/30">
                     {medicinesList.map((m, i) => {
-                      // Color-coded badge by type
-                      const typeColors: Record<string, string> = {
-                        'Tablet': 'bg-blue-50 text-blue-700 border-blue-200',
-                        'Capsule': 'bg-amber-50 text-amber-700 border-amber-200',
-                        'Syrup': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                        'Injection': 'bg-purple-50 text-purple-700 border-purple-200',
-                        'Cream': 'bg-pink-50 text-pink-700 border-pink-200',
-                        'Drops': 'bg-cyan-50 text-cyan-700 border-cyan-200',
-                        'Powder': 'bg-orange-50 text-orange-700 border-orange-200',
-                        'Inhaler': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                        'Ointment': 'bg-teal-50 text-teal-700 border-teal-200',
-                      };
-                      const badgeClass = typeColors[m.type] || 'bg-slate-50 text-slate-700 border-slate-200';
+                      const badgeClass = typeColors[m.type] || 'bg-muted text-muted-foreground border-border';
                       return (
-                        <tr key={i} className="hover:bg-blue-50/30 transition-colors">
-                          <td className="px-4 py-3 text-sm text-blue-600 font-medium">{i + 1}</td>
-                          <td className="px-4 py-3 font-semibold text-slate-800">{m.name}</td>
-                          <td className="px-4 py-3">
-                            <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full border ${badgeClass}`}>{m.type}</span>
+                        <tr key={i} className="hover:bg-primary/[0.02] transition-colors">
+                          <td className="px-4 py-2.5 text-xs text-primary font-medium">{i + 1}</td>
+                          <td className="px-4 py-2.5 font-semibold text-value">{m.name}</td>
+                          <td className="px-4 py-2.5">
+                            <span className={cn("inline-flex px-2 py-0.5 text-xs font-medium rounded-full border", badgeClass)}>{m.type}</span>
                           </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-4 py-2.5 text-sm text-muted-foreground">
+                            {m.strength && m.unit ? `${m.strength} ${m.unit}` : m.strength || '—'}
+                          </td>
+                          <td className="px-4 py-2.5 text-center">
                             <Button 
                               size="icon" 
                               variant="ghost" 
-                              className="h-8 w-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all" 
+                              className="h-7 w-7 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all" 
                               onClick={() => handleDeleteMedicineClick(i)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </td>
                         </tr>
@@ -452,12 +484,12 @@ export default function NewSupplier() {
                 </table>
               </div>
             ) : (
-              <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center">
-                <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                  <Pill className="h-6 w-6 text-slate-400" />
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mx-auto mb-2">
+                  <Pill className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <p className="text-slate-500 text-sm">No medicines added yet</p>
-                <p className="text-slate-400 text-xs mt-1">Search from inventory or add manually above</p>
+                <p className="text-muted-foreground text-sm font-medium">No medicines added yet</p>
+                <p className="text-muted-foreground/70 text-xs mt-0.5">Search from inventory or add manually above</p>
               </div>
             )}
           </CardContent>
@@ -468,36 +500,14 @@ export default function NewSupplier() {
       <div className="flex justify-end gap-3 mt-5">
         {currentStep === 1 && (
           <>
-            <Button 
-              variant="outline" 
-              className="h-10 px-5 border-slate-300 text-slate-600 hover:bg-slate-50 rounded-lg font-medium" 
-              onClick={() => navigate('/suppliers')}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="h-10 px-5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium shadow-lg shadow-blue-500/25 rounded-lg transition-all" 
-              onClick={() => setCurrentStep(2)} 
-              disabled={!canProceed}
-            >
-              Next
-            </Button>
+            <Button variant="outline" onClick={() => navigate('/suppliers')}>Cancel</Button>
+            <Button onClick={() => setCurrentStep(2)} disabled={!canProceed}>Next</Button>
           </>
         )}
         {currentStep === 2 && (
           <>
-            <Button 
-              variant="outline" 
-              className="h-10 px-5 border-slate-300 text-slate-600 hover:bg-slate-50 rounded-lg font-medium" 
-              onClick={() => setCurrentStep(1)}
-            >
-              Back
-            </Button>
-            <Button 
-              className="h-10 px-5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium shadow-lg shadow-blue-500/25 rounded-lg transition-all" 
-              onClick={handleSubmit} 
-              disabled={!canSubmit}
-            >
+            <Button variant="outline" onClick={() => setCurrentStep(1)}>Back</Button>
+            <Button onClick={handleSubmit} disabled={!canSubmit}>
               {isEditMode ? 'Update Supplier' : 'Add Supplier'}
             </Button>
           </>
