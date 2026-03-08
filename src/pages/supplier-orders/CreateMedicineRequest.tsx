@@ -1043,6 +1043,9 @@ export default function CreateMedicineRequest() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Discard Changes Dialog */}
+      <DiscardChangesDialog open={showDiscardDialog} onDiscard={handleDiscard} onCancel={handleDiscardCancel} />
     </DashboardLayout>
   );
 }
