@@ -422,8 +422,8 @@ export default function NewInvoice() {
                           "flex items-center gap-1.5 border border-dashed border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary transition-all w-fit",
                           !invoiceNumber && "opacity-50 pointer-events-none"
                         )}>
-                          <PlusCircle className="w-3.5 h-3.5" />
-                          Add More
+                          <Upload className="w-3.5 h-3.5" />
+                          {uploadedDocuments.length > 0 ? 'Add More' : 'Upload'}
                           <input
                             type="file"
                             accept="image/*,.pdf"
