@@ -263,11 +263,11 @@ export default function NewInvoice() {
                   </div>
 
                   {/* Payment Mode */}
-                  <div className="px-4 border-l border-border/40">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Payment Mode <span className="text-destructive">*</span></Label>
+                  <div className="px-3 border-l border-border/40">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Payment Mode <span className="text-destructive">*</span></Label>
                     {canEdit ? (
                       <Select value={paymentMode} onValueChange={setPaymentMode}>
-                        <SelectTrigger className="h-8 text-xs mt-1.5"><SelectValue placeholder="Select Mode" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs mt-1"><SelectValue placeholder="Select Mode" /></SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {['cash', 'upi', 'bank_transfer', 'cheque', 'credit'].map(m => (
                             <SelectItem key={m} value={m}>{m.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
