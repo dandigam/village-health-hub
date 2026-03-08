@@ -353,7 +353,7 @@ export default function NewInvoice() {
                   {/* Invoice Attach */}
                   <div className="pl-3 border-l border-border/40 relative">
                     <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Invoice Attach</Label>
-                    <div className="mt-1 space-y-0.5 max-h-[60px] overflow-y-auto premium-scroll">
+                    <div className="mt-1 space-y-0.5 max-h-[60px] overflow-y-auto premium-scroll flex flex-col items-center justify-center min-h-[40px]">
                       {uploadedDocuments.map((doc) => {
                         const nameLower = (doc.name || '').toLowerCase();
                         const isPdf = nameLower.endsWith('.pdf');
