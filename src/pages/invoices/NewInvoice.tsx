@@ -471,7 +471,7 @@ export default function NewInvoice() {
                 </div>
 
                 {/* Row 2: Supplier Address | Amount | Date | Deliver To */}
-                <div className="grid grid-cols-4 gap-0 mt-1.5 pt-1.5 border-t border-border/20">
+                <div className="grid gap-0 mt-1.5 pt-1.5 border-t border-border/20" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 0.8fr' }}>
                   {/* Supplier Full Address */}
                   <div className="pr-3 space-y-0 min-h-[1.75rem]">
                     {selectedSupplier && (
