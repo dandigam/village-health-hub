@@ -182,7 +182,7 @@ export default function Profile() {
               </div>
               <Separator />
               <div className="flex items-center gap-3">
-                <Building className="h-5 w-5 text-muted-foreground" />
+                <Building className="h-5 w-5 text-icon-building" />
                 <div>
                   <p className="text-xs text-muted-foreground">Department</p>
                   <p className="font-medium">{profile.department}</p>
