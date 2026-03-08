@@ -215,7 +215,7 @@ export default function Suppliers() {
                 <div className="space-y-1">
                   <span className="text-xs font-medium text-label uppercase tracking-wide">Contact</span>
                   <p className="font-medium text-value flex items-center gap-1.5">
-                    <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Phone className="h-3.5 w-3.5 text-icon-phone" />
                     {viewSupplier.contact}
                   </p>
                 </div>
