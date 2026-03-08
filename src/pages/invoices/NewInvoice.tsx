@@ -280,12 +280,12 @@ export default function NewInvoice() {
                   </div>
 
                   {/* Invoice No. */}
-                  <div className="px-4 border-l border-border/40">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Invoice No. <span className="text-destructive">*</span></Label>
+                  <div className="px-3 border-l border-border/40">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Invoice No. <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-8 text-xs mt-1.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                     ) : (
-                      <p className="text-sm font-semibold text-value mt-1.5 h-8 flex items-center">{invoiceNumber || '—'}</p>
+                      <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center">{invoiceNumber || '—'}</p>
                     )}
                   </div>
 
