@@ -610,7 +610,7 @@ export default function NewInvoice() {
                   <span>Total Qty: <strong className="text-value font-bold">{totalQty}</strong></span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" className="h-8 px-4 text-xs" onClick={() => navigate('/invoices')}>
+                  <Button variant="ghost" size="sm" className="h-8 px-4 text-xs" onClick={() => confirmNavigation('/invoices')}>
                     Cancel
                   </Button>
                   {canEdit && (
