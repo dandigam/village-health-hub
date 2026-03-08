@@ -106,7 +106,7 @@ export default function Camps() {
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Users className="h-3.5 w-3.5" /> {assignedDoctors.length} assigned
+                      <Users className="h-3.5 w-3.5 text-icon-users" /> {assignedDoctors.length} assigned
                     </div>
                   </TableCell>
                   <TableCell>

@@ -52,7 +52,7 @@ export default function ViewDoctor() {
             <Phone className="h-4 w-4 text-icon-phone" /> {doctor.phoneNumber ?? doctor.phone}
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Mail className="h-4 w-4" /> {doctor.email || '—'}
+            <Mail className="h-4 w-4 text-icon-mail" /> {doctor.email || '—'}
           </div>
           <div className="mt-4">
             <span className="text-xs text-muted-foreground">Assigned Camps</span>
