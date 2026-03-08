@@ -570,11 +570,11 @@ export default function NewInvoice() {
                     <thead className="sticky top-0 z-10">
                       <tr className="border-b-2 border-primary/15 bg-muted/50">
                         <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-12">#</th>
-                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-muted-foreground">Medicine</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-24">Stock</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-28">Batch</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-36">Exp Date</th>
-                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-28">Qty</th>
+                        <th className="px-4 py-2.5 text-left font-bold text-[10px] uppercase tracking-wider text-muted-foreground w-[35%]">Medicine</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground">Stock</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground">Batch</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground">Exp Date</th>
+                        <th className="px-4 py-2.5 text-center font-bold text-[10px] uppercase tracking-wider text-muted-foreground">Qty</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/30">
