@@ -252,7 +252,7 @@ export default function NewInvoice() {
                     <Label className="text-[11px] text-muted-foreground font-medium">Supplier <span className="text-destructive">*</span></Label>
                     {canEdit ? (
                       <Select value={supplierId} onValueChange={setSupplierId}>
-                        <SelectTrigger className="h-9 text-sm mt-1 bg-background border-input hover:border-primary/50 shadow-sm"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                        <SelectTrigger className="h-8 text-xs mt-1"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {suppliers.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                         </SelectContent>
