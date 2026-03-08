@@ -796,18 +796,30 @@ export default function CreateMedicineRequest() {
                         </>
                       )}
 
-                      {/* VIEW/RECEIVE columns */}
-                      {!isCreate && (
+                      {/* PENDING VIEW columns — just Req Qty */}
+                      {isPendingView && (
+                        <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>
+                      )}
+
+                      {/* RECEIVED VIEW columns — full read-only details */}
+                      {isReceivedView && (
                         <>
                           <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>
-                          {!(statusLower === 'received' || statusLower === 'pending') && (
-                            <>
-                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Batch</th>
-                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32">Exp Date</th>
-                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20">HSN</th>
-                              <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20">Stock</th>
-                            </>
-                          )}
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Batch</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32">Exp Date</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20">HSN</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Recv Qty</th>
+                        </>
+                      )}
+
+                      {/* RECEIVE MODE columns — editable */}
+                      {isReceive && (
+                        <>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Req Qty</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-24">Batch</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32">Exp Date</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20">HSN</th>
+                          <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-20">Stock</th>
                           <th className="px-4 py-3 text-center font-semibold text-xs uppercase tracking-wider text-muted-foreground w-32">Recv Qty</th>
                         </>
                       )}
