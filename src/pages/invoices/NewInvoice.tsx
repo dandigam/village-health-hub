@@ -182,7 +182,7 @@ export default function NewInvoice() {
     }]);
     setShowAddDialog(false);
     setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list.` });
-    setNewMedName(''); setNewMedType('');
+    setNewMedName(''); setNewMedType(''); setNewMedStrength(''); setNewMedUnit('');
   };
 
   const handleSave = async () => {
