@@ -89,7 +89,7 @@ export default function Camps() {
                     <div>
                       <p className="font-medium text-sm">{camp.campName}</p>
                       <p className="text-xs text-muted-foreground sm:hidden flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
+                        <MapPin className="h-3 w-3 text-icon-location" /> {camp.city}, {camp.mandal}, {camp.district}, {camp.state}
                       </p>
                     </div>
                   </TableCell>
