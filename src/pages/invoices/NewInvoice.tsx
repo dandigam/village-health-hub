@@ -471,35 +471,8 @@ export default function NewInvoice() {
                     )}
                   </div>
 
-                  {/* Deliver To */}
-                  <div className="pl-3 border-l border-border/40">
-                    <div className="flex items-center gap-1 mb-0.5">
-                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wider">Deliver To</p>
-                      {warehouseDetail && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-3 w-3 text-muted-foreground cursor-help hover:text-primary transition-colors" />
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs text-xs">
-                            <p className="font-semibold mb-1">{warehouseDetail.name}</p>
-                            <p>{warehouseAddress}</p>
-                            {warehouseDetail.phoneNumber && <p className="mt-1">📞 {warehouseDetail.phoneNumber}</p>}
-                            {warehouseDetail.email && <p>✉️ {warehouseDetail.email}</p>}
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
-                    {warehouseDetail ? (
-                      <>
-                        <p className="text-xs font-semibold text-value leading-tight">{warehouseDetail.name}</p>
-                        {warehouseDetail.phoneNumber && <p className="text-[11px] text-muted-foreground mt-0.5">📞 {warehouseDetail.phoneNumber}</p>}
-                        <p className="text-[11px] mt-0.5 text-primary/70 italic leading-snug truncate" title={warehouseAddress}>{warehouseAddress || '-'}</p>
-                      </>
-                    ) : (
-                      <p className="text-[11px] text-muted-foreground italic mt-1">No warehouse assigned</p>
-                    )}
-                  </div>
-                </div>
+                  {/* Empty col for alignment */}
+                  <div className="pl-3 border-l border-border/40" />
               </div>
             </fieldset>
           </div>
