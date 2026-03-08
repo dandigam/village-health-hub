@@ -275,7 +275,7 @@ export default function NewInvoice() {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <p className="text-sm font-semibold text-value mt-1.5 h-8 flex items-center capitalize">{paymentMode || '—'}</p>
+                      <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center capitalize">{paymentMode || '—'}</p>
                     )}
                   </div>
 
