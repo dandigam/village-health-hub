@@ -248,11 +248,11 @@ export default function NewInvoice() {
                 {/* Row 1: Supplier | Payment Mode | Invoice No. | Invoice Attach */}
                 <div className="grid grid-cols-4 gap-0">
                   {/* Supplier */}
-                  <div className="pr-4">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Supplier <span className="text-destructive">*</span></Label>
+                  <div className="pr-3">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Supplier <span className="text-destructive">*</span></Label>
                     {canEdit ? (
                       <Select value={supplierId} onValueChange={setSupplierId}>
-                        <SelectTrigger className="h-8 text-xs mt-1.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs mt-1"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {suppliers.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                         </SelectContent>
