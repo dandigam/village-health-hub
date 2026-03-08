@@ -208,6 +208,25 @@ export default function NewInvoice() {
     if (!supplierId) { setBanner({ type: 'error', message: 'Please select a supplier.' }); return; }
     const filledItems = items.filter(i => i.quantity > 0);
     if (filledItems.length === 0) { setBanner({ type: 'error', message: 'Enter quantity for at least one item.' }); return; }
+    
+    // Validate batch & expiry for items with qty
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const errors: Record<number, { batch?: boolean; expDate?: boolean; expPast?: boolean }> = {};
+    let hasErrors = false;
+    items.forEach((item, idx) => {
+      if (item.quantity <= 0) return;
+      const errs: { batch?: boolean; expDate?: boolean; expPast?: boolean } = {};
+      if (!item.batchNo.trim()) { errs.batch = true; hasErrors = true; }
+      if (!item.expDate) { errs.expDate = true; hasErrors = true; }
+      else {
+        const exp = new Date(item.expDate);
+        if (exp < today) { errs.expPast = true; hasErrors = true; }
+      }
+      if (Object.keys(errs).length > 0) errors[idx] = errs;
+    });
+    setValidationErrors(errors);
+    if (hasErrors) { setBanner({ type: 'error', message: 'Please fill Batch No. and valid Expiry Date for all items with quantity.' }); return; }
     setBanner(null);
     setSaving(true);
     try {
