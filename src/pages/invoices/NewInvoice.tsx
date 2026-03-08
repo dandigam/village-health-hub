@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -7,15 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { useAuth } from '@/context/AuthContext';
 import { useSupplierList, useWarehouseInventory, useWarehouseDetail, WarehouseInventoryItem } from '@/hooks/useApiData';
 import api, { API_BASE_URL } from '@/services/api';
-import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle, Info, CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardChangesDialog } from '@/components/shared/DiscardChangesDialog';
-
 type BannerType = 'success' | 'error';
 interface BannerState { type: BannerType; message: string }
 import { format } from 'date-fns';
@@ -72,6 +73,11 @@ export default function NewInvoice() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState<BannerState | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<number, { batch?: boolean; expDate?: boolean; expPast?: boolean }>>({});
+
+  // Refs for auto-focus on batch fields
+  const batchRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const lastAddedIdx = useRef<number | null>(null);
 
   // Add new medicine dialog
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -176,19 +182,51 @@ export default function NewInvoice() {
 
   const handleAddNewMedicine = () => {
     if (!newMedName.trim() || !newMedType) { setBanner({ type: 'error', message: 'Medicine name and type are required.' }); return; }
+    const newIdx = items.length;
     setItems(prev => [...prev, {
       medicineId: '', medicineName: newMedName.trim(), medicineType: newMedType,
       isAlreadyExist: false, batchNo: '', expDate: '', quantity: 0, stock: 0,
     }]);
+    lastAddedIdx.current = newIdx;
     setShowAddDialog(false);
     setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list.` });
     setNewMedName(''); setNewMedType(''); setNewMedStrength(''); setNewMedUnit('');
   };
 
+  // Auto-focus batch field when a new medicine is added
+  useEffect(() => {
+    if (lastAddedIdx.current !== null) {
+      const idx = lastAddedIdx.current;
+      lastAddedIdx.current = null;
+      setTimeout(() => {
+        batchRefs.current[idx]?.focus();
+      }, 100);
+    }
+  }, [items.length]);
+
   const handleSave = async () => {
     if (!supplierId) { setBanner({ type: 'error', message: 'Please select a supplier.' }); return; }
     const filledItems = items.filter(i => i.quantity > 0);
     if (filledItems.length === 0) { setBanner({ type: 'error', message: 'Enter quantity for at least one item.' }); return; }
+    
+    // Validate batch & expiry for items with qty
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const errors: Record<number, { batch?: boolean; expDate?: boolean; expPast?: boolean }> = {};
+    let hasErrors = false;
+    items.forEach((item, idx) => {
+      if (item.quantity <= 0) return;
+      const errs: { batch?: boolean; expDate?: boolean; expPast?: boolean } = {};
+      if (!item.batchNo.trim()) { errs.batch = true; hasErrors = true; }
+      if (!item.expDate) { errs.expDate = true; hasErrors = true; }
+      else {
+        const exp = new Date(item.expDate);
+        if (exp < today) { errs.expPast = true; hasErrors = true; }
+      }
+      if (Object.keys(errs).length > 0) errors[idx] = errs;
+    });
+    setValidationErrors(errors);
+    if (hasErrors) { setBanner({ type: 'error', message: 'Please fill Batch No. and valid Expiry Date for all items with quantity.' }); return; }
     setBanner(null);
     setSaving(true);
     try {
@@ -465,7 +503,17 @@ export default function NewInvoice() {
                   <div className="px-3 border-l border-border/40">
                     <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Date <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-7 text-xs mt-1" type="date" value={invoiceDate} onChange={e => { setInvoiceDate(e.target.value); setDirty(true); }} />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("h-7 text-xs mt-1 w-full justify-start text-left font-normal", !invoiceDate && "text-muted-foreground")}>
+                            <CalendarIcon className="mr-1.5 h-3 w-3" />
+                            {invoiceDate ? format(new Date(invoiceDate), 'dd-MM-yyyy') : 'dd-mm-yyyy'}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-50" align="start">
+                          <Calendar mode="single" selected={invoiceDate ? new Date(invoiceDate) : undefined} onSelect={(date) => { if (date) { setInvoiceDate(format(date, 'yyyy-MM-dd')); setDirty(true); } }} initialFocus />
+                        </PopoverContent>
+                      </Popover>
                     ) : (
                       <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                     )}
@@ -535,6 +583,7 @@ export default function NewInvoice() {
                         const stock = item.stock;
                         const hasQty = item.quantity > 0;
                         const stockColor = stock <= 0 ? 'text-destructive font-bold' : stock < 30 ? 'text-warning font-semibold' : 'text-success font-medium';
+                        const errs = validationErrors[realIdx];
                         return (
                           <tr key={`${item.medicineId}-${idx}`} className={cn(
                             "transition-colors duration-150 hover:bg-primary/[0.03]",
@@ -549,16 +598,54 @@ export default function NewInvoice() {
                             <td className={`px-4 py-2 text-center text-xs tabular-nums ${stockColor}`}>{stock}</td>
                             <td className="px-4 py-2 text-center">
                               {canEdit ? (
-                                <Input className="w-24 h-8 mx-auto text-center text-xs" placeholder="Batch" value={item.batchNo} onChange={e => updateItem(realIdx, 'batchNo', e.target.value)} />
+                                <div>
+                                  <Input
+                                    ref={(el) => { batchRefs.current[realIdx] = el; }}
+                                    className={cn("w-24 h-8 mx-auto text-center text-xs", errs?.batch && "border-destructive ring-1 ring-destructive/30")}
+                                    placeholder="Batch"
+                                    value={item.batchNo}
+                                    onChange={e => { updateItem(realIdx, 'batchNo', e.target.value); setValidationErrors(prev => { const n = { ...prev }; if (n[realIdx]) { delete n[realIdx].batch; if (!Object.keys(n[realIdx]).length) delete n[realIdx]; } return n; }); }}
+                                  />
+                                  {errs?.batch && <p className="text-[10px] text-destructive mt-0.5">Required</p>}
+                                </div>
                               ) : (
                                 <span className="text-value text-xs font-medium">{item.batchNo || '—'}</span>
                               )}
                             </td>
                             <td className="px-4 py-2 text-center">
                               {canEdit ? (
-                                <Input className="w-36 h-8 mx-auto text-xs" type="date" value={item.expDate} onChange={e => updateItem(realIdx, 'expDate', e.target.value)} />
+                                <div>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button variant="outline" className={cn(
+                                        "w-36 h-8 mx-auto text-xs justify-start text-left font-normal",
+                                        !item.expDate && "text-muted-foreground",
+                                        (errs?.expDate || errs?.expPast) && "border-destructive ring-1 ring-destructive/30"
+                                      )}>
+                                        <CalendarIcon className="mr-1.5 h-3 w-3" />
+                                        {item.expDate ? format(new Date(item.expDate), 'dd-MM-yyyy') : 'dd-mm-yyyy'}
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                                      <Calendar
+                                        mode="single"
+                                        selected={item.expDate ? new Date(item.expDate) : undefined}
+                                        onSelect={(date) => {
+                                          if (date) {
+                                            updateItem(realIdx, 'expDate', format(date, 'yyyy-MM-dd'));
+                                            setValidationErrors(prev => { const n = { ...prev }; if (n[realIdx]) { delete n[realIdx].expDate; delete n[realIdx].expPast; if (!Object.keys(n[realIdx]).length) delete n[realIdx]; } return n; });
+                                          }
+                                        }}
+                                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+                                        initialFocus
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  {errs?.expDate && <p className="text-[10px] text-destructive mt-0.5">Required</p>}
+                                  {errs?.expPast && <p className="text-[10px] text-destructive mt-0.5">Past date</p>}
+                                </div>
                               ) : (
-                                <span className="text-value text-xs font-medium">{item.expDate || '—'}</span>
+                                <span className="text-value text-xs font-medium">{item.expDate ? format(new Date(item.expDate), 'dd-MM-yyyy') : '—'}</span>
                               )}
                             </td>
                               
