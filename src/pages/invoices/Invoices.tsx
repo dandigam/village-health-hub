@@ -106,7 +106,7 @@ export default function Invoices() {
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-4">
-        <h1 className="text-lg font-semibold text-foreground">Stock Entries</h1>
+        <h1 className="text-lg font-semibold text-foreground">Invoices List</h1>
         <span className="text-sm text-muted-foreground">({invoices.length})</span>
         
         <div className="flex-1 max-w-sm ml-4">
