@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -7,15 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { useAuth } from '@/context/AuthContext';
 import { useSupplierList, useWarehouseInventory, useWarehouseDetail, WarehouseInventoryItem } from '@/hooks/useApiData';
 import api, { API_BASE_URL } from '@/services/api';
-import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle, Info, CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardChangesDialog } from '@/components/shared/DiscardChangesDialog';
-
 type BannerType = 'success' | 'error';
 interface BannerState { type: BannerType; message: string }
 import { format } from 'date-fns';
