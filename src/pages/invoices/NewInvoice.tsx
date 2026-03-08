@@ -240,34 +240,34 @@ export default function NewInvoice() {
       ) : (
         <div className="rounded-xl border border-[hsl(var(--card-raised-border))] bg-[hsl(var(--card-raised-bg))] overflow-hidden" style={{ boxShadow: 'var(--card-shadow-elevated)' }}>
           {/* INVOICE INFORMATION — fieldset card style */}
-          <div className="px-4 pt-4 pb-3 border-b border-border/30 bg-[hsl(var(--card-surface-bg))]">
+          <div className="px-3 pt-3 pb-2 border-b border-border/30 bg-[hsl(var(--card-surface-bg))]">
             <fieldset className="border border-[hsl(var(--field-border))] rounded-lg px-0 pt-0 pb-0 relative bg-[hsl(var(--card-raised-bg))]" style={{ boxShadow: '0 1px 4px hsl(var(--shadow-color) / 0.04)' }}>
-              <legend className="text-[11px] font-bold text-primary px-2.5 ml-3 tracking-wider uppercase">Invoice Information</legend>
+              <legend className="text-[10px] font-bold text-primary px-2 ml-3 tracking-wider uppercase">Invoice Information</legend>
 
-              <div className="px-4 py-3">
+              <div className="px-3 py-2">
                 {/* Row 1: Supplier | Payment Mode | Invoice No. | Invoice Attach */}
                 <div className="grid grid-cols-4 gap-0">
                   {/* Supplier */}
-                  <div className="pr-4">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Supplier <span className="text-destructive">*</span></Label>
+                  <div className="pr-3">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Supplier <span className="text-destructive">*</span></Label>
                     {canEdit ? (
                       <Select value={supplierId} onValueChange={setSupplierId}>
-                        <SelectTrigger className="h-8 text-xs mt-1.5"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs mt-1"><SelectValue placeholder="Select Supplier" /></SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {suppliers.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     ) : (
-                      <p className="text-sm font-semibold text-value mt-1.5 h-8 flex items-center">{selectedSupplier?.name || '—'}</p>
+                      <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center">{selectedSupplier?.name || '—'}</p>
                     )}
                   </div>
 
                   {/* Payment Mode */}
-                  <div className="px-4 border-l border-border/40">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Payment Mode <span className="text-destructive">*</span></Label>
+                  <div className="px-3 border-l border-border/40">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Payment Mode <span className="text-destructive">*</span></Label>
                     {canEdit ? (
                       <Select value={paymentMode} onValueChange={setPaymentMode}>
-                        <SelectTrigger className="h-8 text-xs mt-1.5"><SelectValue placeholder="Select Mode" /></SelectTrigger>
+                        <SelectTrigger className="h-7 text-xs mt-1"><SelectValue placeholder="Select Mode" /></SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           {['cash', 'upi', 'bank_transfer', 'cheque', 'credit'].map(m => (
                             <SelectItem key={m} value={m}>{m.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</SelectItem>
@@ -275,24 +275,24 @@ export default function NewInvoice() {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <p className="text-sm font-semibold text-value mt-1.5 h-8 flex items-center capitalize">{paymentMode || '—'}</p>
+                      <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center capitalize">{paymentMode || '—'}</p>
                     )}
                   </div>
 
                   {/* Invoice No. */}
-                  <div className="px-4 border-l border-border/40">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Invoice No. <span className="text-destructive">*</span></Label>
+                  <div className="px-3 border-l border-border/40">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Invoice No. <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-8 text-xs mt-1.5" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" placeholder="INV-001" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
                     ) : (
-                      <p className="text-sm font-semibold text-value mt-1.5 h-8 flex items-center">{invoiceNumber || '—'}</p>
+                      <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center">{invoiceNumber || '—'}</p>
                     )}
                   </div>
 
                   {/* Invoice Attach */}
-                  <div className="pl-4 border-l border-border/40 relative">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Invoice Attach</Label>
-                    <div className="mt-1.5 space-y-1 max-h-[72px] overflow-y-auto premium-scroll">
+                  <div className="pl-3 border-l border-border/40 relative">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Invoice Attach</Label>
+                    <div className="mt-1 space-y-0.5 max-h-[60px] overflow-y-auto premium-scroll">
                       {uploadedDocuments.map((doc) => {
                         const nameLower = (doc.name || '').toLowerCase();
                         const isPdf = nameLower.endsWith('.pdf');
@@ -410,9 +410,9 @@ export default function NewInvoice() {
                 </div>
 
                 {/* Row 2: Supplier contact | Amount | Date */}
-                <div className="grid grid-cols-4 gap-0 mt-2 pt-2 border-t border-border/20">
+                <div className="grid grid-cols-4 gap-0 mt-1.5 pt-1.5 border-t border-border/20">
                   {/* Supplier contact & address */}
-                  <div className="pr-4 space-y-0.5 min-h-[2.25rem]">
+                  <div className="pr-3 space-y-0 min-h-[1.75rem]">
                     {(selectedSupplier as any)?.contact && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <span>📞</span> <span className="text-value font-medium">{(selectedSupplier as any).contact}</span>
@@ -424,26 +424,26 @@ export default function NewInvoice() {
                   </div>
 
                   {/* Amount */}
-                  <div className="px-4 border-l border-border/40">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Amount (₹) <span className="text-destructive">*</span></Label>
+                  <div className="px-3 border-l border-border/40">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Amount (₹) <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-8 text-xs mt-1.5" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
                     ) : (
-                      <p className="text-sm font-bold text-value mt-1.5 h-8 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
+                      <p className="text-xs font-bold text-value mt-1 h-7 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
                     )}
                   </div>
 
                   {/* Date */}
-                  <div className="px-4 border-l border-border/40">
-                    <Label className="text-[11px] text-label font-semibold uppercase tracking-wide">Date <span className="text-destructive">*</span></Label>
+                  <div className="px-3 border-l border-border/40">
+                    <Label className="text-[10px] text-label font-semibold uppercase tracking-wide">Date <span className="text-destructive">*</span></Label>
                     {canEdit ? (
-                      <Input className="h-8 text-xs mt-1.5" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+                      <Input className="h-7 text-xs mt-1" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
                     ) : (
-                      <p className="text-sm font-semibold text-value mt-1.5 h-8 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
+                      <p className="text-xs font-semibold text-value mt-1 h-7 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
                     )}
                   </div>
 
-                  <div className="pl-4 border-l border-border/40">{/* spacer */}</div>
+                  <div className="pl-3 border-l border-border/40">{/* spacer */}</div>
                 </div>
               </div>
             </fieldset>
