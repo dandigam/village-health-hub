@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Truck, Pill, Search, X, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Truck, Pill, Search, X, MapPin, ClipboardPaste } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
