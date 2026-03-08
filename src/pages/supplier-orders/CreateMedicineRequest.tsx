@@ -332,7 +332,7 @@ export default function CreateMedicineRequest() {
       {loading ? (
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
-        <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-[hsl(var(--card-raised-border))] bg-[hsl(var(--card-raised-bg))] overflow-hidden" style={{ boxShadow: 'var(--card-shadow-elevated)' }}>
 
           {/* ═══════════════════════════════════════════════════════════════ */}
           {/* PENDING VIEW — Read-only with Supplier + Warehouse addresses   */}
