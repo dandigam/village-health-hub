@@ -278,6 +278,15 @@ export function useSupplierOrders(warehouseId?: number) {
   });
 }
 
+export function useSupplierOrder(orderId?: number | string) {
+  return useQuery({
+    queryKey: ['supplierOrder', orderId],
+    queryFn: () => request<any>(`/supplier-orders/${orderId}`),
+    staleTime: STALE_TIME,
+    enabled: !!orderId,
+  });
+}
+
 export function useDistributions() {
   return useQuery({
     queryKey: ['distributions'],
