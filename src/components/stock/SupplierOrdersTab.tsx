@@ -177,7 +177,7 @@ export function SupplierOrdersTab() {
             <Package className="mr-1.5 h-3.5 w-3.5" /> Receive Stock
           </Button>
           <Button size="sm" className="h-8 text-xs" onClick={() => setShowRequestStock(true)}>
-            <Send className="mr-1.5 h-3.5 w-3.5" /> Request Stock
+            <Plus className="mr-1.5 h-3.5 w-3.5" /> Create Purchase Order
           </Button>
         </div>
       </div>
