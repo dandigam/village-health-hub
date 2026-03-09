@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, ChevronUp, ChevronDown, Eye, Package, MoreVertical, Download, PackageOpen, X, CalendarIcon } from 'lucide-react';
+import { Plus, Search, Filter, ChevronUp, ChevronDown, Eye, Package, MoreVertical, Download, PackageOpen, X, CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -10,16 +10,38 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
-import { mockPurchaseOrders } from '@/data/procurementMockData';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { PurchaseOrderStatus } from '@/types/procurement';
+import { useSupplierOrders } from '@/hooks/useApiData';
+import { useAuth } from '@/context/AuthContext';
 
 type SortKey = 'poNumber' | 'supplierName' | 'itemCount' | 'status' | 'createdAt';
 type SortDir = 'asc' | 'desc';
 
+interface ApiOrder {
+  id: number;
+  warehouseId: number;
+  supplierId: number;
+  supplierName: string;
+  warehouseName: string;
+  status: string;
+  purchaseOrder: string | null;
+  createdAt: string;
+  updatedAt: string;
+  itemCount: number;
+  items: any[];
+  isPriority: boolean | null;
+  invoice: any;
+  documents: any;
+}
+
 export default function PurchaseOrders() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId;
+  const { data: apiOrders = [], isLoading } = useSupplierOrders(warehouseId) as { data: ApiOrder[] | undefined; isLoading: boolean };
+  const orders: ApiOrder[] = apiOrders || [];
+
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterSupplier, setFilterSupplier] = useState('all');
@@ -32,15 +54,19 @@ export default function PurchaseOrders() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const suppliers = useMemo(() => {
-    const names = [...new Set(mockPurchaseOrders.map(o => o.supplierName))];
+    const names = [...new Set(orders.map(o => o.supplierName))];
     return names.sort();
-  }, []);
+  }, [orders]);
 
   const filtered = useMemo(() => {
-    let result = [...mockPurchaseOrders];
+    let result = [...orders];
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter(o => o.poNumber.toLowerCase().includes(q) || o.supplierName.toLowerCase().includes(q));
+      result = result.filter(o =>
+        (o.purchaseOrder || '').toLowerCase().includes(q) ||
+        o.supplierName.toLowerCase().includes(q) ||
+        String(o.id).includes(q)
+      );
     }
     if (filterStatus !== 'all') result = result.filter(o => o.status === filterStatus);
     if (filterSupplier !== 'all') result = result.filter(o => o.supplierName === filterSupplier);
@@ -50,9 +76,9 @@ export default function PurchaseOrders() {
     result.sort((a, b) => {
       let aV: any, bV: any;
       switch (sortKey) {
-        case 'poNumber': aV = a.poNumber; bV = b.poNumber; break;
+        case 'poNumber': aV = a.purchaseOrder || ''; bV = b.purchaseOrder || ''; break;
         case 'supplierName': aV = a.supplierName.toLowerCase(); bV = b.supplierName.toLowerCase(); break;
-        case 'itemCount': aV = a.items.length; bV = b.items.length; break;
+        case 'itemCount': aV = a.itemCount || a.items.length; bV = b.itemCount || b.items.length; break;
         case 'status': aV = a.status; bV = b.status; break;
         case 'createdAt': aV = new Date(a.createdAt).getTime(); bV = new Date(b.createdAt).getTime(); break;
         default: aV = 0; bV = 0;
@@ -62,7 +88,7 @@ export default function PurchaseOrders() {
       return 0;
     });
     return result;
-  }, [search, filterStatus, filterSupplier, dateFrom, dateTo, sortKey, sortDir]);
+  }, [orders, search, filterStatus, filterSupplier, dateFrom, dateTo, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
   const paged = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
@@ -87,11 +113,18 @@ export default function PurchaseOrders() {
     setPage(1);
   };
 
-  const canReceive = (status: PurchaseOrderStatus) => status === 'sent' || status === 'partially_received';
+  const canReceive = (status: string) => status === 'PENDING' || status === 'PARTIAL';
 
   return (
     <DashboardLayout>
-      {/* Header */}
+      {/* Loading */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="ml-2 text-sm text-muted-foreground">Loading orders...</span>
+        </div>
+      )}
+      {!isLoading && (<>
       <div className="flex items-center gap-4 mb-4">
         <div>
           <h1 className="text-lg font-semibold text-foreground">Purchase Orders</h1>
@@ -158,11 +191,10 @@ export default function PurchaseOrders() {
                   <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue placeholder="All Statuses" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="sent">Sent</SelectItem>
-                    <SelectItem value="partially_received">Partially Received</SelectItem>
-                    <SelectItem value="received">Received</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="DRAFT">Draft</SelectItem>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="PARTIAL">Partially Received</SelectItem>
+                    <SelectItem value="RECEIVED">Received</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -249,8 +281,8 @@ export default function PurchaseOrders() {
                 {paged.map((order) => (
                   <tr key={order.id} className="border-b last:border-b-0 hover:bg-muted/20 transition-colors duration-150">
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs font-semibold text-primary">{order.poNumber}</span>
-                      {order.priority === 'urgent' && (
+                      <span className="font-mono text-xs font-semibold text-primary">{order.purchaseOrder || `#${order.id}`}</span>
+                      {order.isPriority && (
                         <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-destructive/10 text-destructive border border-destructive/20">URGENT</span>
                       )}
                     </td>
@@ -259,7 +291,7 @@ export default function PurchaseOrders() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center justify-center h-6 w-8 rounded-md bg-muted/50 text-xs font-medium">
-                        {order.items.length}
+                        {order.itemCount || order.items.length}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -347,6 +379,7 @@ export default function PurchaseOrders() {
           </div>
         </div>
       )}
+      </>)}
     </DashboardLayout>
   );
 }
