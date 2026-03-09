@@ -23,13 +23,13 @@ interface ReceiveRow {
   medicineType?: string;
   strength?: string;
   unit?: string;
+  currentQty: number;
   requestedQty: number;
   alreadyReceived: number;
   pendingQty: number;
   receiveQty: number;
   batchNumber: string;
   expiryDate: Date | undefined;
-  hsnNo: string;
   error?: string;
 }
 
