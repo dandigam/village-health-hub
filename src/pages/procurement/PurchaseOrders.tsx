@@ -282,8 +282,8 @@ export default function PurchaseOrders() {
                 {paged.map((order) => (
                   <tr key={order.id} className="border-b last:border-b-0 hover:bg-muted/20 transition-colors duration-150">
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs font-semibold text-primary">{order.poNumber}</span>
-                      {order.priority === 'urgent' && (
+                      <span className="font-mono text-xs font-semibold text-primary">{order.purchaseOrder || `#${order.id}`}</span>
+                      {order.isPriority && (
                         <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-destructive/10 text-destructive border border-destructive/20">URGENT</span>
                       )}
                     </td>
@@ -292,7 +292,7 @@ export default function PurchaseOrders() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center justify-center h-6 w-8 rounded-md bg-muted/50 text-xs font-medium">
-                        {order.items.length}
+                        {order.itemCount || order.items.length}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
