@@ -168,13 +168,13 @@ export default function WarehouseDashboard() {
 
         {/* Orders & Distribution Row */}
         <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Supplier Orders Summary */}
+          {/* Purchase Orders Summary */}
           <Card className="overflow-hidden">
             <CardContent className="p-0">
               <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/20">
                 <div className="flex items-center gap-2">
                   <ShoppingCart className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">Supplier Orders</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Purchase Orders</h3>
                 </div>
                 <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/supplier-orders')}>
                   View All <ArrowRight className="ml-1 h-3 w-3" />
