@@ -158,7 +158,7 @@ export default function PurchaseOrders() {
               </span>
             )}
           </Button>
-          <Button onClick={() => navigate('/purchase-orders/new')} className="h-9">
+          <Button onClick={() => navigate('/supplier-orders/new')} className="h-9">
             <Plus className="mr-1.5 h-4 w-4" /> Create Purchase Order
           </Button>
         </div>
@@ -307,7 +307,7 @@ export default function PurchaseOrders() {
                             <Button
                               size="sm"
                               className="h-7 px-3 text-xs font-medium rounded-full shadow-sm"
-                              onClick={() => navigate(`/purchase-orders/${order.id}/receive`)}
+                              onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}
                             >
                               <Package className="h-3.5 w-3.5 mr-1" /> Receive
                             </Button>
@@ -318,7 +318,7 @@ export default function PurchaseOrders() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-36">
-                                <DropdownMenuItem onClick={() => navigate(`/purchase-orders/${order.id}`)}>
+                                <DropdownMenuItem onClick={() => navigate(`/supplier-orders/${order.id}`)}>
                                   <Eye className="h-3.5 w-3.5 mr-2" /> View
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
@@ -333,7 +333,7 @@ export default function PurchaseOrders() {
                               size="sm"
                               variant="outline"
                               className="h-7 px-3 text-xs font-medium rounded-full"
-                              onClick={() => navigate(`/purchase-orders/${order.id}`)}
+                              onClick={() => navigate(`/supplier-orders/${order.id}`)}
                             >
                               <Eye className="h-3.5 w-3.5 mr-1" /> View
                             </Button>
