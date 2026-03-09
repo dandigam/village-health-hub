@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, CheckCircle2, CalendarIcon, AlertCircle, X, FileText, Loader2, Download, Printer } from 'lucide-react';
 import { format } from 'date-fns';
@@ -10,14 +10,16 @@ import { StatusBadge } from '@/components/procurement/StatusBadge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { mockPurchaseOrders } from '@/data/procurementMockData';
+import { useSupplierOrder } from '@/hooks/useApiData';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { API_BASE_URL } from '@/services/api';
+import api from '@/services/api';
 
 interface ReceiveRow {
-  medicineId: string;
+  medicineId: number;
   medicineName: string;
+  medicineType?: string;
   strength?: string;
   unit?: string;
   requestedQty: number;
@@ -37,27 +39,10 @@ interface UploadedDocument {
 export default function ReceiveGoods() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { data: order, isLoading } = useSupplierOrder(id);
 
-  const order = mockPurchaseOrders.find(o => o.id === id);
-
-  const [rows, setRows] = useState<ReceiveRow[]>(() => {
-    if (!order) return [];
-    return order.items
-      .filter(i => i.pendingQty > 0)
-      .map(i => ({
-        medicineId: i.medicineId,
-        medicineName: i.medicineName,
-        strength: i.strength,
-        unit: i.unit,
-        requestedQty: i.requestedQty,
-        alreadyReceived: i.receivedQty,
-        pendingQty: i.pendingQty,
-        receiveQty: 0,
-        batchNumber: '',
-        expiryDate: undefined,
-      }));
-  });
-
+  const [rows, setRows] = useState<ReceiveRow[]>([]);
+  const [initialized, setInitialized] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -71,6 +56,37 @@ export default function ReceiveGoods() {
   const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
   const [previewType, setPreviewType] = useState<'pdf' | 'image' | 'unknown'>('unknown');
   const [previewLoading, setPreviewLoading] = useState(false);
+
+  // Initialize rows from API data
+  if (order && !initialized) {
+    const items = order.items || [];
+    const pending = items.filter((i: any) => (i.requestedQuantity || 0) - (i.receivedQuantity || 0) > 0);
+    setRows(pending.map((i: any) => ({
+      medicineId: i.medicineId,
+      medicineName: i.medicineName,
+      medicineType: i.medicineType,
+      strength: i.strength,
+      unit: i.unit,
+      requestedQty: i.requestedQuantity || 0,
+      alreadyReceived: i.receivedQuantity || 0,
+      pendingQty: (i.requestedQuantity || 0) - (i.receivedQuantity || 0),
+      receiveQty: 0,
+      batchNumber: '',
+      expiryDate: undefined,
+    })));
+    setInitialized(true);
+  }
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="ml-2 text-sm text-muted-foreground">Loading order...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (!order) {
     return (
@@ -108,11 +124,29 @@ export default function ReceiveGoods() {
   const handleConfirm = async () => {
     if (!validate()) return;
     setSubmitting(true);
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 800));
-    setSubmitting(false);
-    toast.success('Goods received successfully');
-    navigate(`/purchase-orders/${order.id}`, { state: { banner: { type: 'success', message: 'Goods receipt recorded successfully.' } } });
+    try {
+      const receivingItems = rows
+        .filter(r => r.receiveQty > 0)
+        .map(r => ({
+          medicineId: r.medicineId,
+          receivedQuantity: r.receiveQty,
+          batchNumber: r.batchNumber,
+          expiryDate: r.expiryDate ? format(r.expiryDate, 'yyyy-MM-dd') : '',
+        }));
+
+      await api.put(`/supplier-orders/${order.id}/receive`, {
+        items: receivingItems,
+        invoiceNumber: invoiceNumber || undefined,
+        invoiceAmount: invoiceAmount ? Number(invoiceAmount) : undefined,
+      });
+
+      toast.success('Goods received successfully');
+      navigate(`/purchase-orders/${order.id}`, { state: { banner: { type: 'success', message: 'Goods receipt recorded successfully.' } } });
+    } catch {
+      toast.error('Failed to receive goods');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleFileUpload = async (files: FileList) => {
@@ -200,7 +234,7 @@ export default function ReceiveGoods() {
           <div>
             <h1 className="text-lg font-semibold text-foreground">Receive Goods</h1>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs font-mono text-primary font-medium">{order.poNumber}</span>
+              <span className="text-xs font-mono text-primary font-medium">{order.purchaseOrder || `#${order.id}`}</span>
               <span className="text-xs text-muted-foreground">•</span>
               <span className="text-xs text-muted-foreground">{order.supplierName}</span>
               <StatusBadge status={order.status} className="ml-1" />
@@ -215,87 +249,93 @@ export default function ReceiveGoods() {
           <h2 className="text-sm font-semibold text-foreground">Medicines to Receive</h2>
           <p className="text-[10px] text-muted-foreground mt-0.5">Enter quantities, batch numbers, and expiry dates for items being received</p>
         </div>
-        <div className="overflow-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/30 border-b">
-              <tr>
-                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Medicine</th>
-                <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-20">Req Qty</th>
-                <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-20">Received</th>
-                <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-20">Pending</th>
-                <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-24">Receive Qty</th>
-                <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-32">Batch No.</th>
-                <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-36">Expiry Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, idx) => (
-                <tr key={row.medicineId} className={cn("border-b last:border-b-0", row.error && "bg-destructive/5")}>
-                  <td className="px-4 py-2.5">
-                    <span className="font-medium text-foreground">{row.medicineName}</span>
-                    {row.strength && row.unit && <span className="ml-1 text-xs text-muted-foreground">{row.strength}{row.unit}</span>}
-                    {row.error && (
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <AlertCircle className="h-3 w-3 text-destructive" />
-                        <span className="text-[10px] text-destructive font-medium">{row.error}</span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-3 py-2.5 text-center text-muted-foreground">{row.requestedQty}</td>
-                  <td className="px-3 py-2.5 text-center text-emerald-600 font-medium">{row.alreadyReceived}</td>
-                  <td className="px-3 py-2.5 text-center">
-                    <span className={cn("font-semibold", row.pendingQty > 0 ? "text-amber-600" : "text-muted-foreground")}>{row.pendingQty}</span>
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <Input
-                      type="number"
-                      min={0}
-                      max={row.pendingQty}
-                      className={cn("h-8 text-center text-sm w-20 mx-auto", row.error?.includes('Exceeds') && "border-destructive")}
-                      value={row.receiveQty || ''}
-                      onChange={e => updateRow(idx, 'receiveQty', Math.min(Number(e.target.value), row.pendingQty))}
-                    />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <Input
-                      className={cn("h-8 text-sm w-28", row.error?.includes('Batch') && "border-destructive")}
-                      placeholder="Batch #"
-                      value={row.batchNumber}
-                      onChange={e => updateRow(idx, 'batchNumber', e.target.value)}
-                      autoFocus={idx === 0}
-                    />
-                  </td>
-                  <td className="px-3 py-2.5">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "h-8 w-32 text-xs justify-start",
-                            !row.expiryDate && "text-muted-foreground",
-                            row.error?.includes('date') && "border-destructive"
-                          )}
-                        >
-                          <CalendarIcon className="h-3 w-3 mr-1" />
-                          {row.expiryDate ? format(row.expiryDate, 'dd/MM/yyyy') : 'Select'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={row.expiryDate}
-                          onSelect={d => updateRow(idx, 'expiryDate', d)}
-                          disabled={d => d < new Date()}
-                          className="p-3 pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </td>
+        {rows.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <p className="text-sm text-muted-foreground">All items have been fully received</p>
+          </div>
+        ) : (
+          <div className="overflow-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/30 border-b">
+                <tr>
+                  <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Medicine</th>
+                  <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-20">Req Qty</th>
+                  <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-20">Received</th>
+                  <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-20">Pending</th>
+                  <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-24">Receive Qty</th>
+                  <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-32">Batch No.</th>
+                  <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-36">Expiry Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((row, idx) => (
+                  <tr key={row.medicineId} className={cn("border-b last:border-b-0", row.error && "bg-destructive/5")}>
+                    <td className="px-4 py-2.5">
+                      <span className="font-medium text-foreground">{row.medicineName}</span>
+                      {row.strength && row.unit && <span className="ml-1 text-xs text-muted-foreground">{row.strength}{row.unit}</span>}
+                      {row.error && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <AlertCircle className="h-3 w-3 text-destructive" />
+                          <span className="text-[10px] text-destructive font-medium">{row.error}</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-center text-muted-foreground">{row.requestedQty}</td>
+                    <td className="px-3 py-2.5 text-center text-emerald-600 font-medium">{row.alreadyReceived}</td>
+                    <td className="px-3 py-2.5 text-center">
+                      <span className={cn("font-semibold", row.pendingQty > 0 ? "text-amber-600" : "text-muted-foreground")}>{row.pendingQty}</span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={row.pendingQty}
+                        className={cn("h-8 text-center text-sm w-20 mx-auto", row.error?.includes('Exceeds') && "border-destructive")}
+                        value={row.receiveQty || ''}
+                        onChange={e => updateRow(idx, 'receiveQty', Math.min(Number(e.target.value), row.pendingQty))}
+                      />
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Input
+                        className={cn("h-8 text-sm w-28", row.error?.includes('Batch') && "border-destructive")}
+                        placeholder="Batch #"
+                        value={row.batchNumber}
+                        onChange={e => updateRow(idx, 'batchNumber', e.target.value)}
+                        autoFocus={idx === 0}
+                      />
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "h-8 w-32 text-xs justify-start",
+                              !row.expiryDate && "text-muted-foreground",
+                              row.error?.includes('date') && "border-destructive"
+                            )}
+                          >
+                            <CalendarIcon className="h-3 w-3 mr-1" />
+                            {row.expiryDate ? format(row.expiryDate, 'dd/MM/yyyy') : 'Select'}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={row.expiryDate}
+                            onSelect={d => updateRow(idx, 'expiryDate', d)}
+                            disabled={d => d < new Date()}
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
         {totalReceiving > 0 && (
           <div className="px-4 py-2.5 border-t bg-emerald-50/50 flex items-center gap-2">
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
