@@ -277,6 +277,7 @@ export default function ReceiveGoods() {
                   <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-24">Receive Qty</th>
                   <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-32">Batch No.</th>
                   <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-36">Expiry Date</th>
+                  <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-28">HSN No.</th>
                 </tr>
               </thead>
               <tbody>
