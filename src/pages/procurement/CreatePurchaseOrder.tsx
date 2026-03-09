@@ -188,7 +188,7 @@ export default function CreatePurchaseOrder() {
           requestedQuantity: i.qty,
         })),
       };
-      const result = await api.post('/purchase-orders', payload);
+      const result = await api.post('/supplier-orders', payload);
       const orderId = (result as any)?.id;
       toast.success(status === 'draft'
         ? `Draft saved — ${validItems.length} medicines, ${totalQty} total units`
