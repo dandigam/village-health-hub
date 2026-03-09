@@ -41,6 +41,7 @@ import CreateMedicineRequest from "./pages/supplier-orders/CreateMedicineRequest
 import PurchaseOrders from "./pages/procurement/PurchaseOrders";
 import PurchaseOrderDetail from "./pages/procurement/PurchaseOrderDetail";
 import ReceiveGoods from "./pages/procurement/ReceiveGoods";
+import CreatePurchaseOrder from "./pages/procurement/CreatePurchaseOrder";
 import GoodsReceipts from "./pages/procurement/GoodsReceipts";
 import GoodsReceiptDetail from "./pages/procurement/GoodsReceiptDetail";
 
