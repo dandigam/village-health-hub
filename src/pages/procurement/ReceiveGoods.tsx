@@ -352,14 +352,6 @@ export default function ReceiveGoods() {
                         </PopoverContent>
                       </Popover>
                     </td>
-                    <td className="px-3 py-2.5">
-                      <Input
-                        className="h-8 text-sm w-24"
-                        placeholder="HSN"
-                        value={row.hsnNo}
-                        onChange={e => updateRow(idx, 'hsnNo', e.target.value)}
-                      />
-                    </td>
                   </tr>
                 ))}
               </tbody>
