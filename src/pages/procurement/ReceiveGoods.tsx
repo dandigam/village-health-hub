@@ -65,6 +65,7 @@ export default function ReceiveGoods() {
     const items = order.items || [];
     const pending = items.filter((i: any) => (i.requestedQuantity || 0) - (i.receivedQuantity || 0) > 0);
     setRows(pending.map((i: any) => ({
+      id: i.id,
       medicineId: i.medicineId,
       medicineName: i.medicineName,
       medicineType: i.medicineType,
@@ -74,8 +75,9 @@ export default function ReceiveGoods() {
       alreadyReceived: i.receivedQuantity || 0,
       pendingQty: (i.requestedQuantity || 0) - (i.receivedQuantity || 0),
       receiveQty: 0,
-      batchNumber: '',
-      expiryDate: undefined,
+      batchNumber: i.batchNo || '',
+      expiryDate: i.expDate ? new Date(i.expDate) : undefined,
+      hsnNo: i.hsnNo || '',
     })));
     setInitialized(true);
   }
