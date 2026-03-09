@@ -138,7 +138,7 @@ export default function CreatePurchaseOrder() {
       category: newMedCategory.trim() || 'General',
       stock: 0,
     };
-    setLocalCatalog(prev => [...prev, newMed]);
+    setExtraMedicines(prev => [...prev, newMed]);
     addMedicine(newMed);
     setNewMedName('');
     setNewMedStrength('');
