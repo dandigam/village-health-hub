@@ -17,6 +17,7 @@ import { API_BASE_URL } from '@/services/api';
 import api from '@/services/api';
 
 interface ReceiveRow {
+  id?: number;
   medicineId: number;
   medicineName: string;
   medicineType?: string;
@@ -28,6 +29,7 @@ interface ReceiveRow {
   receiveQty: number;
   batchNumber: string;
   expiryDate: Date | undefined;
+  hsnNo: string;
   error?: string;
 }
 
@@ -45,6 +47,7 @@ export default function ReceiveGoods() {
   const [initialized, setInitialized] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
+  const [invoiceDateObj, setInvoiceDateObj] = useState<Date | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
 
   // Document upload state
@@ -62,6 +65,7 @@ export default function ReceiveGoods() {
     const items = order.items || [];
     const pending = items.filter((i: any) => (i.requestedQuantity || 0) - (i.receivedQuantity || 0) > 0);
     setRows(pending.map((i: any) => ({
+      id: i.id,
       medicineId: i.medicineId,
       medicineName: i.medicineName,
       medicineType: i.medicineType,
@@ -71,8 +75,9 @@ export default function ReceiveGoods() {
       alreadyReceived: i.receivedQuantity || 0,
       pendingQty: (i.requestedQuantity || 0) - (i.receivedQuantity || 0),
       receiveQty: 0,
-      batchNumber: '',
-      expiryDate: undefined,
+      batchNumber: i.batchNo || '',
+      expiryDate: i.expDate ? new Date(i.expDate) : undefined,
+      hsnNo: i.hsnNo || '',
     })));
     setInitialized(true);
   }
@@ -125,19 +130,26 @@ export default function ReceiveGoods() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const receivingItems = rows
+      const items = rows
         .filter(r => r.receiveQty > 0)
         .map(r => ({
-          medicineId: r.medicineId,
+          id: r.id,
           receivedQuantity: r.receiveQty,
-          batchNumber: r.batchNumber,
-          expiryDate: r.expiryDate ? format(r.expiryDate, 'yyyy-MM-dd') : '',
+          batchNo: r.batchNumber,
+          expDate: r.expiryDate ? format(r.expiryDate, 'yyyy-MM-dd') : '',
+          hsnNo: r.hsnNo,
         }));
 
-      await api.put(`/supplier-orders/${order.id}/receive`, {
-        items: receivingItems,
+      // Check if all items are fully received
+      const isFullyReceived = rows.every(r => (r.alreadyReceived + r.receiveQty) >= r.requestedQty);
+
+      await api.put(`/supplier-orders/${order.id}`, {
+        items,
+        status: isFullyReceived ? 'RECEIVED' : 'PARTIAL',
         invoiceNumber: invoiceNumber || undefined,
-        invoiceAmount: invoiceAmount ? Number(invoiceAmount) : undefined,
+        invoiceAmount: invoiceAmount ? parseFloat(invoiceAmount) || 0 : undefined,
+        invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : undefined,
+        documents: uploadedDocuments,
       });
 
       toast.success('Goods received successfully');
@@ -265,6 +277,7 @@ export default function ReceiveGoods() {
                   <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-24">Receive Qty</th>
                   <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-32">Batch No.</th>
                   <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-36">Expiry Date</th>
+                  <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-28">HSN No.</th>
                 </tr>
               </thead>
               <tbody>
@@ -330,6 +343,14 @@ export default function ReceiveGoods() {
                         </PopoverContent>
                       </Popover>
                     </td>
+                    <td className="px-3 py-2.5">
+                      <Input
+                        className="h-8 text-sm w-24"
+                        placeholder="HSN"
+                        value={row.hsnNo}
+                        onChange={e => updateRow(idx, 'hsnNo', e.target.value)}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -347,7 +368,7 @@ export default function ReceiveGoods() {
       {/* Invoice Section */}
       <div className="border rounded-lg bg-card p-5 shadow-sm mb-6">
         <h2 className="text-sm font-semibold text-foreground mb-4">Invoice Details</h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <div className="space-y-1.5">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice Number</label>
             <Input className="h-9 text-sm" placeholder="INV-2026-XXXX" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
@@ -355,6 +376,20 @@ export default function ReceiveGoods() {
           <div className="space-y-1.5">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice Amount (₹)</label>
             <Input className="h-9 text-sm" type="number" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("h-9 w-full text-sm justify-start", !invoiceDateObj && "text-muted-foreground")}>
+                  <CalendarIcon className="h-3.5 w-3.5 mr-2" />
+                  {invoiceDateObj ? format(invoiceDateObj, 'dd/MM/yyyy') : 'Select date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={invoiceDateObj} onSelect={setInvoiceDateObj} className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1.5">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Upload Documents</label>
