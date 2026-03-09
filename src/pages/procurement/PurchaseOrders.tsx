@@ -191,11 +191,10 @@ export default function PurchaseOrders() {
                   <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue placeholder="All Statuses" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="sent">Sent</SelectItem>
-                    <SelectItem value="partially_received">Partially Received</SelectItem>
-                    <SelectItem value="received">Received</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="DRAFT">Draft</SelectItem>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="PARTIAL">Partially Received</SelectItem>
+                    <SelectItem value="RECEIVED">Received</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
