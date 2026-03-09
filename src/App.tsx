@@ -33,9 +33,16 @@ import StockManagement from "./pages/stock/StockManagement";
 import Suppliers from "./pages/suppliers/Suppliers";
 import NewSupplier from "./pages/suppliers/NewSupplier";
 
-// Supplier Orders
+// Supplier Orders (legacy)
 import SupplierOrders from "./pages/supplier-orders/SupplierOrders";
 import CreateMedicineRequest from "./pages/supplier-orders/CreateMedicineRequest";
+
+// Procurement
+import PurchaseOrders from "./pages/procurement/PurchaseOrders";
+import PurchaseOrderDetail from "./pages/procurement/PurchaseOrderDetail";
+import ReceiveGoods from "./pages/procurement/ReceiveGoods";
+import GoodsReceipts from "./pages/procurement/GoodsReceipts";
+import GoodsReceiptDetail from "./pages/procurement/GoodsReceiptDetail";
 
 // Distribution Orders
 import DistributionOrders from "./pages/distribution/DistributionOrders";
@@ -120,11 +127,20 @@ const App = () => (
               <Route path="/suppliers/new" element={<ProtectedRoute routeKey="suppliers"><NewSupplier /></ProtectedRoute>} />
               <Route path="/suppliers/:id/edit" element={<ProtectedRoute routeKey="suppliers"><NewSupplier /></ProtectedRoute>} />
               
-              {/* Supplier Orders */}
+              {/* Supplier Orders (legacy) */}
               <Route path="/supplier-orders" element={<ProtectedRoute routeKey="supplier-orders"><SupplierOrders /></ProtectedRoute>} />
               <Route path="/supplier-orders/new" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
               <Route path="/supplier-orders/:id" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
               <Route path="/supplier-orders/:id/edit" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
+              
+              {/* Purchase Orders (new procurement) */}
+              <Route path="/purchase-orders" element={<ProtectedRoute routeKey="supplier-orders"><PurchaseOrders /></ProtectedRoute>} />
+              <Route path="/purchase-orders/:id" element={<ProtectedRoute routeKey="supplier-orders"><PurchaseOrderDetail /></ProtectedRoute>} />
+              <Route path="/purchase-orders/:id/receive" element={<ProtectedRoute routeKey="supplier-orders"><ReceiveGoods /></ProtectedRoute>} />
+              
+              {/* Goods Receipts */}
+              <Route path="/goods-receipts" element={<ProtectedRoute routeKey="supplier-orders"><GoodsReceipts /></ProtectedRoute>} />
+              <Route path="/goods-receipts/:id" element={<ProtectedRoute routeKey="supplier-orders"><GoodsReceiptDetail /></ProtectedRoute>} />
               
               {/* Distribution Orders */}
               <Route path="/distribution-orders" element={<ProtectedRoute routeKey="distribution-orders"><DistributionOrders /></ProtectedRoute>} />
