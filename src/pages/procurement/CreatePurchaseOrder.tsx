@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { mockPurchaseOrders } from '@/data/procurementMockData';
+import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { useSupplierList } from '@/hooks/useApiData';
 
