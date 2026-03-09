@@ -1,16 +1,19 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, CheckCircle2, CalendarIcon, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Upload, CheckCircle2, CalendarIcon, AlertCircle, X, FileText, Loader2, Download, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { mockPurchaseOrders } from '@/data/procurementMockData';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { API_BASE_URL } from '@/services/api';
 
 interface ReceiveRow {
   medicineId: string;
@@ -24,6 +27,11 @@ interface ReceiveRow {
   batchNumber: string;
   expiryDate: Date | undefined;
   error?: string;
+}
+
+interface UploadedDocument {
+  documentId: string;
+  name: string;
 }
 
 export default function ReceiveGoods() {
@@ -52,8 +60,17 @@ export default function ReceiveGoods() {
 
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
-  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Document upload state
+  const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  // Document preview state
+  const [showDocumentPreview, setShowDocumentPreview] = useState<{ url: string; name: string } | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [previewType, setPreviewType] = useState<'pdf' | 'image' | 'unknown'>('unknown');
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   if (!order) {
     return (
@@ -96,6 +113,80 @@ export default function ReceiveGoods() {
     setSubmitting(false);
     toast.success('Goods received successfully');
     navigate(`/purchase-orders/${order.id}`, { state: { banner: { type: 'success', message: 'Goods receipt recorded successfully.' } } });
+  };
+
+  const handleFileUpload = async (files: FileList) => {
+    if (!invoiceNumber.trim()) {
+      toast.error('Enter invoice number before uploading documents');
+      return;
+    }
+    setUploading(true);
+    for (const file of Array.from(files)) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('invoiceNo', invoiceNumber);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+          method: 'POST',
+          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: formData,
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const doc = await res.json();
+        if (doc?.documentId && doc?.documentName) {
+          setUploadedDocuments(prev => {
+            if (prev.some(d => d.documentId === doc.documentId)) return prev;
+            return [...prev, { documentId: doc.documentId, name: doc.documentName }];
+          });
+        }
+      } catch {
+        toast.error(`Failed to upload ${file.name}`);
+      }
+    }
+    setUploading(false);
+  };
+
+  const handleDocumentPreview = async (doc: UploadedDocument) => {
+    const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
+    setShowDocumentPreview({ url, name: doc.name });
+    setPreviewLoading(true);
+    setPreviewBlobUrl(null);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      const contentType = res.headers.get('content-type') || '';
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setPreviewBlobUrl(blobUrl);
+      const nameLower = (doc.name || '').toLowerCase();
+      if (contentType.includes('pdf') || nameLower.endsWith('.pdf')) setPreviewType('pdf');
+      else setPreviewType('image');
+    } catch {
+      setPreviewType('unknown');
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleDocumentDelete = async (doc: UploadedDocument) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      });
+      setUploadedDocuments(prev => prev.filter(d => d.documentId !== doc.documentId));
+    } catch {
+      toast.error('Failed to delete document');
+    }
+  };
+
+  const closePreview = () => {
+    if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
+    setShowDocumentPreview(null);
+    setPreviewBlobUrl(null);
+    setPreviewType('unknown');
   };
 
   return (
@@ -226,21 +317,63 @@ export default function ReceiveGoods() {
             <Input className="h-9 text-sm" type="number" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Upload Invoice</label>
-            <div className="relative">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Upload Documents</label>
+            <label className="block">
               <input
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                onChange={e => setInvoiceFile(e.target.files?.[0] || null)}
+                accept="image/*,.pdf"
+                multiple
+                className="hidden"
+                disabled={!invoiceNumber.trim() || uploading}
+                onChange={async (e) => {
+                  const files = e.target.files;
+                  if (!files) return;
+                  await handleFileUpload(files);
+                  e.target.value = '';
+                }}
               />
-              <Button variant="outline" className="h-9 w-full text-sm justify-start gap-2">
-                <Upload className="h-3.5 w-3.5" />
-                {invoiceFile ? invoiceFile.name : 'Choose file...'}
+              <Button
+                variant="outline"
+                className={cn("h-9 w-full text-sm justify-start gap-2", !invoiceNumber.trim() && "opacity-50 cursor-not-allowed")}
+                asChild
+              >
+                <span>
+                  {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                  {uploading ? 'Uploading...' : 'Choose files...'}
+                </span>
               </Button>
-            </div>
+            </label>
+            {!invoiceNumber.trim() && (
+              <p className="text-[10px] text-muted-foreground">Enter invoice number first</p>
+            )}
           </div>
         </div>
+
+        {/* Uploaded document tags */}
+        {uploadedDocuments.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            {uploadedDocuments.map((doc) => (
+              <div key={doc.documentId} className="flex items-center gap-1.5 border border-emerald-200 rounded-full bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
+                <Badge
+                  variant="outline"
+                  className="bg-emerald-100 border-emerald-200 text-emerald-700 cursor-pointer rounded-full px-2"
+                  onClick={() => handleDocumentPreview(doc)}
+                  title="View document"
+                >
+                  <FileText className="h-3 w-3 mr-1" />
+                  {doc.name}
+                </Badge>
+                <button
+                  className="text-muted-foreground hover:text-destructive focus:outline-none"
+                  onClick={() => handleDocumentDelete(doc)}
+                  aria-label="Remove document"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Actions */}
@@ -254,6 +387,58 @@ export default function ReceiveGoods() {
           )}
         </Button>
       </div>
+
+      {/* Document Preview Dialog */}
+      <Dialog open={!!showDocumentPreview} onOpenChange={(open) => { if (!open) closePreview(); }}>
+        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <FileText className="h-4 w-4" />
+              {showDocumentPreview?.name || 'Document Preview'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto min-h-[300px] flex items-center justify-center">
+            {previewLoading ? (
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="text-xs text-muted-foreground">Loading preview...</span>
+              </div>
+            ) : previewBlobUrl ? (
+              previewType === 'pdf' ? (
+                <iframe src={previewBlobUrl} className="w-full h-[65vh] rounded border" title="PDF Preview" />
+              ) : previewType === 'image' ? (
+                <img src={previewBlobUrl} alt={showDocumentPreview?.name} className="max-w-full max-h-[65vh] object-contain rounded" />
+              ) : (
+                <p className="text-sm text-muted-foreground">Unable to preview this file type.</p>
+              )
+            ) : (
+              <p className="text-sm text-muted-foreground">Failed to load preview.</p>
+            )}
+          </div>
+          {previewBlobUrl && (
+            <div className="flex items-center justify-end gap-2 pt-2 border-t">
+              <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                <a href={previewBlobUrl} download={showDocumentPreview?.name}>
+                  <Download className="h-3.5 w-3.5" /> Download
+                </a>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => {
+                  if (previewBlobUrl) {
+                    const w = window.open(previewBlobUrl);
+                    w?.print();
+                  }
+                }}
+              >
+                <Printer className="h-3.5 w-3.5" /> Print
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
