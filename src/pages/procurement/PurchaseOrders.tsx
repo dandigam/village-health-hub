@@ -244,7 +244,7 @@ export default function PurchaseOrders() {
           </div>
           <p className="text-sm font-semibold text-foreground mb-1">No Purchase Orders Found</p>
           <p className="text-xs text-muted-foreground mb-4">Create your first purchase order to get started</p>
-          <Button size="sm" className="shadow-md" onClick={() => navigate('/supplier-orders/new')}>
+          <Button size="sm" className="shadow-md" onClick={() => navigate('/purchase-orders/new')}>
             <Plus className="mr-1.5 h-4 w-4" /> New Purchase Order
           </Button>
         </div>
