@@ -127,11 +127,20 @@ const App = () => (
               <Route path="/suppliers/new" element={<ProtectedRoute routeKey="suppliers"><NewSupplier /></ProtectedRoute>} />
               <Route path="/suppliers/:id/edit" element={<ProtectedRoute routeKey="suppliers"><NewSupplier /></ProtectedRoute>} />
               
-              {/* Supplier Orders */}
+              {/* Supplier Orders (legacy) */}
               <Route path="/supplier-orders" element={<ProtectedRoute routeKey="supplier-orders"><SupplierOrders /></ProtectedRoute>} />
               <Route path="/supplier-orders/new" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
               <Route path="/supplier-orders/:id" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
               <Route path="/supplier-orders/:id/edit" element={<ProtectedRoute routeKey="supplier-orders"><CreateMedicineRequest /></ProtectedRoute>} />
+              
+              {/* Purchase Orders (new procurement) */}
+              <Route path="/purchase-orders" element={<ProtectedRoute routeKey="supplier-orders"><PurchaseOrders /></ProtectedRoute>} />
+              <Route path="/purchase-orders/:id" element={<ProtectedRoute routeKey="supplier-orders"><PurchaseOrderDetail /></ProtectedRoute>} />
+              <Route path="/purchase-orders/:id/receive" element={<ProtectedRoute routeKey="supplier-orders"><ReceiveGoods /></ProtectedRoute>} />
+              
+              {/* Goods Receipts */}
+              <Route path="/goods-receipts" element={<ProtectedRoute routeKey="supplier-orders"><GoodsReceipts /></ProtectedRoute>} />
+              <Route path="/goods-receipts/:id" element={<ProtectedRoute routeKey="supplier-orders"><GoodsReceiptDetail /></ProtectedRoute>} />
               
               {/* Distribution Orders */}
               <Route path="/distribution-orders" element={<ProtectedRoute routeKey="distribution-orders"><DistributionOrders /></ProtectedRoute>} />
