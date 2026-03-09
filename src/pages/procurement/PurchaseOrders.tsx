@@ -117,7 +117,14 @@ export default function PurchaseOrders() {
 
   return (
     <DashboardLayout>
-      {/* Header */}
+      {/* Loading */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="ml-2 text-sm text-muted-foreground">Loading orders...</span>
+        </div>
+      )}
+      {!isLoading && (
       <div className="flex items-center gap-4 mb-4">
         <div>
           <h1 className="text-lg font-semibold text-foreground">Purchase Orders</h1>
