@@ -33,9 +33,16 @@ import StockManagement from "./pages/stock/StockManagement";
 import Suppliers from "./pages/suppliers/Suppliers";
 import NewSupplier from "./pages/suppliers/NewSupplier";
 
-// Supplier Orders
+// Supplier Orders (legacy)
 import SupplierOrders from "./pages/supplier-orders/SupplierOrders";
 import CreateMedicineRequest from "./pages/supplier-orders/CreateMedicineRequest";
+
+// Procurement
+import PurchaseOrders from "./pages/procurement/PurchaseOrders";
+import PurchaseOrderDetail from "./pages/procurement/PurchaseOrderDetail";
+import ReceiveGoods from "./pages/procurement/ReceiveGoods";
+import GoodsReceipts from "./pages/procurement/GoodsReceipts";
+import GoodsReceiptDetail from "./pages/procurement/GoodsReceiptDetail";
 
 // Distribution Orders
 import DistributionOrders from "./pages/distribution/DistributionOrders";
