@@ -124,7 +124,7 @@ export default function PurchaseOrders() {
           <span className="ml-2 text-sm text-muted-foreground">Loading orders...</span>
         </div>
       )}
-      {!isLoading && (
+      {!isLoading && (<>
       <div className="flex items-center gap-4 mb-4">
         <div>
           <h1 className="text-lg font-semibold text-foreground">Purchase Orders</h1>
