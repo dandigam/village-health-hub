@@ -130,19 +130,26 @@ export default function ReceiveGoods() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const receivingItems = rows
+      const items = rows
         .filter(r => r.receiveQty > 0)
         .map(r => ({
-          medicineId: r.medicineId,
+          id: r.id,
           receivedQuantity: r.receiveQty,
-          batchNumber: r.batchNumber,
-          expiryDate: r.expiryDate ? format(r.expiryDate, 'yyyy-MM-dd') : '',
+          batchNo: r.batchNumber,
+          expDate: r.expiryDate ? format(r.expiryDate, 'yyyy-MM-dd') : '',
+          hsnNo: r.hsnNo,
         }));
 
-      await api.put(`/supplier-orders/${order.id}/receive`, {
-        items: receivingItems,
+      // Check if all items are fully received
+      const isFullyReceived = rows.every(r => (r.alreadyReceived + r.receiveQty) >= r.requestedQty);
+
+      await api.put(`/supplier-orders/${order.id}`, {
+        items,
+        status: isFullyReceived ? 'RECEIVED' : 'PARTIAL',
         invoiceNumber: invoiceNumber || undefined,
-        invoiceAmount: invoiceAmount ? Number(invoiceAmount) : undefined,
+        invoiceAmount: invoiceAmount ? parseFloat(invoiceAmount) || 0 : undefined,
+        invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : undefined,
+        documents: uploadedDocuments,
       });
 
       toast.success('Goods received successfully');
