@@ -171,14 +171,35 @@ export default function CreatePurchaseOrder() {
   const handleSubmit = async (status: 'draft' | 'sent') => {
     if (!validate()) return;
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 800));
-    setSubmitting(false);
-    const nextNum = `PO-2026-${String(mockPurchaseOrders.length + 1).padStart(3, '0')}`;
-    toast.success(status === 'draft'
-      ? `Draft ${nextNum} saved — ${totalItems} medicines`
-      : `Purchase order ${nextNum} sent to ${selectedSupplier?.name}`
-    );
-    navigate('/purchase-orders');
+    try {
+      const validItems = items.filter(i => i.qty > 0);
+      const payload = {
+        warehouseId,
+        supplierId: Number(supplierId),
+        status: status === 'draft' ? 'DRAFT' : 'PENDING',
+        priority: priority.toUpperCase(),
+        notes,
+        items: validItems.map(i => ({
+          medicineId: Number(i.medicineId),
+          name: i.name,
+          strength: i.strength,
+          unit: i.unit,
+          category: i.category,
+          requestedQuantity: i.qty,
+        })),
+      };
+      const result = await api.post('/purchase-orders', payload);
+      const orderId = (result as any)?.id;
+      toast.success(status === 'draft'
+        ? `Draft saved — ${validItems.length} medicines, ${totalQty} total units`
+        : `Purchase order sent to ${selectedSupplier?.name} — ${validItems.length} medicines, ${totalQty} total units`
+      );
+      navigate('/purchase-orders');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to submit purchase order');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
