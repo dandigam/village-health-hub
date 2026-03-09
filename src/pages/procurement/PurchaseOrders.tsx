@@ -380,6 +380,7 @@ export default function PurchaseOrders() {
           </div>
         </div>
       )}
+      )}
     </DashboardLayout>
   );
 }
