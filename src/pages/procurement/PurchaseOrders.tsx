@@ -35,11 +35,13 @@ interface ApiOrder {
   documents: any;
 }
 
-type SortKey = 'poNumber' | 'supplierName' | 'itemCount' | 'status' | 'createdAt';
-type SortDir = 'asc' | 'desc';
-
 export default function PurchaseOrders() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId;
+  const { data: apiOrders = [], isLoading } = useSupplierOrders(warehouseId) as { data: ApiOrder[] | undefined; isLoading: boolean };
+  const orders: ApiOrder[] = apiOrders || [];
+
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterSupplier, setFilterSupplier] = useState('all');
@@ -52,15 +54,19 @@ export default function PurchaseOrders() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const suppliers = useMemo(() => {
-    const names = [...new Set(mockPurchaseOrders.map(o => o.supplierName))];
+    const names = [...new Set(orders.map(o => o.supplierName))];
     return names.sort();
-  }, []);
+  }, [orders]);
 
   const filtered = useMemo(() => {
-    let result = [...mockPurchaseOrders];
+    let result = [...orders];
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter(o => o.poNumber.toLowerCase().includes(q) || o.supplierName.toLowerCase().includes(q));
+      result = result.filter(o =>
+        (o.purchaseOrder || '').toLowerCase().includes(q) ||
+        o.supplierName.toLowerCase().includes(q) ||
+        String(o.id).includes(q)
+      );
     }
     if (filterStatus !== 'all') result = result.filter(o => o.status === filterStatus);
     if (filterSupplier !== 'all') result = result.filter(o => o.supplierName === filterSupplier);
@@ -70,9 +76,9 @@ export default function PurchaseOrders() {
     result.sort((a, b) => {
       let aV: any, bV: any;
       switch (sortKey) {
-        case 'poNumber': aV = a.poNumber; bV = b.poNumber; break;
+        case 'poNumber': aV = a.purchaseOrder || ''; bV = b.purchaseOrder || ''; break;
         case 'supplierName': aV = a.supplierName.toLowerCase(); bV = b.supplierName.toLowerCase(); break;
-        case 'itemCount': aV = a.items.length; bV = b.items.length; break;
+        case 'itemCount': aV = a.itemCount || a.items.length; bV = b.itemCount || b.items.length; break;
         case 'status': aV = a.status; bV = b.status; break;
         case 'createdAt': aV = new Date(a.createdAt).getTime(); bV = new Date(b.createdAt).getTime(); break;
         default: aV = 0; bV = 0;
@@ -82,7 +88,7 @@ export default function PurchaseOrders() {
       return 0;
     });
     return result;
-  }, [search, filterStatus, filterSupplier, dateFrom, dateTo, sortKey, sortDir]);
+  }, [orders, search, filterStatus, filterSupplier, dateFrom, dateTo, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
   const paged = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
@@ -107,7 +113,7 @@ export default function PurchaseOrders() {
     setPage(1);
   };
 
-  const canReceive = (status: PurchaseOrderStatus) => status === 'sent' || status === 'partially_received';
+  const canReceive = (status: string) => status === 'PENDING' || status === 'PARTIAL';
 
   return (
     <DashboardLayout>
