@@ -318,7 +318,7 @@ export default function PurchaseOrders() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-36">
-                                <DropdownMenuItem onClick={() => navigate(`/purchase-orders/${order.id}`)}>
+                                <DropdownMenuItem onClick={() => navigate(`/supplier-orders/${order.id}`)}>
                                   <Eye className="h-3.5 w-3.5 mr-2" /> View
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
