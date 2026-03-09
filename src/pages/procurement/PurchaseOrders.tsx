@@ -125,7 +125,7 @@ export default function PurchaseOrders() {
               </span>
             )}
           </Button>
-          <Button onClick={() => navigate('/supplier-orders/new')} className="h-9">
+          <Button onClick={() => navigate('/purchase-orders/new')} className="h-9">
             <Plus className="mr-1.5 h-4 w-4" /> Create Purchase Order
           </Button>
         </div>
