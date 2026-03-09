@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, ChevronUp, ChevronDown, Eye, Package, MoreVertical, Download, PackageOpen, X, CalendarIcon } from 'lucide-react';
+import { Plus, Search, Filter, ChevronUp, ChevronDown, Eye, Package, MoreVertical, Download, PackageOpen, X, CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,30 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
-import { mockPurchaseOrders } from '@/data/procurementMockData';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { PurchaseOrderStatus } from '@/types/procurement';
+import { useSupplierOrders } from '@/hooks/useApiData';
+import { useAuth } from '@/context/AuthContext';
+
+type SortKey = 'poNumber' | 'supplierName' | 'itemCount' | 'status' | 'createdAt';
+type SortDir = 'asc' | 'desc';
+
+interface ApiOrder {
+  id: number;
+  warehouseId: number;
+  supplierId: number;
+  supplierName: string;
+  warehouseName: string;
+  status: string;
+  purchaseOrder: string | null;
+  createdAt: string;
+  updatedAt: string;
+  itemCount: number;
+  items: any[];
+  isPriority: boolean | null;
+  invoice: any;
+  documents: any;
+}
 
 type SortKey = 'poNumber' | 'supplierName' | 'itemCount' | 'status' | 'createdAt';
 type SortDir = 'asc' | 'desc';
