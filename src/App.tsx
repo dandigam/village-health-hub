@@ -41,6 +41,7 @@ import CreateMedicineRequest from "./pages/supplier-orders/CreateMedicineRequest
 import PurchaseOrders from "./pages/procurement/PurchaseOrders";
 import PurchaseOrderDetail from "./pages/procurement/PurchaseOrderDetail";
 import ReceiveGoods from "./pages/procurement/ReceiveGoods";
+import CreatePurchaseOrder from "./pages/procurement/CreatePurchaseOrder";
 import GoodsReceipts from "./pages/procurement/GoodsReceipts";
 import GoodsReceiptDetail from "./pages/procurement/GoodsReceiptDetail";
 
@@ -135,6 +136,7 @@ const App = () => (
               
               {/* Purchase Orders (new procurement) */}
               <Route path="/purchase-orders" element={<ProtectedRoute routeKey="supplier-orders"><PurchaseOrders /></ProtectedRoute>} />
+              <Route path="/purchase-orders/new" element={<ProtectedRoute routeKey="supplier-orders"><CreatePurchaseOrder /></ProtectedRoute>} />
               <Route path="/purchase-orders/:id" element={<ProtectedRoute routeKey="supplier-orders"><PurchaseOrderDetail /></ProtectedRoute>} />
               <Route path="/purchase-orders/:id/receive" element={<ProtectedRoute routeKey="supplier-orders"><ReceiveGoods /></ProtectedRoute>} />
               
