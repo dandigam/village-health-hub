@@ -150,7 +150,7 @@ export default function SupplierOrders() {
           </Select>
 
           <Button onClick={() => navigate('/supplier-orders/new')}>
-            <Send className="mr-1.5 h-4 w-4" /> Request Stock
+            <Plus className="mr-1.5 h-4 w-4" /> Create Purchase Order
           </Button>
         </div>
       </div>

@@ -48,7 +48,7 @@ export function OrderFulfillmentModal({ order, open, onOpenChange, onUpdate }: P
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle className="text-base font-semibold">Request Stock from Supplier</DialogTitle>
+          <DialogTitle className="text-base font-semibold">Fulfill Distribution Request</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">Order #{order.id} · Requested by {order.requestedBy} on {new Date(order.createdAt).toLocaleDateString()}</DialogDescription>
         </DialogHeader>
         <div className="px-6 py-4 space-y-5">

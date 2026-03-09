@@ -349,10 +349,10 @@ export function SupplierOrdersTab() {
         </DialogContent>
       </Dialog>
 
-      {/* Request Stock Dialog */}
+      {/* Create Purchase Order Dialog */}
       <Dialog open={showRequestStock} onOpenChange={setShowRequestStock}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><Send className="h-4 w-4 text-primary" />Request Stock from Supplier</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Plus className="h-4 w-4 text-primary" />Create Purchase Order</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="grid md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
