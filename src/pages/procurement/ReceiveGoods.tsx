@@ -71,13 +71,13 @@ export default function ReceiveGoods() {
       medicineType: i.medicineType,
       strength: i.strength,
       unit: i.unit,
+      currentQty: i.currentQty || 0,
       requestedQty: i.requestedQuantity || 0,
       alreadyReceived: i.receivedQuantity || 0,
       pendingQty: (i.requestedQuantity || 0) - (i.receivedQuantity || 0),
       receiveQty: 0,
       batchNumber: i.batchNo || '',
       expiryDate: i.expDate ? new Date(i.expDate) : undefined,
-      hsnNo: i.hsnNo || '',
     })));
     setInitialized(true);
   }
