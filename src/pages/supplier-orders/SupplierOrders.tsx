@@ -164,7 +164,7 @@ export default function SupplierOrders() {
           <p className="text-sm font-semibold text-foreground mb-1">No Orders Found</p>
           <p className="text-xs text-muted-foreground mb-4">Create your first medicine request to get started</p>
           <Button size="sm" className="shadow-md" onClick={() => navigate('/supplier-orders/new')}>
-            <Send className="mr-1.5 h-4 w-4" /> New Request
+            <Plus className="mr-1.5 h-4 w-4" /> New Purchase Order
           </Button>
         </div>
       ) : (
