@@ -1,17 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { format } from 'date-fns';
 import {
   Package, Truck, ShoppingCart, ArrowRightLeft, TrendingDown, AlertTriangle,
-  Clock, CheckCircle2, ArrowRight, Boxes, TrendingUp,
+  Clock, CheckCircle2, ArrowRight, Boxes, TrendingUp, FileText, PackageOpen,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { StatusBadge } from '@/components/procurement/StatusBadge';
 import {
   useDistributions, useRequestOrders, useWarehouseInventory, useWarehouseDashboardStats,
 } from '@/hooks/useApiData';
+import { mockPurchaseOrders, mockGoodsReceipts } from '@/data/procurementMockData';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
