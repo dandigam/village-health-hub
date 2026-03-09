@@ -47,6 +47,7 @@ export default function ReceiveGoods() {
   const [initialized, setInitialized] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceAmount, setInvoiceAmount] = useState('');
+  const [invoiceDateObj, setInvoiceDateObj] = useState<Date | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
 
   // Document upload state
