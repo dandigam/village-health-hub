@@ -368,7 +368,7 @@ export default function ReceiveGoods() {
       {/* Invoice Section */}
       <div className="border rounded-lg bg-card p-5 shadow-sm mb-6">
         <h2 className="text-sm font-semibold text-foreground mb-4">Invoice Details</h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <div className="space-y-1.5">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice Number</label>
             <Input className="h-9 text-sm" placeholder="INV-2026-XXXX" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
@@ -376,6 +376,20 @@ export default function ReceiveGoods() {
           <div className="space-y-1.5">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice Amount (₹)</label>
             <Input className="h-9 text-sm" type="number" placeholder="0.00" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("h-9 w-full text-sm justify-start", !invoiceDateObj && "text-muted-foreground")}>
+                  <CalendarIcon className="h-3.5 w-3.5 mr-2" />
+                  {invoiceDateObj ? format(invoiceDateObj, 'dd/MM/yyyy') : 'Select date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={invoiceDateObj} onSelect={setInvoiceDateObj} className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1.5">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Upload Documents</label>
