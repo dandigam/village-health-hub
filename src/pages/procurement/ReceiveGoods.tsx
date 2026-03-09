@@ -130,27 +130,37 @@ export default function ReceiveGoods() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const items = rows
-        .filter(r => r.receiveQty > 0)
-        .map(r => ({
-          id: r.id,
-          receivedQuantity: r.receiveQty,
-          batchNo: r.batchNumber,
-          expDate: r.expiryDate ? format(r.expiryDate, 'yyyy-MM-dd') : '',
-          hsnNo: r.hsnNo,
-        }));
-
-      // Check if all items are fully received
       const isFullyReceived = rows.every(r => (r.alreadyReceived + r.receiveQty) >= r.requestedQty);
 
-      await api.put(`/supplier-orders/${order.id}`, {
-        items,
+      const payload = {
+        id: order.id,
+        warehouseId: order.warehouseId,
+        supplierId: order.supplierId,
         status: isFullyReceived ? 'RECEIVED' : 'PARTIAL',
-        invoiceNumber: invoiceNumber || undefined,
-        invoiceAmount: invoiceAmount ? parseFloat(invoiceAmount) || 0 : undefined,
-        invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : undefined,
-        documents: uploadedDocuments,
-      });
+        items: rows.map(r => ({
+          id: r.id,
+          medicineId: r.medicineId,
+          currentQty: r.currentQty,
+          requestedQuantity: r.requestedQty,
+          receivedQuantity: r.alreadyReceived + r.receiveQty,
+        })),
+        isPriority: order.isPriority ?? false,
+        invoice: {
+          id: order.invoice?.id || 0,
+          invoiceAmount: invoiceAmount ? parseFloat(invoiceAmount) || 0 : 0,
+          invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : '',
+          documents: uploadedDocuments.map(d => ({
+            documentId: Number(d.documentId) || 0,
+            documentName: d.name,
+          })),
+        },
+        documents: uploadedDocuments.map(d => ({
+          documentId: Number(d.documentId) || 0,
+          documentName: d.name,
+        })),
+      };
+
+      await api.put(`/supplier-orders/${order.id}`, payload);
 
       toast.success('Goods received successfully');
       navigate(`/purchase-orders/${order.id}`, { state: { banner: { type: 'success', message: 'Goods receipt recorded successfully.' } } });
