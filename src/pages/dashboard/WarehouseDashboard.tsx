@@ -1,17 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { format } from 'date-fns';
 import {
   Package, Truck, ShoppingCart, ArrowRightLeft, TrendingDown, AlertTriangle,
-  Clock, CheckCircle2, ArrowRight, Boxes, TrendingUp,
+  Clock, CheckCircle2, ArrowRight, Boxes, TrendingUp, FileText, PackageOpen,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { StatusBadge } from '@/components/procurement/StatusBadge';
 import {
   useDistributions, useRequestOrders, useWarehouseInventory, useWarehouseDashboardStats,
 } from '@/hooks/useApiData';
+import { mockPurchaseOrders, mockGoodsReceipts } from '@/data/procurementMockData';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
@@ -245,6 +248,97 @@ export default function WarehouseDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Procurement Summary Row */}
+        <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Pending Purchase Orders */}
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/20">
+                <div className="flex items-center gap-2">
+                  <PackageOpen className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground">Pending Purchase Orders</h3>
+                </div>
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/purchase-orders')}>
+                  View All <ArrowRight className="ml-1 h-3 w-3" />
+                </Button>
+              </div>
+              <div className="p-3 space-y-1.5">
+                {mockPurchaseOrders
+                  .filter(po => po.status === 'sent' || po.status === 'partially_received' || po.status === 'draft')
+                  .slice(0, 4)
+                  .map(po => (
+                    <div
+                      key={po.id}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/purchase-orders/${po.id}`)}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-lg bg-background">
+                          <ShoppingCart className="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-foreground font-mono">{po.poNumber}</span>
+                          <p className="text-[10px] text-muted-foreground">{po.supplierName} · {po.items.length} items</p>
+                        </div>
+                      </div>
+                      <StatusBadge status={po.status} className="text-[10px]" />
+                    </div>
+                  ))}
+                {mockPurchaseOrders.filter(po => po.status === 'sent' || po.status === 'partially_received' || po.status === 'draft').length === 0 && (
+                  <div className="flex flex-col items-center py-6">
+                    <CheckCircle2 className="h-6 w-6 text-muted-foreground/30 mb-2" />
+                    <p className="text-xs text-muted-foreground">No pending orders</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Goods Receipts */}
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/20">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground">Recent Goods Receipts</h3>
+                </div>
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/goods-receipts')}>
+                  View All <ArrowRight className="ml-1 h-3 w-3" />
+                </Button>
+              </div>
+              <div className="p-3 space-y-1.5">
+                {mockGoodsReceipts
+                  .sort((a, b) => new Date(b.receivedDate).getTime() - new Date(a.receivedDate).getTime())
+                  .slice(0, 4)
+                  .map(gr => (
+                    <div
+                      key={gr.id}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/goods-receipts/${gr.id}`)}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-lg bg-background">
+                          <FileText className="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-foreground font-mono">{gr.receiptNumber}</span>
+                          <p className="text-[10px] text-muted-foreground">{gr.supplierName} · {gr.items.length} items</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">{format(new Date(gr.receivedDate), 'dd MMM yyyy')}</span>
+                    </div>
+                  ))}
+                {mockGoodsReceipts.length === 0 && (
+                  <div className="flex flex-col items-center py-6">
+                    <FileText className="h-6 w-6 text-muted-foreground/30 mb-2" />
+                    <p className="text-xs text-muted-foreground">No receipts yet</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

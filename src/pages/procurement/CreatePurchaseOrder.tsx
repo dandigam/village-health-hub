@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Search, Trash2, Save, Send, AlertCircle, X, Package } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Trash2, Save, Send, AlertCircle, X, Package, PlusCircle, Boxes } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,26 +11,28 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { mockPurchaseOrders } from '@/data/procurementMockData';
 
-/* ── Supplier mock data (mirrors existing patterns) ── */
+/* ── Supplier mock data ── */
 const mockSuppliers = [
   { id: '1', name: 'MedPlus Distributors', address: 'Plot 42, Industrial Area, Hyderabad', phone: '+91 98765 43210', email: 'orders@medplus.in' },
   { id: '2', name: 'HealthCare Supplies', address: '15/A MG Road, Bangalore', phone: '+91 98765 12345', email: 'supply@healthcare.in' },
   { id: '3', name: 'PharmaChem India', address: 'Sector 5, MIDC Pune', phone: '+91 98765 67890', email: 'info@pharmachem.co.in' },
 ];
 
+const UNITS = ['mg', 'ml', 'gm', 'mcg', 'IU', 'drops', 'units'] as const;
+
 const mockMedicineCatalog = [
-  { id: '1', name: 'Paracetamol', strength: '500', unit: 'mg', category: 'Analgesic' },
-  { id: '2', name: 'Ibuprofen', strength: '400', unit: 'mg', category: 'NSAID' },
-  { id: '3', name: 'Metformin', strength: '500', unit: 'mg', category: 'Antidiabetic' },
-  { id: '4', name: 'Amlodipine', strength: '5', unit: 'mg', category: 'Antihypertensive' },
-  { id: '5', name: 'Amoxicillin', strength: '250', unit: 'mg', category: 'Antibiotic' },
-  { id: '6', name: 'Atorvastatin', strength: '10', unit: 'mg', category: 'Statin' },
-  { id: '7', name: 'Cetirizine', strength: '10', unit: 'mg', category: 'Antihistamine' },
-  { id: '8', name: 'Omeprazole', strength: '20', unit: 'mg', category: 'PPI' },
-  { id: '9', name: 'Ranitidine', strength: '150', unit: 'mg', category: 'H2 Blocker' },
-  { id: '10', name: 'Azithromycin', strength: '500', unit: 'mg', category: 'Antibiotic' },
-  { id: '11', name: 'Ciprofloxacin', strength: '500', unit: 'mg', category: 'Antibiotic' },
-  { id: '12', name: 'Doxycycline', strength: '100', unit: 'mg', category: 'Antibiotic' },
+  { id: '1', name: 'Paracetamol', strength: '500', unit: 'mg', category: 'Analgesic', stock: 340 },
+  { id: '2', name: 'Ibuprofen', strength: '400', unit: 'mg', category: 'NSAID', stock: 120 },
+  { id: '3', name: 'Metformin', strength: '500', unit: 'mg', category: 'Antidiabetic', stock: 85 },
+  { id: '4', name: 'Amlodipine', strength: '5', unit: 'mg', category: 'Antihypertensive', stock: 200 },
+  { id: '5', name: 'Amoxicillin', strength: '250', unit: 'mg', category: 'Antibiotic', stock: 45 },
+  { id: '6', name: 'Atorvastatin', strength: '10', unit: 'mg', category: 'Statin', stock: 160 },
+  { id: '7', name: 'Cetirizine', strength: '10', unit: 'mg', category: 'Antihistamine', stock: 500 },
+  { id: '8', name: 'Omeprazole', strength: '20', unit: 'mg', category: 'PPI', stock: 220 },
+  { id: '9', name: 'Ranitidine', strength: '150', unit: 'mg', category: 'H2 Blocker', stock: 30 },
+  { id: '10', name: 'Azithromycin', strength: '500', unit: 'mg', category: 'Antibiotic', stock: 75 },
+  { id: '11', name: 'Ciprofloxacin', strength: '500', unit: 'mg', category: 'Antibiotic', stock: 90 },
+  { id: '12', name: 'Doxycycline', strength: '100', unit: 'mg', category: 'Antibiotic', stock: 110 },
 ];
 
 interface MedicineRow {
@@ -40,6 +42,7 @@ interface MedicineRow {
   unit: string;
   category: string;
   qty: number;
+  stock: number;
   error?: string;
 }
 
@@ -52,21 +55,30 @@ export default function CreatePurchaseOrder() {
   const [items, setItems] = useState<MedicineRow[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
-  // Add medicine
+  // Add medicine panel
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [medSearch, setMedSearch] = useState('');
 
-  const selectedSupplier = mockSuppliers.find(s => s.id === supplierId);
+  // Inline add-new medicine
+  const [showInlineAdd, setShowInlineAdd] = useState(false);
+  const [newMedName, setNewMedName] = useState('');
+  const [newMedStrength, setNewMedStrength] = useState('');
+  const [newMedUnit, setNewMedUnit] = useState('mg');
+  const [newMedCategory, setNewMedCategory] = useState('');
+  const [localCatalog, setLocalCatalog] = useState(mockMedicineCatalog);
 
+  const selectedSupplier = mockSuppliers.find(s => s.id === supplierId);
   const addedIds = useMemo(() => new Set(items.map(i => i.medicineId)), [items]);
 
   const filteredCatalog = useMemo(() => {
     const q = medSearch.toLowerCase().trim();
-    return mockMedicineCatalog
+    return localCatalog
       .filter(m => !addedIds.has(m.id))
       .filter(m => !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q))
       .slice(0, 20);
-  }, [medSearch, addedIds]);
+  }, [medSearch, addedIds, localCatalog]);
+
+  const hasNoResults = medSearch.trim().length > 0 && filteredCatalog.length === 0;
 
   const addMedicine = (med: typeof mockMedicineCatalog[0]) => {
     setItems(prev => [...prev, {
@@ -76,7 +88,31 @@ export default function CreatePurchaseOrder() {
       unit: med.unit,
       category: med.category,
       qty: 0,
+      stock: med.stock,
     }]);
+  };
+
+  const handleInlineAddMedicine = () => {
+    if (!newMedName.trim()) { toast.error('Medicine name is required'); return; }
+    if (!newMedStrength.trim()) { toast.error('Strength is required'); return; }
+    const newId = `new-${Date.now()}`;
+    const newMed = {
+      id: newId,
+      name: newMedName.trim(),
+      strength: newMedStrength.trim(),
+      unit: newMedUnit,
+      category: newMedCategory.trim() || 'General',
+      stock: 0,
+    };
+    setLocalCatalog(prev => [...prev, newMed]);
+    addMedicine(newMed);
+    setNewMedName('');
+    setNewMedStrength('');
+    setNewMedUnit('mg');
+    setNewMedCategory('');
+    setShowInlineAdd(false);
+    setMedSearch('');
+    toast.success(`${newMed.name} added to order`);
   };
 
   const removeMedicine = (idx: number) => {
@@ -103,7 +139,6 @@ export default function CreatePurchaseOrder() {
     setSubmitting(true);
     await new Promise(r => setTimeout(r, 800));
     setSubmitting(false);
-
     const nextNum = `PO-2026-${String(mockPurchaseOrders.length + 1).padStart(3, '0')}`;
     toast.success(status === 'draft'
       ? `Draft ${nextNum} saved — ${totalItems} medicines`
@@ -141,7 +176,6 @@ export default function CreatePurchaseOrder() {
       {/* Supplier & Priority Row */}
       <div className="border rounded-lg bg-card shadow-sm mb-5">
         <div className="px-5 py-4 flex items-stretch gap-0">
-          {/* Supplier */}
           <div className="flex-1 min-w-[220px]">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
               Supplier <span className="text-destructive">*</span>
@@ -158,19 +192,14 @@ export default function CreatePurchaseOrder() {
             </Select>
           </div>
 
-          {/* Divider */}
           <div className="flex items-center px-4 self-stretch py-2">
             <div className="w-px h-full bg-border" />
           </div>
 
-          {/* Priority */}
           <div className="flex flex-col justify-center">
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">Priority</label>
             <div className="flex items-center gap-2">
-              <Switch
-                checked={priority === 'urgent'}
-                onCheckedChange={v => setPriority(v ? 'urgent' : 'normal')}
-              />
+              <Switch checked={priority === 'urgent'} onCheckedChange={v => setPriority(v ? 'urgent' : 'normal')} />
               <Badge className={cn(
                 "text-xs px-2 py-0.5 rounded-full border-0",
                 priority === 'urgent' ? "bg-destructive text-destructive-foreground" : "bg-muted text-muted-foreground"
@@ -180,14 +209,12 @@ export default function CreatePurchaseOrder() {
             </div>
           </div>
 
-          {/* Divider */}
           {selectedSupplier && (
             <div className="flex items-center px-4 self-stretch py-2">
               <div className="w-px h-full bg-border" />
             </div>
           )}
 
-          {/* Supplier Info */}
           {selectedSupplier && (
             <div className="flex-1 flex flex-col justify-center min-w-[180px]">
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5 block">Supplier Address</label>
@@ -200,7 +227,6 @@ export default function CreatePurchaseOrder() {
           )}
         </div>
 
-        {/* Notes */}
         <div className="px-5 pb-4">
           <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">Notes (optional)</label>
           <Input className="h-8 text-sm" placeholder="Add any notes for this order..." value={notes} onChange={e => setNotes(e.target.value)} />
@@ -236,6 +262,7 @@ export default function CreatePurchaseOrder() {
                   <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Medicine</th>
                   <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-24">Strength</th>
                   <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-28">Category</th>
+                  <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-20">Stock</th>
                   <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-28">
                     Quantity <span className="text-destructive">*</span>
                   </th>
@@ -244,7 +271,7 @@ export default function CreatePurchaseOrder() {
               </thead>
               <tbody>
                 {items.map((row, idx) => (
-                  <tr key={row.medicineId} className="border-b last:border-b-0 hover:bg-muted/20 transition-colors">
+                  <tr key={row.medicineId} className={cn("border-b last:border-b-0 hover:bg-muted/20 transition-colors", row.stock < 50 && "bg-destructive/5")}>
                     <td className="px-4 py-2.5 text-xs text-muted-foreground">{idx + 1}</td>
                     <td className="px-3 py-2.5">
                       <span className="font-medium text-foreground">{row.name}</span>
@@ -252,6 +279,15 @@ export default function CreatePurchaseOrder() {
                     <td className="px-3 py-2.5 text-xs text-muted-foreground">{row.strength} {row.unit}</td>
                     <td className="px-3 py-2.5">
                       <Badge variant="outline" className="text-[10px] font-normal">{row.category}</Badge>
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      <Badge variant="secondary" className={cn(
+                        "text-[10px] font-semibold",
+                        row.stock < 50 ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
+                      )}>
+                        <Boxes className="h-2.5 w-2.5 mr-1" />
+                        {row.stock}
+                      </Badge>
                     </td>
                     <td className="px-3 py-2.5">
                       <Input
@@ -264,7 +300,6 @@ export default function CreatePurchaseOrder() {
                         onKeyDown={e => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
-                            // Focus next row's qty input
                             const nextInput = (e.target as HTMLElement)
                               .closest('tr')
                               ?.nextElementSibling
@@ -296,10 +331,10 @@ export default function CreatePurchaseOrder() {
         )}
       </div>
 
-      {/* Add Medicine Side Panel / Dialog */}
+      {/* Add Medicine Side Panel */}
       {showAddPanel && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowAddPanel(false)} />
+          <div className="absolute inset-0 bg-black/40" onClick={() => { setShowAddPanel(false); setShowInlineAdd(false); }} />
           <div className="relative w-full max-w-md bg-card border-l shadow-xl flex flex-col animate-in slide-in-from-right duration-200">
             {/* Panel Header */}
             <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/20">
@@ -307,7 +342,7 @@ export default function CreatePurchaseOrder() {
                 <h3 className="text-sm font-semibold text-foreground">Add Medicines</h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5">Click to add, then close panel</p>
               </div>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setShowAddPanel(false)}>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => { setShowAddPanel(false); setShowInlineAdd(false); }}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -320,7 +355,7 @@ export default function CreatePurchaseOrder() {
                   className="h-8 pl-8 text-sm"
                   placeholder="Search medicines..."
                   value={medSearch}
-                  onChange={e => setMedSearch(e.target.value)}
+                  onChange={e => { setMedSearch(e.target.value); setShowInlineAdd(false); }}
                   autoFocus
                 />
               </div>
@@ -329,8 +364,54 @@ export default function CreatePurchaseOrder() {
             {/* Medicine List */}
             <div className="flex-1 overflow-auto">
               {filteredCatalog.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10">
-                  <p className="text-sm text-muted-foreground">No medicines found</p>
+                <div className="flex flex-col items-center justify-center py-8 px-4">
+                  <Package className="h-8 w-8 text-muted-foreground/30 mb-2" />
+                  <p className="text-sm text-muted-foreground mb-1">No medicines found for "{medSearch}"</p>
+                  {!showInlineAdd ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 h-8 text-xs gap-1.5 border-dashed"
+                      onClick={() => { setShowInlineAdd(true); setNewMedName(medSearch); }}
+                    >
+                      <PlusCircle className="h-3.5 w-3.5" /> Add "{medSearch}" as new medicine
+                    </Button>
+                  ) : (
+                    <div className="w-full mt-3 p-3 rounded-lg border border-dashed bg-muted/20 space-y-2.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">Add New Medicine</p>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-medium text-muted-foreground">Name <span className="text-destructive">*</span></label>
+                        <Input className="h-7 text-sm" value={newMedName} onChange={e => setNewMedName(e.target.value)} autoFocus />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-medium text-muted-foreground">Strength <span className="text-destructive">*</span></label>
+                          <Input className="h-7 text-sm" placeholder="e.g. 500" value={newMedStrength} onChange={e => setNewMedStrength(e.target.value)} />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-medium text-muted-foreground">Unit</label>
+                          <Select value={newMedUnit} onValueChange={setNewMedUnit}>
+                            <SelectTrigger className="h-7 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-medium text-muted-foreground">Category</label>
+                        <Input className="h-7 text-sm" placeholder="e.g. Antibiotic" value={newMedCategory} onChange={e => setNewMedCategory(e.target.value)} />
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <Button variant="outline" size="sm" className="h-7 text-xs flex-1" onClick={() => setShowInlineAdd(false)}>Cancel</Button>
+                        <Button size="sm" className="h-7 text-xs flex-1" onClick={handleInlineAddMedicine}>
+                          <Plus className="h-3 w-3 mr-1" /> Add & Include
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 filteredCatalog.map(med => (
@@ -339,12 +420,22 @@ export default function CreatePurchaseOrder() {
                     className="w-full text-left px-4 py-2.5 border-b hover:bg-muted/30 transition-colors flex items-center justify-between group"
                     onClick={() => addMedicine(med)}
                   >
-                    <div>
-                      <span className="text-sm font-medium text-foreground">{med.name}</span>
-                      <span className="text-xs text-muted-foreground ml-2">{med.strength}{med.unit}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">{med.name}</span>
+                        <span className="text-xs text-muted-foreground">{med.strength}{med.unit}</span>
+                      </div>
                       <p className="text-[10px] text-muted-foreground">{med.category}</p>
                     </div>
-                    <Plus className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className={cn(
+                        "text-[10px] font-medium",
+                        med.stock < 50 ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
+                      )}>
+                        {med.stock} in stock
+                      </Badge>
+                      <Plus className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </button>
                 ))
               )}
@@ -352,7 +443,7 @@ export default function CreatePurchaseOrder() {
 
             {/* Panel Footer */}
             <div className="px-4 py-3 border-t bg-muted/10">
-              <Button className="w-full h-8 text-sm" onClick={() => setShowAddPanel(false)}>
+              <Button className="w-full h-8 text-sm" onClick={() => { setShowAddPanel(false); setShowInlineAdd(false); }}>
                 Done — {items.length} medicine{items.length !== 1 ? 's' : ''} added
               </Button>
             </div>
