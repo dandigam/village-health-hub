@@ -252,9 +252,9 @@ export default function CreatePurchaseOrder() {
           {selectedSupplier && (
             <div className="flex-1 flex flex-col justify-center min-w-[180px]">
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5 block">Supplier Address</label>
-              <p className="text-xs text-foreground leading-relaxed">{selectedSupplier.address}</p>
+              <p className="text-xs text-foreground leading-relaxed">{selectedSupplier.address}, {selectedSupplier.mandal}, {selectedSupplier.district}, {selectedSupplier.state} - {selectedSupplier.pinCode}</p>
               <div className="flex items-center gap-3 mt-1">
-                <span className="text-[10px] text-muted-foreground">{selectedSupplier.phone}</span>
+                <span className="text-[10px] text-muted-foreground">{selectedSupplier.contact}</span>
                 <span className="text-[10px] text-muted-foreground">{selectedSupplier.email}</span>
               </div>
             </div>
