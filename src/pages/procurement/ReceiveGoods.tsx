@@ -17,6 +17,7 @@ import { API_BASE_URL } from '@/services/api';
 import api from '@/services/api';
 
 interface ReceiveRow {
+  id?: number;
   medicineId: number;
   medicineName: string;
   medicineType?: string;
@@ -28,6 +29,7 @@ interface ReceiveRow {
   receiveQty: number;
   batchNumber: string;
   expiryDate: Date | undefined;
+  hsnNo: string;
   error?: string;
 }
 
