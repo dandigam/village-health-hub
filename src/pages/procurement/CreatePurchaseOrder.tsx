@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Search, Trash2, Save, Send, AlertCircle, X, Package, PlusCircle, Boxes } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Trash2, Save, Send, AlertCircle, X, Package, PlusCircle, Boxes, Loader2 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,30 +10,35 @@ import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { mockPurchaseOrders } from '@/data/procurementMockData';
-
-/* ── Supplier mock data ── */
-const mockSuppliers = [
-  { id: '1', name: 'MedPlus Distributors', address: 'Plot 42, Industrial Area, Hyderabad', phone: '+91 98765 43210', email: 'orders@medplus.in' },
-  { id: '2', name: 'HealthCare Supplies', address: '15/A MG Road, Bangalore', phone: '+91 98765 12345', email: 'supply@healthcare.in' },
-  { id: '3', name: 'PharmaChem India', address: 'Sector 5, MIDC Pune', phone: '+91 98765 67890', email: 'info@pharmachem.co.in' },
-];
+import { useAuth } from '@/context/AuthContext';
+import { useSupplierList } from '@/hooks/useApiData';
 
 const UNITS = ['mg', 'ml', 'gm', 'mcg', 'IU', 'drops', 'units'] as const;
 
-const mockMedicineCatalog = [
-  { id: '1', name: 'Paracetamol', strength: '500', unit: 'mg', category: 'Analgesic', stock: 340 },
-  { id: '2', name: 'Ibuprofen', strength: '400', unit: 'mg', category: 'NSAID', stock: 120 },
-  { id: '3', name: 'Metformin', strength: '500', unit: 'mg', category: 'Antidiabetic', stock: 85 },
-  { id: '4', name: 'Amlodipine', strength: '5', unit: 'mg', category: 'Antihypertensive', stock: 200 },
-  { id: '5', name: 'Amoxicillin', strength: '250', unit: 'mg', category: 'Antibiotic', stock: 45 },
-  { id: '6', name: 'Atorvastatin', strength: '10', unit: 'mg', category: 'Statin', stock: 160 },
-  { id: '7', name: 'Cetirizine', strength: '10', unit: 'mg', category: 'Antihistamine', stock: 500 },
-  { id: '8', name: 'Omeprazole', strength: '20', unit: 'mg', category: 'PPI', stock: 220 },
-  { id: '9', name: 'Ranitidine', strength: '150', unit: 'mg', category: 'H2 Blocker', stock: 30 },
-  { id: '10', name: 'Azithromycin', strength: '500', unit: 'mg', category: 'Antibiotic', stock: 75 },
-  { id: '11', name: 'Ciprofloxacin', strength: '500', unit: 'mg', category: 'Antibiotic', stock: 90 },
-  { id: '12', name: 'Doxycycline', strength: '100', unit: 'mg', category: 'Antibiotic', stock: 110 },
-];
+interface SupplierMedicineApi {
+  id: number;
+  name: string;
+  type: string;
+  strength: string | null;
+  unit: string | null;
+  manufacturer: string | null;
+  medicineId: number | null;
+  currentQty: number | null;
+}
+
+interface SupplierApi {
+  id: number;
+  name: string;
+  contact: string;
+  address: string;
+  state: string;
+  district: string;
+  mandal: string;
+  pinCode: string;
+  email: string;
+  status: string;
+  medicines: SupplierMedicineApi[];
+}
 
 interface MedicineRow {
   medicineId: string;
@@ -48,6 +53,14 @@ interface MedicineRow {
 
 export default function CreatePurchaseOrder() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId;
+
+  // Fetch suppliers from real API
+  const { data: suppliers = [], isLoading: suppliersLoading } = useSupplierList(warehouseId) as {
+    data: SupplierApi[] | undefined;
+    isLoading: boolean;
+  };
 
   const [supplierId, setSupplierId] = useState('');
   const [priority, setPriority] = useState<'normal' | 'urgent'>('normal');
@@ -65,22 +78,43 @@ export default function CreatePurchaseOrder() {
   const [newMedStrength, setNewMedStrength] = useState('');
   const [newMedUnit, setNewMedUnit] = useState('mg');
   const [newMedCategory, setNewMedCategory] = useState('');
-  const [localCatalog, setLocalCatalog] = useState(mockMedicineCatalog);
+  const [extraMedicines, setExtraMedicines] = useState<{ id: string; name: string; strength: string; unit: string; category: string; stock: number }[]>([]);
 
-  const selectedSupplier = mockSuppliers.find(s => s.id === supplierId);
+  const selectedSupplier = suppliers.find(s => String(s.id) === supplierId);
+
+  // Build medicine catalog from selected supplier's medicines + any inline-added ones
+  const medicineCatalog = useMemo(() => {
+    if (!selectedSupplier) return extraMedicines;
+    const supplierMeds = selectedSupplier.medicines.map(m => ({
+      id: String(m.id),
+      name: m.name,
+      strength: m.strength || '',
+      unit: m.unit || m.type || '',
+      category: m.type || 'General',
+      stock: m.currentQty ?? 0,
+    }));
+    return [...supplierMeds, ...extraMedicines];
+  }, [selectedSupplier, extraMedicines]);
+
+  // Clear items when supplier changes
+  useEffect(() => {
+    setItems([]);
+    setExtraMedicines([]);
+  }, [supplierId]);
+
   const addedIds = useMemo(() => new Set(items.map(i => i.medicineId)), [items]);
 
   const filteredCatalog = useMemo(() => {
     const q = medSearch.toLowerCase().trim();
-    return localCatalog
+    return medicineCatalog
       .filter(m => !addedIds.has(m.id))
       .filter(m => !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q))
       .slice(0, 20);
-  }, [medSearch, addedIds, localCatalog]);
+  }, [medSearch, addedIds, medicineCatalog]);
 
   const hasNoResults = medSearch.trim().length > 0 && filteredCatalog.length === 0;
 
-  const addMedicine = (med: typeof mockMedicineCatalog[0]) => {
+  const addMedicine = (med: typeof medicineCatalog[0]) => {
     setItems(prev => [...prev, {
       medicineId: med.id,
       name: med.name,
@@ -104,7 +138,7 @@ export default function CreatePurchaseOrder() {
       category: newMedCategory.trim() || 'General',
       stock: 0,
     };
-    setLocalCatalog(prev => [...prev, newMed]);
+    setExtraMedicines(prev => [...prev, newMed]);
     addMedicine(newMed);
     setNewMedName('');
     setNewMedStrength('');
@@ -180,13 +214,13 @@ export default function CreatePurchaseOrder() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
               Supplier <span className="text-destructive">*</span>
             </label>
-            <Select value={supplierId} onValueChange={setSupplierId}>
+            <Select value={supplierId} onValueChange={v => { setSupplierId(v); }}>
               <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="Select supplier..." />
+                <SelectValue placeholder={suppliersLoading ? "Loading suppliers..." : "Select supplier..."} />
               </SelectTrigger>
               <SelectContent>
-                {mockSuppliers.map(s => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                {suppliers.map(s => (
+                  <SelectItem key={String(s.id)} value={String(s.id)}>{s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -218,9 +252,9 @@ export default function CreatePurchaseOrder() {
           {selectedSupplier && (
             <div className="flex-1 flex flex-col justify-center min-w-[180px]">
               <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5 block">Supplier Address</label>
-              <p className="text-xs text-foreground leading-relaxed">{selectedSupplier.address}</p>
+              <p className="text-xs text-foreground leading-relaxed">{selectedSupplier.address}, {selectedSupplier.mandal}, {selectedSupplier.district}, {selectedSupplier.state} - {selectedSupplier.pinCode}</p>
               <div className="flex items-center gap-3 mt-1">
-                <span className="text-[10px] text-muted-foreground">{selectedSupplier.phone}</span>
+                <span className="text-[10px] text-muted-foreground">{selectedSupplier.contact}</span>
                 <span className="text-[10px] text-muted-foreground">{selectedSupplier.email}</span>
               </div>
             </div>
