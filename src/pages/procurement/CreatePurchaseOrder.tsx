@@ -53,6 +53,14 @@ interface MedicineRow {
 
 export default function CreatePurchaseOrder() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId;
+
+  // Fetch suppliers from real API
+  const { data: suppliers = [], isLoading: suppliersLoading } = useSupplierList(warehouseId) as {
+    data: SupplierApi[] | undefined;
+    isLoading: boolean;
+  };
 
   const [supplierId, setSupplierId] = useState('');
   const [priority, setPriority] = useState<'normal' | 'urgent'>('normal');
@@ -70,22 +78,43 @@ export default function CreatePurchaseOrder() {
   const [newMedStrength, setNewMedStrength] = useState('');
   const [newMedUnit, setNewMedUnit] = useState('mg');
   const [newMedCategory, setNewMedCategory] = useState('');
-  const [localCatalog, setLocalCatalog] = useState(mockMedicineCatalog);
+  const [extraMedicines, setExtraMedicines] = useState<{ id: string; name: string; strength: string; unit: string; category: string; stock: number }[]>([]);
 
-  const selectedSupplier = mockSuppliers.find(s => s.id === supplierId);
+  const selectedSupplier = suppliers.find(s => String(s.id) === supplierId);
+
+  // Build medicine catalog from selected supplier's medicines + any inline-added ones
+  const medicineCatalog = useMemo(() => {
+    if (!selectedSupplier) return extraMedicines;
+    const supplierMeds = selectedSupplier.medicines.map(m => ({
+      id: String(m.id),
+      name: m.name,
+      strength: m.strength || '',
+      unit: m.unit || m.type || '',
+      category: m.type || 'General',
+      stock: m.currentQty ?? 0,
+    }));
+    return [...supplierMeds, ...extraMedicines];
+  }, [selectedSupplier, extraMedicines]);
+
+  // Clear items when supplier changes
+  useEffect(() => {
+    setItems([]);
+    setExtraMedicines([]);
+  }, [supplierId]);
+
   const addedIds = useMemo(() => new Set(items.map(i => i.medicineId)), [items]);
 
   const filteredCatalog = useMemo(() => {
     const q = medSearch.toLowerCase().trim();
-    return localCatalog
+    return medicineCatalog
       .filter(m => !addedIds.has(m.id))
       .filter(m => !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q))
       .slice(0, 20);
-  }, [medSearch, addedIds, localCatalog]);
+  }, [medSearch, addedIds, medicineCatalog]);
 
   const hasNoResults = medSearch.trim().length > 0 && filteredCatalog.length === 0;
 
-  const addMedicine = (med: typeof mockMedicineCatalog[0]) => {
+  const addMedicine = (med: typeof medicineCatalog[0]) => {
     setItems(prev => [...prev, {
       medicineId: med.id,
       name: med.name,
