@@ -307,7 +307,7 @@ export default function PurchaseOrders() {
                             <Button
                               size="sm"
                               className="h-7 px-3 text-xs font-medium rounded-full shadow-sm"
-                              onClick={() => navigate(`/supplier-orders/${order.id}/edit`)}
+                              onClick={() => navigate(`/purchase-orders/${order.id}/receive`)}
                             >
                               <Package className="h-3.5 w-3.5 mr-1" /> Receive
                             </Button>
@@ -318,7 +318,7 @@ export default function PurchaseOrders() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-36">
-                                <DropdownMenuItem onClick={() => navigate(`/supplier-orders/${order.id}`)}>
+                                <DropdownMenuItem onClick={() => navigate(`/purchase-orders/${order.id}`)}>
                                   <Eye className="h-3.5 w-3.5 mr-2" /> View
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
