@@ -1,0 +1,364 @@
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Plus, Search, Trash2, Save, Send, AlertCircle, X, Package } from 'lucide-react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { mockPurchaseOrders } from '@/data/procurementMockData';
+
+/* ── Supplier mock data (mirrors existing patterns) ── */
+const mockSuppliers = [
+  { id: '1', name: 'MedPlus Distributors', address: 'Plot 42, Industrial Area, Hyderabad', phone: '+91 98765 43210', email: 'orders@medplus.in' },
+  { id: '2', name: 'HealthCare Supplies', address: '15/A MG Road, Bangalore', phone: '+91 98765 12345', email: 'supply@healthcare.in' },
+  { id: '3', name: 'PharmaChem India', address: 'Sector 5, MIDC Pune', phone: '+91 98765 67890', email: 'info@pharmachem.co.in' },
+];
+
+const mockMedicineCatalog = [
+  { id: '1', name: 'Paracetamol', strength: '500', unit: 'mg', category: 'Analgesic' },
+  { id: '2', name: 'Ibuprofen', strength: '400', unit: 'mg', category: 'NSAID' },
+  { id: '3', name: 'Metformin', strength: '500', unit: 'mg', category: 'Antidiabetic' },
+  { id: '4', name: 'Amlodipine', strength: '5', unit: 'mg', category: 'Antihypertensive' },
+  { id: '5', name: 'Amoxicillin', strength: '250', unit: 'mg', category: 'Antibiotic' },
+  { id: '6', name: 'Atorvastatin', strength: '10', unit: 'mg', category: 'Statin' },
+  { id: '7', name: 'Cetirizine', strength: '10', unit: 'mg', category: 'Antihistamine' },
+  { id: '8', name: 'Omeprazole', strength: '20', unit: 'mg', category: 'PPI' },
+  { id: '9', name: 'Ranitidine', strength: '150', unit: 'mg', category: 'H2 Blocker' },
+  { id: '10', name: 'Azithromycin', strength: '500', unit: 'mg', category: 'Antibiotic' },
+  { id: '11', name: 'Ciprofloxacin', strength: '500', unit: 'mg', category: 'Antibiotic' },
+  { id: '12', name: 'Doxycycline', strength: '100', unit: 'mg', category: 'Antibiotic' },
+];
+
+interface MedicineRow {
+  medicineId: string;
+  name: string;
+  strength: string;
+  unit: string;
+  category: string;
+  qty: number;
+  error?: string;
+}
+
+export default function CreatePurchaseOrder() {
+  const navigate = useNavigate();
+
+  const [supplierId, setSupplierId] = useState('');
+  const [priority, setPriority] = useState<'normal' | 'urgent'>('normal');
+  const [notes, setNotes] = useState('');
+  const [items, setItems] = useState<MedicineRow[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Add medicine
+  const [showAddPanel, setShowAddPanel] = useState(false);
+  const [medSearch, setMedSearch] = useState('');
+
+  const selectedSupplier = mockSuppliers.find(s => s.id === supplierId);
+
+  const addedIds = useMemo(() => new Set(items.map(i => i.medicineId)), [items]);
+
+  const filteredCatalog = useMemo(() => {
+    const q = medSearch.toLowerCase().trim();
+    return mockMedicineCatalog
+      .filter(m => !addedIds.has(m.id))
+      .filter(m => !q || m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q))
+      .slice(0, 20);
+  }, [medSearch, addedIds]);
+
+  const addMedicine = (med: typeof mockMedicineCatalog[0]) => {
+    setItems(prev => [...prev, {
+      medicineId: med.id,
+      name: med.name,
+      strength: med.strength,
+      unit: med.unit,
+      category: med.category,
+      qty: 0,
+    }]);
+  };
+
+  const removeMedicine = (idx: number) => {
+    setItems(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateQty = (idx: number, qty: number) => {
+    setItems(prev => prev.map((r, i) => i === idx ? { ...r, qty: Math.max(0, qty), error: undefined } : r));
+  };
+
+  const totalItems = items.filter(i => i.qty > 0).length;
+  const totalQty = items.reduce((s, i) => s + i.qty, 0);
+
+  const validate = (): boolean => {
+    if (!supplierId) { toast.error('Select a supplier'); return false; }
+    if (items.length === 0) { toast.error('Add at least one medicine'); return false; }
+    const validItems = items.filter(i => i.qty > 0);
+    if (validItems.length === 0) { toast.error('Enter quantity for at least one medicine'); return false; }
+    return true;
+  };
+
+  const handleSubmit = async (status: 'draft' | 'sent') => {
+    if (!validate()) return;
+    setSubmitting(true);
+    await new Promise(r => setTimeout(r, 800));
+    setSubmitting(false);
+
+    const nextNum = `PO-2026-${String(mockPurchaseOrders.length + 1).padStart(3, '0')}`;
+    toast.success(status === 'draft'
+      ? `Draft ${nextNum} saved — ${totalItems} medicines`
+      : `Purchase order ${nextNum} sent to ${selectedSupplier?.name}`
+    );
+    navigate('/purchase-orders');
+  };
+
+  return (
+    <DashboardLayout>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => navigate('/purchase-orders')}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">Create Purchase Order</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">Select a supplier, add medicines, set quantities</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/purchase-orders')} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => handleSubmit('draft')} disabled={submitting || !supplierId}>
+            <Save className="h-3.5 w-3.5 mr-1.5" /> Save Draft
+          </Button>
+          <Button size="sm" onClick={() => handleSubmit('sent')} disabled={submitting || totalItems === 0}>
+            <Send className="h-3.5 w-3.5 mr-1.5" /> {submitting ? 'Sending...' : 'Send Order'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Supplier & Priority Row */}
+      <div className="border rounded-lg bg-card shadow-sm mb-5">
+        <div className="px-5 py-4 flex items-stretch gap-0">
+          {/* Supplier */}
+          <div className="flex-1 min-w-[220px]">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
+              Supplier <span className="text-destructive">*</span>
+            </label>
+            <Select value={supplierId} onValueChange={setSupplierId}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue placeholder="Select supplier..." />
+              </SelectTrigger>
+              <SelectContent>
+                {mockSuppliers.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center px-4 self-stretch py-2">
+            <div className="w-px h-full bg-border" />
+          </div>
+
+          {/* Priority */}
+          <div className="flex flex-col justify-center">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">Priority</label>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={priority === 'urgent'}
+                onCheckedChange={v => setPriority(v ? 'urgent' : 'normal')}
+              />
+              <Badge className={cn(
+                "text-xs px-2 py-0.5 rounded-full border-0",
+                priority === 'urgent' ? "bg-destructive text-destructive-foreground" : "bg-muted text-muted-foreground"
+              )}>
+                {priority === 'urgent' ? '🔴 Urgent' : 'Normal'}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Divider */}
+          {selectedSupplier && (
+            <div className="flex items-center px-4 self-stretch py-2">
+              <div className="w-px h-full bg-border" />
+            </div>
+          )}
+
+          {/* Supplier Info */}
+          {selectedSupplier && (
+            <div className="flex-1 flex flex-col justify-center min-w-[180px]">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5 block">Supplier Address</label>
+              <p className="text-xs text-foreground leading-relaxed">{selectedSupplier.address}</p>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-[10px] text-muted-foreground">{selectedSupplier.phone}</span>
+                <span className="text-[10px] text-muted-foreground">{selectedSupplier.email}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Notes */}
+        <div className="px-5 pb-4">
+          <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">Notes (optional)</label>
+          <Input className="h-8 text-sm" placeholder="Add any notes for this order..." value={notes} onChange={e => setNotes(e.target.value)} />
+        </div>
+      </div>
+
+      {/* Medicines Table */}
+      <div className="border rounded-lg bg-card overflow-hidden shadow-sm mb-5">
+        <div className="px-4 py-3 border-b bg-muted/20 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Order Items</h2>
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              {items.length === 0 ? 'Add medicines to this order' : `${items.length} medicines added · ${totalItems} with quantity · ${totalQty} total units`}
+            </p>
+          </div>
+          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setShowAddPanel(true)}>
+            <Plus className="h-3 w-3" /> Add Medicine
+          </Button>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Package className="h-10 w-10 text-muted-foreground/30 mb-3" />
+            <p className="text-sm text-muted-foreground">No medicines added yet</p>
+            <p className="text-xs text-muted-foreground/70 mt-0.5">Click "Add Medicine" to get started</p>
+          </div>
+        ) : (
+          <div className="overflow-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/30 border-b">
+                <tr>
+                  <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-8">#</th>
+                  <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Medicine</th>
+                  <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-24">Strength</th>
+                  <th className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-28">Category</th>
+                  <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-28">
+                    Quantity <span className="text-destructive">*</span>
+                  </th>
+                  <th className="px-3 py-2.5 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground w-16"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((row, idx) => (
+                  <tr key={row.medicineId} className="border-b last:border-b-0 hover:bg-muted/20 transition-colors">
+                    <td className="px-4 py-2.5 text-xs text-muted-foreground">{idx + 1}</td>
+                    <td className="px-3 py-2.5">
+                      <span className="font-medium text-foreground">{row.name}</span>
+                    </td>
+                    <td className="px-3 py-2.5 text-xs text-muted-foreground">{row.strength} {row.unit}</td>
+                    <td className="px-3 py-2.5">
+                      <Badge variant="outline" className="text-[10px] font-normal">{row.category}</Badge>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Input
+                        type="number"
+                        min={0}
+                        className="h-8 text-center text-sm w-24 mx-auto"
+                        placeholder="0"
+                        value={row.qty || ''}
+                        onChange={e => updateQty(idx, Number(e.target.value))}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            // Focus next row's qty input
+                            const nextInput = (e.target as HTMLElement)
+                              .closest('tr')
+                              ?.nextElementSibling
+                              ?.querySelector('input[type="number"]') as HTMLInputElement;
+                            nextInput?.focus();
+                          }
+                        }}
+                      />
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" onClick={() => removeMedicine(idx)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {totalItems > 0 && (
+          <div className="px-4 py-2.5 border-t bg-primary/5 flex items-center justify-between">
+            <span className="text-xs font-medium text-primary">
+              {totalItems} medicine{totalItems !== 1 ? 's' : ''} with quantity
+            </span>
+            <span className="text-xs font-semibold text-primary">{totalQty} total units</span>
+          </div>
+        )}
+      </div>
+
+      {/* Add Medicine Side Panel / Dialog */}
+      {showAddPanel && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowAddPanel(false)} />
+          <div className="relative w-full max-w-md bg-card border-l shadow-xl flex flex-col animate-in slide-in-from-right duration-200">
+            {/* Panel Header */}
+            <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/20">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Add Medicines</h3>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Click to add, then close panel</p>
+              </div>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setShowAddPanel(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Search */}
+            <div className="px-4 py-3 border-b">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  className="h-8 pl-8 text-sm"
+                  placeholder="Search medicines..."
+                  value={medSearch}
+                  onChange={e => setMedSearch(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* Medicine List */}
+            <div className="flex-1 overflow-auto">
+              {filteredCatalog.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10">
+                  <p className="text-sm text-muted-foreground">No medicines found</p>
+                </div>
+              ) : (
+                filteredCatalog.map(med => (
+                  <button
+                    key={med.id}
+                    className="w-full text-left px-4 py-2.5 border-b hover:bg-muted/30 transition-colors flex items-center justify-between group"
+                    onClick={() => addMedicine(med)}
+                  >
+                    <div>
+                      <span className="text-sm font-medium text-foreground">{med.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">{med.strength}{med.unit}</span>
+                      <p className="text-[10px] text-muted-foreground">{med.category}</p>
+                    </div>
+                    <Plus className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                ))
+              )}
+            </div>
+
+            {/* Panel Footer */}
+            <div className="px-4 py-3 border-t bg-muted/10">
+              <Button className="w-full h-8 text-sm" onClick={() => setShowAddPanel(false)}>
+                Done — {items.length} medicine{items.length !== 1 ? 's' : ''} added
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </DashboardLayout>
+  );
+}
