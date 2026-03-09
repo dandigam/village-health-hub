@@ -214,13 +214,13 @@ export default function CreatePurchaseOrder() {
             <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
               Supplier <span className="text-destructive">*</span>
             </label>
-            <Select value={supplierId} onValueChange={setSupplierId}>
+            <Select value={supplierId} onValueChange={v => { setSupplierId(v); }}>
               <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="Select supplier..." />
+                <SelectValue placeholder={suppliersLoading ? "Loading suppliers..." : "Select supplier..."} />
               </SelectTrigger>
               <SelectContent>
-                {mockSuppliers.map(s => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                {suppliers.map(s => (
+                  <SelectItem key={String(s.id)} value={String(s.id)}>{s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
