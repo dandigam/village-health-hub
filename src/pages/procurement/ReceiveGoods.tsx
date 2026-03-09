@@ -146,7 +146,6 @@ export default function ReceiveGoods() {
         })),
         isPriority: order.isPriority ?? false,
         invoice: {
-          id: order.invoice?.id || 0,
           invoiceAmount: invoiceAmount ? parseFloat(invoiceAmount) || 0 : 0,
           invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : '',
           documents: uploadedDocuments.map(d => ({
