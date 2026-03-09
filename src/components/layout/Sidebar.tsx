@@ -60,7 +60,7 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: Package, label: 'Inventory', href: '/stock', routeKey: 'stock', color: 'hsl(35, 90%, 60%)' },
       { icon: Truck, label: 'Suppliers', href: '/suppliers', routeKey: 'suppliers', color: 'hsl(140, 65%, 55%)' },
-      { icon: ShoppingCart, label: 'Supplier Orders', href: '/supplier-orders', routeKey: 'supplier-orders', color: 'hsl(25, 95%, 60%)' },
+      { icon: ShoppingCart, label: 'Purchase Orders', href: '/supplier-orders', routeKey: 'supplier-orders', color: 'hsl(25, 95%, 60%)' },
       { icon: ArrowRightLeft, label: 'Distribution', href: '/distribution-orders', routeKey: 'distribution-orders', color: 'hsl(270, 70%, 65%)' },
       { icon: WarehouseIcon, label: 'Warehouses', href: '/warehouses', routeKey: 'warehouses', color: 'hsl(210, 60%, 60%)' },
     ],
