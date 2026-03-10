@@ -36,7 +36,7 @@ export default function PurchaseOrderDetail() {
   }
 
   const canReceive = order.status === 'PENDING' || order.status === 'PARTIAL';
-  const isFullyReceived = order.status === 'RECEIVED';
+  const isFullyReceived = order.status === 'RECEIVED' || order.status === 'PARTIAL';
   const items = order.items || [];
   const totalRequested = items.reduce((s: number, i: any) => s + (i.requestedQuantity || 0), 0);
   const totalReceived = items.reduce((s: number, i: any) => s + (i.receivedQuantity || 0), 0);
