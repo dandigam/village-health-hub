@@ -84,6 +84,7 @@ export function useCurrentUser() {
     queryKey: ['currentUser'],
     queryFn: () => fetchWithFallback<User>('/auth/me', mockUser),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
