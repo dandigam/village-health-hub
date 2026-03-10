@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, Package, Download, Loader2, ClipboardList, Eye } from 'lucide-react';
 import { format } from 'date-fns';
+import { mockGoodsReceipts } from '@/data/procurementMockData';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
