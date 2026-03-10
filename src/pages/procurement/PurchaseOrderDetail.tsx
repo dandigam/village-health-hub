@@ -41,6 +41,9 @@ export default function PurchaseOrderDetail() {
   const totalReceived = items.reduce((s: number, i: any) => s + (i.receivedQuantity || 0), 0);
   const totalPending = totalRequested - totalReceived;
 
+  // Get goods receipts linked to this PO
+  const poReceipts = mockGoodsReceipts.filter(r => r.poId === id);
+
   return (
     <DashboardLayout>
       {/* Header */}
