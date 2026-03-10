@@ -225,6 +225,7 @@ export function useStockItems() {
     queryKey: ['stockItems'],
     queryFn: () => fetchWithFallback<StockItem[]>('/stock-items', mockStockItems),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -234,6 +235,7 @@ export function useDiscounts() {
     queryKey: ['discounts'],
     queryFn: () => fetchWithFallback<Discount[]>('/discounts', mockDiscounts),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -243,6 +245,7 @@ export function usePayments() {
     queryKey: ['payments'],
     queryFn: () => fetchWithFallback<Payment[]>('/payments', mockPayments),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -252,6 +255,7 @@ export function useCampStats() {
     queryKey: ['campStats'],
     queryFn: () => fetchWithFallback<CampStats>('/stats/camp', mockCampStats),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -261,6 +265,7 @@ export function useWarehouses() {
     queryKey: ['warehouses'],
     queryFn: () => fetchWithFallback<Warehouse[]>('/warehouses', mockWarehouses),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -270,6 +275,7 @@ export function useSupplierMedicines() {
     queryKey: ['supplierMedicines'],
     queryFn: () => fetchWithFallback<SupplierMedicine[]>('/supplier-medicines', mockSupplierMedicines),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
