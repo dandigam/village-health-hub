@@ -54,6 +54,7 @@ import {
   mockDistributions,
   mockRequestOrders,
 } from '@/mock';
+import { mockGoodsReceipts } from '@/data/procurementMockData';
 import type {
   User,
   CampTemplate,
