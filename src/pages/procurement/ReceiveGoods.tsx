@@ -130,36 +130,28 @@ export default function ReceiveGoods() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const isFullyReceived = rows.every(r => (r.alreadyReceived + r.receiveQty) >= r.requestedQty);
 
       const payload = {
-        id: order.id,
-        warehouseId: order.warehouseId,
+        poRequestId: order.id,
         supplierId: order.supplierId,
-        status: isFullyReceived ? 'RECEIVED' : 'PARTIAL',
+        warehouseId: order.warehouseId,
+        documentIds: uploadedDocuments.map(d => Number(d.documentId) || 0),
+        invoicedDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : '',
+        invoiceNumber: invoiceNumber || '',
+        invoiceAmount: invoiceAmount ? parseFloat(invoiceAmount) || 0 : 0,
         items: rows.map(r => ({
-          id: r.id,
-          medicineId: r.medicineId,
-          currentQty: r.currentQty,
-          requestedQuantity: r.requestedQty,
-          receivedQuantity: r.alreadyReceived + r.receiveQty,
-        })),
-        isPriority: order.isPriority ?? false,
-        invoice: {
-          invoiceAmount: invoiceAmount ? parseFloat(invoiceAmount) || 0 : 0,
-          invoiceDate: invoiceDateObj ? format(invoiceDateObj, 'yyyy-MM-dd') : '',
-          documents: uploadedDocuments.map(d => ({
-            documentId: Number(d.documentId) || 0,
-            documentName: d.name,
-          })),
-        },
-        documents: uploadedDocuments.map(d => ({
-          documentId: Number(d.documentId) || 0,
-          documentName: d.name,
+          poRequestItemId: r.id || 0,
+          medicineLookupId: r.medicineId,
+          receivedQty: r.receiveQty,
+          batchNumber: r.batchNumber || '',
+          expiryDate: r.expiryDate ? format(r.expiryDate, 'yyyy-MM-dd') : '',
         })),
       };
 
-      await api.put(`/supplier-orders/${order.id}`, payload);
+      // Keep old PUT for reference:
+      // await api.put(`/supplier-orders/${order.id}`, payload);
+
+      await api.post('/purchase-orders', payload);
 
       toast.success('Goods received successfully');
       navigate(`/purchase-orders/${order.id}`, { state: { banner: { type: 'success', message: 'Goods receipt recorded successfully.' } } });
