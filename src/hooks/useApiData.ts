@@ -447,6 +447,7 @@ export function useMedicalConditions() {
       return res.json();
     },
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (data) => Array.isArray(data) ? data.filter((c) => c.isActive).sort((a, b) => a.displayOrder - b.displayOrder) : [],
     retry: false,
     refetchOnWindowFocus: false,
