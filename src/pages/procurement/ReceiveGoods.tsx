@@ -130,7 +130,6 @@ export default function ReceiveGoods() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const isFullyReceived = rows.every(r => (r.alreadyReceived + r.receiveQty) >= r.requestedQty);
 
       const payload = {
         poRequestId: order.id,
