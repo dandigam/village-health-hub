@@ -492,6 +492,7 @@ export function useWarehouseDashboardStats(warehouseId?: number) {
     },
     enabled: !!warehouseId,
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     refetchOnWindowFocus: false,
   });
 }
