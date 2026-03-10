@@ -288,6 +288,7 @@ export function useSupplierOrders(warehouseId?: number) {
       mockSupplierOrders
     ),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
     enabled: !!warehouseId,
   });
@@ -298,6 +299,7 @@ export function useSupplierOrder(orderId?: number | string) {
     queryKey: ['supplierOrder', orderId],
     queryFn: () => request<any>(`/supplier-orders/${orderId}`),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     enabled: !!orderId,
   });
 }
@@ -307,6 +309,7 @@ export function useDistributions() {
     queryKey: ['distributions'],
     queryFn: () => fetchWithFallback<StockDistribution[]>('/distributions', mockDistributions),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -316,6 +319,7 @@ export function useRequestOrders() {
     queryKey: ['requestOrders'],
     queryFn: () => fetchWithFallback<RequestOrder[]>('/request-orders', mockRequestOrders),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
