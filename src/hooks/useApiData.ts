@@ -527,6 +527,7 @@ export function useWarehouseDetail(warehouseId?: number) {
     },
     enabled: !!warehouseId,
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
   });
 }
 
