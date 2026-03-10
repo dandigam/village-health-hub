@@ -151,7 +151,7 @@ export default function ReceiveGoods() {
       // Keep old PUT for reference:
       // await api.put(`/supplier-orders/${order.id}`, payload);
 
-      await api.post('/purchase-orders', payload);
+      await api.post(`/purchase-orders/${order.id}/receive`, payload);
 
       toast.success('Goods received successfully');
       navigate(`/purchase-orders/${order.id}`, { state: { banner: { type: 'success', message: 'Goods receipt recorded successfully.' } } });
