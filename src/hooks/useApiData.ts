@@ -75,6 +75,7 @@ import type {
 } from '@/types';
 
 const STALE_TIME = 2 * 60 * 1000; // 2 minutes for fresher data on navigation
+const REFETCH_ON_MOUNT = 'always' as const; // Always refetch when navigating between pages
 
 // ── Query Hooks ──────────────────────────────────────────────
 
@@ -83,6 +84,7 @@ export function useCurrentUser() {
     queryKey: ['currentUser'],
     queryFn: () => fetchWithFallback<User>('/auth/me', mockUser),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -142,6 +144,7 @@ export function useDoctors() {
     queryKey: ['doctors'],
     queryFn: () => fetchWithFallback<Doctor[]>('/doctors', mockDoctors),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -151,6 +154,7 @@ export function usePatients() {
     queryKey: ['patients'],
     queryFn: () => fetchWithFallback<Patient[]>('/patients', mockPatients),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -166,6 +170,7 @@ export function usePatient(id: string) {
       return result;
     },
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     enabled: !!id,
     select: (res) => res.data,
   });
@@ -176,6 +181,7 @@ export function useMedicines() {
     queryKey: ['medicines'],
     queryFn: () => fetchWithFallback<Medicine[]>('/medicines', mockMedicines),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -185,6 +191,7 @@ export function usePrescriptions() {
     queryKey: ['prescriptions'],
     queryFn: () => fetchWithFallback<Prescription[]>('/prescriptions', mockPrescriptions),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -194,6 +201,7 @@ export function useSuppliers() {
     queryKey: ['suppliers'],
     queryFn: () => fetchWithFallback<Supplier[]>('/suppliers', mockSuppliers),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -207,6 +215,7 @@ export function useSupplierList(warehouseId?: number) {
         mockSuppliers
       ),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -216,6 +225,7 @@ export function useStockItems() {
     queryKey: ['stockItems'],
     queryFn: () => fetchWithFallback<StockItem[]>('/stock-items', mockStockItems),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -225,6 +235,7 @@ export function useDiscounts() {
     queryKey: ['discounts'],
     queryFn: () => fetchWithFallback<Discount[]>('/discounts', mockDiscounts),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -234,6 +245,7 @@ export function usePayments() {
     queryKey: ['payments'],
     queryFn: () => fetchWithFallback<Payment[]>('/payments', mockPayments),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -243,6 +255,7 @@ export function useCampStats() {
     queryKey: ['campStats'],
     queryFn: () => fetchWithFallback<CampStats>('/stats/camp', mockCampStats),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -252,6 +265,7 @@ export function useWarehouses() {
     queryKey: ['warehouses'],
     queryFn: () => fetchWithFallback<Warehouse[]>('/warehouses', mockWarehouses),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -261,6 +275,7 @@ export function useSupplierMedicines() {
     queryKey: ['supplierMedicines'],
     queryFn: () => fetchWithFallback<SupplierMedicine[]>('/supplier-medicines', mockSupplierMedicines),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -273,6 +288,7 @@ export function useSupplierOrders(warehouseId?: number) {
       mockSupplierOrders
     ),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
     enabled: !!warehouseId,
   });
@@ -283,6 +299,7 @@ export function useSupplierOrder(orderId?: number | string) {
     queryKey: ['supplierOrder', orderId],
     queryFn: () => request<any>(`/supplier-orders/${orderId}`),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     enabled: !!orderId,
   });
 }
@@ -292,6 +309,7 @@ export function useDistributions() {
     queryKey: ['distributions'],
     queryFn: () => fetchWithFallback<StockDistribution[]>('/distributions', mockDistributions),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -301,6 +319,7 @@ export function useRequestOrders() {
     queryKey: ['requestOrders'],
     queryFn: () => fetchWithFallback<RequestOrder[]>('/request-orders', mockRequestOrders),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -329,6 +348,7 @@ export function useStatesHierarchy() {
     queryKey: ['statesHierarchy'],
     queryFn: () => fetchWithFallback<StateHierarchy[]>('/states/hierarchy', []),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -427,6 +447,7 @@ export function useMedicalConditions() {
       return res.json();
     },
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (data) => Array.isArray(data) ? data.filter((c) => c.isActive).sort((a, b) => a.displayOrder - b.displayOrder) : [],
     retry: false,
     refetchOnWindowFocus: false,
@@ -471,6 +492,7 @@ export function useWarehouseDashboardStats(warehouseId?: number) {
     },
     enabled: !!warehouseId,
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     refetchOnWindowFocus: false,
   });
 }
@@ -505,6 +527,7 @@ export function useWarehouseDetail(warehouseId?: number) {
     },
     enabled: !!warehouseId,
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
   });
 }
 
