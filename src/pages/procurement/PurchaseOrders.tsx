@@ -113,7 +113,7 @@ export default function PurchaseOrders() {
     setPage(1);
   };
 
-  const canReceive = (status: string) => status === 'PENDING' || status === 'PARTIAL';
+  const canReceive = (status: string) => status === 'PENDING' || status === 'PARTIAL' || status === 'PARTIALLY_RECEIVED';
 
   return (
     <DashboardLayout>
