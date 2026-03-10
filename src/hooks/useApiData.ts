@@ -144,6 +144,7 @@ export function useDoctors() {
     queryKey: ['doctors'],
     queryFn: () => fetchWithFallback<Doctor[]>('/doctors', mockDoctors),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
