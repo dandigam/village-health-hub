@@ -170,6 +170,7 @@ export function usePatient(id: string) {
       return result;
     },
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     enabled: !!id,
     select: (res) => res.data,
   });
