@@ -348,6 +348,7 @@ export function useStatesHierarchy() {
     queryKey: ['statesHierarchy'],
     queryFn: () => fetchWithFallback<StateHierarchy[]>('/states/hierarchy', []),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
