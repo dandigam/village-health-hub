@@ -54,6 +54,7 @@ import {
   mockDistributions,
   mockRequestOrders,
 } from '@/mock';
+import { mockGoodsReceipts } from '@/data/procurementMockData';
 import type {
   User,
   CampTemplate,
@@ -301,6 +302,20 @@ export function useSupplierOrder(orderId?: number | string) {
     staleTime: STALE_TIME,
     refetchOnMount: REFETCH_ON_MOUNT,
     enabled: !!orderId,
+  });
+}
+
+export function useGoodsReceiptsByPO(poId?: number | string) {
+  return useQuery({
+    queryKey: ['goodsReceipts', 'po', poId],
+    queryFn: () => fetchWithFallback<any[]>(
+      `/purchase-orders/${poId}/goods-receipts`,
+      mockGoodsReceipts.filter(r => String(r.poId) === String(poId))
+    ),
+    staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
+    enabled: !!poId,
+    select: (res) => res.data,
   });
 }
 
