@@ -194,7 +194,6 @@ export default function PurchaseOrders() {
                     <SelectItem value="DRAFT">Draft</SelectItem>
                     <SelectItem value="PENDING">Pending</SelectItem>
                     <SelectItem value="PARTIAL">Partially Received</SelectItem>
-                    <SelectItem value="PARTIALLY_RECEIVED">Partially Received (API)</SelectItem>
                     <SelectItem value="RECEIVED">Received</SelectItem>
                   </SelectContent>
                 </Select>
