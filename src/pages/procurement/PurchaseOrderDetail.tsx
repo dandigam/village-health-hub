@@ -155,8 +155,8 @@ export default function PurchaseOrderDetail() {
         </div>
       )}
 
-      {/* Recent Receipts */}
-      {poReceipts.length > 0 && (
+      {/* Recent Receipts — only show when fully received */}
+      {isFullyReceived && poReceipts.length > 0 && (
         <div className="border rounded-lg bg-card overflow-hidden shadow-sm mt-6">
           <div className="px-4 py-3 border-b bg-muted/20 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Recent Receipts</h2>
