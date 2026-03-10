@@ -75,6 +75,7 @@ import type {
 } from '@/types';
 
 const STALE_TIME = 2 * 60 * 1000; // 2 minutes for fresher data on navigation
+const REFETCH_ON_MOUNT = 'always' as const; // Always refetch when navigating between pages
 
 // ── Query Hooks ──────────────────────────────────────────────
 
