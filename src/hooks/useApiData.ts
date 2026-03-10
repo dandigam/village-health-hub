@@ -154,6 +154,7 @@ export function usePatients() {
     queryKey: ['patients'],
     queryFn: () => fetchWithFallback<Patient[]>('/patients', mockPatients),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
