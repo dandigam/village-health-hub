@@ -68,7 +68,13 @@ export default function PurchaseOrders() {
         String(o.id).includes(q)
       );
     }
-    if (filterStatus !== 'all') result = result.filter(o => o.status === filterStatus);
+    if (filterStatus !== 'all') {
+      if (filterStatus === 'PARTIAL') {
+        result = result.filter(o => o.status === 'PARTIAL' || o.status === 'PARTIALLY_RECEIVED');
+      } else {
+        result = result.filter(o => o.status === filterStatus);
+      }
+    }
     if (filterSupplier !== 'all') result = result.filter(o => o.supplierName === filterSupplier);
     if (dateFrom) result = result.filter(o => new Date(o.createdAt) >= dateFrom);
     if (dateTo) result = result.filter(o => new Date(o.createdAt) <= dateTo);
@@ -113,7 +119,7 @@ export default function PurchaseOrders() {
     setPage(1);
   };
 
-  const canReceive = (status: string) => status === 'PENDING' || status === 'PARTIAL';
+  const canReceive = (status: string) => status === 'PENDING' || status === 'PARTIAL' || status === 'PARTIALLY_RECEIVED';
 
   return (
     <DashboardLayout>

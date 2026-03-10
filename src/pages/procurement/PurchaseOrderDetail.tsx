@@ -35,8 +35,8 @@ export default function PurchaseOrderDetail() {
     );
   }
 
-  const canReceive = order.status === 'PENDING' || order.status === 'PARTIAL';
-  const isFullyReceived = order.status === 'RECEIVED' || order.status === 'PARTIAL';
+  const canReceive = order.status === 'PENDING' || order.status === 'PARTIAL' || order.status === 'PARTIALLY_RECEIVED';
+  const showReceipts = order.status === 'RECEIVED' || order.status === 'PARTIAL' || order.status === 'PARTIALLY_RECEIVED';
   const items = order.items || [];
   const totalRequested = items.reduce((s: number, i: any) => s + (i.requestedQuantity || 0), 0);
   const totalReceived = items.reduce((s: number, i: any) => s + (i.receivedQuantity || 0), 0);
@@ -155,7 +155,7 @@ export default function PurchaseOrderDetail() {
       )}
 
       {/* Recent Receipts — only show when fully received */}
-      {isFullyReceived && poReceipts.length > 0 && (
+      {showReceipts && poReceipts.length > 0 && (
         <div className="border rounded-lg bg-card overflow-hidden shadow-sm mt-6">
           <div className="px-4 py-3 border-b bg-muted/20 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Recent Receipts</h2>
