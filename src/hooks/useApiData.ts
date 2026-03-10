@@ -191,6 +191,7 @@ export function usePrescriptions() {
     queryKey: ['prescriptions'],
     queryFn: () => fetchWithFallback<Prescription[]>('/prescriptions', mockPrescriptions),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
