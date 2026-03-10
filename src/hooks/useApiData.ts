@@ -201,6 +201,7 @@ export function useSuppliers() {
     queryKey: ['suppliers'],
     queryFn: () => fetchWithFallback<Supplier[]>('/suppliers', mockSuppliers),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
@@ -214,6 +215,7 @@ export function useSupplierList(warehouseId?: number) {
         mockSuppliers
       ),
     staleTime: STALE_TIME,
+    refetchOnMount: REFETCH_ON_MOUNT,
     select: (res) => res.data,
   });
 }
