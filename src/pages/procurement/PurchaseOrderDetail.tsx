@@ -1,17 +1,17 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Download, Loader2, ClipboardList, Eye } from 'lucide-react';
 import { format } from 'date-fns';
-import { mockGoodsReceipts } from '@/data/procurementMockData';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
-import { useSupplierOrder } from '@/hooks/useApiData';
+import { useSupplierOrder, useGoodsReceiptsByPO } from '@/hooks/useApiData';
 import { cn } from '@/lib/utils';
 
 export default function PurchaseOrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: order, isLoading } = useSupplierOrder(id);
+  const { data: poReceipts = [] } = useGoodsReceiptsByPO(id);
 
   if (isLoading) {
     return (
