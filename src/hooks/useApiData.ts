@@ -305,7 +305,7 @@ export function useGoodsReceipts(warehouseId?: number) {
     staleTime: STALE_TIME,
     refetchOnMount: 'always',
     select: (res) => res.data,
-    enabled: !!warehouseId,
+    enabled: true,
   });
 }
 
