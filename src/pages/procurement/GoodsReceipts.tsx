@@ -94,7 +94,7 @@ export default function GoodsReceipts() {
                 <tr
                   key={receipt.id}
                   className="border-b last:border-b-0 hover:bg-muted/20 transition-colors duration-150 cursor-pointer"
-                  onClick={() => navigate(`/goods-receipts/${receipt.id}`)}
+                  onClick={() => navigate(`/goods-receipts/${receipt.id}`, { state: { receipt } })}
                 >
                   <td className="px-4 py-3">
                     <span className="font-mono text-xs font-semibold text-primary">{receipt.receiptNumber}</span>
