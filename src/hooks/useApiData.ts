@@ -298,14 +298,16 @@ export function useSupplierOrders(warehouseId?: number) {
 export function useGoodsReceipts(warehouseId?: number) {
   return useQuery({
     queryKey: ['goodsReceipts', warehouseId],
-    queryFn: () => fetchWithFallback<any[]>(
-      `/purchase-orders/goods-receipts${warehouseId ? `?warehouseId=${warehouseId}` : ''}`,
-      []
-    ),
+    queryFn: async () => {
+      const endpoint = `/purchase-orders/goods-receipts${warehouseId ? `?warehouseId=${warehouseId}` : ''}`;
+      console.log('📦 [GoodsReceipts] Fetching:', `${API_BASE_URL}${endpoint}`);
+      const res = await fetchWithFallback<any[]>(endpoint, []);
+      console.log('📦 [GoodsReceipts] Result:', res.source, res.data?.length, 'items');
+      return res;
+    },
     staleTime: STALE_TIME,
     refetchOnMount: 'always',
     select: (res) => res.data,
-    enabled: true,
   });
 }
 
