@@ -50,28 +50,28 @@ export default function GoodsReceiptDetail() {
       </div>
 
       {/* Info Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="border rounded-lg bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">PO Number</p>
-          <p className="text-sm font-mono font-semibold text-primary cursor-pointer hover:underline" onClick={() => navigate(`/purchase-orders/${receipt.poId}`)}>
+      <div className="grid grid-cols-4 gap-3 mb-5">
+        <div className="border rounded-lg bg-card px-3 py-2.5">
+          <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">PO Number</p>
+          <p className="text-xs font-mono font-semibold text-primary cursor-pointer hover:underline" onClick={() => navigate(`/purchase-orders/${receipt.poId}`)}>
             {receipt.poNumber}
           </p>
         </div>
-        <div className="border rounded-lg bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Supplier</p>
-          <p className="text-sm font-semibold text-foreground">{receipt.supplierName}</p>
+        <div className="border rounded-lg bg-card px-3 py-2.5">
+          <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Supplier</p>
+          <p className="text-xs font-semibold text-foreground">{receipt.supplierName}</p>
         </div>
-        <div className="border rounded-lg bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Invoice</p>
-          <p className="text-sm font-mono font-medium text-foreground">{receipt.invoiceNumber || '—'}</p>
+        <div className="border rounded-lg bg-card px-3 py-2.5">
+          <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Invoice</p>
+          <p className="text-xs font-mono font-medium text-foreground">{receipt.invoiceNumber || '—'}</p>
           {receipt.invoiceAmount && (
-            <p className="text-xs text-muted-foreground mt-0.5">₹{receipt.invoiceAmount.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">₹{receipt.invoiceAmount.toLocaleString()}</p>
           )}
         </div>
-        <div className="border rounded-lg bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Total Received</p>
-          <p className="text-xl font-bold text-emerald-600">{totalQty}</p>
-          <p className="text-[10px] text-muted-foreground">{receipt.items.length} medicines</p>
+        <div className="border rounded-lg bg-card px-3 py-2.5">
+          <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Total Received</p>
+          <p className="text-base font-bold text-emerald-600">{totalQty}</p>
+          <p className="text-[9px] text-muted-foreground">{receipt.items.length} medicines</p>
         </div>
       </div>
 
