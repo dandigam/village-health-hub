@@ -1,15 +1,15 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Download, FileText, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { mockGoodsReceipts } from '@/data/procurementMockData';
 
 export default function GoodsReceiptDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const receipt = mockGoodsReceipts.find(r => r.id === id);
+  const receipt = (location.state as any)?.receipt;
 
   if (!receipt) {
     return (

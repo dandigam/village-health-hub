@@ -122,7 +122,7 @@ export default function GoodsReceipts() {
                       size="sm"
                       variant="outline"
                       className="h-7 px-3 text-xs rounded-full"
-                      onClick={e => { e.stopPropagation(); navigate(`/goods-receipts/${receipt.id}`); }}
+                      onClick={e => { e.stopPropagation(); navigate(`/goods-receipts/${receipt.id}`, { state: { receipt } }); }}
                     >
                       <Eye className="h-3.5 w-3.5 mr-1" /> View
                     </Button>
