@@ -1,34 +1,38 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Eye, PackageOpen, ArrowLeft } from 'lucide-react';
+import { Search, Eye, PackageOpen, ArrowLeft, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { mockGoodsReceipts } from '@/data/procurementMockData';
-import { cn } from '@/lib/utils';
+import { useGoodsReceipts } from '@/hooks/useApiData';
+import { useAuth } from '@/context/AuthContext';
 
 export default function GoodsReceipts() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const poFilter = searchParams.get('po');
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId ?? undefined;
+
+  const { data: receipts = [], isLoading } = useGoodsReceipts(warehouseId);
 
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
-    let result = [...mockGoodsReceipts];
-    if (poFilter) result = result.filter(r => r.poId === poFilter);
+    let result = [...receipts];
+    if (poFilter) result = result.filter(r => String(r.poId) === poFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(r =>
-        r.receiptNumber.toLowerCase().includes(q) ||
-        r.poNumber.toLowerCase().includes(q) ||
-        r.supplierName.toLowerCase().includes(q) ||
-        r.receivedBy.toLowerCase().includes(q)
+        r.receiptNumber?.toLowerCase().includes(q) ||
+        r.poNumber?.toLowerCase().includes(q) ||
+        r.supplierName?.toLowerCase().includes(q) ||
+        r.receivedBy?.toLowerCase().includes(q)
       );
     }
-    return result.sort((a, b) => new Date(b.receivedDate).getTime() - new Date(a.receivedDate).getTime());
-  }, [search, poFilter]);
+    return result.sort((a, b) => new Date(b.receivedDate || b.createdAt).getTime() - new Date(a.receivedDate || a.createdAt).getTime());
+  }, [search, poFilter, receipts]);
 
   return (
     <DashboardLayout>
@@ -42,7 +46,7 @@ export default function GoodsReceipts() {
         <div>
           <h1 className="text-lg font-semibold text-foreground">Goods Receipts</h1>
           <p className="text-xs text-muted-foreground">
-            {poFilter ? `Filtered by PO #${mockGoodsReceipts.find(r => r.poId === poFilter)?.poNumber || poFilter}` : `${filtered.length} receipts`}
+            {poFilter ? `Filtered by PO #${receipts.find(r => String(r.poId) === poFilter)?.poNumber || poFilter}` : `${filtered.length} receipts`}
           </p>
         </div>
 
@@ -59,7 +63,11 @@ export default function GoodsReceipts() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="border rounded-xl bg-gradient-to-br from-card to-muted/10 flex flex-col items-center justify-center py-16 shadow-sm">
           <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
             <PackageOpen className="h-8 w-8 text-muted-foreground/40" />
@@ -77,7 +85,7 @@ export default function GoodsReceipts() {
                 <th className="px-4 py-3 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Supplier</th>
                 <th className="px-4 py-3 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Received Date</th>
                 <th className="px-4 py-3 text-center text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Items</th>
-                <th className="px-4 py-3 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Received By</th>
+                <th className="px-4 py-3 text-left text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Invoice</th>
                 <th className="px-4 py-3 text-right text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -96,14 +104,19 @@ export default function GoodsReceipts() {
                   </td>
                   <td className="px-4 py-3 font-medium text-foreground">{receipt.supplierName}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {format(new Date(receipt.receivedDate), 'dd MMM yyyy, hh:mm a')}
+                    {receipt.receivedDate ? format(new Date(receipt.receivedDate), 'dd MMM yyyy') : '—'}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className="inline-flex items-center justify-center h-6 w-8 rounded-md bg-muted/50 text-xs font-medium">
-                      {receipt.items.length}
+                      {receipt.items?.length || 0}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm">{receipt.receivedBy}</td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs font-mono">{receipt.invoiceNumber || '—'}</span>
+                    {receipt.invoiceAmount && (
+                      <span className="ml-1.5 text-[10px] text-muted-foreground">₹{Number(receipt.invoiceAmount).toLocaleString()}</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <Button
                       size="sm"
