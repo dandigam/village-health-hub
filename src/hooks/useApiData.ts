@@ -295,6 +295,20 @@ export function useSupplierOrders(warehouseId?: number) {
   });
 }
 
+export function useGoodsReceipts(warehouseId?: number) {
+  return useQuery({
+    queryKey: ['goodsReceipts', warehouseId],
+    queryFn: () => fetchWithFallback<any[]>(
+      `/purchase-orders/goods-receipts${warehouseId ? `?warehouseId=${warehouseId}` : ''}`,
+      []
+    ),
+    staleTime: STALE_TIME,
+    refetchOnMount: 'always',
+    select: (res) => res.data,
+    enabled: !!warehouseId,
+  });
+}
+
 export function useSupplierOrder(orderId?: number | string) {
   return useQuery({
     queryKey: ['supplierOrder', orderId],
