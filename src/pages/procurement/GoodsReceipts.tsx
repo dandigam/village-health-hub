@@ -94,7 +94,7 @@ export default function GoodsReceipts() {
                 <tr
                   key={receipt.id}
                   className="border-b last:border-b-0 hover:bg-muted/20 transition-colors duration-150 cursor-pointer"
-                  onClick={() => navigate(`/goods-receipts/${receipt.id}`)}
+                  onClick={() => navigate(`/goods-receipts/${receipt.id}`, { state: { receipt } })}
                 >
                   <td className="px-4 py-3">
                     <span className="font-mono text-xs font-semibold text-primary">{receipt.receiptNumber}</span>
@@ -122,7 +122,7 @@ export default function GoodsReceipts() {
                       size="sm"
                       variant="outline"
                       className="h-7 px-3 text-xs rounded-full"
-                      onClick={e => { e.stopPropagation(); navigate(`/goods-receipts/${receipt.id}`); }}
+                      onClick={e => { e.stopPropagation(); navigate(`/goods-receipts/${receipt.id}`, { state: { receipt } }); }}
                     >
                       <Eye className="h-3.5 w-3.5 mr-1" /> View
                     </Button>
