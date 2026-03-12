@@ -56,6 +56,7 @@ interface MedicineRow {
 export default function CreatePurchaseOrder() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const warehouseId = user?.context?.warehouseId;
 
   // Fetch suppliers from real API
