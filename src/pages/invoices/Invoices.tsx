@@ -236,7 +236,7 @@ export default function Invoices() {
                             <DropdownMenuItem onClick={() => navigate(`/invoices/${invoice.id}/edit`)}>
                               <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => downloadInvoicePDF(invoice, warehouseDetail)}>
                               <Download className="h-3.5 w-3.5 mr-2" /> Download
                             </DropdownMenuItem>
                           </DropdownMenuContent>
