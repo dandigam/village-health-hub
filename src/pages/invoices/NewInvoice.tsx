@@ -543,7 +543,7 @@ export default function NewInvoice() {
           </div>
 
           {/* ─── Invoice Details + Actions (bottom-right) ─── */}
-          <div className="flex justify-end mb-5">
+          {(supplierId || mode !== 'create') && <div className="flex justify-end mb-5">
             <div className="border rounded-lg bg-card p-5 shadow-sm w-full max-w-2xl">
               <h2 className="text-sm font-semibold text-foreground mb-4">Invoice Details</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -694,7 +694,7 @@ export default function NewInvoice() {
                 )}
               </div>
             </div>
-          </div>
+          </div>}
         </>
       )}
 
