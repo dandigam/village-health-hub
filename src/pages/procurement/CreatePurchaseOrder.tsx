@@ -12,8 +12,10 @@ import { toast } from 'sonner';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { useSupplierList } from '@/hooks/useApiData';
+import { useQueryClient } from '@tanstack/react-query';
 
 const UNITS = ['mg', 'ml', 'gm', 'mcg', 'IU', 'drops', 'units'] as const;
+const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Powder', 'Inhaler', 'Ointment'] as const;
 
 interface SupplierMedicineApi {
   id: number;
