@@ -113,7 +113,7 @@ export default function GoodsReceiptDetail() {
           <Button variant="outline" size="sm" className="h-8">
             <Printer className="h-3.5 w-3.5 mr-1.5" /> Print
           </Button>
-          <Button variant="outline" size="sm" className="h-8">
+          <Button variant="outline" size="sm" className="h-8" onClick={() => downloadGoodsReceiptPDF(receipt, warehouseDetail)}>
             <Download className="h-3.5 w-3.5 mr-1.5" /> Download
           </Button>
         </div>

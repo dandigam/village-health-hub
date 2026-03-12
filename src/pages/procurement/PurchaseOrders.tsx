@@ -12,8 +12,9 @@ import { Calendar } from '@/components/ui/calendar';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSupplierOrders } from '@/hooks/useApiData';
+import { useSupplierOrders, useWarehouseDetail } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
+import { downloadPurchaseOrderPDF } from '@/utils/pdfGenerator';
 
 type SortKey = 'poNumber' | 'supplierName' | 'itemCount' | 'status' | 'createdAt';
 type SortDir = 'asc' | 'desc';

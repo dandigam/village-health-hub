@@ -138,7 +138,7 @@ export default function PurchaseOrderDetail() {
           <Button size="sm" variant="outline" onClick={() => navigate(`/goods-receipts?po=${order.id}`)} className="h-8">
             <ClipboardList className="h-3.5 w-3.5 mr-1.5" /> Receipt History
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => downloadPurchaseOrderPDF(order, warehouseDetail)}>
             <Download className="h-4 w-4" />
           </Button>
         </div>
