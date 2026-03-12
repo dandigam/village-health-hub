@@ -6,9 +6,11 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
-import { useSupplierOrder, useGoodsReceiptsByPO } from '@/hooks/useApiData';
+import { useSupplierOrder, useGoodsReceiptsByPO, useWarehouseDetail } from '@/hooks/useApiData';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/services/api';
+import { downloadPurchaseOrderPDF } from '@/utils/pdfGenerator';
 
 export default function PurchaseOrderDetail() {
   const { id } = useParams();
