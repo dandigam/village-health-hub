@@ -40,7 +40,9 @@ export default function PurchaseOrders() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const warehouseId = user?.context?.warehouseId;
+  const numWarehouseId = warehouseId ? Number(warehouseId) : undefined;
   const { data: apiOrders = [], isLoading } = useSupplierOrders(warehouseId) as { data: ApiOrder[] | undefined; isLoading: boolean };
+  const { data: warehouseDetail } = useWarehouseDetail(numWarehouseId);
   const orders: ApiOrder[] = apiOrders || [];
 
   const [search, setSearch] = useState('');
