@@ -544,9 +544,9 @@ export default function NewInvoice() {
 
           {/* ─── Invoice Details + Actions (bottom-right) ─── */}
           <div className="flex justify-end mb-5">
-            <div className="border rounded-lg bg-card p-5 shadow-sm w-full max-w-lg">
+            <div className="border rounded-lg bg-card p-5 shadow-sm w-full max-w-2xl">
               <h2 className="text-sm font-semibold text-foreground mb-4">Invoice Details</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice No. <span className="text-destructive">*</span></label>
                   {canEdit ? (
