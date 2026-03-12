@@ -268,14 +268,6 @@ export default function NewInvoice() {
               <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={() => confirmNavigation('/invoices')} disabled={saving}>
-            Cancel
-          </Button>
-          {canEdit && (
-            <Button size="sm" onClick={handleSave} disabled={saving || totalWithQty === 0}>
-              <Save className="h-3.5 w-3.5 mr-1.5" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
-            </Button>
-          )}
         </div>
       </div>
 
