@@ -57,6 +57,7 @@ export default function NewInvoice() {
   const { data: suppliers = [] } = useSupplierList(warehouseId);
   const { data: inventory = [] } = useWarehouseInventory(warehouseId);
   const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
+  const queryClient = useQueryClient();
 
   const { isDirty, setDirty, confirmNavigation, showDiscardDialog, handleDiscard, handleCancel: handleDiscardCancel } = useUnsavedChanges();
 
