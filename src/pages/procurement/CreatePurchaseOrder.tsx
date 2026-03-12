@@ -440,62 +440,10 @@ export default function CreatePurchaseOrder() {
 
             {/* Medicine List */}
             <div className="flex-1 overflow-auto">
-              {filteredCatalog.length === 0 ? (
+              {filteredCatalog.length === 0 && medSearch.trim() ? (
                 <div className="flex flex-col items-center justify-center py-8 px-4">
                   <Package className="h-8 w-8 text-muted-foreground/30 mb-2" />
-                  <p className="text-sm text-muted-foreground mb-1">No medicines found for "{medSearch}"</p>
-                  {!showInlineAdd ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-2 h-8 text-xs gap-1.5 border-dashed"
-                      onClick={() => { setShowInlineAdd(true); setNewMedName(medSearch); }}
-                    >
-                      <PlusCircle className="h-3.5 w-3.5" /> Add "{medSearch}" as new medicine
-                    </Button>
-                  ) : (
-                    <div className="w-full mt-3 p-3 rounded-lg border border-dashed bg-muted/20 space-y-2.5">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">Add New Medicine</p>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-medium text-muted-foreground">Name <span className="text-destructive">*</span></label>
-                        <Input className="h-7 text-sm" value={newMedName} onChange={e => setNewMedName(e.target.value)} autoFocus />
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-muted-foreground">Strength <span className="text-destructive">*</span></label>
-                          <Input className="h-7 text-sm" placeholder="e.g. 500" value={newMedStrength} onChange={e => setNewMedStrength(e.target.value)} />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-muted-foreground">Unit</label>
-                          <Select value={newMedUnit} onValueChange={setNewMedUnit}>
-                            <SelectTrigger className="h-7 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-medium text-muted-foreground">Category <span className="text-destructive">*</span></label>
-                        <Select value={newMedCategory} onValueChange={setNewMedCategory}>
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {MEDICINE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex gap-2 pt-1">
-                        <Button variant="outline" size="sm" className="h-7 text-xs flex-1" onClick={() => setShowInlineAdd(false)}>Cancel</Button>
-                        <Button size="sm" className="h-7 text-xs flex-1" onClick={handleInlineAddMedicine}>
-                          <Plus className="h-3 w-3 mr-1" /> Add & Include
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                  <p className="text-sm text-muted-foreground">No medicines found for "{medSearch}"</p>
                 </div>
               ) : (
                 filteredCatalog.map(med => (
@@ -523,6 +471,62 @@ export default function CreatePurchaseOrder() {
                   </button>
                 ))
               )}
+
+              {/* Always-visible Add New Medicine section */}
+              <div className="px-4 py-3 border-t">
+                {!showInlineAdd ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full h-8 text-xs gap-1.5 border-dashed"
+                    onClick={() => { setShowInlineAdd(true); setNewMedName(medSearch); }}
+                  >
+                    <PlusCircle className="h-3.5 w-3.5" /> Add {medSearch.trim() ? `"${medSearch}" as` : ''} new medicine
+                  </Button>
+                ) : (
+                  <div className="p-3 rounded-lg border border-dashed bg-muted/20 space-y-2.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">Add New Medicine</p>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-medium text-muted-foreground">Name <span className="text-destructive">*</span></label>
+                      <Input className="h-7 text-sm" value={newMedName} onChange={e => setNewMedName(e.target.value)} autoFocus />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-medium text-muted-foreground">Strength <span className="text-destructive">*</span></label>
+                        <Input className="h-7 text-sm" placeholder="e.g. 500" value={newMedStrength} onChange={e => setNewMedStrength(e.target.value)} />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-medium text-muted-foreground">Unit</label>
+                        <Select value={newMedUnit} onValueChange={setNewMedUnit}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-medium text-muted-foreground">Category <span className="text-destructive">*</span></label>
+                      <Select value={newMedCategory} onValueChange={setNewMedCategory}>
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MEDICINE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex gap-2 pt-1">
+                      <Button variant="outline" size="sm" className="h-7 text-xs flex-1" onClick={() => setShowInlineAdd(false)}>Cancel</Button>
+                      <Button size="sm" className="h-7 text-xs flex-1" onClick={handleInlineAddMedicine}>
+                        <Plus className="h-3 w-3 mr-1" /> Add & Include
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Panel Footer */}
