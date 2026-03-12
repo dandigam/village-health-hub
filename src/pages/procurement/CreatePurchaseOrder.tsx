@@ -478,8 +478,15 @@ export default function CreatePurchaseOrder() {
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-medium text-muted-foreground">Category</label>
-                        <Input className="h-7 text-sm" placeholder="e.g. Antibiotic" value={newMedCategory} onChange={e => setNewMedCategory(e.target.value)} />
+                        <label className="text-[10px] font-medium text-muted-foreground">Category <span className="text-destructive">*</span></label>
+                        <Select value={newMedCategory} onValueChange={setNewMedCategory}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MEDICINE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="flex gap-2 pt-1">
                         <Button variant="outline" size="sm" className="h-7 text-xs flex-1" onClick={() => setShowInlineAdd(false)}>Cancel</Button>
