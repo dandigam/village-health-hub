@@ -15,8 +15,11 @@ import { downloadPurchaseOrderPDF } from '@/utils/pdfGenerator';
 export default function PurchaseOrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
   const { data: order, isLoading } = useSupplierOrder(id);
   const { data: poReceipts = [] } = useGoodsReceiptsByPO(id);
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
 
   // Document preview state
   const [showPreview, setShowPreview] = useState<{ url: string; name: string } | null>(null);
