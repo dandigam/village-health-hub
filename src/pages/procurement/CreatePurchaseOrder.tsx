@@ -12,8 +12,10 @@ import { toast } from 'sonner';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { useSupplierList } from '@/hooks/useApiData';
+import { useQueryClient } from '@tanstack/react-query';
 
 const UNITS = ['mg', 'ml', 'gm', 'mcg', 'IU', 'drops', 'units'] as const;
+const MEDICINE_TYPES = ['Tablet', 'Capsule', 'Syrup', 'Injection', 'Cream', 'Drops', 'Powder', 'Inhaler', 'Ointment'] as const;
 
 interface SupplierMedicineApi {
   id: number;
@@ -54,6 +56,7 @@ interface MedicineRow {
 export default function CreatePurchaseOrder() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const warehouseId = user?.context?.warehouseId;
 
   // Fetch suppliers from real API
@@ -126,27 +129,46 @@ export default function CreatePurchaseOrder() {
     }]);
   };
 
-  const handleInlineAddMedicine = () => {
+  const handleInlineAddMedicine = async () => {
     if (!newMedName.trim()) { toast.error('Medicine name is required'); return; }
     if (!newMedStrength.trim()) { toast.error('Strength is required'); return; }
-    const newId = `new-${Date.now()}`;
-    const newMed = {
-      id: newId,
-      name: newMedName.trim(),
-      strength: newMedStrength.trim(),
-      unit: newMedUnit,
-      category: newMedCategory.trim() || 'General',
-      stock: 0,
-    };
-    setExtraMedicines(prev => [...prev, newMed]);
-    addMedicine(newMed);
+    if (!newMedCategory) { toast.error('Category is required'); return; }
+    if (!supplierId) { toast.error('Select a supplier first'); return; }
+
+    // Call POST API to add medicine to supplier
+    try {
+      const payload = [{
+        name: newMedName.trim(),
+        type: newMedCategory,
+        strength: newMedStrength.trim(),
+        unit: newMedUnit,
+      }];
+      await api.post(`/suppliers/warehouses/${warehouseId}/suppliers/${supplierId}/medicines`, payload);
+      // Refresh supplier data to get updated medicine list
+      await queryClient.invalidateQueries({ queryKey: ['suppliers', warehouseId ? Number(warehouseId) : undefined] });
+      toast.success(`${newMedName.trim()} added to supplier`);
+    } catch {
+      // Fallback: add locally even if API fails
+      const newId = `new-${Date.now()}`;
+      const newMed = {
+        id: newId,
+        name: newMedName.trim(),
+        strength: newMedStrength.trim(),
+        unit: newMedUnit,
+        category: newMedCategory,
+        stock: 0,
+      };
+      setExtraMedicines(prev => [...prev, newMed]);
+      addMedicine(newMed);
+      toast.success(`${newMedName.trim()} added to order (offline)`);
+    }
+
     setNewMedName('');
     setNewMedStrength('');
     setNewMedUnit('mg');
     setNewMedCategory('');
     setShowInlineAdd(false);
     setMedSearch('');
-    toast.success(`${newMed.name} added to order`);
   };
 
   const removeMedicine = (idx: number) => {
@@ -456,8 +478,15 @@ export default function CreatePurchaseOrder() {
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-medium text-muted-foreground">Category</label>
-                        <Input className="h-7 text-sm" placeholder="e.g. Antibiotic" value={newMedCategory} onChange={e => setNewMedCategory(e.target.value)} />
+                        <label className="text-[10px] font-medium text-muted-foreground">Category <span className="text-destructive">*</span></label>
+                        <Select value={newMedCategory} onValueChange={setNewMedCategory}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MEDICINE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="flex gap-2 pt-1">
                         <Button variant="outline" size="sm" className="h-7 text-xs flex-1" onClick={() => setShowInlineAdd(false)}>Cancel</Button>
