@@ -174,16 +174,34 @@ export default function NewInvoice() {
     return items.filter(m => m.medicineName.toLowerCase().includes(q) || m.medicineType.toLowerCase().includes(q));
   }, [items, medSearch]);
 
-  const handleAddNewMedicine = () => {
+  const handleAddNewMedicine = async () => {
     if (!newMedName.trim() || !newMedType) { setBanner({ type: 'error', message: 'Medicine name and type are required.' }); return; }
-    const newIdx = items.length;
-    setItems(prev => [...prev, {
-      medicineId: '', medicineName: newMedName.trim(), medicineType: newMedType,
-      isAlreadyExist: false, batchNo: '', expDate: '', quantity: 0, stock: 0,
-    }]);
-    lastAddedIdx.current = newIdx;
+    if (!supplierId) { setBanner({ type: 'error', message: 'Please select a supplier first.' }); return; }
+
+    // Call POST API to add medicine to supplier
+    try {
+      const payload = [{
+        name: newMedName.trim(),
+        type: newMedType,
+        strength: newMedStrength.trim() || null,
+        unit: newMedUnit || null,
+      }];
+      await api.post(`/suppliers/warehouses/${warehouseId}/suppliers/${supplierId}/medicines`, payload);
+      // Refresh supplier data to get updated medicine list with new medicine ID
+      await queryClient.invalidateQueries({ queryKey: ['suppliers', warehouseId ? Number(warehouseId) : undefined] });
+      setBanner({ type: 'success', message: `"${newMedName.trim()}" added to supplier and list.` });
+    } catch {
+      // Fallback: add locally
+      const newIdx = items.length;
+      setItems(prev => [...prev, {
+        medicineId: '', medicineName: newMedName.trim(), medicineType: newMedType,
+        isAlreadyExist: false, batchNo: '', expDate: '', quantity: 0, stock: 0,
+      }]);
+      lastAddedIdx.current = newIdx;
+      setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list (offline).` });
+    }
+
     setShowAddDialog(false);
-    setBanner({ type: 'success', message: `"${newMedName.trim()}" added to the list.` });
     setNewMedName(''); setNewMedType(''); setNewMedStrength(''); setNewMedUnit('');
   };
 
