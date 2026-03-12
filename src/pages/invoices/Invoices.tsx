@@ -32,6 +32,7 @@ export default function Invoices() {
   const { user } = useAuth();
   const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
   const { data: invoices = [], isLoading, refetch } = useInvoices(warehouseId);
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
 
   const [filterPayment, setFilterPayment] = useState('all');
   const [filterSearch, setFilterSearch] = useState('');
