@@ -268,14 +268,6 @@ export default function NewInvoice() {
               <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={() => confirmNavigation('/invoices')} disabled={saving}>
-            Cancel
-          </Button>
-          {canEdit && (
-            <Button size="sm" onClick={handleSave} disabled={saving || totalWithQty === 0}>
-              <Save className="h-3.5 w-3.5 mr-1.5" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
-            </Button>
-          )}
         </div>
       </div>
 
@@ -295,7 +287,7 @@ export default function NewInvoice() {
         <div className="flex items-center justify-center py-10"><p className="text-sm text-muted-foreground">Loading...</p></div>
       ) : (
         <>
-          {/* ─── Supplier & Invoice Card ─── */}
+          {/* ─── Supplier Card (top) ─── */}
           <div className="border rounded-lg bg-card shadow-sm mb-5">
             <div className="px-5 py-4 flex items-stretch gap-0">
               {/* Supplier */}
@@ -344,180 +336,22 @@ export default function NewInvoice() {
                   <p className="text-sm font-semibold text-foreground h-8 flex items-center capitalize">{paymentMode || '—'}</p>
                 )}
               </div>
-
-              <div className="flex items-center px-4 self-stretch py-2"><div className="w-px h-full bg-border" /></div>
-
-              {/* Invoice No */}
-              <div className="min-w-[130px]">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
-                  Invoice No. <span className="text-destructive">*</span>
-                </label>
-                {canEdit ? (
-                  <Input className="h-8 text-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => { setInvoiceNumber(e.target.value); setDirty(true); }} />
-                ) : (
-                  <p className="text-sm font-semibold text-foreground h-8 flex items-center">{invoiceNumber || '—'}</p>
-                )}
-              </div>
-
-              <div className="flex items-center px-4 self-stretch py-2"><div className="w-px h-full bg-border" /></div>
-
-              {/* Amount */}
-              <div className="min-w-[120px]">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
-                  Amount (₹) <span className="text-destructive">*</span>
-                </label>
-                {canEdit ? (
-                  <Input className="h-8 text-sm" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => { setInvoiceAmount(e.target.value); setDirty(true); }} />
-                ) : (
-                  <p className="text-sm font-bold text-foreground h-8 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
-                )}
-              </div>
-
-              <div className="flex items-center px-4 self-stretch py-2"><div className="w-px h-full bg-border" /></div>
-
-              {/* Date */}
-              <div className="min-w-[140px]">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
-                  Date <span className="text-destructive">*</span>
-                </label>
-                {canEdit ? (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("h-8 text-sm w-full justify-start text-left font-normal", !invoiceDate && "text-muted-foreground")}>
-                        <CalendarIcon className="mr-1.5 h-3 w-3" />
-                        {invoiceDate ? format(new Date(invoiceDate), 'dd-MM-yyyy') : 'dd-mm-yyyy'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50" align="start">
-                      <Calendar mode="single" selected={invoiceDate ? new Date(invoiceDate) : undefined} onSelect={(date) => { if (date) { setInvoiceDate(format(date, 'yyyy-MM-dd')); setDirty(true); } }} initialFocus />
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  <p className="text-sm font-semibold text-foreground h-8 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
-                )}
-              </div>
             </div>
 
-            {/* Supplier address + document upload row */}
-            {(selectedSupplier || uploadedDocuments.length > 0 || canEdit) && (
-              <div className="px-5 pb-4 flex items-start gap-0 border-t border-border/30 pt-3">
-                {/* Supplier Address */}
-                {selectedSupplier && (
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-0.5 block">Supplier Address</label>
-                    <p className="text-xs font-medium text-foreground leading-tight">{selectedSupplier.name}</p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      {(selectedSupplier as any)?.contact && (
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {(selectedSupplier as any).contact}</span>
-                      )}
-                      {(selectedSupplier as any)?.email && (
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {(selectedSupplier as any).email}</span>
-                      )}
-                    </div>
-                    <p className="text-[10px] mt-0.5 text-primary/70 italic leading-snug">{supplierAddress || '-'}</p>
-                  </div>
-                )}
-
-                {/* Invoice Attach */}
-                <div className={cn("flex flex-col items-end", selectedSupplier && "ml-auto")}>
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1 block">Invoice Attach</label>
-                  <div className="flex items-center gap-2 flex-wrap justify-end">
-                    {uploadedDocuments.map((doc) => {
-                      const nameLower = (doc.name || '').toLowerCase();
-                      const isPdf = nameLower.endsWith('.pdf');
-                      return (
-                        <div key={doc.documentId} className="flex items-center gap-1.5">
-                          <button
-                            className="flex items-center gap-1 text-xs font-medium hover:underline truncate max-w-[120px]"
-                            style={{ color: isPdf ? 'hsl(var(--primary))' : 'hsl(var(--warning))' }}
-                            onClick={async () => {
-                              const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
-                              setShowDocumentPreview({ url, name: doc.name });
-                              setPreviewLoading(true);
-                              try {
-                                const token = localStorage.getItem('token');
-                                const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-                                const contentType = res.headers.get('content-type') || '';
-                                const blob = await res.blob();
-                                const blobUrl = URL.createObjectURL(blob);
-                                setPreviewBlobUrl(blobUrl);
-                                setPreviewType(contentType.includes('pdf') || nameLower.endsWith('.pdf') ? 'pdf' : 'image');
-                              } catch { setPreviewType('unknown'); }
-                              finally { setPreviewLoading(false); }
-                            }}
-                            title="View document"
-                          >
-                            <FileImage className={cn("w-3 h-3 shrink-0", isPdf ? "text-primary" : "text-warning")} />
-                            <span className="truncate">{doc.name}</span>
-                          </button>
-                          {canEdit && (
-                            <button
-                              className="text-muted-foreground/50 hover:text-destructive shrink-0"
-                              onClick={async () => {
-                                try {
-                                  const token = localStorage.getItem('token');
-                                  await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
-                                    method: 'DELETE',
-                                    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-                                  });
-                                  setUploadedDocuments(prev => prev.filter(d => d.documentId !== doc.documentId));
-                                } catch { setBanner({ type: 'error', message: 'Failed to delete document.' }); }
-                              }}
-                              aria-label="Remove document"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {canEdit && (
-                      <label className={cn(
-                        "flex items-center gap-1.5 border border-dashed border-border rounded-md px-3 py-1.5 text-xs text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary transition-all",
-                        !invoiceNumber && "opacity-50 pointer-events-none"
-                      )}>
-                        <Upload className="w-3.5 h-3.5" />
-                        {uploadedDocuments.length > 0 ? 'Add More' : 'Upload'}
-                        <input
-                          type="file"
-                          accept="image/*,.pdf"
-                          multiple
-                          className="hidden"
-                          disabled={!invoiceNumber || uploading}
-                          onChange={async (e) => {
-                            const files = e.target.files;
-                            if (!files) return;
-                            setUploading(true);
-                            for (const file of Array.from(files)) {
-                              const formData = new FormData();
-                              formData.append('file', file);
-                              formData.append('invoiceNo', invoiceNumber);
-                              try {
-                                const token = localStorage.getItem('token');
-                                const res = await fetch(`${API_BASE_URL}/documents/upload`, {
-                                  method: 'POST',
-                                  headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-                                  body: formData,
-                                });
-                                if (!res.ok) throw new Error('Upload failed');
-                                const doc = await res.json();
-                                if (doc && doc.documentId && doc.documentName) {
-                                  setUploadedDocuments(prev => {
-                                    if (prev.some(d => d.documentId === doc.documentId)) return prev;
-                                    return [...prev, { documentId: doc.documentId, name: doc.documentName }];
-                                  });
-                                }
-                              } catch { setBanner({ type: 'error', message: 'Failed to upload document.' }); }
-                            }
-                            setUploading(false);
-                            e.target.value = '';
-                          }}
-                        />
-                        {uploading && <span className="ml-1 text-primary">Uploading...</span>}
-                      </label>
-                    )}
-                  </div>
+            {/* Supplier address row */}
+            {selectedSupplier && (
+              <div className="px-5 pb-4 border-t border-border/30 pt-3">
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-0.5 block">Supplier Address</label>
+                <p className="text-xs font-medium text-foreground leading-tight">{selectedSupplier.name}</p>
+                <div className="flex items-center gap-3 mt-0.5">
+                  {(selectedSupplier as any)?.contact && (
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Phone className="h-3 w-3 text-icon-phone" /> {(selectedSupplier as any).contact}</span>
+                  )}
+                  {(selectedSupplier as any)?.email && (
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3 text-icon-mail" /> {(selectedSupplier as any).email}</span>
+                  )}
                 </div>
+                <p className="text-[10px] mt-0.5 text-primary/70 italic leading-snug">{supplierAddress || '-'}</p>
               </div>
             )}
           </div>
@@ -686,6 +520,160 @@ export default function NewInvoice() {
                 )}
               </>
             )}
+          </div>
+
+          {/* ─── Invoice Details + Actions (bottom-right) ─── */}
+          <div className="flex justify-end mb-5">
+            <div className="border rounded-lg bg-card p-5 shadow-sm w-full max-w-lg">
+              <h2 className="text-sm font-semibold text-foreground mb-4">Invoice Details</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice No. <span className="text-destructive">*</span></label>
+                  {canEdit ? (
+                    <Input className="h-9 text-sm" placeholder="INV-001" value={invoiceNumber} onChange={e => { setInvoiceNumber(e.target.value); setDirty(true); }} />
+                  ) : (
+                    <p className="text-sm font-semibold text-foreground h-9 flex items-center">{invoiceNumber || '—'}</p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Amount (₹) <span className="text-destructive">*</span></label>
+                  {canEdit ? (
+                    <Input className="h-9 text-sm" type="number" step="0.01" placeholder="0.00" value={invoiceAmount} onChange={e => { setInvoiceAmount(e.target.value); setDirty(true); }} />
+                  ) : (
+                    <p className="text-sm font-bold text-foreground h-9 flex items-center">₹{Number(invoiceAmount).toLocaleString()}</p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Date <span className="text-destructive">*</span></label>
+                  {canEdit ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("h-9 w-full text-sm justify-start text-left font-normal", !invoiceDate && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-1.5 h-3 w-3" />
+                          {invoiceDate ? format(new Date(invoiceDate), 'dd-MM-yyyy') : 'dd-mm-yyyy'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 z-50" align="start">
+                        <Calendar mode="single" selected={invoiceDate ? new Date(invoiceDate) : undefined} onSelect={(date) => { if (date) { setInvoiceDate(format(date, 'yyyy-MM-dd')); setDirty(true); } }} initialFocus />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <p className="text-sm font-semibold text-foreground h-9 flex items-center">{invoiceDate ? format(new Date(invoiceDate), 'dd MMM yyyy') : '—'}</p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Invoice Attach</label>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {uploadedDocuments.map((doc) => {
+                      const nameLower = (doc.name || '').toLowerCase();
+                      const isPdf = nameLower.endsWith('.pdf');
+                      return (
+                        <div key={doc.documentId} className="flex items-center gap-1.5">
+                          <button
+                            className="flex items-center gap-1 text-xs font-medium hover:underline truncate max-w-[100px]"
+                            style={{ color: isPdf ? 'hsl(var(--primary))' : 'hsl(var(--warning))' }}
+                            onClick={async () => {
+                              const url = `${API_BASE_URL}/documents/download/${doc.documentId}`;
+                              setShowDocumentPreview({ url, name: doc.name });
+                              setPreviewLoading(true);
+                              try {
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+                                const contentType = res.headers.get('content-type') || '';
+                                const blob = await res.blob();
+                                const blobUrl = URL.createObjectURL(blob);
+                                setPreviewBlobUrl(blobUrl);
+                                setPreviewType(contentType.includes('pdf') || nameLower.endsWith('.pdf') ? 'pdf' : 'image');
+                              } catch { setPreviewType('unknown'); }
+                              finally { setPreviewLoading(false); }
+                            }}
+                            title="View document"
+                          >
+                            <FileImage className={cn("w-3 h-3 shrink-0", isPdf ? "text-primary" : "text-warning")} />
+                            <span className="truncate">{doc.name}</span>
+                          </button>
+                          {canEdit && (
+                            <button
+                              className="text-muted-foreground/50 hover:text-destructive shrink-0"
+                              onClick={async () => {
+                                try {
+                                  const token = localStorage.getItem('token');
+                                  await fetch(`${API_BASE_URL}/documents/${doc.documentId}`, {
+                                    method: 'DELETE',
+                                    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                                  });
+                                  setUploadedDocuments(prev => prev.filter(d => d.documentId !== doc.documentId));
+                                } catch { setBanner({ type: 'error', message: 'Failed to delete document.' }); }
+                              }}
+                              aria-label="Remove document"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {canEdit && (
+                      <label className={cn(
+                        "flex items-center gap-1.5 border border-dashed border-border rounded-md px-3 py-1.5 text-xs text-muted-foreground cursor-pointer hover:border-primary/50 hover:text-primary transition-all",
+                        !invoiceNumber && "opacity-50 pointer-events-none"
+                      )}>
+                        <Upload className="w-3.5 h-3.5" />
+                        {uploadedDocuments.length > 0 ? 'Add More' : 'Upload'}
+                        <input
+                          type="file"
+                          accept="image/*,.pdf"
+                          multiple
+                          className="hidden"
+                          disabled={!invoiceNumber || uploading}
+                          onChange={async (e) => {
+                            const files = e.target.files;
+                            if (!files) return;
+                            setUploading(true);
+                            for (const file of Array.from(files)) {
+                              const formData = new FormData();
+                              formData.append('file', file);
+                              formData.append('invoiceNo', invoiceNumber);
+                              try {
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(`${API_BASE_URL}/documents/upload`, {
+                                  method: 'POST',
+                                  headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                                  body: formData,
+                                });
+                                if (!res.ok) throw new Error('Upload failed');
+                                const doc = await res.json();
+                                if (doc && doc.documentId && doc.documentName) {
+                                  setUploadedDocuments(prev => {
+                                    if (prev.some(d => d.documentId === doc.documentId)) return prev;
+                                    return [...prev, { documentId: doc.documentId, name: doc.documentName }];
+                                  });
+                                }
+                              } catch { setBanner({ type: 'error', message: 'Failed to upload document.' }); }
+                            }
+                            setUploading(false);
+                            e.target.value = '';
+                          }}
+                        />
+                        {uploading && <span className="ml-1 text-primary">Uploading...</span>}
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions inside invoice card */}
+              <div className="flex items-center justify-end gap-3 mt-5 pt-4 border-t">
+                <Button variant="outline" size="sm" onClick={() => confirmNavigation('/invoices')} disabled={saving}>
+                  Cancel
+                </Button>
+                {canEdit && (
+                  <Button size="sm" onClick={handleSave} disabled={saving || totalWithQty === 0}>
+                    <Save className="h-3.5 w-3.5 mr-1.5" /> {saving ? 'Saving...' : id ? 'Update Stock' : 'Save Stock'}
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </>
       )}
