@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useInvoices } from '@/hooks/useApiData';
+import { useInvoices, useWarehouseDetail } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { downloadInvoicePDF } from '@/utils/pdfGenerator';
 
 type BannerType = 'success' | 'error';
 interface BannerState { type: BannerType; message: string }
