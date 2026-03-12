@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { useAuth } from '@/context/AuthContext';
 import { useSupplierList, useWarehouseInventory, useWarehouseDetail, WarehouseInventoryItem } from '@/hooks/useApiData';
+import { useQueryClient } from '@tanstack/react-query';
 import api, { API_BASE_URL } from '@/services/api';
 import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle, CalendarIcon, Phone, Mail, Banknote, CreditCard, Landmark, Wallet, QrCode, Boxes } from 'lucide-react';
 import { cn } from '@/lib/utils';
