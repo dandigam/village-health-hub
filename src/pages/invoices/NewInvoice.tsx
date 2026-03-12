@@ -434,9 +434,7 @@ export default function NewInvoice() {
                           const errs = validationErrors[realIdx];
                           return (
                             <tr key={`${item.medicineId}-${idx}`} className={cn(
-                              "transition-colors duration-150 hover:bg-muted/20",
-                              hasQty && 'bg-[hsl(var(--stock-ok-bg))]',
-                              stock < 50 && "bg-destructive/5"
+                              "transition-colors duration-150 hover:bg-muted/20"
                             )}>
                               <td className="px-4 py-2 text-xs text-muted-foreground">{idx + 1}</td>
                               <td className="px-3 py-2">
