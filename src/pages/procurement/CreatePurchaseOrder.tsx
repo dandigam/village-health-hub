@@ -129,27 +129,46 @@ export default function CreatePurchaseOrder() {
     }]);
   };
 
-  const handleInlineAddMedicine = () => {
+  const handleInlineAddMedicine = async () => {
     if (!newMedName.trim()) { toast.error('Medicine name is required'); return; }
     if (!newMedStrength.trim()) { toast.error('Strength is required'); return; }
-    const newId = `new-${Date.now()}`;
-    const newMed = {
-      id: newId,
-      name: newMedName.trim(),
-      strength: newMedStrength.trim(),
-      unit: newMedUnit,
-      category: newMedCategory.trim() || 'General',
-      stock: 0,
-    };
-    setExtraMedicines(prev => [...prev, newMed]);
-    addMedicine(newMed);
+    if (!newMedCategory) { toast.error('Category is required'); return; }
+    if (!supplierId) { toast.error('Select a supplier first'); return; }
+
+    // Call POST API to add medicine to supplier
+    try {
+      const payload = [{
+        name: newMedName.trim(),
+        type: newMedCategory,
+        strength: newMedStrength.trim(),
+        unit: newMedUnit,
+      }];
+      await api.post(`/suppliers/warehouses/${warehouseId}/suppliers/${supplierId}/medicines`, payload);
+      // Refresh supplier data to get updated medicine list
+      await queryClient.invalidateQueries({ queryKey: ['suppliers', warehouseId ? Number(warehouseId) : undefined] });
+      toast.success(`${newMedName.trim()} added to supplier`);
+    } catch {
+      // Fallback: add locally even if API fails
+      const newId = `new-${Date.now()}`;
+      const newMed = {
+        id: newId,
+        name: newMedName.trim(),
+        strength: newMedStrength.trim(),
+        unit: newMedUnit,
+        category: newMedCategory,
+        stock: 0,
+      };
+      setExtraMedicines(prev => [...prev, newMed]);
+      addMedicine(newMed);
+      toast.success(`${newMedName.trim()} added to order (offline)`);
+    }
+
     setNewMedName('');
     setNewMedStrength('');
     setNewMedUnit('mg');
     setNewMedCategory('');
     setShowInlineAdd(false);
     setMedSearch('');
-    toast.success(`${newMed.name} added to order`);
   };
 
   const removeMedicine = (idx: number) => {
