@@ -290,9 +290,18 @@ export default function NewInvoice() {
           )}
           {createdAt && <span className="text-xs text-muted-foreground border border-border rounded-md px-2.5 py-1">{new Date(createdAt).toLocaleDateString()}</span>}
           {isReadOnly && (
-            <Button size="sm" variant="outline" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
-              <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
-            </Button>
+            <>
+              <Button size="sm" variant="outline" onClick={() => downloadInvoicePDF(
+                { id, invoiceNumber, invoiceAmount, invoiceDate, paymentMode, supplierName: selectedSupplier?.name, items },
+                warehouseDetail,
+                selectedSupplier
+              )}>
+                <Download className="mr-1 h-3.5 w-3.5" /> Download
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
+                <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
+              </Button>
+            </>
           )}
         </div>
       </div>
