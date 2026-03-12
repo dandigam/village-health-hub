@@ -330,7 +330,7 @@ export default function PurchaseOrders() {
                                 <DropdownMenuItem onClick={() => navigate(`/purchase-orders/${order.id}`)}>
                                   <Eye className="h-3.5 w-3.5 mr-2" /> View
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => downloadPurchaseOrderPDF(order, warehouseDetail)}>
                                   <Download className="h-3.5 w-3.5 mr-2" /> Download
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
