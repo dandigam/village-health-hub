@@ -16,6 +16,9 @@ export default function GoodsReceiptDetail() {
   const location = useLocation();
 
   const receipt = (location.state as any)?.receipt;
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
 
   // Document preview state
   const [showPreview, setShowPreview] = useState<{ url: string; name: string } | null>(null);
