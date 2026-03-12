@@ -12,8 +12,9 @@ import { Calendar } from '@/components/ui/calendar';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSupplierOrders } from '@/hooks/useApiData';
+import { useSupplierOrders, useWarehouseDetail } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
+import { downloadPurchaseOrderPDF } from '@/utils/pdfGenerator';
 
 type SortKey = 'poNumber' | 'supplierName' | 'itemCount' | 'status' | 'createdAt';
 type SortDir = 'asc' | 'desc';
@@ -39,7 +40,9 @@ export default function PurchaseOrders() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const warehouseId = user?.context?.warehouseId;
+  const numWarehouseId = warehouseId ? Number(warehouseId) : undefined;
   const { data: apiOrders = [], isLoading } = useSupplierOrders(warehouseId) as { data: ApiOrder[] | undefined; isLoading: boolean };
+  const { data: warehouseDetail } = useWarehouseDetail(numWarehouseId);
   const orders: ApiOrder[] = apiOrders || [];
 
   const [search, setSearch] = useState('');
@@ -327,7 +330,7 @@ export default function PurchaseOrders() {
                                 <DropdownMenuItem onClick={() => navigate(`/purchase-orders/${order.id}`)}>
                                   <Eye className="h-3.5 w-3.5 mr-2" /> View
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => downloadPurchaseOrderPDF(order, warehouseDetail)}>
                                   <Download className="h-3.5 w-3.5 mr-2" /> Download
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -350,7 +353,7 @@ export default function PurchaseOrders() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-36">
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => downloadPurchaseOrderPDF(order, warehouseDetail)}>
                                   <Download className="h-3.5 w-3.5 mr-2" /> Download
                                 </DropdownMenuItem>
                               </DropdownMenuContent>

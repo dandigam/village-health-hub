@@ -6,15 +6,20 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/procurement/StatusBadge';
-import { useSupplierOrder, useGoodsReceiptsByPO } from '@/hooks/useApiData';
+import { useSupplierOrder, useGoodsReceiptsByPO, useWarehouseDetail } from '@/hooks/useApiData';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { API_BASE_URL } from '@/services/api';
+import { downloadPurchaseOrderPDF } from '@/utils/pdfGenerator';
 
 export default function PurchaseOrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
   const { data: order, isLoading } = useSupplierOrder(id);
   const { data: poReceipts = [] } = useGoodsReceiptsByPO(id);
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
 
   // Document preview state
   const [showPreview, setShowPreview] = useState<{ url: string; name: string } | null>(null);
@@ -133,7 +138,7 @@ export default function PurchaseOrderDetail() {
           <Button size="sm" variant="outline" onClick={() => navigate(`/goods-receipts?po=${order.id}`)} className="h-8">
             <ClipboardList className="h-3.5 w-3.5 mr-1.5" /> Receipt History
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => downloadPurchaseOrderPDF(order, warehouseDetail)}>
             <Download className="h-4 w-4" />
           </Button>
         </div>

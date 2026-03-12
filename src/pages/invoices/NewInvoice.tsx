@@ -12,8 +12,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useSupplierList, useWarehouseInventory, useWarehouseDetail, WarehouseInventoryItem } from '@/hooks/useApiData';
 import { useQueryClient } from '@tanstack/react-query';
 import api, { API_BASE_URL } from '@/services/api';
-import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle, CalendarIcon, Phone, Mail, Banknote, CreditCard, Landmark, Wallet, QrCode, Boxes } from 'lucide-react';
+import { ArrowLeft, Check, Search, Package, Pencil, PlusCircle, Save, Pill, Upload, X, FileImage, CheckCircle2, AlertCircle, CalendarIcon, Phone, Mail, Banknote, CreditCard, Landmark, Wallet, QrCode, Boxes, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { downloadInvoicePDF } from '@/utils/pdfGenerator';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardChangesDialog } from '@/components/shared/DiscardChangesDialog';
 import { Label } from '@/components/ui/label';
@@ -289,9 +290,18 @@ export default function NewInvoice() {
           )}
           {createdAt && <span className="text-xs text-muted-foreground border border-border rounded-md px-2.5 py-1">{new Date(createdAt).toLocaleDateString()}</span>}
           {isReadOnly && (
-            <Button size="sm" variant="outline" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
-              <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
-            </Button>
+            <>
+              <Button size="sm" variant="outline" onClick={() => downloadInvoicePDF(
+                { id, invoiceNumber, invoiceAmount, invoiceDate, paymentMode, supplierName: selectedSupplier?.name, items },
+                warehouseDetail,
+                selectedSupplier
+              )}>
+                <Download className="mr-1 h-3.5 w-3.5" /> Download
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
+                <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
+              </Button>
+            </>
           )}
         </div>
       </div>

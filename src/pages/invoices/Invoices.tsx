@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useInvoices } from '@/hooks/useApiData';
+import { useInvoices, useWarehouseDetail } from '@/hooks/useApiData';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { downloadInvoicePDF } from '@/utils/pdfGenerator';
 
 type BannerType = 'success' | 'error';
 interface BannerState { type: BannerType; message: string }
@@ -31,6 +32,7 @@ export default function Invoices() {
   const { user } = useAuth();
   const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
   const { data: invoices = [], isLoading, refetch } = useInvoices(warehouseId);
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
 
   const [filterPayment, setFilterPayment] = useState('all');
   const [filterSearch, setFilterSearch] = useState('');
@@ -234,7 +236,7 @@ export default function Invoices() {
                             <DropdownMenuItem onClick={() => navigate(`/invoices/${invoice.id}/edit`)}>
                               <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => downloadInvoicePDF(invoice, warehouseDetail)}>
                               <Download className="h-3.5 w-3.5 mr-2" /> Download
                             </DropdownMenuItem>
                           </DropdownMenuContent>

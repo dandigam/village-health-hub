@@ -6,6 +6,9 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { API_BASE_URL } from '@/services/api';
+import { useWarehouseDetail } from '@/hooks/useApiData';
+import { useAuth } from '@/context/AuthContext';
+import { downloadGoodsReceiptPDF } from '@/utils/pdfGenerator';
 
 export default function GoodsReceiptDetail() {
   const { id } = useParams();
@@ -13,6 +16,9 @@ export default function GoodsReceiptDetail() {
   const location = useLocation();
 
   const receipt = (location.state as any)?.receipt;
+  const { user } = useAuth();
+  const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
+  const { data: warehouseDetail } = useWarehouseDetail(warehouseId);
 
   // Document preview state
   const [showPreview, setShowPreview] = useState<{ url: string; name: string } | null>(null);
@@ -107,7 +113,7 @@ export default function GoodsReceiptDetail() {
           <Button variant="outline" size="sm" className="h-8">
             <Printer className="h-3.5 w-3.5 mr-1.5" /> Print
           </Button>
-          <Button variant="outline" size="sm" className="h-8">
+          <Button variant="outline" size="sm" className="h-8" onClick={() => downloadGoodsReceiptPDF(receipt, warehouseDetail)}>
             <Download className="h-3.5 w-3.5 mr-1.5" /> Download
           </Button>
         </div>
