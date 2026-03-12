@@ -353,7 +353,7 @@ export default function PurchaseOrders() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-36">
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => downloadPurchaseOrderPDF(order, warehouseDetail)}>
                                   <Download className="h-3.5 w-3.5 mr-2" /> Download
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
