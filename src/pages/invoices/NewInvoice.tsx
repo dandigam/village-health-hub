@@ -274,15 +274,20 @@ export default function NewInvoice() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
+              {id && <span className="text-sm text-muted-foreground font-mono">#{id}</span>}
+            </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {mode === 'create' ? 'Select a supplier to auto-load their medicines' : `Invoice #${id}`}
             </p>
           </div>
-          {id && <span className="text-sm text-muted-foreground font-mono ml-2">#{id}</span>}
         </div>
-        <div className="flex items-center gap-2">
-          {createdAt && <span className="text-xs text-muted-foreground mr-2">{new Date(createdAt).toLocaleDateString()}</span>}
+        <div className="flex items-center gap-3">
+          {selectedSupplier && isReadOnly && (
+            <span className="text-xs text-muted-foreground border border-border rounded-md px-2.5 py-1">{selectedSupplier.name}</span>
+          )}
+          {createdAt && <span className="text-xs text-muted-foreground border border-border rounded-md px-2.5 py-1">{new Date(createdAt).toLocaleDateString()}</span>}
           {isReadOnly && (
             <Button size="sm" variant="outline" onClick={() => { setMode('edit'); navigate(`/invoices/${id}/edit`, { replace: true }); }}>
               <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
