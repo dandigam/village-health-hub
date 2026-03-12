@@ -6,6 +6,9 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { API_BASE_URL } from '@/services/api';
+import { useWarehouseDetail } from '@/hooks/useApiData';
+import { useAuth } from '@/context/AuthContext';
+import { downloadGoodsReceiptPDF } from '@/utils/pdfGenerator';
 
 export default function GoodsReceiptDetail() {
   const { id } = useParams();
