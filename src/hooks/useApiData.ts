@@ -516,7 +516,7 @@ export interface WarehouseDashboardStats {
 export function useWarehouseDashboardStats(warehouseId?: number) {
   const defaultStats: WarehouseDashboardStats = {
     lowStock: 0,
-    supplierOrders: { pendingOrders: 0, received: 0, totalOrders: 0 },
+    supplierOrders: { pendingOrders: 0, received: 0, totalOrders: 0, cancelled: 0 },
     suppliers: 0,
     totalMedicines: 0,
   };
