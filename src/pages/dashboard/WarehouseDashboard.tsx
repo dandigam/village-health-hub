@@ -28,9 +28,8 @@ export default function WarehouseDashboard() {
   const { user } = useAuth();
   const warehouseId = user?.context?.warehouseId ? Number(user.context.warehouseId) : undefined;
 
-  const { data: dashStats, refetch } = useWarehouseDashboardStats(warehouseId);
+  const { data: dashStats } = useWarehouseDashboardStats(warehouseId);
   const alertShownRef = useRef(false);
-  useEffect(() => { refetch(); }, [warehouseId]);
 
   const { data: distributions = [] } = useDistributions();
   const { data: requestOrders = [] } = useRequestOrders();

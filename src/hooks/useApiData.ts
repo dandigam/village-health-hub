@@ -514,17 +514,24 @@ export interface WarehouseDashboardStats {
 }
 
 export function useWarehouseDashboardStats(warehouseId?: number) {
-  return useQuery<WarehouseDashboardStats>({
+  const defaultStats: WarehouseDashboardStats = {
+    lowStock: 0,
+    supplierOrders: { pendingOrders: 0, received: 0, totalOrders: 0 },
+    suppliers: 0,
+    totalMedicines: 0,
+  };
+  return useQuery({
     queryKey: ['warehouse-dashboard-stats', warehouseId],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/dashboard/warehouse/${warehouseId}`);
-      if (!res.ok) throw new Error('Failed to fetch warehouse dashboard stats');
-      return res.json();
-    },
+    queryFn: () => fetchWithFallback<WarehouseDashboardStats>(
+      `/dashboard/warehouse/${warehouseId}`,
+      defaultStats
+    ),
     enabled: !!warehouseId,
     staleTime: STALE_TIME,
     refetchOnMount: REFETCH_ON_MOUNT,
     refetchOnWindowFocus: false,
+    select: (res) => res.data,
+    retry: 1,
   });
 }
 
