@@ -563,7 +563,6 @@ export function useWarehouseDetail(warehouseId?: number) {
     retry: 1,
   });
 }
-}
 
 // ── Mutation Hooks ───────────────────────────────────────────
 
